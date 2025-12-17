@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Seeds - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Order Seeds</h1>
+        <p>Voordat we orders kunnen opslaan, hebben we statussen nodig in de database. We gebruiken een seeder om deze vaste waardes aan te maken.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een seeder maken voor statische data (statussen).</li>
+            <li>Ik kan seeders toevoegen aan de <code>DatabaseSeeder</code>.</li>
+            <li>Ik begrijp waarom je ID's soms hardcoded wilt hebben.</li>
+        </ul>
+
+        <h3 id="create">Stap 1: State Seeder Maken</h3>
+        <p>Maak een seeder aan:</p>
+        <pre><code class="language-bash">php artisan make:seeder StateSeeder</code></pre>
+
+        <h3 id="run">Stap 2: Statussen Vullen</h3>
+        <p>In <code>database/seeders/StateSeeder.php</code> voegen we de statussen toe. We gebruiken hier <code>create</code> omdat we zeker willen weten dat deze specifiek bestaan.</p>
+
+        <pre><code class="language-php">
+use App\Models\State;
+
+public function run(): void
+{
+    // Vaste statussen aanmaken
+    State::create(['name' => 'Pending']); // ID 1
+    State::create(['name' => 'Paid']);    // ID 2
+    State::create(['name' => 'Shipped']); // ID 3
+    State::create(['name' => 'Delivered']); // ID 4
+}
+        </code></pre>
+
+        <h3 id="db-seeder">Stap 3: DatabaseSeeder Aanpassen</h3>
+        <p>Zorg dat de <code>StateSeeder</code> wordt aangeroepen in de <code>DatabaseSeeder</code>. De volgorde is belangrijk: States moeten bestaan voordat je Orders (of testdata daarvan) zou seeden.</p>
+
+        <pre><code class="language-php">
+public function run(): void
+{
+    $this->call([
+        RoleAndPermissionSeeder::class,
+        UserSeeder::class,
+        ProductSeeder::class, // Maakt categorieën, producten en prijzen
+        StateSeeder::class,   // NIEUW: Maakt statussen
+    ]);
+}
+        </code></pre>
+
+        <h3 id="exec">Stap 4: Uitvoeren</h3>
+        <p>Ververs de database om de nieuwe tabellen en data te krijgen.</p>
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

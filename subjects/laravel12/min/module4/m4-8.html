@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winkelwagen Wijzigen - Laravel 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Winkelwagen Wijzigen</h1>
+        <p>Gebruikers willen ook items kunnen verwijderen of het aantal aanpassen. Hiervoor voegen we acties toe aan de tabel.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan items in de winkelwagen updaten (<code>Cart::update</code>).</li>
+            <li>Ik kan items verwijderen (<code>Cart::remove</code>).</li>
+            <li>Ik kan formulieren gebruiken voor update en delete acties.</li>
+        </ul>
+
+        <h3 id="routes">Stap 1: Routes</h3>
+        <p>We hebben routes nodig voor update (PATCH) en delete (DELETE).</p>
+        <pre><code class="language-php">
+Route::patch('/cart/{rowId}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/{rowId}', [CartController::class, 'destroy'])->name('cart.destroy');
+        </code></pre>
+
+        <h3 id="view">Stap 2: Wijzigen (View)</h3>
+        <p>In de tabel (bij de acties kolom) plaatsen we een formulier om het aantal aan te passen.</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('cart.update', $item->rowId) }}" method="POST"
+            class="flex items-center gap-2"&gt;
+    @csrf
+    @method('PATCH')
+    &lt;input type="number" name="qty" value="{{ $item->qty }}" class="w-16 border
+            rounded p-1" min="1"&gt;
+    &lt;button type="submit" class="text-blue-600 hover:underline"&gt;Update&lt;/button&gt;
+&lt;/form&gt;
+        </code></pre>
+
+        <h3 id="delete">Stap 3: Verwijderen (View)</h3>
+        <p>Daarnaast een knop (formulier) om het item volledig te verwijderen.</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('cart.destroy', $item->rowId) }}" method="POST" class="mt-2"&gt;
+    @csrf
+    @method('DELETE')
+    &lt;button type="submit" class="text-red-600 hover:underline"&gt;Verwijder&lt;/button&gt;
+&lt;/form&gt;
+        </code></pre>
+
+        <h3 id="controller">Stap 4: Controller Methodes</h3>
+        <p>Voeg de update en destroy methodes toe aan <code>CartController</code>.</p>
+
+        <pre><code class="language-php">
+public function update(Request $request, $rowId)
+{
+    Cart::update($rowId, $request->qty); // Update het aantal
+    return back()->with('status', 'Aantal aangepast!');
+}
+
+public function destroy($rowId)
+{
+    Cart::remove($rowId); // Verwijder item
+    return back()->with('status', 'Product verwijderd!');
+}
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

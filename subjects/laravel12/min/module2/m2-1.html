@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publieke layout - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+    <main class="main-content">
+        <h1>Publieke Layout</h1>
+        <p>De admin-omgeving heeft zijn eigen layout (`layoutadmin`), maar voor de bezoekers van de website willen we een andere uitstraling. We maken hiervoor een publieke layout.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een aparte layout maken voor publieke pagina's.</li>
+            <li>Ik kan een view koppelen aan een specifieke layout.</li>
+            <li>Ik kan een route definiëren voor de homepagina.</li>
+        </ul>
+
+        <h3 id="layout">Stap 1: Layout Bestand Maken</h3>
+        <p>Maak een nieuw bestand: <code>resources/views/layouts/layoutpublic.blade.php</code>.</p>
+        <p>Hierin plaatsen we de HTML-structuur met een navigatiebalk en footer die geschikt is voor bezoekers.</p>
+
+        <pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="nl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Mijn Webshop&lt;/title&gt;
+    &lt;!-- Vite voor CSS/JS --&gt;
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+&lt;/head&gt;
+&lt;body class="bg-gray-100 font-sans leading-normal tracking-normal"&gt;
+
+    &lt;!-- Navigatie --&gt;
+    &lt;nav class="bg-white shadow p-4"&gt;
+        &lt;div class="container mx-auto flex justify-between items-center"&gt;
+            &lt;a href="{{ route('home') }}" class="font-bold text-xl"&gt;Webshop&lt;/a&gt;
+            &lt;div&gt;
+                &lt;a href="{{ route('home') }}" class="mr-4"&gt;Home&lt;/a&gt;
+                &lt;a href="{{ route('login') }}"&gt;Login&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+
+    &lt;!-- Content --&gt;
+    &lt;main class="container mx-auto mt-8 px-4"&gt;
+        @yield('content')
+    &lt;/main&gt;
+
+    &lt;footer class="bg-gray-800 text-white text-center p-4 mt-12"&gt;
+        &copy; 2025 Mijn Webshop
+    &lt;/footer&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+
+        <h3 id="home">Stap 2: Home View & Route</h3>
+        <p>Om de layout te testen, passen we de root-route (<code>/</code>) aan in <code>routes/web.php</code>.</p>
+
+        <pre><code class="language-php">
+// routes/web.php
+Route::get('/', function () {
+    return view('home'); // Verwijst naar resources/views/home.blade.php
+})->name('home');
+        </code></pre>
+
+        <p>Maak vervolgens <code>resources/views/home.blade.php</code>:</p>
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;h1 class="text-4xl text-center"&gt;Welkom in de Webshop&lt;/h1&gt;
+    &lt;p class="text-center mt-4"&gt;Bekijk onze categorieën in het menu.&lt;/p&gt;
+@endsection
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

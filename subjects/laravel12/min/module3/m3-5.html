@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Permissions in Controllers</h1>
+        <p>Naast het beveiligen van routes met middleware, moeten we ook zorgen dat specifieke acties binnen controllers alleen uitgevoerd kunnen worden door gebruikers met de juiste permissies.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan permissies aanmaken en koppelen aan roles.</li>
+            <li>Ik kan permissies toepassen op controller methodes.</li>
+            <li>Ik kan routes beveiligen met permissies.</li>
+            <li>Ik kan authorize in requests op true zetten.</li>
+        </ul>
+
+        <h3 id="seeder">Stap 1: Permissies Aanmaken (Seeder)</h3>
+        <p>Voordat we de controller kunnen beveiligen, moeten de permissies bestaan. We voegen deze toe in <code>RoleAndPermissionSeeder</code>.</p>
+
+        <pre><code class="language-php">
+// database/seeders/RoleAndPermissionSeeder.php
+
+// 1. Maak permissies aan voor Product CRUD
+Permission::create(['name' => 'index product']);
+Permission::create(['name' => 'show product']);
+Permission::create(['name' => 'create product']); // dekt create & store
+Permission::create(['name' => 'edit product']);   // dekt edit & update
+Permission::create(['name' => 'delete product']); // dekt delete & destroy
+
+// 2. Koppel aan rol (bijv. admin mag alles)
+$role = Role::findByName('admin');
+$role->givePermissionTo(Permission::all());
+        </code></pre>
+        <p><em>Vergeet niet <code>php artisan migrate:fresh --seed</code> te draaien na wijzigingen!</em></p>
+
+        <h3 id="controller">Stap 2: Controller Setup</h3>
+        <p>Open de <code>ProductController</code>. In Laravel 12 implementeren we de <code>HasMiddleware</code> interface om permissies te koppelen.</p>
+
+        <pre><code class="language-php">
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+
+// Voeg 'implements HasMiddleware' toe
+class ProductController extends Controller implements HasMiddleware
+{
+    // ...
+}
+        </code></pre>
+
+        <h3 id="middleware">Stap 3: Middleware Methode</h3>
+        <p>Voeg de statische <code>middleware</code> functie toe. Hier koppel je de permissie-naam aan de controller-acties.</p>
+
+        <pre><code class="language-php">
+public static function middleware(): array
+{
+    return [
+        // Iedereen met 'index product' mag de lijst zien
+        new Middleware(PermissionMiddleware::using('index product'), only:['index']),
+
+        // Alleen met 'create product' mag je toevoegen
+        new Middleware(PermissionMiddleware::using('create product'), only:['create', 'store']),
+
+        // Enzovoort...
+        new Middleware(PermissionMiddleware::using('edit product'), only:['edit', 'update']),
+        new Middleware(PermissionMiddleware::using('delete product'), only:['delete', 'destroy']),
+    ];
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 20</p>
+            <p>Pas dit toe op de <code>TaskController</code>. Maak permissies aan (<code>index task</code>, etc.), koppel ze aan rollen (student/teacher/admin) en beveilig de controller methodes.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

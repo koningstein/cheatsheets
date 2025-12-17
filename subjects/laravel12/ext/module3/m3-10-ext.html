@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update & Logica - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Update & Logica</h1>
+        <p>De gebruiker heeft wijzigingen aangebracht in het formulier en op "Opslaan" geklikt. Het verzoek (een <code>PUT</code> request) komt nu binnen bij jouw applicatie. In de <code>update</code> methode van de Controller moeten we deze data verwerken.</p>
+        <p>Op het eerste gezicht lijkt dit precies op het opslaan van een nieuw product (Store), maar er is één belangrijk verschil in de logica: hoe ga je om met unieke waardes (zoals een artikelnummer of slug) van het product dat je aan het bewerken bent?</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een aparte <strong>Form Request</strong> maken voor updates (UpdateProductRequest).</li>
+                <li>Ik begrijp de "Unique Validation Trap" en hoe ik deze oplos met de <code>ignore</code> regel.</li>
+                <li>Ik kan de <code>update()</code> methode van Eloquent gebruiken.</li>
+                <li>Ik kan controleren of data daadwerkelijk gewijzigd is (Dirty Checking).</li>
+                <li>Ik kan een gebruiker redirecten met een feedback melding.</li>
+            </ul>
+        </div>
+
+        <h2>De Validation Trap (Unieke Waardes)</h2>
+        <p>Stel, elk product moet een uniek artikelnummer (SKU) of unieke titel hebben. Bij het <strong>aanmaken</strong> is de regel simpel: <code>unique:products,title</code>.</p>
+        <p>Maar bij het <strong>updaten</strong> ontstaat een probleem:</p>
+        <ol>
+            <li>Je opent product "FIFA 24" om de prijs aan te passen.</li>
+            <li>Je laat de titel "FIFA 24" staan.</li>
+            <li>Je klikt op opslaan.</li>
+            <li>Laravel checkt de database: "Bestaat de titel 'FIFA 24' al?"</li>
+            <li><strong>Ja!</strong> (Namelijk bij het product dat je nu aan het bewerken bent).</li>
+            <li>Laravel geeft een error: "De titel is al in gebruik".</li>
+        </ol>
+        <p>Dit is frustrerend voor de gebruiker. We moeten tegen Laravel zeggen: "De titel moet uniek zijn, <strong>behalve</strong> als het van dit product zelf is."</p>
+
+        <h2>UpdateProductRequest Maken</h2>
+        <p>Omdat de regels anders zijn dan bij het aanmaken, maken we een aparte Request class.</p>
+        <pre><code class="language-bash">php artisan make:request UpdateProductRequest</code></pre>
+
+        <p>In de <code>rules()</code> methode gebruiken we de <code>Rule</code> helper class om de uitzondering te programmeren.</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule; // Vergeet deze import niet!
+
+class UpdateProductRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // Zet op true!
+    }
+
+    public function rules(): array
+    {
+        // We halen het product op dat we aan het bewerken zijn via de route.
+        // In de route staat bijv: /admin/products/{product}
+        $product = $this->route('product');
+
+        return [
+            // Unieke regel met uitzondering (ignore)
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'title')->ignore($product->id),
+            ],
+
+            // De rest blijft hetzelfde als bij Store
+            'description' => 'required|string',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+        ];
+    }
+}
+        </code></pre>
+
+        <h2>De Controller Logica</h2>
+        <p>Nu de validatie geregeld is, kunnen we de controller methode schrijven. Dankzij Eloquent is het updaten van een record heel eenvoudig. We hoeven geen SQL UPDATE queries te schrijven; we roepen simpelweg de methode <code>update()</code> aan op het model.</p>
+
+        <p>Open <code>app/Http/Controllers/Admin/ProductController.php</code>:</p>
+
+        <pre><code class="language-php">
+use App\Http\Requests\UpdateProductRequest;
+use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
+
+public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+{
+    // 1. Validatie wordt automatisch afgehandeld door UpdateProductRequest.
+    // We halen de 'schone' data op.
+    $validatedData = $request->validated();
+
+    // 2. Update het product in de database
+    // Eloquent kijkt naar de $fillable property in je Model om te zien wat mag.
+    $product->update($validatedData);
+
+    // 3. Stuur de gebruiker terug naar het overzicht (of naar de detailpagina)
+    return to_route('admin.products.index')
+        ->with('status', 'Product succesvol bijgewerkt!');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Wat doet update() precies?</strong><br>
+            De <code>update()</code> methode doet twee dingen:<br>
+            1. Het vult het model met de nieuwe data (<code>$product->fill($data)</code>).<br>
+            2. Het slaat de wijzigingen op in de database (<code>$product->save()</code>).<br>
+            Bovendien werkt het de <code>updated_at</code> kolom automatisch bij naar de huidige tijd.
+        </div>
+
+        <h2>Geavanceerd: Dirty Checking (Optioneel)</h2>
+        <p>Soms wil je extra logica uitvoeren, maar <em>alleen</em> als een specifiek veld is veranderd. Bijvoorbeeld: als de prijs verandert, wil je de klanten een e-mail sturen.</p>
+        <p>Eloquent houdt bij welke velden gewijzigd zijn zolang je nog niet hebt opgeslagen. Dit heet de "Dirty State".</p>
+
+        <pre><code class="language-php">
+// Voorbeeld van handmatige logica (in plaats van ->update())
+$product->fill($request->validated());
+
+if ($product->isDirty('price')) {
+    // De prijs is gewijzigd! Doe iets speciaals.
+    Log::info("Prijs van product {$product->id} is aangepast.");
+}
+
+$product->save();
+        </code></pre>
+
+        <h2>Redirects & Feedback</h2>
+        <p>Na een update is het belangrijk om de gebruiker te laten weten dat het gelukt is. Anders kijkt hij naar een scherm en denkt hij: "Is er iets gebeurd?".</p>
+        <p>We gebruiken <code>->with('status', '...')</code>. Dit zet een bericht in de sessie voor één pagina-laadtijd (Flash Data).</p>
+
+        <p>Zorg dat je in je <code>layoutadmin.blade.php</code> of in je index-view een plek hebt waar dit bericht wordt getoond:</p>
+
+        <pre><code class="language-html">
+@if (session('status'))
+    &lt;div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"&gt;
+        {{ session('status') }}
+    &lt;/div&gt;
+@endif
+        </code></pre>
+
+        <h2>Checklist voor Testen</h2>
+        <p>Ga naar je browser en test de volgende scenario's om zeker te zijn dat je logica klopt:</p>
+        <ol>
+            <li><strong>Standaard update:</strong> Verander de prijs en sla op. Is het gewijzigd in het overzicht?</li>
+            <li><strong>Geen wijziging:</strong> Open een product en klik direct op opslaan. Krijg je geen errors? (Vooral de unieke validatie mag hier niet struikelen).</li>
+            <li><strong>Relatie wijzigen:</strong> Koppel het product aan een andere categorie. Werkt dit?</li>
+            <li><strong>Validatie:</strong> Maak de titel leeg en sla op. Krijg je een foutmelding?</li>
+        </ol>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

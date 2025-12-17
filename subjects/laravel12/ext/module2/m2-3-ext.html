@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Roles & Permissions</h1>
+        <p>Tot nu toe kan iedereen die een account aanmaakt inloggen en (als ze de URL weten) naar het admin-gedeelte gaan. Dat is natuurlijk niet de bedoeling. Een klant mag alleen producten kopen, terwijl een beheerder producten mag toevoegen en verwijderen.</p>
+        <p>In deze module leggen we de basis voor <strong>Role-Based Access Control (RBAC)</strong>. We gaan onderscheid maken tussen gewone gebruikers ('User') en beheerders ('Admin').</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp het verschil tussen Authenticatie en Autorisatie.</li>
+                <li>Ik kan een bestaande tabel (users) uitbreiden met een nieuwe kolom via een migration.</li>
+                <li>Ik kan Attribute Casting gebruiken in een Model.</li>
+                <li>Ik kan beheerders aanmaken via Database Seeders.</li>
+                <li>Ik kan in Blade controleren of een gebruiker admin-rechten heeft.</li>
+            </ul>
+        </div>
+
+        <h2>Authenticatie vs. Autorisatie</h2>
+        <p>Deze twee termen worden vaak door elkaar gehaald, maar betekenen iets heel anders:</p>
+        <ul>
+            <li><strong>Authenticatie (Who are you?):</strong> Controleren <em>wie</em> de gebruiker is. Dit gebeurt bij het inloggen (gebruikersnaam + wachtwoord). Laravel regelt dit grotendeels voor ons met de starterkit.</li>
+            <li><strong>Autorisatie (What may you do?):</strong> Controleren wat de gebruiker <em>mag doen</em>. Mag deze persoon de admin-pagina bekijken? Mag hij dit product verwijderen?</li>
+        </ul>
+        <p>In deze module focussen we op <strong>Autorisatie</strong>.</p>
+
+        <h2>Database Aanpassing</h2>
+        <p>Om te weten of iemand admin is, moeten we dit opslaan in de database. De simpelste manier voor nu is om een kolom <code>is_admin</code> toe te voegen aan de <code>users</code> tabel. Dit is een 'boolean' (waar/niet waar).</p>
+
+        <h3>Migration Maken</h3>
+        <p>Omdat de <code>users</code> tabel al bestaat (deze komt standaard met Laravel mee), maken we een nieuwe migration om de tabel te <em>wijzigen</em>.</p>
+
+        <pre><code class="language-bash">php artisan make:migration add_is_admin_to_users_table --table=users</code></pre>
+
+        <p>Open het bestand in <code>database/migrations</code> en voeg de kolom toe:</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        // We voegen een boolean kolom toe.
+        // default(false) is belangrijk: nieuwe gebruikers zijn standaard GEEN admin.
+        $table->boolean('is_admin')->default(false)->after('email');
+    });
+}
+
+public function down(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        // Als we de migratie terugdraaien, moet de kolom weer weg.
+        $table->dropColumn('is_admin');
+    });
+}
+        </code></pre>
+
+        <p>Voer daarna de migratie uit:</p>
+        <pre><code class="language-bash">php artisan migrate</code></pre>
+
+        <h2>Model Aanpassing (Casting)</h2>
+        <p>In de database wordt een boolean vaak opgeslagen als een <code>0</code> of een <code>1</code> (TINYINT). In PHP willen we liever werken met <code>true</code> of <code>false</code>.</p>
+        <p>Laravel heeft hiervoor <strong>Attribute Casting</strong>. Hiermee vertel je het Model hoe hij de data uit de database moet vertalen naar PHP.</p>
+        <p>Open <code>app/Models/User.php</code> en voeg <code>is_admin</code> toe aan de <code>$casts</code> array:</p>
+
+        <pre><code class="language-php">
+protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_admin' => 'boolean', // Zorgt dat 0/1 automatisch false/true wordt
+    ];
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Mass Assignment:</strong><br>
+            Vergeet niet om <code>is_admin</code> ook toe te voegen aan de <code>$fillable</code> array in je User model, anders kun je deze waarde niet opslaan via seeds of controllers!
+            <br><br>
+            <code>protected $fillable = ['name', 'email', 'password', 'is_admin'];</code>
+        </div>
+
+        <h2>Admins maken (Seeding)</h2>
+        <p>We hebben nu de structuur, maar nog geen admins. We gaan de <code>DatabaseSeeder</code> aanpassen zodat we altijd één vaste admin-account hebben om mee te testen.</p>
+        <p>Open <code>database/seeders/DatabaseSeeder.php</code>:</p>
+
+        <pre><code class="language-php">
+use App\Models\User;
+
+public function run(): void
+{
+    // Maak 1 specifieke Admin aan
+    User::factory()->create([
+        'name' => 'Admin User',
+        'email' => 'admin@test.com',
+        'password' => bcrypt('password'), // of Hash::make('password')
+        'is_admin' => true,
+    ]);
+
+    // Maak 10 gewone klanten aan
+    User::factory(10)->create([
+        'is_admin' => false,
+    ]);
+
+    // ... je andere seeders (CategorySeeder etc.)
+}
+        </code></pre>
+
+        <p>Reset je database en vul hem opnieuw:</p>
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+        <p>Je kunt nu inloggen met <code>admin@test.com</code> en wachtwoord <code>password</code>.</p>
+
+        <h2>Blade Checks</h2>
+        <p>Nu kunnen we in onze HTML (Blade) controleren wie er is ingelogd. We passen de <code>navbarpublic.blade.php</code> aan zodat de "Admin" knop alleen zichtbaar is voor beheerders.</p>
+
+        <pre><code class="language-html">
+@auth
+    &lt;span class="text-gray-600"&gt;Hallo, {{ Auth::user()-&gt;name }}&lt;/span&gt;
+
+    {{-- Check of de ingelogde user admin is --}}
+    @if(Auth::user()-&gt;is_admin)
+        &lt;a href="{{ route('admin.categories.index') }}"
+           class="text-blue-600 hover:text-blue-800 font-bold"&gt;
+           Admin Paneel
+        &lt;/a&gt;
+    @endif
+
+    &lt;form method="POST" action="{{ route('logout') }}" class="inline"&gt;
+        @csrf
+        &lt;button type="submit" class="text-gray-600 ml-4"&gt;Uitloggen&lt;/button&gt;
+    &lt;/form&gt;
+@endauth
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Waarschuwing: Beveiliging is nog niet compleet!</strong><br>
+            We hebben nu de knop verborgen voor gewone gebruikers. Maar... als een gewone gebruiker de URL <code>/admin/categories</code> handmatig intypt in de browser, <strong>komt hij er nog steeds in!</strong><br><br>
+            Het verbergen van een knop is <em>geen</em> beveiliging. In de volgende module (2-5) gaan we <strong>Middleware</strong> gebruiken om de routes daadwerkelijk af te schermen.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

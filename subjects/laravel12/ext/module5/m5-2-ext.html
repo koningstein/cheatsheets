@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Seeds - Laravel 12 Module 5</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Order Seeds</h1>
+        <p>We hebben in de vorige les de tabellen <code>orders</code> en <code>order_items</code> gemaakt. Maar die zijn nu nog leeg. Om onze administratie-omgeving straks goed te kunnen testen, hebben we data nodig. Veel data.</p>
+        <p>Het handmatig invoeren van 50 bestellingen met elk 3 regels is monnikenwerk. Daarom gaan we <strong>Factories</strong> en <strong>Seeders</strong> gebruiken. Dit is iets complexer dan voorheen, omdat we te maken hebben met een <em>Parent-Child</em> relatie (één bestelling heeft meerdere regels) én een berekend totaalbedrag.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Factory maken voor een hoofdtabel (Order) en subtabel (OrderItem).</li>
+                <li>Ik kan in een Factory verwijzen naar bestaande gebruikers en producten.</li>
+                <li>Ik begrijp het concept van de <code>afterCreating</code> hook (logica uitvoeren ná opslaan).</li>
+                <li>Ik kan automatisch het totaalbedrag van een bestelling berekenen tijdens het seeden.</li>
+            </ul>
+        </div>
+
+        <h2>Stap 1: Order Factory</h2>
+        <p>We beginnen met het genereren van de factory.</p>
+        <pre><code class="language-bash">php artisan make:factory OrderFactory</code></pre>
+
+        <p>Open <code>database/factories/OrderFactory.php</code>. Hier definiëren we de basisgegevens van een bestelling, zoals het adres en de status. We laten <code>total_price</code> even op 0 staan; die gaan we straks slim berekenen.</p>
+
+        <pre><code class="language-php">
+namespace Database\Factories;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class OrderFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            // Maak automatisch een user aan, OF gebruik een bestaande id
+            'user_id' => User::factory(),
+
+            // Faker kan hele adressen genereren
+            'address' => $this->faker->streetAddress(),
+            'zipcode' => $this->faker->postcode(),
+            'city'    => $this->faker->city(),
+
+            // Kies willekeurig een status uit de lijst
+            'status'  => $this->faker->randomElement(['pending', 'paid', 'shipped', 'cancelled']),
+
+            // Placeholder: dit rekenen we later uit
+            'total_price' => 0,
+        ];
+    }
+}
+        </code></pre>
+
+        <h2>Stap 2: OrderItem Factory</h2>
+        <p>Nu de regels op de bestelling. Elke regel moet verwijzen naar een product.</p>
+        <pre><code class="language-bash">php artisan make:factory OrderItemFactory</code></pre>
+
+        <p>Open <code>database/factories/OrderItemFactory.php</code>. Hier gebeurt iets belangrijks: de prijs.</p>
+
+        <pre><code class="language-php">
+namespace Database\Factories;
+
+use App\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class OrderItemFactory extends Factory
+{
+    public function definition(): array
+    {
+        // We koppelen aan een willekeurig product dat al bestaat?
+        // Of we maken een nieuwe. Voor nu maken we een nieuwe voor het gemak.
+        return [
+            'product_id' => Product::factory(),
+            'quantity'   => $this->faker->numberBetween(1, 5),
+
+            // Simpele prijs als placeholder (wordt overschreven in de logica)
+            'price'      => $this->faker->randomFloat(2, 5, 100),
+        ];
+    }
+}
+        </code></pre>
+
+
+
+        <h2>Stap 3: De Koppeling (De 'Configure' Methode)</h2>
+        <p>Nu komt het lastige stuk. Als we een <code>Order</code> maken, willen we dat er automatisch ook <code>OrderItems</code> worden aangemaakt. Én we willen dat het <code>total_price</code> veld van de Order precies de som is van alle items.</p>
+        <p>Stel je voor dat je een bonnetje schrijft: je weet pas het totaalbedrag als je alle regels hebt opgeschreven. Laravel werkt net zo.</p>
+        <p>We gebruiken de <code>configure()</code> methode in de <strong>OrderFactory</strong>. Hiermee kunnen we zeggen: "Nadat je de order hebt aangemaakt (<code>afterCreating</code>), doe dan nog even dit..."</p>
+
+        <p>Pas <code>OrderFactory.php</code> aan:</p>
+
+        <pre><code class="language-php">
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+
+public function configure(): static
+{
+    return $this->afterCreating(function (Order $order) {
+
+        // 1. Maak 3 tot 6 items aan voor DEZE order
+        // We gebruiken 'create' zodat ze direct in de DB komen
+        $items = OrderItem::factory()->count(rand(3, 6))->create([
+            'order_id' => $order->id,
+            // Optioneel: Pak een willekeurig bestaand product om vervuiling te voorkomen
+            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
+        ]);
+
+        // 2. Bereken het totaalbedrag
+        $total = 0;
+        foreach ($items as $item) {
+            $total += $item->price * $item->quantity;
+        }
+
+        // 3. Update de order met het juiste totaalbedrag
+        $order->update(['total_price' => $total]);
+    });
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Uitleg afterCreating:</strong><br>
+            Deze functie wordt uitgevoerd <em>nadat</em> de Order in de database is gezet (dus hij heeft een ID). Binnen de functie maken we de items, tellen we de prijzen op, en updaten we de Order weer. Dit zorgt voor perfecte, consistente testdata.
+        </div>
+
+        <h2>Stap 4: DatabaseSeeder</h2>
+        <p>Nu alles klaarstaat, hoeven we alleen nog maar op de knop te drukken in de <code>DatabaseSeeder.php</code>.</p>
+
+        <pre><code class="language-php">
+// Database/Seeders/DatabaseSeeder.php
+
+public function run(): void
+{
+    // Maak eerst users en producten (als je die nog niet hebt)
+    // ...
+
+    // Maak 20 bestellingen
+    // Door de 'configure' logica die we net schreven,
+    // worden de items en totalen automatisch geregeld!
+    \App\Models\Order::factory(20)->create();
+}
+        </code></pre>
+
+        <h2>Stap 5: Uitvoeren</h2>
+        <p>Draai de migraties en seeders opnieuw om je database te vullen.</p>
+
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+
+        <p>Kijk nu in je database (bijvoorbeeld via PHPMyAdmin of TablePlus). Je zou het volgende moeten zien:</p>
+        <ol>
+            <li>De tabel <code>orders</code> is gevuld met 20 regels.</li>
+            <li>De kolom <code>total_price</code> is niet 0, maar een echt bedrag.</li>
+            <li>De tabel <code>order_items</code> zit vol met regels die verwijzen naar die orders.</li>
+        </ol>
+        <p>Gefeliciteerd! Je hebt nu een complexe datastructuur automatisch gevuld. Dit is onmisbaar om straks je admin-panel voor orders te bouwen.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publieke Productpagina - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Publieke Productpagina</h1>
+        <p>In deze module maken we de klantkant van de webshop. We beginnen met een overzichtspagina van alle producten, zichtbaar voor iedereen.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een publieke controller maken voor producten.</li>
+            <li>Ik kan producten ophalen met paginatie en eager loading.</li>
+            <li>Ik kan productgegevens tonen in een grid lay-out.</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller Aanmaken</h3>
+        <p>We scheiden de publieke logica van de admin. Maak een controller in de map <code>Open</code>.</p>
+        <pre><code class="language-bash">php artisan make:controller Open/ProductController</code></pre>
+
+        <h3 id="index-method">Stap 2: Index Methode met Paginatie</h3>
+        <p>Open <code>app/Http/Controllers/Open/ProductController.php</code>. We halen producten op, samen met de categorie en de laatste prijs om het N+1 probleem te voorkomen (zie Module 3).</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Open;
+
+use App\Http\Controllers\Controller;
+use App\Models\Product;
+use Illuminate\View\View;
+
+class ProductController extends Controller
+{
+    public function index(): View
+    {
+        // Haal producten op met relaties en paginatie (12 per pagina)
+        $products = Product::with(['category', 'latest_price'])
+            ->latest()
+            ->paginate(12);
+
+        return view('open.products.index', ['products' => $products]);
+    }
+}
+        </code></pre>
+
+        <h3 id="route">Stap 3: Route Toevoegen</h3>
+        <p>Voeg de route toe aan <code>routes/web.php</code>. Geef de route een naam voor makkelijk gebruik.</p>
+        <pre><code class="language-php">
+use App\Http\Controllers\Open\ProductController;
+
+Route::get('/products', [ProductController::class, 'index'])
+    ->name('open.products.index');
+        </code></pre>
+
+        <h3 id="view">Stap 4: View Maken (Grid)</h3>
+        <p>Maak <code>resources/views/open/products/index.blade.php</code>. Gebruik de publieke layout en een grid voor de weergave.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;h1 class="text-3xl font-bold mb-6 text-center"&gt;Onze Producten&lt;/h1&gt;
+
+    &lt;div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"&gt;
+        @foreach($products as $product)
+            &lt;div class="border rounded-lg shadow-md overflow-hidden bg-white
+            hover:shadow-xl transition"&gt; &lt;img src="https://placehold.co/400x300"
+            alt="{{ $product->name }}" class="w-full h-48 object-cover"&gt;
+
+                &lt;div class="p-4"&gt;
+                    &lt;h2 class="font-bold text-xl mb-2"&gt;{{ $product->name }}&lt;/h2&gt;
+                    &lt;p class="text-sm text-gray-500 mb-2"&gt;
+                        {{ $product->category->name }}&lt;/p&gt;
+
+                    &lt;p class="text-green-600 font-bold text-lg mb-2"&gt;
+                        &euro; {{ $product->latest_price->price ?? 'N/A' }}
+                    &lt;/p&gt;
+
+                    &lt;p class="text-gray-700 text-sm mb-4"&gt;
+                        {{ Str::limit($product->description, 100) }}
+                    &lt;/p&gt;
+
+                    &lt;a href="{{ route('open.products.show', $product) }}" class="block
+                    w-full bg-blue-600 text-white text-center py-2 rounded
+                    hover:bg-blue-700"&gt;
+                        Bekijken
+                    &lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        @endforeach
+    &lt;/div&gt;
+
+    &lt;div class="mt-8"&gt;
+        {{ $products->links() }}
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

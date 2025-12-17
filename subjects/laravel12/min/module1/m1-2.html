@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory & seeding - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Factory & Seed</h1>
+        <p>Om de applicatie goed te kunnen testen, hebben we data nodig. In plaats van dit handmatig in te voeren, gebruiken we Factories voor de structuur en Seeders om de database automatisch te vullen met neppe data via Faker.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een factory aanmaken.</li>
+            <li>Ik kan Faker gebruiken voor testdata.</li>
+            <li>Ik kan een seeder aanmaken.</li>
+            <li>Ik kan seeders uitvoeren.</li>
+        </ul>
+
+        <h3 id="factory">1. Factory: De blauwdruk voor data</h3>
+        <p>Om te testen hebben we nepdata nodig. Een <strong>Factory</strong> definieert hoe één rij eruit ziet.</p>
+        <pre><code class="language-bash">php artisan make:factory CategoryFactory</code></pre>
+
+        <p>In <code>database/factories/CategoryFactory.php</code> gebruiken we <strong>Faker</strong>:</p>
+        <pre><code class="language-php">
+public function definition(): array
+{
+    return [
+        // Genereer een uniek woord als categorie naam
+        'name' => $this->faker->unique()->word(),
+
+        // Optioneel: specifieke datums
+        'created_at' => $this->faker->dateTimeThisDecade(),
+    ];
+}
+        </code></pre>
+
+        <h3 id="model">2. Model koppelen</h3>
+        <p>Zorg dat in je Model (<code>Category.php</code>) de <code>HasFactory</code> trait aan staat:</p>
+        <pre><code class="language-php">use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Category extends Model {
+    use HasFactory;
+}</code></pre>
+
+        <h3 id="seeder">3. Seeder: De database vullen</h3>
+        <p>Een <strong>Seeder</strong> bepaalt hoeveel rijen er gemaakt worden.</p>
+        <pre><code class="language-bash">php artisan make:seeder CategorySeeder</code></pre>
+
+        <p>In <code>database/seeders/CategorySeeder.php</code>:</p>
+        <pre><code class="language-php">
+public function run(): void
+{
+    // Maak 10 categorieën aan
+    Category::factory()->times(10)->create();
+}
+        </code></pre>
+
+        <h3 id="uitvoeren">4. Uitvoeren</h3>
+        <p>Vergeet niet de seeder te registreren in <code>DatabaseSeeder.php</code> en draai daarna:</p>
+        <pre><code class="language-bash">php artisan db:seed</code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

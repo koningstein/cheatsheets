@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticatie Basis - Laravel 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<header>
+    <a href="../../index.html" class="logo">
+        <svg width="30" height="30" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0L10 20L10 80L50 100L90 80L90 20L50 0Z"/></svg>
+        Laravel 12
+    </a>
+    <div class="header-controls">
+        <button class="btn-control" id="color-toggle">🎨 Kleur</button>
+        <button class="btn-control" id="theme-toggle">🌓 Thema</button>
+        <button class="mobile-menu-btn" id="menu-toggle">☰</button>
+    </div>
+</header>
+
+<div class="layout-wrapper">
+    <nav class="sidebar-left">
+
+        <div class="nav-group">
+            <h3>Installatie</h3>
+            <div class="nav-item-container">
+                <ul class="submenu" style="display:block; padding-left:0;">
+                    <li><a href="../../index.html" style="border-left:none; padding-left:0.75rem;">Overzicht</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <h3>Opdrachten</h3>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 1: Basis CRUD
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module1/m1-1.html">Model & Migration</a></li>
+                    <li><a href="../module1/m1-2.html">Factory & Seeding</a></li>
+                    <li><a href="../module1/m1-3.html">Layouts & Tailwind</a></li>
+                    <li><a href="../module1/m1-4.html">Controller Index</a></li>
+                    <li><a href="../module1/m1-5.html">Create & Store</a></li>
+                    <li><a href="../module1/m1-6.html">Validatie & Flash</a></li>
+                    <li><a href="../module1/m1-7.html">Detailpagina (Show)</a></li>
+                    <li><a href="../module1/m1-8.html">Edit & Update</a></li>
+                    <li><a href="../module1/m1-9.html">Delete & Destroy</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 2: Users & Security
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module2/m2-1.html">Publieke Layout</a></li>
+                    <li><a href="../module2/m2-2.html">Simpele Publieke Pagina</a></li>
+                    <li><a href="../module2/m2-3.html">Roles & Permissions</a></li>
+                    <li><a href="../module2/m2-4.html">Aanmaken van Users</a></li>
+                    <li><a href="../module2/m2-5.html">Middleware bij Routes</a></li>
+                    <li><a href="../module2/m2-6.html">Rolgebaseerde Toegang</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 3: Advanced Admin
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module3/m3-1.html">Models & Migrations</a></li>
+                    <li><a href="../module3/m3-2.html">Factories met Relaties</a></li>
+                    <li><a href="../module3/m3-3.html">Seeders met Relaties</a></li>
+                    <li><a href="../module3/m3-4.html">Index & Eager Loading</a></li>
+                    <li><a href="../module3/m3-5.html">Permissions</a></li>
+                    <li><a href="../module3/m3-6.html">Create & Dropdowns</a></li>
+                    <li><a href="../module3/m3-7.html">Store & Validatie</a></li>
+                    <li><a href="../module3/m3-8.html">Show & Relaties</a></li>
+                    <li><a href="../module3/m3-9.html">Edit & Pre-select</a></li>
+                    <li><a href="../module3/m3-10.html">Update & Logica</a></li>
+                    <li><a href="../module3/m3-11.html">Delete View</a></li>
+                    <li><a href="../module3/m3-12.html">Destroy & Constraints</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 4: Webshop Features
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module4/m4-1.html">Publieke Productpagina</a></li>
+                    <li><a href="../module4/m4-2.html">De Product Show</a></li>
+                    <li><a href="../module4/m4-3.html">Reviews Setup (DB)</a></li>
+                    <li><a href="../module4/m4-4.html">Reviews Tonen</a></li>
+                    <li><a href="../module4/m4-5.html">Reviews Plaatsen</a></li>
+                    <li><a href="../module4/m4-6.html">Winkelwagen Setup</a></li>
+                    <li><a href="../module4/m4-7.html">Winkelwagen Tonen</a></li>
+                    <li><a href="../module4/m4-8.html">Winkelwagen Wijzigen</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 5: Orders & Validatie
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module5/m5-1.html">Orders Structuur</a></li>
+                    <li><a href="../module5/m5-2.html">Order Seeds</a></li>
+                    <li><a href="../module5/m5-3.html">Orders Opslaan</a></li>
+                    <li><a href="../module5/m5-4.html">Orders Tonen</a></li>
+                    <li><a href="../module5/m5-5.html">Order naar PDF</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <h3>Thema's</h3>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Database & Models
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module6/m6-1.html">Migrations & Datatypes</a></li>
+                    <li><a href="../module6/m6-2.html">Foreign Key Constraints</a></li>
+                    <li><a href="../module6/m6-3.html">Model Conventions</a></li>
+                    <li><a href="../module6/m6-4.html">Mass Assignment</a></li>
+                    <li><a href="../module6/m6-5.html">Factories (Faker)</a></li>
+                    <li><a href="../module6/m6-6.html">Seeders & DatabaseState</a></li>
+                    <li><a href="../module6/m6-7.html">Soft Deletes</a></li>
+                    <li><a href="../module6/m6-8.html">Casts & Accessors</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Eloquent Relaties
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module7/m7-1.html">One to One (HasOne)</a></li>
+                    <li><a href="../module7/m7-2.html">One to Many (HasMany)</a></li>
+                    <li><a href="../module7/m7-3.html">Many to Many</a></li>
+                    <li><a href="../module7/m7-4.html">Eager Loading</a></li>
+                    <li><a href="../module7/m7-5.html">Query Scopes</a></li>
+                    <li><a href="../module7/m7-6.html">Collections Methods</a></li>
+                    <li><a href="../module7/m7-7.html">Pivot Tabellen</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Routing & Controllers
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module8/m8-1.html">Basic Routing</a></li>
+                    <li><a href="../module8/m8-2.html">Named Routes & Groups</a></li>
+                    <li><a href="../module8/m8-3.html">Route Model Binding</a></li>
+                    <li><a href="../module8/m8-4.html">Resource Controllers</a></li>
+                    <li><a href="../module8/m8-5.html">Single Action Controllers</a></li>
+                    <li><a href="../module8/m8-6.html">Redirects & Responses</a></li>
+                    <li><a href="../module8/m8-7.html">Dependency Injection</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Blade & Frontend
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module9/m9-1.html">Layout Inheritance</a></li>
+                    <li><a href="../module9/m9-2.html">Components & Slots</a></li>
+                    <li><a href="../module9/m9-3.html">Stacks & Push</a></li>
+                    <li><a href="../module9/m9-4.html">Control Structures</a></li>
+                    <li><a href="../module9/m9-5.html">Auth Directives</a></li>
+                    <li><a href="../module9/m9-6.html">Service Injection</a></li>
+                    <li><a href="../module9/m9-7.html">Tailwind Patterns</a></li>
+                    <li><a href="../module9/m9-8.html">Pagination</a></li>
+                    <li><a href="../module9/m9-9.html">Flash messages</a></li>
+                    <li><a href="../module9/m9-10.html">Livewire</a></li>
+                    <li><a href="../module9/m9-11.html">Flux UI</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Validatie & Forms
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module10/m10-1.html">Controller Validatie</a></li>
+                    <li><a href="../module10/m10-2.html">Errors weergeven</a></li>
+                    <li><a href="../module10/m10-3.html">Form requests</a></li>
+                    <li><a href="../module10/m10-4.html">Database regels</a></li>
+                    <li><a href="../module10/m10-5.html">Custom Error Messages</a></li>
+                    <li><a href="../module10/m10-6.html">CSRF en Old input</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container active">
+                <button class="nav-toggle">
+                    Security & Auth
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu" style="display: block;">
+                    <li><a href="m11-1.html" class="current">Auth Flow</a></li>
+                    <li><a href="m11-2.html">Middleware</a></li>
+                    <li><a href="m11-3.html">Gates</a></li>
+                    <li><a href="m11-4.html">Policies</a></li>
+                    <li><a href="m11-5.html">Spatie Permissions</a></li>
+                    <li><a href="m11-6.html">Password Hashing</a></li>
+                    <li><a href="m11-7.html">Helper Functions</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Features
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module12/m12-1.html">PDF Generatie</a></li>
+                    <li><a href="../module12/m12-2.html">Excel Import/Export</a></li>
+                    <li><a href="../module12/m12-3.html">Mail & Notifications</a></li>
+                    <li><a href="../module12/m12-4.html">File Storage</a></li>
+                    <li><a href="../module12/m12-5.html">HTTP Client</a></li>
+                    <li><a href="../module12/m12-6.html">Events & Listeners</a></li>
+                    <li><a href="../module12/m12-7.html">Artisan Commands</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Automated Testing
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module13/m13-1.html">Introductie & PHPUnit</a></li>
+                    <li><a href="../module13/m13-2.html">Unit vs Feature Tests</a></li>
+                    <li><a href="../module13/m13-3.html">Introductie Pest</a></li>
+                    <li><a href="../module13/m13-4.html">Unit & Feature Tests (Pest)</a></li>
+                    <li><a href="../module13/m13-5.html">Database Testing & Seeding</a></li>
+                    <li><a href="../module13/m13-6.html">HTTP Testing</a></li>
+                    <li><a href="../module13/m13-7.html">Mocking & Spies</a></li>
+                    <li><a href="../module13/m13-8.html">Faking</a></li>
+                    <li><a href="../module13/m13-9.html">Browser Testing (Dusk)</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    QA Tools & Workflow
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module14/m14-1.html">Static Analysis (Larastan)</a></li>
+                    <li><a href="../module14/m14-2.html">Code Style (Pint)</a></li>
+                    <li><a href="../module14/m14-3.html">Debugging & Debugbar</a></li>
+                    <li><a href="../module14/m14-4.html">Git Workflow</a></li>
+                    <li><a href="../module14/m14-5.html">CI/CD Basics</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <h1>Authenticatie Basis</h1>
+        <p>Authenticatie (vaak afgekort als "Auth") is het proces van verifiëren <strong>wie</strong> een gebruiker is. Dit is de basis van bijna elke moderne webapplicatie. Zonder authenticatie kun je geen onderscheid maken tussen een beheerder, een klant of een willekeurige bezoeker. Laravel maakt dit proces extreem eenvoudig, maar het is belangrijk om te begrijpen wat er onder de motorkap gebeurt.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik begrijp het verschil tussen authenticatie en autorisatie.</li>
+            <li>Ik weet hoe de login flow werkt in Laravel met Livewire.</li>
+            <li>Ik kan de `auth()` helper en de `Auth` facade gebruiken.</li>
+            <li>Ik weet hoe ik de huidige gebruiker kan ophalen in mijn code.</li>
+        </ul>
+
+        <h3>Van Controllers naar Livewire Components</h3>
+        <p>In oudere versies van Laravel (en in de standaard documentatie zonder starter kits) wordt authenticatie vaak afgehandeld door Controllers (bijvoorbeeld `LoginController`). Echter, in Laravel 12 met moderne starter kits zoals <strong>Breeze</strong> of <strong>Jetstream</strong> kiezen we vaak voor de <strong>Livewire</strong> stack.</p>
+        <p>Dit betekent dat de logica voor het inloggen niet meer in een klassieke Controller zit, maar in een <strong>Livewire Component</strong>. Dit biedt grote voordelen: validatie errors verschijnen direct zonder pagina-herlaad (real-time feedback) en de gebruikerservaring is veel vloeiender ("SPA-like feel").</p>
+
+        <div class="note-box">Bestand: <code>app/Livewire/Auth/Login.php</code></div>
+        <pre><code class="language-php">
+namespace App\Livewire\Auth;
+
+use Livewire\Component;
+use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Auth;
+
+#[Layout('components.layouts.auth')]
+class Login extends Component
+{
+    // Properties die gekoppeld zijn aan de input velden met wire:model
+    public string $email = '';
+    public string $password = '';
+    public bool $remember = false;
+
+    public function login()
+    {
+        // 1. Validatie: Livewire handelt dit intern af.
+        // Bij een fout stopt de functie en toont de view de error.
+        $credentials = $this->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        // 2. Auth::attempt probeert de gebruiker in te loggen.
+        // Het hasht het ingevoerde wachtwoord en vergelijkt dit met de database.
+        if (! Auth::attempt($credentials, $this->remember)) {
+            // Als het mislukt, voegen we handmatig een error toe aan het 'email' veld.
+            $this->addError('email', trans('auth.failed'));
+            return;
+        }
+
+        // 3. Sessie regeneratie is cruciaal om 'Session Fixation' aanvallen te voorkomen.
+        session()->regenerate();
+
+        // 4. Stuur de gebruiker naar waar hij heen wilde (of default naar dashboard)
+        return $this->redirectIntended(route('dashboard'), navigate: true);
+    }
+}
+        </code></pre>
+
+        <h3>De Huidige Gebruiker Ophalen (De `auth()` helper)</h3>
+        <p>Zodra een gebruiker is ingelogd, houdt Laravel de sessie bij. Je hoeft niet zelf sessie-variabelen uit te lezen. Laravel biedt de krachtige <code>auth()</code> helper functie. Deze is globaal beschikbaar: in je Controllers, in je Livewire Components, in je Models en in je Views.</p>
+
+        <p>Het meest gebruikte commando is <code>auth()->user()</code>. Dit geeft je een instantie van het <code>User</code> model terug, gevuld met de data van de ingelogde persoon. Als niemand is ingelogd, geeft het <code>null</code> terug.</p>
+
+        <div class="note-box">Voorbeeld in een Livewire Component (bijv. <code>CreateOrder.php</code>)</div>
+        <pre><code class="language-php">
+public function save()
+{
+    // Haal de volledig ingelogde gebruiker op
+    $user = auth()->user();
+
+    // Omdat $user een instantie is van het User model,
+    // kun je direct relaties aanspreken!
+    // Hier maken we een order aan die direct gekoppeld is aan deze user.
+    $user->orders()->create([
+        'total' => $this->total,
+        'status' => 'pending',
+    ]);
+
+    // Soms heb je alleen het ID nodig voor een query.
+    // Dit is efficiënter dan het hele user object ophalen.
+    $userId = auth()->id();
+}
+        </code></pre>
+
+        <h3>Controleren of iemand is ingelogd</h3>
+        <p>Soms wil je alleen weten <em>of</em> er iemand is ingelogd, bijvoorbeeld om een "Log in" of "Log uit" knop te tonen. Hiervoor gebruik je <code>auth()->check()</code>. Dit geeft een simpele <code>true</code> of <code>false</code>.</p>
+        <p>In Blade views zijn hier nog specifiekere directives voor, zoals <code>@auth</code> en <code>@guest</code>, die we in Blade & Frontend hebben besproken.</p>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

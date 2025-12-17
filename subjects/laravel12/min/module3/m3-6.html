@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create & dropdowns - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Create met Dropdowns</h1>
+        <p>Bij het aanmaken van items (zoals producten of taken) moeten we vaak gerelateerde data selecteren, zoals een categorie of een gebruiker. Hiervoor gebruiken we dropdowns in formulieren.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan data voor dropdowns ophalen in de create methode.</li>
+            <li>Ik kan een formulier maken met <code>select</code> velden.</li>
+            <li>Ik kan dropdown options vullen met gerelateerde data (foreach).</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Data ophalen in Controller</h3>
+        <p>Om een product aan te maken, moet je een categorie kiezen. We moeten dus alle categorieën ophalen en meesturen naar de view.</p>
+
+        <pre><code class="language-php">
+// ProductController.php
+
+public function create(): View
+{
+    // Haal alle categorieën op voor de dropdown
+    $categories = Category::all();
+
+    return view('admin.products.create', [
+        'categories' => $categories
+    ]);
+}
+        </code></pre>
+
+        <h3 id="blade">Stap 2: Dropdown in Blade</h3>
+        <p>In de view maken we een <code>&lt;select&gt;</code> element. We loopen door de categorieën heen om de <code>&lt;option&gt;</code> tags te maken.</p>
+
+        <pre><code class="language-html">
+&lt;label class="block text-sm font-medium text-gray-700"&gt;Categorie:&lt;/label&gt;
+&lt;select name="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
+            focus:border-indigo-500 focus:ring-indigo-500"&gt;
+
+    @foreach($categories as $category)
+        &lt;option value="{{ $category->id }}"
+            {{-- Zorg dat de keuze blijft staan bij validatiefouten --}}
+            @selected(old('category_id') == $category->id)
+        &gt;
+            {{ $category->name }}
+        &lt;/option&gt;
+    @endforeach
+
+&lt;/select&gt;
+        </code></pre>
+
+        <h3 id="other-fields">Stap 3: Overige Velden</h3>
+        <p>Vergeet niet de andere velden toe te voegen, zoals Prijs. Omdat Prijs in een andere tabel zit, vangen we die hier op als een 'los' veld in het formulier en slaan we die later op.</p>
+        <pre><code class="language-html">
+&lt;label&gt;Start Prijs:&lt;/label&gt;
+&lt;input type="number" step="0.01" name="price" value="{{ old('price') }}"&gt;
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 21</p>
+            <p>Maak de create-pagina voor <strong>Tasks</strong>. Een taak heeft dropdowns nodig voor <code>User</code>, <code>Project</code> en <code>Activity</code>. Haal deze allemaal op in de controller!</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

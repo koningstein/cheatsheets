@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factories met relaties - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+
+    <main class="main-content">
+        <h1>Factories met Relaties</h1>
+        <p>Data genereren voor tabellen met relaties vergt iets meer werk. We moeten zorgen dat foreign keys verwijzen naar bestaande ID's en dat datums logisch zijn.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan factories maken voor gerelateerde modellen.</li>
+            <li>Ik kan foreign keys automatisch vullen in een factory.</li>
+            <li>Ik kan datums genereren met Carbon en Faker.</li>
+        </ul>
+
+        <h3 id="foreign-keys">1. Foreign Keys Vullen</h3>
+        <p>Een product heeft een <code>category_id</code> nodig. Om te voorkomen dat we een ID kiezen die niet bestaat, halen we alle categorieën op en kiezen er willekeurig eentje uit.</p>
+
+        <pre><code class="language-php">
+// database/factories/ProductFactory.php
+public function definition(): array
+{
+    // Zorg dat je de classes importeert!
+    return [
+        'name' => $this->faker->word,
+        'description' => $this->faker->paragraph(15),
+
+        // Pak een willekeurig ID uit de Categories tabel
+        'category_id' => Category::all()->random()->id,
+    ];
+}
+        </code></pre>
+
+        <h3 id="carbon">2. Datums met Carbon</h3>
+        <p>Voor de prijzen tabel willen we een datum in het verleden. We gebruiken <strong>Carbon</strong> om makkelijk met datums te rekenen.</p>
+
+        <pre><code class="language-php">
+// database/factories/PriceFactory.php
+use Carbon\Carbon;
+
+public function definition(): array
+{
+    return [
+        'price' => $this->faker->randomFloat(2, 2, 100),
+
+        // Vandaag min een willekeurig aantal dagen (0-365)
+        'effdate' => Carbon::today()->subDays(random_int(0, 365)),
+
+        'product_id' => Product::all()->random()->id,
+    ];
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 17</p>
+            <p>Maak nu factories voor <code>Activity</code> en <code>Task</code>. Een taak heeft een start- en einddatum (10 dagen later) en koppelingen met user, project en activity.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publieke Product Pagina - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Publieke Product Pagina</h1>
+        <p>In de vorige modules hebben we hard gewerkt aan het <strong>Admin Panel</strong>. We kunnen producten beheren, categorieën aanmaken en alles opslaan in de database. Maar... we hebben nog niets om aan de klanten te laten zien! Een webshop zonder etalage verkoopt natuurlijk niets.</p>
+        <p>In Module 4 gaan we de voorkant (Front-end) bouwen. We gebruiken de layout die we in Module 2 hebben opgezet en vullen deze nu met de echte producten uit Module 3.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een aparte Controller maken voor de publieke pagina's (ShopController).</li>
+                <li>Ik begrijp het verschil tussen een Admin-view (Tabellen) en een Publieke view (Grids/Cards).</li>
+                <li>Ik kan producten ophalen en weergeven in een responsive grid met Tailwind CSS.</li>
+                <li>Ik kan een detailpagina maken voor een specifiek product (Show).</li>
+                <li>Ik kan Eager Loading (<code>with</code>) toepassen om de shop snel te houden.</li>
+            </ul>
+        </div>
+
+        <h2>De Shop Controller</h2>
+        <p>We zouden de bestaande <code>ProductController</code> kunnen gebruiken, maar die staat in de map <code>Admin</code> en is beveiligd met middleware. Voor de publieke shop willen we dat <strong>iedereen</strong> (ook gasten) de producten kan zien.</p>
+        <p>Daarom maken we een nieuwe controller aan, specifiek voor de winkelvoorkant.</p>
+
+        <pre><code class="language-bash">php artisan make:controller ShopController</code></pre>
+
+        <p>In deze controller hebben we twee methodes nodig:</p>
+        <ol>
+            <li><strong>index:</strong> Toont een overzicht van alle producten (de catalogus).</li>
+            <li><strong>show:</strong> Toont de details van één specifiek product.</li>
+        </ol>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use Illuminate\View\View;
+
+class ShopController extends Controller
+{
+    public function index(): View
+    {
+        // Haal producten op.
+        // 1. 'with' zorgt dat we de categorie meteen ophalen (sneller).
+        // 2. 'latest' zet de nieuwste bovenaan.
+        // 3. 'paginate' zorgt dat we niet 1000 producten op 1 pagina tonen.
+        $products = Product::with('category')->latest()->paginate(12);
+
+        return view('shop.index', [
+            'products' => $products
+        ]);
+    }
+
+    public function show(Product $product): View
+    {
+        // Laravel zoekt automatisch het juiste product (Route Model Binding)
+        return view('shop.show', [
+            'product' => $product
+        ]);
+    }
+}
+        </code></pre>
+
+        <h2>Routes Instellen</h2>
+        <p>Nu moeten we de URL's koppelen. Open <code>routes/web.php</code>. Zorg dat deze routes <strong>buiten</strong> de admin-middleware groep staan, want ze moeten openbaar zijn.</p>
+
+        <pre><code class="language-php">
+use App\Http\Controllers\ShopController;
+
+// De hoofdpagina van de shop
+Route::get('/', [ShopController::class, 'index'])->name('shop.index');
+
+// De detailpagina van een product
+// We gebruiken {product} zodat Laravel weet welk ID hij moet zoeken
+Route::get('/product/{product}', [ShopController::class, 'show'])->name('shop.show');
+        </code></pre>
+
+        <h2>De Index View (De Catalogus)</h2>
+        <p>In de admin gebruikten we een saaie tabel. Voor klanten willen we een aantrekkelijk overzicht met "kaartjes" (Cards). We gebruiken CSS Grid om dit responsive te maken.</p>
+
+        <p>Maak het bestand: <code>resources/views/shop/index.blade.php</code>.</p>
+
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="container mx-auto px-4 py-8"&gt;
+        &lt;h1 class="text-3xl font-bold mb-6"&gt;Ons Assortiment&lt;/h1&gt;
+
+        &lt;!-- Grid Layout: 1 kolom mobiel, 3 kolommen desktop --&gt;
+        &lt;div class="grid grid-cols-1 md:grid-cols-3 gap-6"&gt;
+
+            @foreach($products as $product)
+                &lt;div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"&gt;
+
+                    &lt;!-- Placeholder afbeelding (later echte foto's) --&gt;
+                    &lt;div class="h-48 bg-gray-200 flex items-center justify-center"&gt;
+                        &lt;span class="text-gray-500"&gt;Afbeelding&lt;/span&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class="p-4"&gt;
+                        &lt;div class="text-sm text-red-600 mb-1"&gt;
+                            {{ $product->category->name }}
+                        &lt;/div&gt;
+
+                        &lt;h2 class="text-xl font-semibold mb-2"&gt;
+                            &lt;a href="{{ route('shop.show', $product) }}" class="hover:text-red-600"&gt;
+                                {{ $product->title }}
+                            &lt;/a&gt;
+                        &lt;/h2&gt;
+
+                        &lt;p class="text-gray-600 text-sm mb-4 line-clamp-2"&gt;
+                            {{ $product->description }}
+                        &lt;/p&gt;
+
+                        &lt;div class="flex justify-between items-center"&gt;
+                            &lt;span class="text-lg font-bold"&gt;&euro; {{ number_format($product->price, 2, ',', '.') }}&lt;/span&gt;
+
+                            &lt;a href="{{ route('shop.show', $product) }}"
+                               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"&gt;
+                                Bekijk
+                            &lt;/a&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            @endforeach
+
+        &lt;/div&gt;
+
+        &lt;!-- Paginering links --&gt;
+        &lt;div class="mt-8"&gt;
+            {{ $products->links() }}
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Nieuwe CSS Classes:</strong><br>
+            <ul>
+                <li><code>grid-cols-1 md:grid-cols-3</code>: Op mobiel 1 kolom, vanaf medium schermen 3 kolommen.</li>
+                <li><code>line-clamp-2</code>: Kapt de tekst af na 2 regels met puntjes (...) zodat alle kaartjes even hoog blijven.</li>
+                <li><code>transition-shadow</code>: Zorgt voor een mooi effect als je met de muis over het kaartje gaat.</li>
+            </ul>
+        </div>
+
+        <h2>De Show View (Detailpagina)</h2>
+        <p>Als de klant op "Bekijk" klikt, willen ze alle details zien en uiteindelijk het product in de winkelwagen kunnen leggen. De winkelwagen bouwen we in de volgende module, maar de knop en de pagina maken we nu alvast.</p>
+
+        <p>Maak het bestand: <code>resources/views/shop/show.blade.php</code>.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="container mx-auto px-4 py-8"&gt;
+        &lt;div class="bg-white rounded-lg shadow-lg overflow-hidden"&gt;
+            &lt;div class="md:flex"&gt;
+                &lt;!-- Afbeelding Kant --&gt;
+                &lt;div class="md:w-1/2 bg-gray-100 h-96 flex items-center justify-center"&gt;
+                    &lt;span class="text-gray-500 text-xl"&gt;Grote Productfoto&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Informatie Kant --&gt;
+                &lt;div class="p-8 md:w-1/2"&gt;
+                    &lt;div class="uppercase tracking-wide text-sm text-red-600 font-semibold"&gt;
+                        {{ $product->category->name }}
+                    &lt;/div&gt;
+
+                    &lt;h1 class="mt-2 text-3xl font-bold text-gray-900"&gt;
+                        {{ $product->title }}
+                    &lt;/h1&gt;
+
+                    &lt;p class="mt-4 text-gray-600 leading-relaxed"&gt;
+                        {{ $product->description }}
+                    &lt;/p&gt;
+
+                    &lt;div class="mt-6"&gt;
+                        &lt;span class="text-2xl font-bold text-gray-900"&gt;
+                            &euro; {{ number_format($product->price, 2, ',', '.') }}
+                        &lt;/span&gt;
+
+                        @if($product->stock > 0)
+                            &lt;span class="ml-4 text-green-600 text-sm font-semibold"&gt;
+                                &amp;#10003; Op voorraad ({{ $product->stock }})
+                            &lt;/span&gt;
+                        @else
+                            &lt;span class="ml-4 text-red-600 text-sm font-semibold"&gt;
+                                &amp;#10007; Uitverkocht
+                            &lt;/span&gt;
+                        @endif
+                    &lt;/div&gt;
+
+                    &lt;div class="mt-8"&gt;
+                        &lt;!-- De formulier actie komt later in Module 4-2 --&gt;
+                        &lt;button class="bg-green-600 text-white font-bold py-3 px-8 rounded hover:bg-green-700 w-full md:w-auto transition duration-300"&gt;
+                            In Winkelwagen
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Testen</h2>
+        <p>Ga naar de homepage van je applicatie (bijv. <code>http://localhost:8000/</code>). Als het goed is zie je nu:</p>
+        <ol>
+            <li>Een mooi grid met alle producten die je in de seeder hebt aangemaakt.</li>
+            <li>De juiste prijzen en categorieën.</li>
+            <li>Als je op een product klikt, ga je naar de detailpagina.</li>
+        </ol>
+        <p>Je hebt nu een werkende "etalage"! In de volgende module gaan we zorgen dat de "In Winkelwagen" knop ook daadwerkelijk iets doet.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

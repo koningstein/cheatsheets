@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete View met Relaties - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Delete View met Relaties</h1>
+        <p>Wanneer we items verwijderen, is het belangrijk om de gebruiker te informeren over wat er precies verwijderd wordt, inclusief gerelateerde informatie. Dit voorkomt fouten.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een delete view maken die gerelateerde informatie toont.</li>
+            <li>Ik kan disabled fields gebruiken voor dropdowns en inputs.</li>
+        </ul>
+
+        <h3 id="controller-delete">Stap 1: Controller (Delete)</h3>
+        <p>We maken een aparte <code>delete</code> methode (naast destroy) om het bevestigingsscherm te tonen. We halen het product op via Model Binding.</p>
+
+        <pre><code class="language-php">
+public function delete(Product $product)
+{
+    return view('admin.products.delete', ['product' => $product]);
+}
+        </code></pre>
+
+        <h3 id="view-disabled">Stap 2: View: Disabled Fields</h3>
+        <p>Het formulier lijkt op edit, maar alle velden zijn <code>disabled</code>. Dit maakt duidelijk dat de gebruiker hier niets kan wijzigen. Bij de categorie tonen we simpelweg de naam in een tekstveld in plaats van een select-menu, omdat je toch niets kunt kiezen.</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('products.destroy', $product) }}" method="POST"&gt;
+    @csrf
+    @method('DELETE')
+
+    &lt;label class="block text-sm font-medium text-gray-700"&gt;Naam:&lt;/label&gt;
+    &lt;input type="text" value="{{ $product->name }}" disabled class="mt-1 block w-full
+            rounded-md border-gray-300 bg-gray-100 shadow-sm"&gt;
+
+    &lt;label class="block text-sm font-medium text-gray-700 mt-4"&gt;Categorie:&lt;/label&gt;
+    &lt;!-- Gewoon de naam tonen, geen select nodig --&gt;
+    &lt;input type="text" value="{{ $product->category->name }}" disabled class="mt-1
+            block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm"&gt;
+
+    &lt;label class="block text-sm font-medium text-gray-700 mt-4"&gt;Huidige Prijs:&lt;/label&gt;
+    &lt;input type="text" value="{{ $product->latest_price->price }}" disabled class="mt-1
+            block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm"&gt;
+
+    &lt;div class="mt-6"&gt;
+        &lt;p class="text-red-600 mb-4"&gt;Weet je zeker dat je dit product wilt verwijderen?&lt;/p&gt;
+        &lt;button type="submit" class="bg-red-600 text-white px-4 py-2 rounded
+            hover:bg-red-700"&gt;Verwijderen&lt;/button&gt;
+        &lt;a href="{{ route('products.index') }}" class="ml-4 text-gray-600
+            hover:underline"&gt;Annuleren&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/form&gt;
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 26</p>
+            <p>Maak de Delete view voor <strong>Tasks</strong>. Zorg dat alle velden (inclusief Project en Activity) disabled zijn en de huidige waarde tonen.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

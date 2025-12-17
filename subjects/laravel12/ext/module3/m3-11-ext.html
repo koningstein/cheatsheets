@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete View - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Delete View</h1>
+        <p>Het verwijderen van data is een kritieke actie. Je wilt niet dat een gebruiker per ongeluk op een knop drukt en direct een product kwijt is. Hoewel een JavaScript `confirm()` werkt, is een aparte bevestigingspagina veel professioneler en veiliger.</p>
+        <p>In deze module maken we een specifieke <strong>Delete View</strong>. Hier ziet de gebruiker welk product hij op het punt staat te verwijderen, met een duidelijke "Weet je het zeker?" vraag.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een extra GET-route toevoegen aan een Resource Controller.</li>
+                <li>Ik kan een bevestigingspagina (view) maken die productdetails toont.</li>
+                <li>Ik begrijp waarom een aparte pagina veiliger is dan een simpele link.</li>
+                <li>Ik kan een formulier voorbereiden dat verwijst naar de <code>destroy</code> route.</li>
+            </ul>
+        </div>
+
+        <h2>De Route Toevoegen</h2>
+        <p>Standaard heeft een <code>Route::resource</code> geen 'delete' pagina (alleen de 'destroy' actie). We moeten dus zelf een extra route toevoegen. Doe dit <strong>boven</strong> de resource route, anders kan het conflicteren met <code>{id}</code> patronen.</p>
+
+        <p>Open <code>routes/web.php</code>:</p>
+
+        <pre><code class="language-php">
+// Extra route voor het bevestigingsscherm
+Route::get('products/{product}/delete', [ProductController::class, 'delete'])
+    ->name('products.delete');
+
+// De standaard resource routes
+Route::resource('products', ProductController::class);
+        </code></pre>
+
+        <h2>De Controller Methode</h2>
+        <p>We hebben een nieuwe methode <code>delete</code> nodig in de <code>ProductController</code>. Deze lijkt erg op <code>show</code> of <code>edit</code>: we halen het product op en tonen een view.</p>
+
+        <pre><code class="language-php">
+// In Admin/ProductController.php
+
+public function delete(Product $product): View
+{
+    return view('admin.products.delete', [
+        'product' => $product
+    ]);
+}
+        </code></pre>
+
+        <h2>De View Maken</h2>
+        <p>Maak het bestand <code>resources/views/admin/products/delete.blade.php</code>.
+            Deze pagina heeft één doel: de gebruiker waarschuwen.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;div class="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded p-6"&gt;
+        &lt;h1 class="text-2xl font-bold text-red-700 mb-4"&gt;Product Verwijderen&lt;/h1&gt;
+
+        &lt;p class="mb-4 text-gray-700"&gt;
+            Weet je zeker dat je het product &lt;strong&gt;{{ $product->title }}&lt;/strong&gt; wilt verwijderen?
+            &lt;br&gt;Deze actie kan niet ongedaan worden gemaakt.
+        &lt;/p&gt;
+
+        &lt;div class="bg-white p-4 rounded border mb-6"&gt;
+            &lt;p&gt;&lt;strong&gt;Prijs:&lt;/strong&gt; &euro; {{ $product->price }}&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;Voorraad:&lt;/strong&gt; {{ $product->stock }} stuks&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="flex gap-4"&gt;
+            &lt;!-- De Annuleren Knop (Veilig terug) --&gt;
+            &lt;a href="{{ route('admin.products.index') }}"
+               class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"&gt;
+                Annuleren
+            &lt;/a&gt;
+
+            &lt;!-- De Definitieve Verwijder Knop --&gt;
+            &lt;!-- Let op: Dit formulier wijst naar de DESTROY route --&gt;
+            &lt;form action="{{ route('admin.products.destroy', $product) }}" method="POST"&gt;
+                @csrf
+                @method('DELETE')
+
+                &lt;button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"&gt;
+                    Ja, verwijder definitief
+                &lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Koppelen in het Overzicht</h2>
+        <p>Vergeet niet om in je <code>index.blade.php</code> (en <code>show.blade.php</code>) de knop aan te passen. In plaats van direct een formulier, linken we nu naar onze nieuwe pagina.</p>
+
+        <pre><code class="language-html">
+&lt;a href="{{ route('admin.products.delete', $product) }}"
+   class="text-red-600 hover:text-red-900"&gt;
+    Verwijder
+&lt;/a&gt;
+        </code></pre>
+
+        <p>In de volgende module gaan we zorgen dat de knop "Ja, verwijder definitief" ook daadwerkelijk werkt en wat we moeten doen met database relaties.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

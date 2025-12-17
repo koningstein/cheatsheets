@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller Index - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Controller Index</h1>
+        <p>Nu we de database (Model) en de lay-out (View) hebben, missen we nog de schakel die deze twee verbindt: de <strong>Controller</strong>. In deze module gaan we de eerste pagina van onze CRUD (Create, Read, Update, Delete) maken: de Index pagina. Dit is de pagina waar je een lijst ziet van alle items.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan uitleggen wat een Resource Controller is.</li>
+                <li>Ik kan routes definiëren in <code>web.php</code>.</li>
+                <li>Ik kan data ophalen uit de database via het Model.</li>
+                <li>Ik kan data doorgeven vanuit de Controller naar de View.</li>
+                <li>Ik kan een <code>foreach</code> loop gebruiken in Blade om data te tonen.</li>
+            </ul>
+        </div>
+
+        <h2>Routing</h2>
+        <p>Alles in Laravel begint bij een <strong>Route</strong>. Een route bepaalt welke URL (bijv. <code>/admin/categories</code>) gekoppeld wordt aan welke code. De routes vind je in <code>routes/web.php</code>.</p>
+
+        <h3>Resource Routes</h3>
+        <p>Omdat het patroon van CRUD (lijst bekijken, item aanmaken, item wijzigen, item verwijderen) zo vaak voorkomt, heeft Laravel hier een standaardoplossing voor: de <strong>Resource Route</strong>.</p>
+        <p>In plaats van 7 losse routes te schrijven, schrijf je er maar één:</p>
+
+        <pre><code class="language-php">
+use App\Http\Controllers\Admin\CategoryController;
+use Illuminate\Support\Facades\Route;
+
+// Deze ene regel maakt automatisch 7 routes aan!
+Route::resource('admin/categories', CategoryController::class);
+        </code></pre>
+
+        <p>Met het commando <code>php artisan route:list</code> kun je in je terminal zien welke routes er allemaal zijn aangemaakt.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Named Routes:</strong><br>
+            Laravel geeft deze routes automatisch namen, zoals <code>categories.index</code> of <code>categories.store</code>. Het is "best practice" om in je code altijd deze namen te gebruiken in plaats van harde URL's. Als je de URL later verandert, blijft je code gewoon werken.
+        </div>
+
+        <h2>De Controller</h2>
+        <p>De controller is de verkeersregelaar. Hij ontvangt het verzoek van de route, haalt de juiste data op, en stuurt deze naar de view.</p>
+
+        <h3>Controller Aanmaken</h3>
+        <p>We maken een controller aan. Omdat we een admin-paneel maken, zetten we deze netjes in een submap <code>Admin</code>.</p>
+
+        <pre><code class="language-bash">php artisan make:controller --model=Category Admin/CategoryController </code></pre>
+
+        <p>De optie <code>--model=Category</code> zorgt ervoor dat Laravel het bestand alvast vult met de 7 standaard methodes (index, create, store, show, edit, update, destroy), meteen gekoppeld aan de model Category.</p>
+
+        <h3>De Index Methode</h3>
+        <p>Open <code>app/Http/Controllers/Admin/CategoryController.php</code>. We gaan aan de slag met de <code>index()</code> methode.</p>
+        <p>Het doel van deze methode is:</p>
+        <ol>
+            <li>Haal alle categorieën op uit de database.</li>
+            <li>Laad de view (de pagina).</li>
+            <li>Geef de categorieën mee aan de view.</li>
+        </ol>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category; // Vergeet niet je Model te importeren!
+use Illuminate\View\View;
+
+class CategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): View
+    {
+        // 1. Haal alle categorieën op
+        $categories = Category::all();
+
+        // 2. Return de view en geef de data mee
+        return view('admin.categories.index', [
+            'categories' => $categories
+        ]);
+    }
+}
+        </code></pre>
+
+        <h2>De View (Blade)</h2>
+        <p>Nu moeten we zorgen dat de data ook zichtbaar wordt voor de gebruiker. We maken het bestand <code>resources/views/admin/categories/index.blade.php</code> aan.</p>
+
+        <h3>Extenden van de Layout</h3>
+        <p>We gebruiken de masterpage die we in de vorige module hebben gemaakt. We "injecteren" onze inhoud in de <code>content</code> sectie.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('title', 'Categorieën')
+
+@section('content')
+    &lt;h2 class="text-2xl font-bold mb-4"&gt;Categorieën Overzicht&lt;/h2&gt;
+
+    &lt;!-- Hier komt de tabel --&gt;
+@endsection
+        </code></pre>
+
+        <h3>De Loop (Foreach)</h3>
+        <p>We hebben de variabele <code>$categories</code> doorgegeven vanuit de controller. In Blade kunnen we hier doorheen lopen met een <code>@foreach</code> lus. We maken een tabel met Tailwind CSS classes voor de opmaak.</p>
+
+        <pre><code class="language-html">
+&lt;div class="bg-white shadow overflow-hidden rounded-lg"&gt;
+    &lt;table class="min-w-full divide-y divide-gray-200"&gt;
+        &lt;thead class="bg-gray-50"&gt;
+            &lt;tr&gt;
+                &lt;th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"&gt;ID&lt;/th&gt;
+                &lt;th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"&gt;Naam&lt;/th&gt;
+                &lt;th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"&gt;Aangemaakt op&lt;/th&gt;
+                &lt;th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"&gt;Details&lt;/th&gt;
+                &lt;th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"&gt;Edit&lt;/th&gt;
+                &lt;th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"&gt;Delete&lt;/th&gt;
+
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody class="bg-white divide-y divide-gray-200"&gt;
+            @foreach($categories as $category)
+                &lt;tr&gt;
+                    &lt;td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"&gt;
+                        {{ $category-&gt;id }}
+                    &lt;/td&gt;
+                    &lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"&gt;
+                        {{ $category-&gt;name }}
+                    &lt;/td&gt;
+                    &lt;td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"&gt;
+                        {{ $category-&gt;created_at-&gt;format('d-m-Y') }}
+                    &lt;/td&gt;
+                    &lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"&gt;Details&lt;/td&gt;
+                    &lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"&gt;Edit&lt;/td&gt;
+                    &lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"&gt;Delete&lt;/td&gt;
+                &lt;/tr&gt;
+            @endforeach
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <h3>Lege Database?</h3>
+        <p>Het is netter om iets te tonen als er geen resultaten zijn. Blade heeft hiervoor de handige <code>@forelse</code> structuur. Dit is een combinatie van een foreach en een if-empty check.</p>
+
+        <pre><code class="language-html">
+@forelse($categories as $category)
+    &lt;!-- Code voor 1 rij --&gt;
+@empty
+    &lt;tr&gt;
+        &lt;td colspan="4" class="px-6 py-4 text-center text-gray-500"&gt;
+            Geen categorieën gevonden.
+        &lt;/td&gt;
+    &lt;/tr&gt;
+@endforelse
+        </code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

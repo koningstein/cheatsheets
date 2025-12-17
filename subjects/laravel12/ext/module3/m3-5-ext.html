@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Permissions</h1>
+        <p>In Module 2 hebben we onze routes beveiligd met Middleware. Dit is als een hek om je huis: je komt erin of niet. Maar wat als je eenmaal binnen bent? Mag je de tv aanzetten? Mag je de koelkast openen?</p>
+        <p>In applicaties hebben we vaak <strong>fijnmazige rechten</strong> nodig. Misschien mag een 'Redacteur' wel nieuwsberichten aanmaken, maar geen gebruikers verwijderen. Hiervoor gebruiken we in Laravel <strong>Gates</strong> en <strong>Policies</strong>.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp het verschil tussen Middleware (Route-level) en Gates/Policies (Action-level).</li>
+                <li>Ik kan een eenvoudige <strong>Gate</strong> definiëren in de AppServiceProvider.</li>
+                <li>Ik kan een <strong>Policy</strong> aanmaken en koppelen aan een Model.</li>
+                <li>Ik kan in Blade knoppen verbergen op basis van rechten met <code>@can</code>.</li>
+                <li>Ik kan in de Controller acties blokkeren met <code>Gate::authorize</code>.</li>
+            </ul>
+        </div>
+
+        <h2>Gates (De simpele poortwachter)</h2>
+        <p>Gates zijn simpele checks die niet perse aan een Model gekoppeld zijn. Je gebruikt ze voor algemene acties, zoals "Mag deze gebruiker het dashboard zien?".</p>
+        <p>Je definieert Gates in <code>app/Providers/AppServiceProvider.php</code> in de <code>boot</code> methode.</p>
+
+        <pre><code class="language-php">
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
+
+public function boot(): void
+{
+    // Definieer een Gate genaamd 'view-dashboard'
+    Gate::define('view-dashboard', function (User $user) {
+        // Logica: Return true als de gebruiker admin is
+        return $user->is_admin;
+    });
+}
+        </code></pre>
+
+        <h3>Gate gebruiken</h3>
+        <p>Je kunt deze check nu overal in je applicatie uitvoeren.</p>
+
+        <p><strong>In Blade (HTML):</strong></p>
+        <pre><code class="language-html">
+@can('view-dashboard')
+    &lt;a href="/admin"&gt;Ga naar Dashboard&lt;/a&gt;
+@else
+    &lt;p&gt;Je hebt geen toegang.&lt;/p&gt;
+@endcan
+        </code></pre>
+
+        <p><strong>In PHP (Controller):</strong></p>
+        <pre><code class="language-php">
+if (! Gate::allows('view-dashboard')) {
+    abort(403);
+}
+        </code></pre>
+
+        <h2>Policies (Rechten per Model)</h2>
+        <p>Gates worden rommelig als je voor elk model (Product, Categorie, User) regels gaat schrijven voor Create, Read, Update en Delete. Daarom gebruiken we voor Models liever <strong>Policies</strong>. Een Policy is een klasse die alle logica voor één specifiek Model groepeert.</p>
+
+        <h3>Policy Aanmaken</h3>
+        <p>We maken een Policy voor ons Product-model.</p>
+        <pre><code class="language-bash">php artisan make:policy ProductPolicy --model=Product</code></pre>
+
+        <p>Dit maakt het bestand <code>app/Policies/ProductPolicy.php</code> aan. Laravel vult dit bestand al met standaard methodes: <code>viewAny</code>, <code>view</code>, <code>create</code>, <code>update</code>, <code>delete</code>, etc.</p>
+
+        <h2>Policy Configureren</h2>
+        <p>Laten we zeggen dat <strong>iedereen</strong> producten mag zien (view), maar alleen <strong>admins</strong> producten mogen aanmaken en verwijderen.</p>
+        <p>Open <code>app/Policies/ProductPolicy.php</code>:</p>
+
+        <pre><code class="language-php">
+namespace App\Policies;
+
+use App\Models\Product;
+use App\Models\User;
+
+class ProductPolicy
+{
+    // Iedereen mag de lijst zien?
+    // Let op: 'viewAny' wordt vaak gebruikt voor de index pagina.
+    public function viewAny(User $user): bool
+    {
+        return true; // Of: return $user->is_admin; als je het dicht wilt timmeren
+    }
+
+    // Mag deze gebruiker een product aanmaken?
+    public function create(User $user): bool
+    {
+        return $user->is_admin;
+    }
+
+    // Mag deze gebruiker DIT specifieke product bewerken?
+    public function update(User $user, Product $product): bool
+    {
+        return $user->is_admin;
+    }
+
+    // Mag deze gebruiker DIT specifieke product verwijderen?
+    public function delete(User $user, Product $product): bool
+    {
+        return $user->is_admin;
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip: De 'before' methode</strong><br>
+            Als je een Super Admin hebt die <em>alles</em> mag, hoef je dat niet in elke functie te typen. Je kunt een <code>before</code> methode toevoegen in je Policy. Als die <code>true</code> teruggeeft, worden de andere methodes overgeslagen.<br><br>
+            <code>public function before(User $user) { if ($user->is_super_admin) return true; }</code>
+        </div>
+
+        <h2>Policy Toepassen</h2>
+        <p>Laravel weet automatisch dat <code>ProductPolicy</code> bij <code>Product</code> hoort (door de naamgeving). Je kunt de rechten nu direct controleren.</p>
+
+        <h3>1. In de Controller</h3>
+        <p>In je <code>ProductController</code> kun je de toegang blokkeren. Vanaf Laravel 10/11 gebruiken we de <code>Gate</code> facade of de helper <code>authorize</code>.</p>
+
+        <pre><code class="language-php">
+public function create()
+{
+    // Check de 'create' methode in ProductPolicy
+    Gate::authorize('create', Product::class);
+
+    return view('admin.products.create');
+}
+
+public function update(Request $request, Product $product)
+{
+    // Check de 'update' methode voor DIT product
+    Gate::authorize('update', $product);
+
+    // ... update logica ...
+}
+        </code></pre>
+
+        <h3>2. In Blade (Knoppen verbergen)</h3>
+        <p>Het is netjes om de "Verwijder" knop helemaal niet te tonen als iemand toch niet mag verwijderen. </p>
+
+        <pre><code class="language-html">
+@foreach($products as $product)
+    &lt;tr&gt;
+        &lt;td&gt;{{ $product->title }}&lt;/td&gt;
+        &lt;td&gt;
+            {{-- Iedereen mag bewerken? --}}
+            @can('update', $product)
+                &lt;a href="{{ route('admin.products.edit', $product) }}"&gt;Bewerk&lt;/a&gt;
+            @endcan
+
+            {{-- Alleen admin mag verwijderen? --}}
+            @can('delete', $product)
+                &lt;form action="..." method="POST"&gt;
+                    @csrf @method('DELETE')
+                    &lt;button type="submit"&gt;Verwijder&lt;/button&gt;
+                &lt;/form&gt;
+            @endcan
+        &lt;/td&gt;
+    &lt;/tr&gt;
+@endforeach
+        </code></pre>
+
+        <h2>Samenvatting Beveiliging</h2>
+        <p>Je hebt nu drie lagen van beveiliging geleerd:</p>
+        <ol>
+            <li><strong>Authenticatie (Login):</strong> Ben je wie je zegt dat je bent?</li>
+            <li><strong>Middleware (Route):</strong> Mag je überhaupt op deze pagina komen?</li>
+            <li><strong>Policies (Action):</strong> Mag je op deze specifieke knop drukken of dit specifieke item wijzigen?</li>
+        </ol>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

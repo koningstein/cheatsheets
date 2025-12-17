@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete & Destroy - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+    <main class="main-content">
+        <h1>Delete & Destroy</h1>
+        <p>De laatste letter van CRUD staat voor <strong>Delete</strong>. In deze module gaan we functionaliteit bouwen om categorieën te verwijderen uit de database. Dit is een destructieve actie, dus we moeten goed opletten hoe we dit veilig implementeren.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp waarom we voor verwijderen een POST/DELETE request gebruiken en geen GET.</li>
+                <li>Ik kan een HTML-formulier maken om een item te verwijderen.</li>
+                <li>Ik kan Method Spoofing toepassen voor DELETE acties.</li>
+                <li>Ik kan een JavaScript bevestiging (confirm) toevoegen voor de zekerheid.</li>
+                <li>Ik kan de destroy methode in de controller implementeren.</li>
+            </ul>
+        </div>
+
+        <h2>De Veiligheid van Delete</h2>
+        <p>Een veelgemaakte fout bij beginners is om een simpel linkje te maken voor het verwijderen: <code>&lt;a href="/delete/1"&gt;Verwijder&lt;/a&gt;</code>. <strong>Doe dit nooit!</strong></p>
+
+        <p>Waarom niet? Een link is altijd een <strong>GET</strong> request. Browsers (en Google bots) kunnen linkjes vooraf laden om pagina's sneller te maken. Als een Google-bot langs jouw admin-pagina komt en alle linkjes "volgt", heeft hij per ongeluk je hele database leeggegooid.</p>
+
+        <p>Daarom gebruiken we voor acties die iets veranderen (zoals verwijderen) altijd een <strong>formulier</strong> met een POST-methode (en Method Spoofing naar DELETE). Bovendien vereist een formulier een <strong>CSRF-token</strong>, wat voorkomt dat andere sites namens jou iets kunnen verwijderen.</p>
+
+        <h2>De View (De Knop)</h2>
+        <p>We voegen de verwijderknop toe aan het overzicht in <code>resources/views/admin/categories/index.blade.php</code>. Omdat het een formulier is, ziet de code er iets anders uit dan een simpele knop.</p>
+
+        <pre><code class="language-html">
+&lt;!-- In de loop van je tabel --&gt;
+&lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium"&gt;
+    &lt;a href="{{ route('admin.categories.edit', $category) }}" class="text-indigo-600 hover:text-indigo-900 mr-3"&gt;
+        Wijzig
+    &lt;/a&gt;
+
+    &lt;!-- Verwijder Formulier --&gt;
+    &lt;form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline-block"&gt;
+        @csrf
+        @method('DELETE')
+
+        &lt;button type="submit"
+                class="text-red-600 hover:text-red-900"
+                onclick="return confirm('Weet je zeker dat je deze categorie wilt verwijderen?')"&gt;
+            Verwijder
+        &lt;/button&gt;
+    &lt;/form&gt;
+&lt;/td&gt;
+        </code></pre>
+
+        <h3>Javascript Bevestiging</h3>
+        <p>Je ziet in de code hierboven het attribuut <code>onclick</code>. Dit is een klein stukje JavaScript dat een pop-up toont. Als de gebruiker op "Annuleren" klikt, geeft de functie <code>false</code> terug en wordt het formulier niet verstuurd. Klikt de gebruiker op "OK", dan gaat het formulier wel door.</p>
+
+        <h2>De Destroy Methode</h2>
+        <p>Het formulier stuurt de gebruiker naar de <code>destroy</code> methode in de <code>CategoryController</code>. Dankzij de Resource Route die we in module 1-4 hebben gemaakt, is deze route al gekoppeld.</p>
+
+        <p>We gebruiken ook hier weer <strong>Implicit Model Binding</strong>. Laravel zoekt automatisch de categorie die bij het ID in de URL hoort.</p>
+
+        <pre><code class="language-php">
+/**
+ * Remove the specified resource from storage.
+ */
+public function destroy(Category $category): RedirectResponse
+{
+    // 1. Verwijder de categorie uit de database
+    $category->delete();
+
+    // 2. Stuur de gebruiker terug met een melding
+    return to_route('admin.categories.index')
+        ->with('status', 'Categorie succesvol verwijderd!');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Let op: Constraints</strong><br>
+            Als je later producten gaat koppelen aan categorieën, kun je een categorie niet zomaar verwijderen als er nog producten in zitten (Foreign Key Constraints). De database zal dan een foutmelding geven. Je moet dan eerst controleren of de categorie leeg is, of de producten ook verwijderen (Cascade Delete). Voor nu, in deze fase, is een simpele delete voldoende.
+        </div>
+
+        <h2>Soft Deletes</h2>
+        <p>Soms wil je data niet écht weggooien, maar alleen verbergen ("Prullenbak" principe). Laravel heeft hier een ingebouwde functie voor: <strong>Soft Deletes</strong>.</p>
+        <p>Hierbij wordt de rij niet uit de tabel verwijderd, maar wordt er een datum ingevuld in de kolom <code>deleted_at</code>. Laravel ziet dit en zal bij standaard queries deze rijen negeren, alsof ze weg zijn.</p>
+        <p>Om dit te gebruiken moet je:</p>
+        <ol>
+            <li>De <code>SoftDeletes</code> trait toevoegen aan je Model.</li>
+            <li>De kolom <code>deleted_at</code> toevoegen aan je migration (<code>$table->softDeletes();</code>).</li>
+        </ol>
+        <p>Voor deze module gebruiken we <strong>Hard Deletes</strong> (definitief verwijderen), maar het is goed om te weten dat dit bestaat.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

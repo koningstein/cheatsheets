@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+
+    <main class="main-content">
+        <h1>Models & Migrations</h1>
+        <p>In deze module gaan we aan de slag met complexere data structuren. We kijken naar relaties tussen tabellen, foreign keys en hoe we dit vertalen naar Models en Migrations.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan models en migrations maken voor gerelateerde tabellen.</li>
+            <li>Ik kan foreign keys en constraints (cascade/restrict) toepassen.</li>
+            <li>Ik kan relatie-methodes schrijven (<code>belongsTo</code>, <code>hasMany</code>).</li>
+        </ul>
+
+        <h3 id="casus">1. Casus: Producten en Prijzen</h3>
+        <p>Een product heeft een categorie en een prijsgeschiedenis. Omdat prijzen veranderen, slaan we ze op in een aparte tabel <code>prices</code>.</p>
+
+        <h3 id="generate">2. Bestanden Genereren</h3>
+        <p>We gebruiken de <code>--all</code> vlag om in één keer alles aan te maken.</p>
+
+        <pre><code class="language-bash">
+php artisan make:model --all Product
+php artisan make:model --all Price
+        </code></pre>
+
+        <h3 id="migratie-product">3. Migratie: Product</h3>
+        <p>Een product hoort bij een categorie. We gebruiken <code>constrained()</code> om de foreign key te leggen. We kiezen voor <code>restrict</code> bij delete, zodat je een categorie niet zomaar kunt verwijderen als er nog producten aan hangen.</p>
+
+        <pre><code class="language-php">
+// database/migrations/xxxx_create_products_table.php
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->string('name', 75);
+    $table->mediumText('description')->nullable();
+
+    // Relatie met categories
+    $table->foreignId('category_id')
+          ->constrained()
+          ->onUpdate('restrict')
+          ->onDelete('restrict');
+
+    $table->timestamps();
+});
+        </code></pre>
+
+        <h3 id="migratie-price">4. Migratie: Price</h3>
+        <p>Een prijs hoort bij een product. Als een product verwijderd wordt, moeten de prijzen ook weg (cascade).</p>
+
+        <pre><code class="language-php">
+// database/migrations/xxxx_create_prices_table.php
+Schema::create('prices', function (Blueprint $table) {
+    $table->id();
+    $table->decimal('price', 8, 2);
+    $table->dateTime('effdate');
+
+    // Relatie met products
+    $table->foreignId('product_id')
+          ->constrained()
+          ->onUpdate('cascade')
+          ->onDelete('cascade');
+
+    $table->timestamps();
+});
+        </code></pre>
+
+        <h3 id="relaties">5. Relaties in Models</h3>
+        <p>Definieer de relaties in de Models zodat Laravel ze snapt.</p>
+
+        <pre><code class="language-php">
+// app/Models/Product.php
+public function category(): BelongsTo
+{
+    return $this->belongsTo(Category::class);
+}
+
+public function prices(): HasMany
+{
+    return $this->hasMany(Price::class);
+}
+        </code></pre>
+
+        <pre><code class="language-php">
+// app/Models/Price.php
+public function product(): BelongsTo
+{
+    return $this->belongsTo(Product::class);
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 16</p>
+            <p>Pas deze kennis nu toe op de tabellen <code>tasks</code> en <code>activities</code>. Zorg dat Task relaties heeft met User, Project en Activity. Let goed op de constraints (restrict vs cascade)!</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

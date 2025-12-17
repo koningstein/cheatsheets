@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index & eager loading - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Index & Eager Loading</h1>
+        <p>Als we lijsten tonen met data uit meerdere tabellen, kan de applicatie snel traag worden. We leren hoe we het N+1 probleem oplossen met Eager Loading.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan gerelateerde data (categorie, prijs) tonen in een tabel.</li>
+            <li>Ik begrijp het <strong>N+1 probleem</strong>.</li>
+            <li>Ik kan <strong>Eager Loading</strong> (<code>with()</code>) gebruiken om dit op te lossen.</li>
+        </ul>
+
+        <h3 id="n-plus-1">1. Het N+1 Probleem</h3>
+        <p>Als we in de view voor elk product de categorie naam opvragen (<code>$product->category->name</code>), voert Laravel op de achtergrond steeds een nieuwe query uit. Bij 100 producten zijn dat 101 queries! Dit maakt de applicatie onnodig traag.</p>
+
+        <h3 id="eager-loading">2. Eager Loading</h3>
+        <p>Met <code>with()</code> halen we de relaties in één keer op. In de Models definiëren we de relaties, bijvoorbeeld <code>category()</code> en een handige <code>latest_price()</code>.</p>
+
+        <pre><code class="language-php">
+// app/Models/Product.php
+public function category(): BelongsTo
+{
+    return $this->belongsTo(Category::class);
+}
+
+// Speciale relatie voor de huidige prijs
+public function latest_price(): HasOne
+{
+    return $this->hasOne(Price::class)->orderBy('effdate', 'desc');
+}
+        </code></pre>
+
+        <p>In de controller gebruiken we <code>with</code> om de data efficiënt op te halen:</p>
+
+        <pre><code class="language-php">
+// app/Http/Controllers/Admin/ProductController.php
+public function index()
+{
+    // Haal alles in 1x op met relaties
+    $products = Product::with('category', 'latest_price')->paginate(15);
+
+    return view('admin.products.index', ['products' => $products]);
+}
+        </code></pre>
+
+        <h3 id="view">3. De View</h3>
+        <p>In de Blade view kunnen we nu direct de relaties aanspreken zonder extra database queries te veroorzaken.</p>
+
+        <pre><code class="language-html">
+@foreach($products as $product)
+    &lt;tr&gt;
+        &lt;td&gt;{{ $product->name }}&lt;/td&gt;
+
+        &lt;!-- Gerelateerde data --&gt;
+        &lt;td&gt;{{ $product->category->name }}&lt;/td&gt;
+
+        &lt;td&gt;&euro; {{ $product->latest_price ? $product->latest_price->price : 'N/A' }}&lt;/td&gt;
+
+        &lt;td&gt;Edit | Delete&lt;/td&gt;
+    &lt;/tr&gt;
+@endforeach
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 19</p>
+            <p>Maak de Task index. Toon Task ID, Taak naam, datums, Gebruiker (of N/A), Projectnaam en Activity naam. Gebruik <strong>eager loading</strong> en <strong>paginatie</strong>.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

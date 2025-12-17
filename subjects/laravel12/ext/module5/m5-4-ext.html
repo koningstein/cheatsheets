@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tonen van Orders - Laravel 12 Module 5</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Tonen van Orders</h1>
+        <p>Nu onze database gevuld is met testdata (dankzij de seeders uit de vorige les), kunnen we het beheerpaneel voor bestellingen gaan bouwen. Voor een webshopeigenaar is dit de belangrijkste pagina: hier ziet hij wat er verkocht is en wat er verzonden moet worden.</p>
+        <p>Het tonen van orders is technisch interessanter dan het tonen van producten, omdat we te maken hebben met <strong>relaties</strong>. Een order staat nooit op zichzelf; hij hoort bij een <strong>Klant</strong> (User) en bevat <strong>Regels</strong> (Items). We moeten oppassen dat we de database niet overbelasten met honderden losse vragen (queries).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Resource Controller maken voor Order beheer (Admin).</li>
+                <li>Ik kan Eager Loading (<code>with</code>) gebruiken om klanten en orderregels efficiënt op te halen.</li>
+                <li>Ik kan statussen (zoals 'paid', 'pending') visueel onderscheiden met kleuren/badges.</li>
+                <li>Ik kan een detailpagina bouwen die de orderregels (items) toont.</li>
+                <li>Ik begrijp hoe ik geneste data (Order -> Item -> Product) in Blade weergeef.</li>
+            </ul>
+        </div>
+
+        <h2>Stap 1: De Controller</h2>
+        <p>We maken een nieuwe controller in de Admin-map.</p>
+        <pre><code class="language-bash">php artisan make:controller Admin/OrderController --resource</code></pre>
+
+        <p>Vergeet niet de route toe te voegen aan <code>routes/web.php</code> (binnen de admin middleware groep):</p>
+        <pre><code class="language-php">Route::resource('orders', OrderController::class)->only(['index', 'show']);</code></pre>
+        <p><em>Let op: We gebruiken <code>only</code> omdat we vanuit de admin meestal geen orders aanmaken (dat doet de klant) of verwijderen (dat mag vaak niet wettelijk).</em></p>
+
+        <h2>Stap 2: De Index Methode (Lijstweergave)</h2>
+        <p>Op het overzicht willen we een tabel zien met: Order ID, Klantnaam, Datum, Totaalbedrag en Status.</p>
+        <p>Hier ligt het <strong>N+1 gevaar</strong> op de loer. Als we 50 orders tonen en bij elke order de klantnaam (<code>$order->user->name</code>) willen zien, zou Laravel 51 queries uitvoeren. Met <code>with('user')</code> lossen we dit op.</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Admin;
+
+use App\Models\Order;
+use Illuminate\View\View;
+
+class OrderController extends Controller
+{
+    public function index(): View
+    {
+        $orders = Order::with('user') // Haal klantgegevens direct op
+            ->latest()                // Nieuwste bovenaan
+            ->paginate(10);           // 10 per pagina
+
+        return view('admin.orders.index', [
+            'orders' => $orders
+        ]);
+    }
+}
+        </code></pre>
+
+        <h2>Stap 3: De Index View</h2>
+        <p>Maak <code>resources/views/admin/orders/index.blade.php</code>.
+            We besteden extra aandacht aan de <strong>Status</strong> kolom. Een simpele tekst 'paid' valt niet op. We willen een gekleurd label.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1 class="text-3xl font-bold mb-6"&gt;Bestellingen&lt;/h1&gt;
+
+    &lt;table class="min-w-full bg-white border rounded shadow"&gt;
+        &lt;thead class="bg-gray-50 border-b"&gt;
+            &lt;tr&gt;
+                &lt;th class="py-3 px-4 text-left"&gt;Order #&lt;/th&gt;
+                &lt;th class="py-3 px-4 text-left"&gt;Klant&lt;/th&gt;
+                &lt;th class="py-3 px-4 text-left"&gt;Datum&lt;/th&gt;
+                &lt;th class="py-3 px-4 text-left"&gt;Totaal&lt;/th&gt;
+                &lt;th class="py-3 px-4 text-left"&gt;Status&lt;/th&gt;
+                &lt;th class="py-3 px-4 text-left"&gt;Actie&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @foreach($orders as $order)
+                &lt;tr class="border-b hover:bg-gray-50"&gt;
+                    &lt;td class="py-3 px-4"&gt;{{ $order->id }}&lt;/td&gt;
+                    &lt;td class="py-3 px-4"&gt;{{ $order->user->name }}&lt;/td&gt;
+                    &lt;td class="py-3 px-4"&gt;{{ $order->created_at->format('d-m-Y H:i') }}&lt;/td&gt;
+                    &lt;td class="py-3 px-4 font-bold"&gt;
+                        &euro; {{ number_format($order->total_price, 2, ',', '.') }}
+                    &lt;/td&gt;
+                    &lt;td class="py-3 px-4"&gt;
+                        {{-- Simpele status styling --}}
+                        @if($order->status == 'paid')
+                            &lt;span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs"&gt;Betaald&lt;/span&gt;
+                        @elseif($order->status == 'pending')
+                            &lt;span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs"&gt;Wachtend&lt;/span&gt;
+                        @else
+                            &lt;span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs"&gt;{{ $order->status }}&lt;/span&gt;
+                        @endif
+                    &lt;/td&gt;
+                    &lt;td class="py-3 px-4"&gt;
+                        &lt;a href="{{ route('admin.orders.show', $order) }}" class="text-blue-600 hover:underline"&gt;
+                            Bekijk
+                        &lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            @endforeach
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+    &lt;div class="mt-4"&gt;
+        {{ $orders->links() }}
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Stap 4: De Show Methode (Details)</h2>
+        <p>Als we op "Bekijk" klikken, willen we precies zien wat er in de doos zit. Dit betekent dat we de <code>items</code> moeten ophalen. Maar, elk item verwijst ook weer naar een <code>product</code> (zodat we de titel kunnen tonen).</p>
+        <p>We hebben dus een <strong>geneste relatie</strong> nodig: <code>items.product</code>.</p>
+
+        <pre><code class="language-php">
+public function show(Order $order): View
+{
+    // Laad de relaties 'user', 'items' EN 'items.product'
+    $order->load(['user', 'items.product']);
+
+    return view('admin.orders.show', [
+        'order' => $order
+    ]);
+}
+        </code></pre>
+
+        <h2>Stap 5: De Show View</h2>
+        <p>Maak <code>resources/views/admin/orders/show.blade.php</code>.
+            Deze pagina bestaat uit twee delen:
+            1. De kop (Klantgegevens, Adres).
+            2. De regels (De producten).</p>
+
+
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;div class="flex justify-between items-center mb-6"&gt;
+        &lt;h1 class="text-3xl font-bold"&gt;Order #{{ $order->id }}&lt;/h1&gt;
+        &lt;a href="{{ route('admin.orders.index') }}" class="text-gray-600 hover:underline"&gt;&larr; Terug&lt;/a&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Klant Info Blok --&gt;
+    &lt;div class="bg-white p-6 rounded shadow mb-6"&gt;
+        &lt;h3 class="text-xl font-bold mb-4"&gt;Klantgegevens&lt;/h3&gt;
+        &lt;p&gt;&lt;strong&gt;Naam:&lt;/strong&gt; {{ $order->user->name }}&lt;/p&gt;
+        &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; {{ $order->user->email }}&lt;/p&gt;
+        &lt;p&gt;&lt;strong&gt;Adres:&lt;/strong&gt; {{ $order->address }}, {{ $order->zipcode }} {{ $order->city }}&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Producten Tabel --&gt;
+    &lt;div class="bg-white p-6 rounded shadow"&gt;
+        &lt;h3 class="text-xl font-bold mb-4"&gt;Bestelde Producten&lt;/h3&gt;
+        &lt;table class="w-full text-left"&gt;
+            &lt;thead class="border-b"&gt;
+                &lt;tr&gt;
+                    &lt;th class="py-2"&gt;Product&lt;/th&gt;
+                    &lt;th class="py-2"&gt;Prijs&lt;/th&gt;
+                    &lt;th class="py-2"&gt;Aantal&lt;/th&gt;
+                    &lt;th class="py-2"&gt;Subtotaal&lt;/th&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+                @foreach($order->items as $item)
+                    &lt;tr class="border-b last:border-0"&gt;
+                        &lt;td class="py-3"&gt;
+                            {{-- Veiligheid: Gebruik ?-> operator voor als het product verwijderd is --}}
+                            {{ $item->product?->title ?? 'Verwijderd product' }}
+                        &lt;/td&gt;
+                        &lt;td class="py-3"&gt;&euro; {{ number_format($item->price, 2, ',', '.') }}&lt;/td&gt;
+                        &lt;td class="py-3"&gt;{{ $item->quantity }}&lt;/td&gt;
+                        &lt;td class="py-3 font-bold"&gt;
+                            &euro; {{ number_format($item->price * $item->quantity, 2, ',', '.') }}
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                @endforeach
+            &lt;/tbody&gt;
+            &lt;tfoot&gt;
+                &lt;tr&gt;
+                    &lt;td colspan="3" class="text-right py-4 font-bold"&gt;Totaal:&lt;/td&gt;
+                    &lt;td class="py-4 font-bold text-xl"&gt;
+                        &euro; {{ number_format($order->total_price, 2, ',', '.') }}
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/tfoot&gt;
+        &lt;/table&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Veiligheidstip: De Safe Navigation Operator (?->)</strong><br>
+            In de loop zie je: <code>$item->product?->title</code>. Dit vraagteken is essentieel. <br>
+            Als een product in de database hard verwijderd is, zou <code>$item->product</code> null zijn. Zonder vraagteken crasht je pagina ("Trying to get property 'title' of non-object"). Met vraagteken toont het gewoon niets (of je fallback tekst).
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

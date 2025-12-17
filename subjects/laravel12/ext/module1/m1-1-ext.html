@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Model & Migration</h1>
+        <p>In deze eerste module leggen we de basis voor onze applicatie. We kijken naar de structuur van Laravel, hoe we met de database communiceren en hoe we tabellen aanmaken via code. Dit is essentieel voordat we beginnen met het bouwen van de webshop.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp wat het MVC-design pattern inhoudt.</li>
+                <li>Ik kan uitleggen wat Eloquent ORM is en waarom we het gebruiken.</li>
+                <li>Ik kan een Model en Migration aanmaken via de terminal (Artisan).</li>
+                <li>Ik kan database migraties uitvoeren en terugdraaien.</li>
+                <li>Ik kan wijzigingen aanbrengen in een bestaande tabelstructuur.</li>
+            </ul>
+        </div>
+
+        <h2>Casus Beschrijving</h2>
+        <p>Gedurende deze lessen bouwen we een webshop waar gebruikers spellen kunnen bekijken en kopen. De applicatie moet de volgende functies bevatten:</p>
+        <ul>
+            <li>Spellen bekijken in een overzicht.</li>
+            <li>Details van een specifiek spel bekijken.</li>
+            <li>Een review (beoordeling) achterlaten bij een spel.</li>
+            <li>Een spel kopen (orders plaatsen).</li>
+        </ul>
+        <p>Naast de bezoekers is er ook een beheerder (admin). De beheerder moet alles kunnen beheren (toevoegen, wijzigen, verwijderen). Hiervoor bouwen we verschillende admin-panelen:</p>
+        <ul>
+            <li>Categorie Admin</li>
+            <li>Product Admin</li>
+            <li>Prijs Admin</li>
+            <li>Order Admin</li>
+            <li>Review Admin</li>
+            <li>User Admin</li>
+        </ul>
+
+        <h2>Het Model & MVC</h2>
+        <p>Laravel is gebouwd op het <strong>MVC-principe</strong> (Model-View-Controller). Dit is een veelgebruikt <em>Design Pattern</em> in softwareontwikkeling dat helpt om je code overzichtelijk en onderhoudbaar te houden door verantwoordelijkheden te scheiden.</p>
+        <ul>
+            <li><strong>Model:</strong> Dit onderdeel is verantwoordelijk voor alle data. In de meeste gevallen communiceert het Model direct met de database, maar het kan ook data uit een API of bestand zijn.</li>
+            <li><strong>View:</strong> Dit is de presentatielaag. Het regelt wat de gebruiker op het scherm ziet (HTML, CSS). De View bevat zo min mogelijk logica.</li>
+            <li><strong>Controller:</strong> Dit is de "regelneef" of de manager. De controller ontvangt het verzoek van de gebruiker (via een Route), haalt de benodigde data op via het Model, en stuurt deze data door naar de juiste View.</li>
+        </ul>
+
+        <h3>Eloquent ORM</h3>
+        <p>Laravel maakt gebruik van <strong>Eloquent</strong>, een techniek die we ORM (Object Relational Mapper) noemen. Dit klinkt misschien ingewikkeld, maar het maakt het werken met databases veel eenvoudiger.</p>
+        <p>In plaats van dat je handmatig SQL-queries moet schrijven (zoals <code>SELECT * FROM categories</code>), kun je in Laravel werken met PHP-objecten. Elke tabel in je database heeft een eigen 'Model' bestand. Via dit Model kun je met de tabel praten.</p>
+        <p>Bijvoorbeeld: om alle categorieën op te halen gebruik je simpelweg: <code>Category::all()</code>.</p>
+
+        <h3>Naamgeving (Conventies)</h3>
+        <p>In Laravel zijn de namen van bestanden en tabellen erg belangrijk. Laravel werkt volgens het principe "Convention over Configuration". Als je je aan de regels houdt, werkt alles automatisch. Wijk je af, dan moet je veel extra configuratie schrijven.</p>
+        <ul>
+            <li><strong>Model:</strong> Enkelvoud, begint met een Hoofdletter (UpperCamelCase). Bijvoorbeeld: <code>Category</code> of <code>Student</code>.</li>
+            <li><strong>Tabel:</strong> Meervoud, kleine letters (lowercase, snake_case). Bijvoorbeeld: <code>categories</code> of <code>students</code>.</li>
+        </ul>
+
+        <h3>Model Aanmaken</h3>
+        <p>We gebruiken <strong>Artisan</strong>, de command-line tool van Laravel, om bestanden te genereren. Dit is sneller en voorkomt typefouten. Om een Model voor categorieën te maken, typ je het volgende in je terminal:</p>
+
+        <pre><code class="language-bash">php artisan make:model Category</code></pre>
+
+        <p>Je vindt het nieuwe bestand in de map <code>app/Models/Category.php</code>. Voor nu is dit bestand nog vrij leeg, en dat is prima. Laravel weet door de naam <code>Category</code> automatisch dat dit model gekoppeld is aan de tabel <code>categories</code>.</p>
+
+        <h2>Migrations</h2>
+        <p>Een migration is eigenlijk "versiebeheer voor je database". Waarom gebruiken we dit? Stel je werkt in een team. Jij past de database aan op jouw laptop (bijvoorbeeld: je voegt een kolom toe). Hoe krijgen jouw teamgenoten die aanpassing?</p>
+        <p>Vroeger stuurden we SQL-bestandjes naar elkaar, wat vaak leidde tot errors. Met migrations beschrijf je de structuur van je database in PHP-code. Iedereen in het team kan deze code uitvoeren (migreren) en krijgt precies dezelfde database structuur. Ook kun je wijzigingen makkelijk ongedaan maken (rollback) als er iets misgaat.</p>
+
+        <h3>Migration Aanmaken</h3>
+        <p>We gaan een tabel maken voor de categorieën. We gebruiken weer Artisan. Als je de naam slim kiest (beginnen met <code>create_</code> en eindigen op <code>_table</code>), snapt Laravel wat je wilt doen.</p>
+
+        <pre><code class="language-bash">php artisan make:migration create_categories_table</code></pre>
+
+        <p>Het bestand komt in de map <code>database/migrations</code> te staan. De bestandsnaam begint met een tijdstempel, zodat Laravel weet in welke volgorde de migrations uitgevoerd moeten worden.</p>
+        <p>In dit bestand staan twee methodes:</p>
+        <ul>
+            <li><code>up()</code>: Hierin beschrijf je wat er moet gebeuren als de migration wordt uitgevoerd (bijv. tabel maken).</li>
+            <li><code>down()</code>: Hierin beschrijf je hoe je dit weer ongedaan maakt (bijv. tabel verwijderen).</li>
+        </ul>
+
+        <p>We passen de <code>up()</code> functie aan. Laravel voegt standaard al een ID en Timestamps toe. Wij voegen een <code>name</code> kolom toe.</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::create('categories', function (Blueprint $table) {
+        $table->id(); // Maakt automatisch een primary key aan (BigInt, Auto Increment)
+
+        // We voegen een kolom 'name' toe van het type string (VARCHAR) met max 100 tekens
+        $table->string('name', 100);
+
+        $table->timestamps(); // Maakt created_at en updated_at kolommen aan
+    });
+}
+        </code></pre>
+
+        <h3>Migration Uitvoeren</h3>
+        <p>De code is geschreven, maar de tabel bestaat nog niet in de database. Om de migration daadwerkelijk uit te voeren, typ je:</p>
+        <pre><code class="language-bash">php artisan migrate</code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Foutmelding: "Specified key was too long"?</strong><br>
+            Krijg je een error met deze tekst? Dit gebeurt vaak bij wat oudere versies van MySQL (bijvoorbeeld in XAMPP of WAMP) omdat de standaard tekenset te veel ruimte inneemt voor de index.<br><br>
+            Je kunt dit oplossen door Laravel te vertellen dat teksten standaard wat korter moeten zijn. Ga naar <code>app/Providers/AppServiceProvider.php</code> en voeg in de <code>boot()</code> methode deze regel toe:<br>
+            <code>Schema::defaultStringLength(191);</code><br>
+            <em>(Vergeet niet <code>use Illuminate\Support\Facades\Schema;</code> bovenaan het bestand toe te voegen!)</em>. Voer daarna <code>php artisan migrate:fresh</code> uit om opnieuw te beginnen.
+        </div>
+
+        <h2>Tabel Wijzigen</h2>
+        <p>Stel je hebt een foutje gemaakt: de naam mag toch maar 75 tekens lang zijn in plaats van 100. Of je bent een kolom vergeten.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Let op:</strong> Pas <strong>nooit</strong> een oude migration aan die je al hebt uitgevoerd op een productie-omgeving of die al gedeeld is met je team! Als je dat doet, loopt de database niet meer synchroon met de code. Maak in plaats daarvan een <strong>nieuwe</strong> migration die de wijziging beschrijft.
+        </div>
+
+        <p>We gebruiken de optie <code>--table</code> om aan te geven dat we een bestaande tabel willen aanpassen, in plaats van een nieuwe maken:</p>
+
+        <pre><code class="language-bash">php artisan make:migration --table=categories update_categories_table</code></pre>
+
+        <p>In de nieuwe migration beschrijf je de wijziging in de <code>up()</code> en hoe je het terugdraait in de <code>down()</code>:</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::table('categories', function (Blueprint $table) {
+        // Wijzig de lengte van de kolom 'name' naar 75 tekens
+        // Let op: om ->change() te gebruiken moet je soms de doctrine/dbal package installeren
+        $table->string('name', 75)->change();
+    });
+}
+
+public function down(): void
+{
+    Schema::table('categories', function (Blueprint $table) {
+        // Zet het weer terug naar 100 als we de migratie terugdraaien (rollback)
+        $table->string('name', 100)->change();
+    });
+}
+        </code></pre>
+        <p>Voer daarna weer <code>php artisan migrate</code> uit om de wijziging toe te passen. Je ziet in je database dat de kolom nu aangepast is.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

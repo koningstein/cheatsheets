@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Tonen - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Orders Tonen</h1>
+        <p>De klant moet zijn bestellingen kunnen inzien. We maken een index pagina voor de lijst en een show pagina voor de details.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan orders ophalen voor de ingelogde gebruiker (<code>Auth::id()</code>).</li>
+            <li>Ik kan orderregels en productinformatie ophalen via relaties (Eager Loading).</li>
+        </ul>
+
+        <h3 id="controller-index">Stap 1: Controller Index</h3>
+        <p>In de <code>index</code> methode tonen we alleen de bestellingen van de <strong>huidige gebruiker</strong>.</p>
+
+        <pre><code class="language-php">
+public function index()
+{
+    $orders = Order::where('user_id', Auth::id())
+        ->latest()
+        ->get();
+
+    return view('open.orders.index', ['orders' => $orders]);
+}
+        </code></pre>
+
+        <h3 id="view-index">Stap 2: Index View</h3>
+        <p>Maak een tabel in <code>resources/views/open/orders/index.blade.php</code>.</p>
+        <pre><code class="language-html">
+&lt;table&gt;
+    @foreach($orders as $order)
+        &lt;tr&gt;
+            &lt;td&gt;#{{ $order->id }}&lt;/td&gt;
+            &lt;td&gt;{{ $order->created_at->format('d-m-Y') }}&lt;/td&gt;
+            &lt;td&gt;{{ $order->state->name }}&lt;/td&gt;
+            &lt;td&gt;&lt;a href="{{ route('open.orders.show', $order) }}"&gt;Bekijk&lt;/a&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    @endforeach
+&lt;/table&gt;
+        </code></pre>
+
+        <h3 id="controller-show">Stap 3: Controller Show</h3>
+        <p>We moeten controleren of de order wel van de gebruiker is (Policy of check). En we moeten de regels + producten inladen.</p>
+
+        <pre><code class="language-php">
+public function show(Order $order)
+{
+    if ($order->user_id !== Auth::id()) {
+        abort(403);
+    }
+
+    // Laad regels en producten
+    $order->load('orderrows.product', 'state');
+
+    return view('open.orders.show', ['order' => $order]);
+}
+        </code></pre>
+
+        <h3 id="view-show">Stap 4: Show View</h3>
+        <p>Toon de orderregels in een tabel.</p>
+        <pre><code class="language-html">
+&lt;h1&gt;Bestelling #{{ $order->id }}&lt;/h1&gt;
+&lt;p&gt;Status: {{ $order->state->name }}&lt;/p&gt;
+
+&lt;table&gt;
+    @foreach($order->orderrows as $row)
+        &lt;tr&gt;
+            &lt;td&gt;{{ $row->product->name }}&lt;/td&gt;
+            &lt;td&gt;{{ $row->qty }} x&lt;/td&gt;
+            &lt;td&gt;&euro; {{ $row->price }}&lt;/td&gt;
+        &lt;/tr&gt;
+    @endforeach
+&lt;/table&gt;
+        </code></pre>
+
+        <h3 id="routes">Stap 5: Routes</h3>
+        <pre><code class="language-php">
+Route::middleware(['auth'])->group(function () {
+    // ... store route stond er al ...
+    Route::get('/orders', [OrderController::class, 'index'])->name('open.orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])
+            ->name('open.orders.show');
+});
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

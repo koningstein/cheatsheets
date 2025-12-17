@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create & Store - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Create & Store</h1>
+        <p>In deze module gaan we verder met het bouwen van de CRUD. We hebben de Index (het overzicht) al gemaakt. Nu is het tijd om nieuwe categorieën toe te voegen. Hiervoor hebben we twee onderdelen nodig: de <strong>Create</strong> (het tonen van het formulier) en de <strong>Store</strong> (het verwerken en opslaan van de gegevens).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Create view maken met een HTML-formulier.</li>
+                <li>Ik begrijp wat CSRF is en hoe ik mijn formulieren hiertegen beveilig.</li>
+                <li>Ik kan data van een formulier opvangen in de Controller.</li>
+                <li>Ik begrijp het gevaar van Mass Assignment en hoe ik dit voorkom ($fillable vs $guarded).</li>
+                <li>Ik kan data opslaan in de database en de gebruiker doorsturen (redirecten).</li>
+            </ul>
+        </div>
+
+        <h2>Create Methode</h2>
+        <p>De <code>create</code> methode in de <code>CategoryController</code> heeft als enig doel om het formulier te tonen aan de gebruiker. We hoeven hier nog geen data op te halen of te verwerken, dat komt later bij de <code>store</code> methode.</p>
+
+        <p>In de controller hoeven we dus alleen de juiste view terug te geven:</p>
+
+        <pre><code class="language-php">
+/**
+ * Show the form for creating a new resource.
+ */
+public function create(): View
+{
+    return view('admin.categories.create');
+}
+        </code></pre>
+
+        <p>Vergeet niet om bovenin je bestand de <code>View</code> class te importeren voor de type-hinting in de functie declaratie.</p>
+
+        <h2>De Create View (Het Formulier)</h2>
+        <p>We maken een nieuw bestand aan: <code>resources/views/admin/categories/create.blade.php</code>. Omdat we dezelfde lay-out willen gebruiken als bij de index, nemen we de masterpage (<code>layoutadmin</code>) over.</p>
+
+        <h3>Navigatie (Topmenu)</h3>
+        <p>Het is belangrijk voor de gebruiksvriendelijkheid dat je makkelijk kunt navigeren. Daarom maken we in de <code>topmenu</code> sectie een link terug naar het overzicht.</p>
+
+        <pre><code class="language-html">
+@section('topmenu')
+    &lt;nav class="flex mb-4" aria-label="Breadcrumb"&gt;
+        &lt;ol class="inline-flex items-center space-x-1 md:space-x-3"&gt;
+            &lt;li class="inline-flex items-center"&gt;
+                &lt;a href="{{ route('admin.categories.index') }}" class="text-gray-700 hover:text-blue-600"&gt;
+                    &lt; Terug naar overzicht
+                &lt;/a&gt;
+            &lt;/li&gt;
+        &lt;/ol&gt;
+    &lt;/nav&gt;
+@endsection
+        </code></pre>
+
+        <h3>Het Formulier en Security (CSRF)</h3>
+        <p>Nu gaan we het formulier zelf maken. Er zijn een paar dingen waar je goed op moet letten bij het maken van een formulier in Laravel:</p>
+        <ul>
+            <li><strong>Action:</strong> Waar moet de data heen? We gebruiken de named route <code>admin.categories.store</code>.</li>
+            <li><strong>Method:</strong> We gebruiken <code>POST</code> om gegevens te versturen (wijzigingen aan de server).</li>
+            <li><strong>CSRF Token:</strong> Dit is een verplichte beveiliging.</li>
+        </ul>
+
+        <pre><code class="language-html">
+@section('content')
+    &lt;div class="card mt-6"&gt;
+        &lt;div class="card-body"&gt;
+            &lt;form action="{{ route('admin.categories.store') }}" method="POST" class="max-w-lg"&gt;
+                @csrf
+
+                &lt;div class="mb-4"&gt;
+                    &lt;label class="block text-gray-700 text-sm font-bold mb-2" for="name"&gt;
+                        Naam
+                    &lt;/label&gt;
+                    &lt;input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                           id="name" name="name" type="text" placeholder="Naam categorie"&gt;
+                &lt;/div&gt;
+
+                &lt;button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit"&gt;
+                    Toevoegen
+                &lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Wat is @csrf?</strong><br>
+            CSRF staat voor <em>Cross-Site Request Forgery</em>. Zonder deze beveiliging zou een kwaadaardige website een formulier kunnen maken dat gegevens naar jouw applicatie stuurt zonder dat jij het weet.
+            <br><br>
+            Laravel genereert een unieke, geheime token (de CSRF-token) die in de sessie van de gebruiker wordt opgeslagen. Met de directive <code>@csrf</code> zet je dit token als verborgen veld in je formulier. Bij het ontvangen van het formulier controleert Laravel of de token uit het formulier overeenkomt met de token in de sessie. Zo weet Laravel zeker dat het formulier echt vanaf jouw website komt.
+        </div>
+
+        <h2>Store Methode</h2>
+        <p>Wanneer de gebruiker op "Toevoegen" klikt, wordt de data via een POST request naar de <code>store</code> methode gestuurd. Hier vangen we de data op via de <code>Request $request</code> variabele.</p>
+
+        <h3>Mass Assignment Beveiliging</h3>
+        <p>Er zijn verschillende manieren om data op te slaan. Een snelle manier is:</p>
+        <pre><code class="language-php">Category::create($request->all());</code></pre>
+
+        <p>Maar let op: Laravel staat dit standaard niet toe vanwege <strong>Mass Assignment</strong> beveiliging. Wat betekent dit?</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Het gevaar van Mass Assignment:</strong><br>
+            Stel je voor dat je een tabel hebt met een kolom <code>is_admin</code>. Deze kolom staat natuurlijk niet in je publieke formulier. Maar een hacker kan via de 'Inspect Element' tools van de browser stiekem een extra invoerveld toevoegen: <code>&lt;input name="is_admin" value="1"&gt;</code>.<br>
+            Als jij vervolgens blindelings alles opslaat met <code>$request->all()</code>, slaat Laravel ook die <code>is_admin</code> waarde op. De hacker heeft zichzelf nu admin gemaakt!
+        </div>
+
+        <p>Om dit te voorkomen moet je in je Model aangeven welke velden veilig zijn om in één keer te vullen:</p>
+        <ul>
+            <li><strong>$fillable:</strong> Een "whitelist". Alleen de velden die hierin staan mogen via mass assignment gevuld worden.</li>
+            <li><strong>$guarded:</strong> Een "blacklist". Alle velden mogen gevuld worden, <em>behalve</em> degene die je hier noemt.</li>
+        </ul>
+
+        <p>In <code>app/Models/Category.php</code> kun je bijvoorbeeld dit toevoegen:</p>
+        <pre><code class="language-php">
+// app/Models/Category.php
+class Category extends Model
+{
+    // Alleen de naam mag massaal gevuld worden
+    protected $fillable = ['name'];
+
+    // OF: Alles mag, behalve het id en de timestamps (vaak makkelijker)
+    // protected $guarded = ['id', 'created_at', 'updated_at'];
+}
+        </code></pre>
+
+        <h3>Alternatief: OOP manier (Veiliger & Expliciet)</h3>
+        <p>Een andere manier, die meer lijkt op de basis van Object Oriented Programming (OOP), is om het object stap voor stap op te bouwen. Hierbij heb je geen last van Mass Assignment risico's omdat je elk veld handmatig toewijst. Dit geeft je volledige controle over wat er gebeurt.</p>
+
+        <pre><code class="language-php">
+// app/Http/Controllers/Admin/CategoryController.php
+
+use Illuminate\Http\RedirectResponse; // Vergeet deze niet te importeren!
+
+public function store(Request $request): RedirectResponse
+{
+    // 1. Maak een nieuw, leeg Category object (instantie)
+    $category = new Category();
+
+    // 2. Vul de properties met de data uit het request
+    $category->name = $request->name;
+
+    // 3. Sla het object op in de database
+    $category->save();
+
+    // 4. Stuur de gebruiker terug naar de index
+    return to_route('admin.categories.index');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Redirects:</strong><br>
+            Na het opslaan van een formulier (POST) moet je altijd redirecten (GET). Als je dat niet doet, en de gebruiker ververst de pagina (F5), wordt het formulier opnieuw verzonden en staat de data er dubbel in. Vanaf Laravel 9 gebruiken we de helper functie <code>to_route('naam.van.route')</code>.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

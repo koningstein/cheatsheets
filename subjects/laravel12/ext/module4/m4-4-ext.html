@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Tonen - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Reviews Tonen</h1>
+        <p>In de vorige module hebben we het mogelijk gemaakt om reviews op te slaan in de database. Maar een review is pas waardevol als andere klanten hem kunnen lezen. In deze module gaan we de detailpagina van het product uitbreiden.</p>
+        <p>We moeten hierbij goed opletten op de <strong>performance</strong>. Een product kan honderden reviews hebben, en elke review is geschreven door een gebruiker. Als we dit niet slim aanpakken, vertraagt dit onze pagina enorm.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan Nested Eager Loading toepassen (<code>reviews.user</code>) om het N+1 probleem te voorkomen.</li>
+                <li>Ik kan de gemiddelde score van een product berekenen met Laravel Collections (<code>avg</code>).</li>
+                <li>Ik kan <code>@forelse</code> gebruiken om een lijst te tonen met een fallback voor als er geen data is.</li>
+                <li>Ik kan datums leesbaar maken voor mensen (<code>diffForHumans</code>).</li>
+            </ul>
+        </div>
+
+        <h2>Stap 1: De Controller Optimaliseren</h2>
+        <p>We gebruiken de <code>show</code> methode in de <code>ShopController</code>. Standaard halen we alleen het product op. Maar nu willen we ook:</p>
+        <ol>
+            <li>Alle reviews van dit product.</li>
+            <li>Van elke review: de naam van de gebruiker die hem schreef.</li>
+        </ol>
+
+        <h3>Het N+1 Probleem (Herhaling)</h3>
+        <p>Als we in de view <code>$review->user->name</code> aanroepen binnen een loop, doet Laravel voor elke review een aparte query naar de users-tabel. Bij 50 reviews zijn dat 51 queries. Dit maakt je webshop traag.</p>
+
+        <h3>De Oplossing: Eager Loading</h3>
+        <p>We vertellen Laravel vooraf dat hij alles in één keer moet ophalen. Omdat de gebruiker <em>in</em> de review zit (via de relatie), gebruiken we de punt-notatie: <code>reviews.user</code>.</p>
+
+        <p>Open <code>app/Http/Controllers/ShopController.php</code>:</p>
+
+        <pre><code class="language-php">
+public function show(Product $product): View
+{
+    // We laden de relatie 'reviews' én de geneste relatie 'user'
+    // Dit zorgt voor maximaal 3 efficiënte queries, ongeacht het aantal reviews.
+    $product->load('reviews.user');
+
+    return view('shop.show', [
+        'product' => $product
+    ]);
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip: Sorteren</strong><br>
+            Wil je de nieuwste reviews bovenaan? Je kunt dit in je Model regelen (zoals in Module 4-3), of je kunt het hier doen:<br>
+            <code>$product->load(['reviews' => fn($q) => $q->latest(), 'reviews.user']);</code>
+        </div>
+
+        <h2>Stap 2: Gemiddelde Score Berekenen</h2>
+        <p>Bovenin de pagina willen we vaak zien: "Gemiddeld 4.5 sterren". We hoeven dit niet zelf met een rekenmachine uit te rekenen. Laravel Collections hebben een handige methode: <code>avg()</code>.</p>
+
+        <p>Je kunt dit direct in je Blade view doen:</p>
+        <pre><code class="language-php">
+{{-- Geeft bijvoorbeeld 4.333333 terug --}}
+$product->reviews->avg('rating')
+        </code></pre>
+
+        <p>Om dit netjes te tonen, ronden we het af met <code>number_format</code> of <code>round</code>.</p>
+
+        <h2>Stap 3: De View Bouwen</h2>
+        <p>Nu gaan we de reviews daadwerkelijk tonen in <code>resources/views/shop/show.blade.php</code>. We gebruiken <code>@forelse</code>. Dit is een combinatie van een loop en een if-statement: "Loop door de items, maar als de lijst leeg is, doe dan dit...".</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-12 border-t pt-8"&gt;
+    &lt;h2 class="text-2xl font-bold mb-4"&gt;
+        Klantbeoordelingen
+        &lt;span class="text-gray-500 text-lg font-normal"&gt;
+            ({{ $product->reviews->count() }})
+        &lt;/span&gt;
+    &lt;/h2&gt;
+
+    &lt;!-- Gemiddelde Score --&gt;
+    @if($product->reviews->isNotEmpty())
+        &lt;div class="mb-6 flex items-center bg-gray-50 p-4 rounded"&gt;
+            &lt;span class="text-3xl font-bold text-yellow-500 mr-2"&gt;
+                {{ number_format($product->reviews->avg('rating'), 1) }}
+            &lt;/span&gt;
+            &lt;div class="text-sm text-gray-600"&gt;
+                van de 5 sterren
+            &lt;/div&gt;
+        &lt;/div&gt;
+    @endif
+
+    &lt;!-- De Lijst --&gt;
+    &lt;div class="space-y-6"&gt;
+        @forelse($product->reviews as $review)
+            &lt;div class="bg-white p-4 rounded shadow-sm border"&gt;
+                &lt;div class="flex justify-between items-start"&gt;
+                    &lt;div&gt;
+                        &lt;p class="font-bold text-gray-900"&gt;
+                            {{ $review->user->name }}
+                        &lt;/p&gt;
+                        &lt;p class="text-xs text-gray-500"&gt;
+                            {{-- diffForHumans maakt er "2 dagen geleden" van --}}
+                            {{ $review->created_at->diffForHumans() }}
+                        &lt;/p&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class="flex text-yellow-400"&gt;
+                        {{-- Simpele logica om sterren te tekenen --}}
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= $review->rating)
+                                ★
+                            @else
+                                &lt;span class="text-gray-300"&gt;★&lt;/span&gt;
+                            @endif
+                        @endfor
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;div class="mt-2 text-gray-700"&gt;
+                    {{ $review->body }}
+                &lt;/div&gt;
+            &lt;/div&gt;
+        @empty
+            &lt;div class="text-center py-8 text-gray-500"&gt;
+                &lt;p&gt;Er zijn nog geen reviews voor dit product.&lt;/p&gt;
+                &lt;p class="text-sm"&gt;Wees de eerste die zijn mening deelt!&lt;/p&gt;
+            &lt;/div&gt;
+        @endforelse
+    &lt;/div&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>Detail: DiffForHumans</h2>
+        <p>In de code hierboven zie je <code>$review->created_at->diffForHumans()</code>. Dit is een functie van Carbon (de datum-library van Laravel).</p>
+        <ul>
+            <li>In plaats van: <code>2023-11-24 14:30:00</code></li>
+            <li>Toont het: <code>3 uur geleden</code> of <code>1 week geleden</code>.</li>
+        </ul>
+        <p>Dit maakt je applicatie veel menselijker en dynamischer. Zorg wel dat je app-taal op Nederlands staat in <code>config/app.php</code> (<code>'locale' => 'nl'</code>), anders krijg je "3 hours ago".</p>
+
+        <h2>Samenvatting</h2>
+        <p>Je hebt nu een volledig werkend reviewsysteem!</p>
+        <ol>
+            <li>De database koppelt Users aan Products.</li>
+            <li>De Controller haalt de data efficiënt op met Eager Loading.</li>
+            <li>De View berekent het gemiddelde en toont de lijst netjes.</li>
+            <li>Het Formulier (uit de vorige module) laat gebruikers nieuwe reviews toevoegen.</li>
+        </ol>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

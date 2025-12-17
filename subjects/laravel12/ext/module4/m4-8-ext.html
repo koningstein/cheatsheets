@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wijzigen in Winkelwagen - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Wijzigen in Winkelwagen</h1>
+        <p>Een klant heeft een product in zijn winkelwagen gestopt, maar bedenkt zich. "Toch maar niet", of "Ik wil er eigenlijk 3 hebben in plaats van 1". Op dit moment is onze winkelwagen nog statisch: je kunt alleen kijken, niet aankomen.</p>
+        <p>In deze module gaan we twee essentiële functies bouwen: <strong>Verwijderen</strong> (Remove) en <strong>Aantal Aanpassen</strong> (Update). Omdat onze data in de Sessie zit (en niet direct in de database), werkt dit net even anders dan een standaard CRUD-actie.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een item verwijderen uit een PHP Array (<code>unset</code>) binnen de sessie.</li>
+                <li>Ik kan routes maken voor het verwijderen en updaten van specifieke regels in de kar.</li>
+                <li>Ik kan de sessie overschrijven met de aangepaste data (<code>session()->put</code>).</li>
+                <li>Ik kan een formulier maken om aantallen te wijzigen (PATCH request).</li>
+            </ul>
+        </div>
+
+        <h2>Deel 1: Product Verwijderen</h2>
+        <p>Laten we beginnen met het makkelijkste deel: iets uit de kar gooien. We hebben het ID van het product nodig om te weten welke regel we uit de array moeten halen.</p>
+
+        <h3>Stap 1: De Route</h3>
+        <p>We gebruiken een <code>DELETE</code> method (via een formulier) of een simpele <code>GET</code> link (minder netjes, maar makkelijk). Omdat we CRUD-principes volgen, doen we het netjes met een formulier.</p>
+
+        <pre><code class="language-php">
+// routes/web.php
+Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+        </code></pre>
+
+        <h3>Stap 2: De Controller Logica</h3>
+        <p>In de <code>CartController</code> voegen we de functie <code>remove</code> toe. Het proces is als volgt:</p>
+        <ol>
+            <li>Haal de kar op uit de sessie.</li>
+            <li>Controleer of het ID bestaat in de array.</li>
+            <li>Gooi hem eruit met <code>unset()</code>.</li>
+            <li><strong>Belangrijk:</strong> Sla de nieuwe array weer op in de sessie!</li>
+        </ol>
+
+        <pre><code class="language-php">
+public function remove($id)
+{
+    $cart = session()->get('cart');
+
+    if(isset($cart[$id])) {
+        // Verwijder het item uit de array
+        unset($cart[$id]);
+
+        // Overschrijf de sessie met de nieuwe array
+        session()->put('cart', $cart);
+    }
+
+    return back()->with('status', 'Product verwijderd uit winkelwagen.');
+}
+        </code></pre>
+
+        <h3>Stap 3: De Knop in de View</h3>
+        <p>In <code>resources/views/shop/cart.blade.php</code> passen we de "Verwijder" knop aan. Omdat we een DELETE request gebruiken, moet er een formulier omheen.</p>
+
+        <pre><code class="language-html">
+&lt;td class="py-4"&gt;
+    &lt;form action="{{ route('cart.remove', $id) }}" method="POST"&gt;
+        @csrf
+        @method('DELETE')
+
+        &lt;button type="submit" class="text-red-500 hover:underline"&gt;
+            Verwijder
+        &lt;/button&gt;
+    &lt;/form&gt;
+&lt;/td&gt;
+        </code></pre>
+
+
+
+        <h2>Deel 2: Aantal Aanpassen (Update)</h2>
+        <p>Nu willen we dat de klant het getalletje (Quantity) kan veranderen. Bijvoorbeeld van 1 naar 3. Hiervoor maken we een invulveldje in de tabel.</p>
+
+        <h3>Stap 1: De Route</h3>
+        <p>Dit is een wijziging, dus gebruiken we <code>PATCH</code>.</p>
+        <pre><code class="language-php">
+Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+        </code></pre>
+
+        <h3>Stap 2: De View (Inputveld)</h3>
+        <p>We moeten de kolom "Aantal" in onze tabel interactief maken. In plaats van platte tekst (<code>{{ $details['quantity'] }}</code>), maken we er een formulier van.</p>
+
+        <pre><code class="language-html">
+&lt;td class="py-4"&gt;
+    &lt;form action="{{ route('cart.update', $id) }}" method="POST" class="flex items-center gap-2"&gt;
+        @csrf
+        @method('PATCH')
+
+        &lt;!-- Het invulveld --&gt;
+        &lt;input type="number" name="quantity" value="{{ $details['quantity'] }}"
+               min="1" class="w-16 border rounded px-2 py-1 text-center"&gt;
+
+        &lt;!-- De update knop (klein icoontje of tekst) --&gt;
+        &lt;button type="submit" class="text-blue-600 text-sm hover:underline"&gt;
+            Update
+        &lt;/button&gt;
+    &lt;/form&gt;
+&lt;/td&gt;
+        </code></pre>
+
+        <h3>Stap 3: De Controller Logica</h3>
+        <p>In de functie <code>update</code> halen we de nieuwe hoeveelheid op uit het <code>$request</code> en passen we de array aan.</p>
+
+        <pre><code class="language-php">
+public function update(Request $request, $id)
+{
+    // 1. Valideer de input (moet een getal zijn, minimaal 1)
+    $request->validate([
+        'quantity' => 'required|integer|min:1'
+    ]);
+
+    // 2. Haal kar op
+    $cart = session()->get('cart');
+
+    // 3. Update het aantal als het product bestaat
+    if(isset($cart[$id])) {
+        $cart[$id]['quantity'] = $request->quantity;
+
+        // 4. Sla op in sessie
+        session()->put('cart', $cart);
+    }
+
+    return back()->with('status', 'Aantal bijgewerkt!');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Let op: Vergeet session()->put() niet!</strong><br>
+            Een veelgemaakte fout is het ophalen van de sessie, de variabele <code>$cart</code> aanpassen en dan... niets doen. PHP vergeet de wijzigingen direct na het script. Je moet de gewijzigde array altijd expliciet terugzetten met <code>session()->put('cart', $cart)</code>.
+        </div>
+
+        <h2>Geavanceerd: Voorraad Controle</h2>
+        <p>In een echte webshop wil je niet dat iemand 100 stuks bestelt als je er maar 10 hebt. Je zou in de <code>update</code> functie een check kunnen toevoegen:</p>
+
+        <pre><code class="language-php">
+use App\Models\Product;
+
+public function update(Request $request, $id)
+{
+    $product = Product::find($id);
+
+    // Check of de gevraagde hoeveelheid beschikbaar is
+    if($request->quantity > $product->stock) {
+        return back()->withErrors(['quantity' => "Er zijn er maar {$product->stock} op voorraad!"]);
+    }
+
+    // ... ga verder met updaten ...
+}
+        </code></pre>
+
+        <h2>Testen</h2>
+        <p>Ga naar je winkelwagen en probeer het volgende:</p>
+        <ol>
+            <li>Verander het aantal van een product naar 5 en klik op "Update". Verandert het subtotaal en het eindtotaal mee?</li>
+            <li>Klik op "Verwijder". Verdwijnt het product uit de lijst?</li>
+            <li>Als je de laatste items verwijdert, zie je dan de "Winkelwagen is leeg" melding (uit de vorige module)?</li>
+        </ol>
+        <p>Gefeliciteerd! Je hebt nu een volledig functionerende winkelwagen module geschreven zonder dat er een database aan te pas kwam voor de opslag van de kar zelf.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

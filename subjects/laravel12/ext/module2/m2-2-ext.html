@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Simpele Publieke Pagina</h1>
+        <p>In de vorige module hebben we de lay-out voor het publieke deel gemaakt. Nu is het tijd om deze lay-out daadwerkelijk te gebruiken. We gaan de <strong>Homepagina</strong> en een simpele <strong>Over Ons</strong> pagina maken. Hierbij leren we hoe we data vanuit de route direct naar de view kunnen sturen.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een controller aanmaken voor publieke pagina's.</li>
+                <li>Ik kan routes maken die verwijzen naar controller methodes.</li>
+                <li>Ik kan views maken die de publieke masterpage extenden.</li>
+                <li>Ik kan dynamische data (zoals paginatitels) meegeven aan een view.</li>
+            </ul>
+        </div>
+
+        <h2>De HomeController</h2>
+        <p>Hoewel we routes direct in <code>web.php</code> kunnen definiëren met een closure functie, is het beter om een Controller te gebruiken. Dit houdt je routing bestand schoon en overzichtelijk (Separation of Concerns).</p>
+
+        <p>Maak een nieuwe controller aan:</p>
+        <pre><code class="language-bash">php artisan make:controller HomeController</code></pre>
+
+        <p>In deze controller maken we twee methodes: <code>index</code> (voor de homepagina) en <code>about</code> (voor de over-ons pagina).</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers;
+
+use Illuminate\View\View;
+
+class HomeController extends Controller
+{
+    public function index(): View
+    {
+        return view('home', [
+            'title' => 'Welkom bij onze Webshop',
+            'featured_products' => [] // Hier komt later echte data
+        ]);
+    }
+
+    public function about(): View
+    {
+        return view('about', [
+            'title' => 'Over Ons'
+        ]);
+    }
+}
+        </code></pre>
+
+        <h2>De Views</h2>
+        <p>We hebben de views <code>home.blade.php</code> en <code>about.blade.php</code> nodig. Deze moeten de <code>layoutpublic</code> uitbreiden die we in Module 2-1 hebben gemaakt.</p>
+
+        <h3>Home View</h3>
+        <p>Maak <code>resources/views/home.blade.php</code>:</p>
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="text-center py-16"&gt;
+        &lt;h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl"&gt;
+            &lt;span class="block"&gt;De beste games&lt;/span&gt;
+            &lt;span class="block text-red-600"&gt;voor de beste prijs&lt;/span&gt;
+        &lt;/h1&gt;
+        &lt;p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl"&gt;
+            Ontdek onze uitgebreide collectie van de nieuwste en populairste spellen. Altijd op voorraad en direct leverbaar.
+        &lt;/p&gt;
+        &lt;div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8"&gt;
+            &lt;div class="rounded-md shadow"&gt;
+                &lt;a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 md:py-4 md:text-lg md:px-10"&gt;
+                    Bekijk Producten
+                &lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h3>About View</h3>
+        <p>Maak <code>resources/views/about.blade.php</code>:</p>
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="container mx-auto px-4 py-8"&gt;
+        &lt;h1 class="text-3xl font-bold mb-4"&gt;{{ $title }}&lt;/h1&gt;
+        &lt;p class="text-gray-700 mb-4"&gt;
+            Wij zijn een gepassioneerd team van gamers die de beste ervaring willen bieden aan onze klanten.
+            Onze webshop is gebouwd met Laravel, het krachtigste PHP framework.
+        &lt;/p&gt;
+        &lt;p class="text-gray-700"&gt;
+            Heb je vragen? Neem gerust contact met ons op.
+        &lt;/p&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Routes Koppelen</h2>
+        <p>Nu moeten we de URL's koppelen aan onze nieuwe controller. Open <code>routes/web.php</code> en voeg de routes toe.</p>
+
+        <pre><code class="language-php">
+use App\Http\Controllers\HomeController;
+use Illuminate\Support\Facades\Route;
+
+// Publieke routes
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/over-ons', [HomeController::class, 'about'])->name('about');
+
+// De Admin routes die we eerder maakten staan hieronder (beveiligd)
+// ...
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip: Named Routes</strong><br>
+            Gebruik altijd <code>->name('...')</code> bij je routes. Zo kun je in je navigatie (in <code>navbarpublic.blade.php</code>) verwijzen naar <code>{{ route('about') }}</code> in plaats van hardcoded <code>/over-ons</code>. Als je de URL later verandert naar <code>/about-us</code>, hoef je je navigatie niet aan te passen.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

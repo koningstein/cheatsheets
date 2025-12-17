@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winkelwagen Setup - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Winkelwagen Setup</h1>
+        <p>Een webshop is niet compleet zonder winkelwagen. We gebruiken een bestaande package om dit makkelijk te implementeren.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan de Shoppingcart package installeren en configureren.</li>
+            <li>Ik kan items toevoegen aan de winkelwagen via een controller.</li>
+        </ul>
+
+        <h3 id="install">Stap 1: Package Installatie</h3>
+        <p>We gebruiken de populaire <code>bumbummen99/shoppingcart</code> package. Installeer deze via Composer:</p>
+        <pre><code class="language-bash">composer require bumbummen99/shoppingcart</code></pre>
+
+        <h3 id="config">Stap 2: Config Publiceren (Optioneel)</h3>
+        <p>Als je instellingen wilt wijzigen (zoals belastingtarief), kun je de config publiceren:</p>
+        <pre><code class="language-bash">php artisan vendor:publish
+            --provider="Gloudemans\Shoppingcart\ShoppingcartServiceProvider" --tag="config"</code></pre>
+
+        <h3 id="controller">Stap 3: CartController</h3>
+        <p>Maak een <code>CartController</code> aan in de map <code>Open</code> met een <code>store</code> methode.</p>
+
+        <pre><code class="language-php">
+use Gloudemans\Shoppingcart\Facades\Cart;
+
+public function store(Request $request, Product $product)
+{
+    // Cart::add(id, naam, aantal, prijs)
+    Cart::add(
+        $product->id,
+        $product->name,
+        1, // Aantal (standaard 1)
+        $product->latest_price->price
+    )->associate('App\Models\Product'); // Koppel aan model
+
+    return redirect()->route('cart.index')
+        ->with('status', 'Product toegevoegd!');
+}
+        </code></pre>
+
+        <h3 id="route">Stap 4: Route & Formulier</h3>
+        <p>Maak de route aan in <code>web.php</code>:</p>
+        <pre><code class="language-php">Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');</code></pre>
+
+        <p>Pas de "Bestel Nu" knop op <code>show.blade.php</code> aan zodat het een formulier wordt:</p>
+        <pre><code class="language-html">
+&lt;form action="{{ route('cart.store', $product) }}" method="POST"&gt;
+    @csrf
+    &lt;button type="submit" class="bg-green-600 text-white px-8 py-3 rounded-lg font-bold
+            hover:bg-green-700 transition"&gt;
+        Bestel Nu
+    &lt;/button&gt;
+&lt;/form&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

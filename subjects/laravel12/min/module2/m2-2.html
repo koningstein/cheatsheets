@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simpele publieke pagina - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Simpele Publieke Pagina</h1>
+        <p>We gaan een overzichtspagina maken voor de Categorieën die voor iedereen zichtbaar is. We scheiden de controllers in mappen: <code>Admin</code> en <code>Open</code>.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan controllers organiseren in submappen.</li>
+            <li>Ik kan data gepagineerd ophalen met Eloquent.</li>
+            <li>Ik kan paginatie-links weergeven in Blade.</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller Aanmaken</h3>
+        <p>Maak een controller in de map <code>Open</code>. We gebruiken geen resource controller omdat we alleen een index nodig hebben.</p>
+        <pre><code class="language-bash">php artisan make:controller Open/CategoryController</code></pre>
+
+        <h3 id="method">Stap 2: Index Methode & Paginatie</h3>
+        <p>Open <code>app/Http/Controllers/Open/CategoryController.php</code>. We gebruiken <code>paginate()</code> om de resultaten te verdelen over pagina's.</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Open;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\View\View;
+
+class CategoryController extends Controller
+{
+    public function index(): View
+    {
+        // Haal 8 categorieën per pagina op
+        $categories = Category::paginate(8);
+
+        return view('open.categories.index', ['categories' => $categories]);
+    }
+}
+        </code></pre>
+
+        <h3 id="route">Stap 3: Route & Alias</h3>
+        <p>Om de code in <code>web.php</code> schoon te houden, gebruiken we een alias voor de namespace.</p>
+        <pre><code class="language-php">
+use App\Http\Controllers\Open as Open;
+
+// Publieke route
+Route::get('categories', [Open\CategoryController::class, 'index'])
+    ->name('categories.index');
+        </code></pre>
+
+        <h3 id="view">Stap 4: View met Paginatie Links</h3>
+        <p>Maak <code>resources/views/open/categories/index.blade.php</code>. Gebruik <code>$categories->links()</code> om de navigatieknoppen te tonen.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;h1 class="text-3xl mb-6"&gt;Kies een categorie&lt;/h1&gt;
+
+    &lt;div class="grid grid-cols-1 md:grid-cols-4 gap-4"&gt;
+        @foreach($categories as $category)
+            &lt;div class="border p-4 rounded shadow"&gt;
+                &lt;h2 class="font-bold text-xl"&gt;{{ $category->name }}&lt;/h2&gt;
+                &lt;p&gt;...&lt;/p&gt;
+            &lt;/div&gt;
+        @endforeach
+    &lt;/div&gt;
+
+    &lt;!-- Paginatie knoppen --&gt;
+    &lt;div class="mt-8"&gt;
+        {{ $categories->links() }}
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory & Seeding - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Factory & Seeding</h1>
+        <p>Om goed te kunnen ontwikkelen en testen, heb je data nodig in je database. Het is niet handig om dit elke keer handmatig in te voeren via phpMyAdmin of SQL-scripts. Laravel biedt hiervoor een krachtige oplossing met <strong>Factories</strong> en <strong>Seeders</strong>.</p>
+        <p>De reden dat we dit automatiseren, is zodat elk teamlid op precies dezelfde manier testdata kan genereren. Dit voorkomt fouten en zorgt voor een consistente ontwikkelomgeving.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan uitleggen wat Factories en Seeders zijn en waarom we ze gebruiken.</li>
+                <li>Ik kan een Factory aanmaken en configureren met Faker.</li>
+                <li>Ik kan een Seeder aanmaken om de database te vullen.</li>
+                <li>Ik kan de <code>DatabaseSeeder</code> configureren.</li>
+                <li>Ik kan Artisan commando's gebruiken om de seeding uit te voeren.</li>
+            </ul>
+        </div>
+
+        <h2>Het Concept</h2>
+        <p>We gebruiken drie samenwerkende onderdelen om de database te vullen:</p>
+        <ol>
+            <li><strong>Factory (Fabriek):</strong> Dit is het recept. De factory bepaalt de structuur van één specifiek record (rij). Bijvoorbeeld: "Een categorie heeft een naam en een aanmaakdatum". Dit is gebaseerd op het <strong>Factory Design Pattern</strong>: een klasse die verantwoordelijk is voor het aanmaken van objecten.</li>
+            <li><strong>Faker:</strong> Dit is een externe bibliotheek die standaard in Laravel zit. Faker genereert realistische nepdata, zoals namen, adressen, teksten en datums.</li>
+            <li><strong>Seeder (Zaaier):</strong> Dit is de uitvoerder. De seeder bepaalt <em>hoeveel</em> rijen er gemaakt moeten worden en voert de factory uit. Dit lijkt op het <strong>Command Pattern</strong>: seeders zijn uitvoerbare commando's met één specifieke taak.</li>
+        </ol>
+
+        <h2>Factory Aanmaken</h2>
+        <p>We beginnen met de factory. Omdat we de <code>Category</code> model al hebben, kunnen we een bijbehorende factory maken. De naamgeving is belangrijk: <code>ModelnaamFactory</code>. Zo weet Laravel automatisch dat ze bij elkaar horen.</p>
+
+        <pre><code class="language-bash">php artisan make:factory CategoryFactory</code></pre>
+
+        <p>Dit maakt het bestand <code>database/factories/CategoryFactory.php</code> aan. Als je de modelnaam meegeeft in het commando (met <code>--model=Category</code>), vult Laravel alvast wat basiscode voor je in.</p>
+
+        <h3>Faker Gebruiken</h3>
+        <p>In de factory bepalen we hoe de data eruit ziet in de methode <code>definition()</code>. We gebruiken <strong>Faker</strong> om data te verzinnen. Voor dit project (een webshop met spellen/auto's) gebruiken we een extra pakketje om automerken te genereren.</p>
+        <p>Installeer het pakket eerst via de terminal:</p>
+        <pre><code class="language-bash">composer require pelmered/fake-car --dev</code></pre>
+
+        <p>Pas daarna de <code>definition()</code> methode in je factory aan:</p>
+
+        <pre><code class="language-php">
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class CategoryFactory extends Factory
+{
+    public function definition(): array
+    {
+        // Voeg de auto-provider toe aan Faker zodat we automerken kunnen genereren
+        $this->faker->addProvider(new \Faker\Provider\Fakecar($this->faker));
+
+        return [
+            // unique() zorgt dat we geen dubbele namen krijgen.
+            // 'vehicleBrand' komt uit het pakketje dat we net installeerden.
+            "name" => $this->faker->unique()->vehicleBrand,
+
+            // We genereren datums ergens in de afgelopen 10 jaar
+            "created_at" => $this->faker->dateTimeThisDecade(),
+            "updated_at" => $this->faker->dateTimeThisDecade(),
+        ];
+    }
+}
+        </code></pre>
+
+        <h3>Model Koppeling</h3>
+        <p>Om de factory te kunnen gebruiken, moet het Model weten dat hij een factory heeft. Dit doe je door de <code>HasFactory</code> trait toe te voegen in je Model bestand (<code>app/Models/Category.php</code>).</p>
+
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory; // 1. Importeer de trait
+use Illuminate\Database\Eloquent\Model;
+
+class Category extends Model
+{
+    use HasFactory; // 2. Gebruik de trait in de class
+
+    // ...
+}
+        </code></pre>
+
+        <h2>Seeder Aanmaken</h2>
+        <p>De factory weet <em>hoe</em> de data eruit ziet, maar de seeder bepaalt <em>hoeveel</em> data we in de database willen hebben. De conventie voor naamgeving is <code>TabelnaamSeeder</code> (bijv. <code>CategorySeeder</code>).</p>
+
+        <pre><code class="language-bash">php artisan make:seeder CategorySeeder</code></pre>
+
+        <p>Dit maakt het bestand aan in <code>database/seeders/CategorySeeder.php</code>. Hierin passen we de <code>run()</code> methode aan om de factory aan te roepen:</p>
+
+        <pre><code class="language-php">
+namespace Database\Seeders;
+
+use App\Models\Category; // Vergeet niet je model te importeren!
+use Illuminate\Database\Seeder;
+
+class CategorySeeder extends Seeder
+{
+    public function run(): void
+    {
+        // We roepen de factory aan, zeggen dat we er 25 willen, en maken ze aan.
+        Category::factory()->times(25)->create();
+    }
+}
+        </code></pre>
+
+        <h2>Database Vullen</h2>
+        <p>Er is één hoofd-seeder bestand: <code>DatabaseSeeder.php</code> (in de map <code>database/seeders</code>). Hierin roep je alle losse seeders aan die je hebt gemaakt. Dit is handig omdat je dan de volgorde kunt bepalen (bijvoorbeeld: eerst categorieën aanmaken, daarna pas producten die aan een categorie gekoppeld zijn).</p>
+
+        <p>Pas <code>DatabaseSeeder.php</code> aan:</p>
+
+        <pre><code class="language-php">
+public function run(): void
+{
+    // Hier roep je de losse seeders aan
+    $this->call([
+        CategorySeeder::class,
+        // Hier kun je later meer seeders toevoegen, gescheiden door komma's
+    ]);
+}
+        </code></pre>
+
+        <h3>Uitvoeren via Artisan</h3>
+        <p>Nu alles klaarstaat, kunnen we de database vullen met één commando:</p>
+        <pre><code class="language-bash">php artisan db:seed</code></pre>
+
+        <p>Wil je helemaal opnieuw beginnen met een schone lei? Met het volgende commando gooi je alle tabellen weg, maak je ze opnieuw aan (migrate) én vul je ze direct met data (seed). Dit is erg handig tijdens het ontwikkelen.</p>
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+
+        <p>Als je nu in je database kijkt (bijvoorbeeld via phpMyAdmin of TablePlus), zul je zien dat de tabel <code>categories</code> gevuld is met 25 random automerken.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

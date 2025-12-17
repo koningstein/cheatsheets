@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destroy & Constraints - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Destroy & Constraints</h1>
+        <p>De gebruiker heeft op de "Ja, verwijder definitief" knop gedrukt. Nu moeten we de data daadwerkelijk uit de database halen. Maar mag dat zomaar?</p>
+        <p>In een relationele database zijn tabellen aan elkaar gekoppeld. Wat gebeurt er als je een <strong>Categorie</strong> verwijdert waar nog 100 producten aan gekoppeld zijn? De database zal dit blokkeren om de data-integriteit te bewaken. In deze module leren we twee manieren om hiermee om te gaan: het netjes afvangen van de foutmelding (Try-Catch) en het gebruik van de Prullenbak (Soft Deletes).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp wat een <strong>Foreign Key Constraint Violation</strong> is (SQL Error 23000).</li>
+                <li>Ik kan een <code>try-catch</code> blok gebruiken om database-fouten op te vangen en een vriendelijke melding te tonen.</li>
+                <li>Ik kan <strong>Soft Deletes</strong> implementeren voor data die niet definitief weg mag.</li>
+                <li>Ik kan de keuze maken tussen "Hard Delete met protectie" en "Soft Delete".</li>
+            </ul>
+        </div>
+
+        <h2>Het Probleem: De Database zegt NEE</h2>
+        <p>Stel, je probeert de categorie "Games" te verwijderen. In je database migration (Module 3-1) heb je waarschijnlijk ingesteld dat de relatie <code>constrained()</code> is. Standaard betekent dit dat de database zegt: <strong>STOP!</strong></p>
+        <p>Als je dit niet afvangt in Laravel, krijgt je gebruiker een angstaanjagend scherm te zien:</p>
+        <blockquote style="border-left: 4px solid red; padding-left: 1rem; color: red;">
+            SQLSTATE[23000]: Integrity constraint violation: 1451 Cannot delete or update a parent row: a foreign key constraint fails...
+        </blockquote>
+        <p>Dit willen we voorkomen. We bespreken twee oplossingen.</p>
+
+        <h2>Oplossing 1: Try-Catch (De nette foutmelding)</h2>
+        <p>Bij stamgegevens zoals <strong>Categorieën</strong> wil je vaak niet dat ze verwijderd worden als ze in gebruik zijn. Je wilt de database schoon houden. De gebruiker moet eerst de producten verplaatsen naar een andere categorie voordat de oude weg mag.</p>
+        <p>We "proberen" (try) de categorie te verwijderen. Als de database een fout geeft, "vangen" (catch) we die op en sturen we de gebruiker terug met een uitleg.</p>
+
+        <p>Open <code>app/Http/Controllers/Admin/CategoryController.php</code>:</p>
+
+        <pre><code class="language-php">
+use Illuminate\Database\QueryException; // Vergeet deze import niet!
+
+public function destroy(Category $category)
+{
+    try {
+        // Probeer de categorie te verwijderen
+        $category->delete();
+
+        return to_route('admin.categories.index')
+            ->with('status', 'Categorie succesvol verwijderd!');
+
+    } catch (QueryException $e) {
+        // SQL Error 23000 betekent: Integrity Constraint Violation
+        // Oftewel: er hangt nog data aan vast.
+        if ($e->getCode() == 23000) {
+            return back()->withErrors([
+                'error' => 'Je kunt deze categorie niet verwijderen omdat er nog producten aan gekoppeld zijn.'
+            ]);
+        }
+
+        // Was het een andere fout? Gooi hem dan alsnog op het scherm.
+        throw $e;
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Blade Weergave:</strong><br>
+            Zorg dat je in je view (bovenin de index of delete pagina) de errors toont:<br>
+            <code>@error('error') &lt;div class="text-red-500"&gt;{{ $message }}&lt;/div&gt; @enderror</code>
+        </div>
+
+        <h2>Oplossing 2: Soft Deletes (De Prullenbak)</h2>
+        <p>Bij transactionele data, zoals <strong>Producten</strong> of <strong>Bestellingen</strong>, is het vaak gevaarlijk om data écht weg te gooien. Als je een product verwijdert dat in een oude bestelling zit, klopt je bestelhistorie niet meer.</p>
+        <p>Hier is "tegenhouden" (zoals bij Categorieën) irritant. Je wilt het product gewoon uit je lijst hebben. De oplossing is <strong>Soft Deletes</strong>. Het record blijft in de database, maar krijgt een stempel "verwijderd".</p>
+
+
+
+        <h3>Stap A: Migration Aanpassen</h3>
+        <p>We voegen de kolom <code>deleted_at</code> toe aan de tabel.</p>
+        <pre><code class="language-bash">php artisan make:migration add_soft_deletes_to_products_table --table=products</code></pre>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::table('products', function (Blueprint $table) {
+        $table->softDeletes(); // Voegt 'deleted_at' (TIMESTAMP) toe
+    });
+}
+        </code></pre>
+
+        <h3>Stap B: Model Aanpassen</h3>
+        <p>Vertel het Model dat hij de prullenbak-functionaliteit moet gebruiken.</p>
+
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // 1. Importeer
+
+class Product extends Model
+{
+    use SoftDeletes; // 2. Activeer
+
+    // ...
+}
+        </code></pre>
+
+        <h3>Stap C: De Controller</h3>
+        <p>In de controller hoef je <strong>niets</strong> speciaals te doen. De standaard <code>delete()</code> functie ziet dat SoftDeletes aan staat en voert automatisch een update uit in plaats van een delete.</p>
+
+        <pre><code class="language-php">
+public function destroy(Product $product)
+{
+    // Omdat SoftDeletes aan staat in het Model, crasht dit niet!
+    // Het zet alleen de datum in 'deleted_at'.
+    $product->delete();
+
+    return to_route('admin.products.index')
+        ->with('status', 'Product naar prullenbak verplaatst!');
+}
+        </code></pre>
+
+        <h2>Samenvatting: Wanneer kies je wat?</h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+            <tr style="background: var(--bg-content); border-bottom: 2px solid var(--border-color);">
+                <th style="text-align: left; padding: 0.5rem;">Strategie</th>
+                <th style="text-align: left; padding: 0.5rem;">Gebruik bij...</th>
+                <th style="text-align: left; padding: 0.5rem;">Gevolg</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 0.5rem;"><strong>Try-Catch (Hard Delete)</strong></td>
+                <td style="padding: 0.5rem;">Categorieën, Tags, Locaties</td>
+                <td style="padding: 0.5rem;">Houdt de database schoon. Dwingt de gebruiker om relaties eerst op te lossen.</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.5rem;"><strong>Soft Deletes</strong></td>
+                <td style="padding: 0.5rem;">Producten, Users, Orders</td>
+                <td style="padding: 0.5rem;">Veilig voor historie. Data blijft bestaan maar is onzichtbaar in de app.</td>
+            </tr>
+            </tbody>
+        </table>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introductie Pest - Laravel 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<header>
+    <a href="../../index.html" class="logo">
+        <svg width="30" height="30" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0L10 20L10 80L50 100L90 80L90 20L50 0Z"/></svg>
+        Laravel 12
+    </a>
+    <div class="header-controls">
+        <button class="btn-control" id="color-toggle">🎨 Kleur</button>
+        <button class="btn-control" id="theme-toggle">🌓 Thema</button>
+        <button class="mobile-menu-btn" id="menu-toggle">☰</button>
+    </div>
+</header>
+
+<div class="layout-wrapper">
+    <nav class="sidebar-left">
+        <div class="nav-group">
+            <h3>Installatie</h3>
+            <div class="nav-item-container">
+                <ul class="submenu" style="display:block; padding-left:0;">
+                    <li><a href="../../index.html" style="border-left:none; padding-left:0.75rem;">Overzicht</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="nav-group">
+            <h3>Opdrachten</h3>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 1: Basis CRUD
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module1/m1-1.html">Model & Migration</a></li>
+                    <li><a href="../module1/m1-2.html">Factory & Seeding</a></li>
+                    <li><a href="../module1/m1-3.html">Layouts & Tailwind</a></li>
+                    <li><a href="../module1/m1-4.html">Controller Index</a></li>
+                    <li><a href="../module1/m1-5.html">Create & Store</a></li>
+                    <li><a href="../module1/m1-6.html">Validatie & Flash</a></li>
+                    <li><a href="../module1/m1-7.html">Detailpagina (Show)</a></li>
+                    <li><a href="../module1/m1-8.html">Edit & Update</a></li>
+                    <li><a href="../module1/m1-9.html">Delete & Destroy</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 2: Users & Security
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module2/m2-1.html">Publieke Layout</a></li>
+                    <li><a href="../module2/m2-2.html">Simpele Publieke Pagina</a></li>
+                    <li><a href="../module2/m2-3.html">Roles & Permissions</a></li>
+                    <li><a href="../module2/m2-4.html">Aanmaken van Users</a></li>
+                    <li><a href="../module2/m2-5.html">Middleware bij Routes</a></li>
+                    <li><a href="../module2/m2-6.html">Rolgebaseerde Toegang</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 3: Advanced Admin
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module3/m3-1.html">Models & Migrations</a></li>
+                    <li><a href="../module3/m3-2.html">Factories met Relaties</a></li>
+                    <li><a href="../module3/m3-3.html">Seeders met Relaties</a></li>
+                    <li><a href="../module3/m3-4.html">Index & Eager Loading</a></li>
+                    <li><a href="../module3/m3-5.html">Permissions</a></li>
+                    <li><a href="../module3/m3-6.html">Create & Dropdowns</a></li>
+                    <li><a href="../module3/m3-7.html">Store & Validatie</a></li>
+                    <li><a href="../module3/m3-8.html">Show & Relaties</a></li>
+                    <li><a href="../module3/m3-9.html">Edit & Pre-select</a></li>
+                    <li><a href="../module3/m3-10.html">Update & Logica</a></li>
+                    <li><a href="../module3/m3-11.html">Delete View</a></li>
+                    <li><a href="../module3/m3-12.html">Destroy & Constraints</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 4: Webshop Features
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module4/m4-1.html">Publieke Productpagina</a></li>
+                    <li><a href="../module4/m4-2.html">De Product Show</a></li>
+                    <li><a href="../module4/m4-3.html">Reviews Setup (DB)</a></li>
+                    <li><a href="../module4/m4-4.html">Reviews Tonen</a></li>
+                    <li><a href="../module4/m4-5.html">Reviews Plaatsen</a></li>
+                    <li><a href="../module4/m4-6.html">Winkelwagen Setup</a></li>
+                    <li><a href="../module4/m4-7.html">Winkelwagen Tonen</a></li>
+                    <li><a href="../module4/m4-8.html">Winkelwagen Wijzigen</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 5: Orders & Validatie
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module5/m5-1.html">Orders Structuur</a></li>
+                    <li><a href="../module5/m5-2.html">Order Seeds</a></li>
+                    <li><a href="../module5/m5-3.html">Orders Opslaan</a></li>
+                    <li><a href="../module5/m5-4.html">Orders Tonen</a></li>
+                    <li><a href="../module5/m5-5.html">Order naar PDF</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <h3>Thema's</h3>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Database & Models
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module6/m6-1.html">Migrations & Datatypes</a></li>
+                    <li><a href="../module6/m6-2.html">Foreign Key Constraints</a></li>
+                    <li><a href="../module6/m6-3.html">Model Conventions</a></li>
+                    <li><a href="../module6/m6-4.html">Mass Assignment</a></li>
+                    <li><a href="../module6/m6-5.html">Factories (Faker)</a></li>
+                    <li><a href="../module6/m6-6.html">Seeders & DatabaseState</a></li>
+                    <li><a href="../module6/m6-7.html">Soft Deletes</a></li>
+                    <li><a href="../module6/m6-8.html">Casts & Accessors</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Eloquent Relaties
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module7/m7-1.html">One to One (HasOne)</a></li>
+                    <li><a href="../module7/m7-2.html">One to Many (HasMany)</a></li>
+                    <li><a href="../module7/m7-3.html">Many to Many</a></li>
+                    <li><a href="../module7/m7-4.html">Eager Loading</a></li>
+                    <li><a href="../module7/m7-5.html">Query Scopes</a></li>
+                    <li><a href="../module7/m7-6.html">Collections Methods</a></li>
+                    <li><a href="../module7/m7-7.html">Pivot Tabellen</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Routing & Controllers
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module8/m8-1.html">Basic Routing</a></li>
+                    <li><a href="../module8/m8-2.html">Named Routes & Groups</a></li>
+                    <li><a href="../module8/m8-3.html">Route Model Binding</a></li>
+                    <li><a href="../module8/m8-4.html">Resource Controllers</a></li>
+                    <li><a href="../module8/m8-5.html">Single Action Controllers</a></li>
+                    <li><a href="../module8/m8-6.html">Redirects & Responses</a></li>
+                    <li><a href="../module8/m8-7.html">Dependency Injection</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Blade & Frontend
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module9/m9-1.html">Layout Inheritance</a></li>
+                    <li><a href="../module9/m9-2.html">Components & Slots</a></li>
+                    <li><a href="../module9/m9-3.html">Stacks & Push</a></li>
+                    <li><a href="../module9/m9-4.html">Control Structures</a></li>
+                    <li><a href="../module9/m9-5.html">Auth Directives</a></li>
+                    <li><a href="../module9/m9-6.html">Service Injection</a></li>
+                    <li><a href="../module9/m9-7.html">Tailwind Patterns</a></li>
+                    <li><a href="../module9/m9-8.html">Pagination</a></li>
+                    <li><a href="../module9/m9-9.html">Flash messages</a></li>
+                    <li><a href="../module9/m9-10.html">Livewire</a></li>
+                    <li><a href="../module9/m9-11.html">Flux UI</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Validatie & Forms
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module10/m10-1.html">Controller Validatie</a></li>
+                    <li><a href="../module10/m10-2.html">Errors weergeven</a></li>
+                    <li><a href="../module10/m10-3.html">Form requests</a></li>
+                    <li><a href="../module10/m10-4.html">Database regels</a></li>
+                    <li><a href="../module10/m10-5.html">Custom Error Messages</a></li>
+                    <li><a href="../module10/m10-6.html">CSRF en Old input</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Security & Auth
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module11/m11-1.html">Auth Flow</a></li>
+                    <li><a href="../module11/m11-2.html">Middleware</a></li>
+                    <li><a href="../module11/m11-3.html">Gates</a></li>
+                    <li><a href="../module11/m11-4.html">Policies</a></li>
+                    <li><a href="../module11/m11-5.html">Spatie Permissions</a></li>
+                    <li><a href="../module11/m11-6.html">Password Hashing</a></li>
+                    <li><a href="../module11/m11-7.html">Helper Functions</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Features
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module12/m12-1.html">PDF Generatie</a></li>
+                    <li><a href="../module12/m12-2.html">Excel Import/Export</a></li>
+                    <li><a href="../module12/m12-3.html">Mail & Notifications</a></li>
+                    <li><a href="../module12/m12-4.html">File Storage</a></li>
+                    <li><a href="../module12/m12-5.html">HTTP Client</a></li>
+                    <li><a href="../module12/m12-6.html">Events & Listeners</a></li>
+                    <li><a href="../module12/m12-7.html">Artisan Commands</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container active">
+                <button class="nav-toggle">
+                    Automated Testing
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu" style="display: block;">
+                    <li><a href="m13-1.html">Introductie & PHPUnit</a></li>
+                    <li><a href="m13-2.html">Unit vs Feature Tests</a></li>
+                    <li><a href="m13-3.html" class="current">Introductie Pest</a></li>
+                    <li><a href="m13-4.html">Unit & Feature Tests (Pest)</a></li>
+                    <li><a href="m13-5.html">Database Testing & Seeding</a></li>
+                    <li><a href="m13-6.html">HTTP Testing</a></li>
+                    <li><a href="m13-7.html">Mocking & Spies</a></li>
+                    <li><a href="m13-8.html">Faking</a></li>
+                    <li><a href="m13-9.html">Browser Testing (Dusk)</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    QA Tools & Workflow
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module14/m14-1.html">Static Analysis (Larastan)</a></li>
+                    <li><a href="../module14/m14-2.html">Code Style (Pint)</a></li>
+                    <li><a href="../module14/m14-3.html">Debugging & Debugbar</a></li>
+                    <li><a href="../module14/m14-4.html">Git Workflow</a></li>
+                    <li><a href="../module14/m14-5.html">CI/CD Basics</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <h1>De overstap naar Pest</h1>
+        <p>In de vorige hoofdstukken heb je PHPUnit gezien. Misschien viel het je op dat er veel "boilerplate" code nodig is: <code>class ... extends TestCase</code>, namespaces, <code>public function test_...</code>. Dit maakt de code soms lastig leesbaar en onnodig lang.</p>
+        <p><strong>Pest</strong> is een modern testing framework voor PHP, ontwikkeld door Nuno Maduro (een Laravel core team member). Pest is gebouwd <em>bovenop</em> PHPUnit. Dat betekent dat alles wat in PHPUnit kan, ook in Pest kan. Het verschil zit puur in de syntax: Pest is minimalistisch, functioneel en leest als een zin. In Laravel 12 is Pest de standaard.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik begrijp waarom Pest een alternatief is voor PHPUnit.</li>
+            <li>Ik kan de basis syntax van Pest (`test()` en `it()`) lezen en schrijven.</li>
+            <li>Ik kan de `expect()` API gebruiken voor assertions.</li>
+        </ul>
+
+        <h3>Vergelijking: PHPUnit vs Pest</h3>
+        <p>Laten we dezelfde simpele test eens naast elkaar leggen. Eerst de "oude" manier met PHPUnit.</p>
+
+        <div class="note-box">PHPUnit</div>
+        <pre><code class="language-php">
+namespace Tests\Feature;
+use Tests\TestCase;
+
+class ExampleTest extends TestCase {
+    public function test_true_is_true() {
+        $this->assertTrue(true);
+    }
+}
+        </code></pre>
+
+        <p>En nu dezelfde test in Pest. Zie je hoe we geen class, namespace of methodenaam nodig hebben? We gebruiken gewoon de <code>test</code> functie met een beschrijving en een closure.</p>
+
+        <div class="note-box">Pest</div>
+        <pre><code class="language-php">
+test('true is true', function () {
+    expect(true)->toBeTrue();
+});
+        </code></pre>
+
+        <h3>De `it` syntax</h3>
+        <p>Pest biedt naast <code>test()</code> ook de functie <code>it()</code>. Technisch doen ze precies hetzelfde, maar <code>it()</code> helpt je om je testbeschrijving als een lopende zin te formuleren. Dit maakt de output in je terminal veel leesbaarder.</p>
+
+        <pre><code class="language-php">
+// Leest als: "it has a homepage"
+it('has a homepage', function () {
+    $this->get('/')->assertStatus(200);
+});
+
+// Leest als: "it allows users to login"
+it('allows users to login', function () {
+    // ...
+});
+        </code></pre>
+
+        <p>Als je de tests draait, zie je in de terminal:</p>
+        <pre><code class="language-bash">
+✓ it has a homepage
+✓ it allows users to login
+        </code></pre>
+
+        <h3>De Expect API</h3>
+        <p>Pest introduceert ook een krachtige manier om assertions (controles) te doen: de <code>expect()</code> functie. Dit is een "fluent interface" die veel natuurlijker leest dan de traditionele <code>$this->assert...</code> methodes.</p>
+
+        <p>Vergelijk de PHPUnit assertions:</p>
+        <pre><code class="language-php">
+$this->assertEquals('Rotterdam', $city);
+$this->assertCount(5, $items);
+$this->assertGreaterThan(10, $price);
+        </code></pre>
+
+        <p>Met de Pest Expect API:</p>
+        <pre><code class="language-php">
+expect($city)->toBe('Rotterdam');
+expect($items)->toHaveCount(5);
+expect($price)->toBeGreaterThan(10);
+
+// Je kunt ze zelfs ketenen:
+expect($price)->toBeGreaterThan(10)->toBeLessThan(100);
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

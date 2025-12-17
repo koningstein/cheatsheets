@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Rolgebaseerde Toegang</h1>
+        <p>We zijn aangekomen bij het sluitstuk van de beveiliging. We hebben een kolom <code>is_admin</code> in de database, en we hebben routes beveiligd met <code>auth</code>. Echter, de <code>auth</code> middleware controleert alleen of je bent ingelogd, niet of je beheerder bent. Op dit moment kan elke ingelogde klant handmatig naar <code>/admin/categories</code> navigeren.</p>
+        <p>Om dit gat te dichten, gaan we onze eigen <strong>Middleware</strong> schrijven die specifiek controleert op de admin-rol.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Custom Middleware aanmaken via Artisan.</li>
+                <li>Ik kan logica schrijven om de rol van een gebruiker te controleren.</li>
+                <li>Ik begrijp het verschil tussen een <code>403 Forbidden</code> en een <code>404 Not Found</code>.</li>
+                <li>Ik kan Middleware registreren (alias) in de applicatie configuratie.</li>
+                <li>Ik kan meerdere middlewares stapelen op een route groep.</li>
+            </ul>
+        </div>
+
+        <h2>Custom Middleware Maken</h2>
+        <p>Laravel biedt standaard geen "IsAdmin" middleware, omdat elke applicatie andere rollen heeft. We moeten deze dus zelf maken. We noemen hem <code>EnsureUserIsAdmin</code>.</p>
+
+        <pre><code class="language-bash">php artisan make:middleware EnsureUserIsAdmin</code></pre>
+
+        <p>Dit commando maakt een bestand aan in <code>app/Http/Middleware/EnsureUserIsAdmin.php</code>.</p>
+
+        <h2>De Logica (Handle Methode)</h2>
+        <p>Open het bestand. Je ziet een <code>handle</code> methode. Dit is de functie waar elk verzoek doorheen moet. Hier schrijven we onze check.</p>
+        <p>De logica is als volgt:</p>
+        <ol>
+            <li>Is de gebruiker überhaupt ingelogd? (Dit wordt vaak al door <code>auth</code> gedaan, maar dubbelchecken is veilig).</li>
+            <li>Is de waarde van <code>is_admin</code> waar (true)?</li>
+            <li><strong>Nee?</strong> Stop het verzoek en geef een foutmelding.</li>
+            <li><strong>Ja?</strong> Laat het verzoek doorgaan naar de volgende stap (<code>$next($request)</code>).</li>
+        </ol>
+
+        <pre><code class="language-php">
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth; // Vergeet deze niet!
+
+class EnsureUserIsAdmin
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        // Check 1: Is de gebruiker ingelogd?
+        // Check 2: Is de gebruiker GEEN admin?
+        if (!Auth::check() || !Auth::user()->is_admin) {
+
+            // Optie A: Abort met een 403 Forbidden error (netjes)
+            abort(403, 'U heeft geen toegang tot deze pagina.');
+
+            // Optie B: Redirect terug naar home (gebruiksvriendelijk)
+            // return redirect('/');
+        }
+
+        // Als we hier komen, is de gebruiker admin. Laat hem door.
+        return $next($request);
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>HTTP Status Codes:</strong><br>
+            <ul>
+                <li><strong>401 Unauthorized:</strong> Ik weet niet wie je bent (je bent niet ingelogd).</li>
+                <li><strong>403 Forbidden:</strong> Ik weet wie je bent, maar je mag hier niet in (geen rechten).</li>
+            </ul>
+            Het is belangrijk om de juiste code te gebruiken voor de juiste situatie.
+        </div>
+
+        <h2>Middleware Registreren (Alias)</h2>
+        <p>Voordat we de middleware makkelijk kunnen gebruiken in onze routes, moeten we hem bekendmaken aan Laravel en er een korte naam (alias) aan geven, bijvoorbeeld <code>admin</code>.</p>
+
+        <p>In moderne Laravel versies (11+) doe je dit in <code>bootstrap/app.php</code>.</p>
+
+        <pre><code class="language-php">
+// bootstrap/app.php
+
+use App\Http\Middleware\EnsureUserIsAdmin; // Importeer je class
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+
+        // Hier registreren we de alias
+        $middleware->alias([
+            'admin' => EnsureUserIsAdmin::class,
+        ]);
+
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();
+        </code></pre>
+
+        <h2>Routes Beveiligen</h2>
+        <p>Nu kunnen we de alias <code>admin</code> gebruiken in onze route groep in <code>routes/web.php</code>. We stapelen hem bovenop de <code>auth</code> middleware.</p>
+
+        <pre><code class="language-php">
+// routes/web.php
+
+// De gebruiker moet ingelogd zijn (auth) EN admin zijn (admin)
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::resource('categories', CategoryController::class);
+        Route::resource('products', ProductController::class);
+        Route::resource('users', UserController::class);
+
+        // ... overige admin routes
+});
+        </code></pre>
+
+        <h2>Testen en Verifiëren</h2>
+        <p>Het testen van beveiliging is cruciaal. Je moet verifiëren dat het werkt zoals verwacht.</p>
+
+        <h3>Scenario 1: De Blije Pad (Happy Path)</h3>
+        <ol>
+            <li>Log in met je admin-account (die we in de Seeder hebben gemaakt).</li>
+            <li>Ga naar <code>/admin/categories</code>.</li>
+            <li><strong>Resultaat:</strong> Je ziet de pagina.</li>
+        </ol>
+
+        <h3>Scenario 2: De Indringer</h3>
+        <ol>
+            <li>Log uit of log in met een gewone gebruiker (is_admin = 0).</li>
+            <li>Probeer handmatig naar <code>/admin/categories</code> te gaan.</li>
+            <li><strong>Resultaat:</strong> Je krijgt een <strong>403 | FORBIDDEN</strong> scherm te zien (standaard Laravel foutpagina).</li>
+        </ol>
+
+        <p>Gefeliciteerd! Je admin-paneel is nu volledig afgeschermd. Alleen gebruikers die in de database expliciet als admin zijn gemarkeerd, kunnen wijzigingen aanbrengen.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

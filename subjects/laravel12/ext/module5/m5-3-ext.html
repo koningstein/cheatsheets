@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Opslaan - Laravel 12 Module 5</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Orders Opslaan</h1>
+        <p>We hebben een winkelwagen in de sessie (Module 4) en we hebben database tabellen klaarstaan (Module 5-1). Nu komt het moment van de waarheid: de <strong>Checkout</strong>. De klant drukt op "Afrekenen" en wij moeten zorgen dat de tijdelijke sessie-data wordt omgezet in een permanente bestelling in de database.</p>
+        <p>Dit is een kritiek proces. Als er iets misgaat tijdens het opslaan (bijvoorbeeld: de stroom valt uit halverwege het opslaan van de regels), mag er geen halve bestelling in de database staan. Hiervoor gebruiken we <strong>Database Transacties</strong>.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan data overzetten van de Sessie naar de Database (Migratie van data).</li>
+                <li>Ik kan een <strong>Database Transaction</strong> gebruiken om de data-integriteit te bewaken.</li>
+                <li>Ik kan een <code>foreach</code> loop gebruiken om orderregels (OrderItems) aan te maken.</li>
+                <li>Ik kan de sessie leegmaken (<code>session()->forget</code>) na een succesvolle bestelling.</li>
+                <li>Ik kan de gebruiker doorsturen naar een bedankpagina.</li>
+            </ul>
+        </div>
+
+        <h2>Stap 1: De Checkout Controller</h2>
+        <p>We maken een nieuwe controller die het afrekenproces beheert.</p>
+        <pre><code class="language-bash">php artisan make:controller CheckoutController</code></pre>
+
+        <p>Voeg de routes toe in <code>routes/web.php</code>. Let op: je moet ingelogd zijn om te bestellen, dus deze routes moeten binnen de <code>auth</code> middleware vallen.</p>
+
+        <pre><code class="language-php">
+use App\Http\Controllers\CheckoutController;
+
+Route::middleware(['auth'])->group(function () {
+    // Het formulier om gegevens te controleren
+    Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+
+    // De daadwerkelijke opslag actie
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+    // De bedankpagina
+    Route::get('/order-completed', [CheckoutController::class, 'success'])->name('checkout.success');
+});
+        </code></pre>
+
+        <h2>Stap 2: Het Formulier (Create)</h2>
+        <p>In de <code>create</code> methode tonen we een formulier waar de klant zijn adresgegevens kan invullen. We geven ook de inhoud van de winkelwagen mee, zodat de klant nog één keer het totaalbedrag ziet.</p>
+
+        <pre><code class="language-php">
+// CheckoutController.php
+public function create()
+{
+    $cart = session()->get('cart', []);
+
+    // Als de kar leeg is, stuur terug naar de shop
+    if(count($cart) === 0) {
+        return to_route('shop.index');
+    }
+
+    return view('shop.checkout', [
+        'cart' => $cart
+    ]);
+}
+        </code></pre>
+
+        <p>Maak de view <code>resources/views/shop/checkout.blade.php</code>. Hierin komt een simpel formulier voor straat, postcode en woonplaats.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;h1 class="text-3xl font-bold mb-6"&gt;Afrekenen&lt;/h1&gt;
+
+    &lt;form action="{{ route('checkout.store') }}" method="POST"&gt;
+        @csrf
+
+        &lt;div class="grid grid-cols-1 md:grid-cols-2 gap-6"&gt;
+            &lt;div&gt;
+                &lt;label class="block font-bold mb-2"&gt;Adres&lt;/label&gt;
+                &lt;input type="text" name="address" class="w-full border p-2 rounded" required&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+                &lt;label class="block font-bold mb-2"&gt;Postcode&lt;/label&gt;
+                &lt;input type="text" name="zipcode" class="w-full border p-2 rounded" required&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+                &lt;label class="block font-bold mb-2"&gt;Woonplaats&lt;/label&gt;
+                &lt;input type="text" name="city" class="w-full border p-2 rounded" required&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;button type="submit" class="mt-6 bg-green-600 text-white font-bold py-3 px-8 rounded hover:bg-green-700"&gt;
+            Definitief Bestellen
+        &lt;/button&gt;
+    &lt;/form&gt;
+@endsection
+        </code></pre>
+
+        <h2>Stap 3: Opslaan met Transacties (Store)</h2>
+        <p>Nu het belangrijkste deel. We gaan de bestelling opslaan. Omdat we in twee tabellen schrijven (`orders` en `order_items`), gebruiken we <code>DB::transaction</code>. Dit zorgt ervoor dat als er iets fout gaat bij het wegschrijven van de items, de hele bestelling wordt teruggedraaid (Rollback).</p>
+
+        <pre><code class="language-php">
+use App\Models\Order;
+use App\Models\OrderItem;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+public function store(Request $request)
+{
+    // 1. Valideer de invoer
+    $data = $request->validate([
+        'address' => 'required|string',
+        'zipcode' => 'required|string',
+        'city'    => 'required|string',
+    ]);
+
+    $cart = session()->get('cart', []);
+
+    // 2. Start de Transactie
+    DB::transaction(function () use ($data, $cart) {
+
+        // A. Maak de Order aan (Kop)
+        $order = Order::create([
+            'user_id'     => Auth::id(),
+            'address'     => $data['address'],
+            'zipcode'     => $data['zipcode'],
+            'city'        => $data['city'],
+            'total_price' => 0, // Berekenen we zo
+            'status'      => 'pending',
+        ]);
+
+        $total = 0;
+
+        // B. Loop door de winkelwagen en maak Items aan (Regels)
+        foreach ($cart as $id => $details) {
+            OrderItem::create([
+                'order_id'   => $order->id,
+                'product_id' => $id,
+                'quantity'   => $details['quantity'],
+                'price'      => $details['price'], // De prijs OP DIT MOMENT
+            ]);
+
+            $total += $details['price'] * $details['quantity'];
+        }
+
+        // C. Update het totaalbedrag in de Order
+        $order->update(['total_price' => $total]);
+    });
+
+    // 3. Maak de winkelwagen leeg
+    session()->forget('cart');
+
+    // 4. Stuur naar bedankpagina
+    return to_route('checkout.success');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Wat gebeurt er bij een fout?</strong><br>
+            Stel dat de database vol zit precies nadat de Order is aangemaakt, maar voordat de Items zijn opgeslagen. Zonder transactie heb je dan een lege order in je systeem. <br>
+            Mèt <code>DB::transaction</code> gooit Laravel de Order ook weer weg. Het is "alles of niets".
+        </div>
+
+        <h2>Stap 4: De Bedankpagina</h2>
+        <p>Als laatste maken we een simpele pagina om de klant te bedanken. Dit voorkomt ook dat de klant per ongeluk op "F5" drukt en de bestelling dubbel plaatst (want de sessie is nu toch al leeg).</p>
+
+        <pre><code class="language-php">
+public function success()
+{
+    return view('shop.success');
+}
+        </code></pre>
+
+        <p>En de view <code>resources/views/shop/success.blade.php</code>:</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="text-center py-16"&gt;
+        &lt;h1 class="text-4xl font-bold text-green-600 mb-4"&gt;Bedankt voor je bestelling!&lt;/h1&gt;
+        &lt;p class="text-xl text-gray-600 mb-8"&gt;We gaan direct voor je aan de slag.&lt;/p&gt;
+
+        &lt;a href="{{ route('shop.index') }}" class="bg-blue-600 text-white font-bold py-3 px-8 rounded hover:bg-blue-700"&gt;
+            Verder Winkelen
+        &lt;/a&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Testen</h2>
+        <p>Doorloop nu het hele proces:</p>
+        <ol>
+            <li>Stop producten in je winkelwagen.</li>
+            <li>Ga naar de winkelwagen pagina en klik op afrekenen.</li>
+            <li>Vul gegevens in en klik op Bestellen.</li>
+            <li>Controleer in je database (PHPMyAdmin) of er een nieuwe regel in <code>orders</code> staat en bijbehorende regels in <code>order_items</code>.</li>
+            <li>Controleer of je winkelwagen nu weer leeg is.</li>
+        </ol>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

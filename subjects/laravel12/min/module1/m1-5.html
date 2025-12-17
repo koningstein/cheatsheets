@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create & store - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller - Create & Store</h1>
+        <p>We breiden de CRUD uit met de mogelijkheid om nieuwe items toe te voegen. Hiervoor maken we een formulier (Create) en verwerken we de invoer om deze op te slaan in de database (Store).</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een formulier maken in Blade.</li>
+            <li>Ik kan POST data verwerken in store methode.</li>
+            <li>Ik kan mass assignment voorkomen met $guarded.</li>
+            <li>Ik kan redirects maken naar named routes.</li>
+        </ul>
+
+        <h3 id="create">Stap 1: Create Methode</h3>
+        <p>De <code>create()</code> methode toont alleen het lege formulier.</p>
+        <pre><code class="language-php">
+public function create()
+{
+    return view('admin.categories.create');
+}
+        </code></pre>
+
+        <h3 id="view">Stap 2: Create View</h3>
+        <p>Maak <code>resources/views/admin/categories/create.blade.php</code>. Let op:</p>
+        <ul>
+            <li><strong>Action:</strong> Gebruik <code>route('categories.store')</code>.</li>
+            <li><strong>CSRF:</strong> Voeg <code>@csrf</code> toe voor beveiliging.</li>
+        </ul>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1&gt;Nieuwe Categorie&lt;/h1&gt;
+
+    &lt;form action="{{ route('categories.store') }}" method="POST"&gt;
+        @csrf
+
+        &lt;label&gt;Naam:&lt;/label&gt;
+        &lt;input type="text" name="name" class="border p-2"&gt;
+
+        &lt;button type="submit"&gt;Opslaan&lt;/button&gt;
+    &lt;/form&gt;
+@endsection
+        </code></pre>
+
+        <h3 id="mass-assignment">Stap 3: Mass Assignment (Model)</h3>
+        <p>Om data op te slaan via <code>create()</code>, moet je het Model toestemming geven. Zet in <code>Category.php</code>:</p>
+        <pre><code class="language-php">protected $guarded = []; // Alles mag gevuld worden</code></pre>
+
+        <h3 id="store">Stap 4: Store Methode</h3>
+        <p>In de controller vangen we de data op via <code>$request</code> en slaan het op.</p>
+        <pre><code class="language-php">
+public function store(Request $request)
+{
+    // Maak aan in database
+    Category::create([
+        'name' => $request->name
+    ]);
+
+    // Redirect naar index
+    return to_route('categories.index');
+}
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

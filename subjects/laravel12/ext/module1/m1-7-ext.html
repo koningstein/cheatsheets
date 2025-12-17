@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailpagina (Show) - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller: Show</h1>
+        <p>We hebben nu een overzicht (Index) en we kunnen nieuwe items aanmaken (Create & Store). De volgende stap is het bekijken van de details van één specifiek item. Hiervoor gebruiken we de <code>show</code> methode in onze Resource Controller.</p>
+
+        <p>De <code>show</code> methode lijkt qua structuur een beetje op de <code>index</code>. Het grote verschil is dat we bij de index <em>alle</em> rijen ophalen, en bij de show slechts <strong>één specifieke rij</strong> willen zien.</p>
+
+        <h2 id="model-binding">Implicit Model Binding</h2>
+        <p>Hier komen we in aanraking met een van de krachtigste features van Laravel: <strong>Implicit Model Binding</strong>. Dit is een techniek waarbij Laravel automatisch de juiste data uit de database haalt op basis van de URL.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Hoe werkt het?</strong><br>
+            Als je een URL hebt zoals <code>/admin/categories/1</code>, dan is <code>1</code> het ID van de categorie.
+            In je route staat dit gedefinieerd als <code>/admin/categories/{category}</code>.
+            <br><br>
+            Als je in je controller-functie de parameter <code>Category $category</code> noemt (dezelfde naam als in de route, maar dan als variabele), snapt Laravel dat hij automatisch naar de database moet gaan. Hij zoekt dan naar een Categorie met dat ID. Als hij het vindt, stopt hij het hele object in de variabele <code>$category</code>. Als hij het niet vindt, geeft hij automatisch een 404 error. Je hoeft dus niet meer zelf <code>Category::find($id)</code> te typen!
+        </div>
+
+        <h2 id="show-method">De Show Methode</h2>
+        <p>Laten we kijken naar de code in de <code>CategoryController</code>. Omdat we gebruik maken van Model Binding, krijgen we het categorie-object 'gratis' binnen als parameter.</p>
+
+        <pre><code class="language-php">
+/**
+ * Display the specified resource.
+ */
+public function show(Category $category): View
+{
+    // Door Model Binding zit de juiste categorie al in $category.
+    // We hoeven hem alleen nog maar door te sturen naar de view.
+
+    return view('admin.categories.show', [
+        'category' => $category
+    ]);
+}
+        </code></pre>
+
+        <p>Je ziet dat de methode heel kort en schoon is. We hoeven geen queries te schrijven omdat Laravel het werk al voor ons heeft gedaan.</p>
+
+        <h2 id="show-view">De View Maken</h2>
+        <p>We maken een nieuw bestand aan: <code>resources/views/admin/categories/show.blade.php</code>.
+            We gebruiken weer onze masterpage en tonen de gegevens van de categorie. We zorgen ook voor een 'Topmenu' zodat je makkelijk terug kunt navigeren.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('topmenu')
+    &lt;nav class="flex mb-4" aria-label="Breadcrumb"&gt;
+        &lt;ol class="inline-flex items-center space-x-1 md:space-x-3"&gt;
+            &lt;li class="inline-flex items-center"&gt;
+                &lt;a href="{{ route('admin.categories.index') }}" class="text-gray-700 hover:text-blue-600"&gt;
+                    &lt; Terug naar overzicht
+                &lt;/a&gt;
+            &lt;/li&gt;
+        &lt;/ol&gt;
+    &lt;/nav&gt;
+    &lt;h2 class="text-3xl font-extrabold"&gt;Details van {{ $category-&gt;name }}&lt;/h2&gt;
+@endsection
+
+@section('content')
+    &lt;div class="bg-white shadow overflow-hidden sm:rounded-lg mt-6"&gt;
+        &lt;div class="px-4 py-5 sm:px-6"&gt;
+            &lt;h3 class="text-lg leading-6 font-medium text-gray-900"&gt;
+                Categorie Informatie
+            &lt;/h3&gt;
+        &lt;/div&gt;
+        &lt;div class="border-t border-gray-200"&gt;
+            &lt;dl&gt;
+                &lt;div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                    &lt;dt class="text-sm font-medium text-gray-500"&gt;ID&lt;/dt&gt;
+                    &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;{{ $category-&gt;id }}&lt;/dd&gt;
+                &lt;/div&gt;
+                &lt;div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                    &lt;dt class="text-sm font-medium text-gray-500"&gt;Naam&lt;/dt&gt;
+                    &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;{{ $category-&gt;name }}&lt;/dd&gt;
+                &lt;/div&gt;
+                &lt;div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                    &lt;dt class="text-sm font-medium text-gray-500"&gt;Aangemaakt op&lt;/dt&gt;
+                    &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;{{ $category-&gt;created_at }}&lt;/dd&gt;
+                &lt;/div&gt;
+                &lt;div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                    &lt;dt class="text-sm font-medium text-gray-500"&gt;Laatst gewijzigd&lt;/dt&gt;
+                    &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;{{ $category-&gt;updated_at }}&lt;/dd&gt;
+                &lt;/div&gt;
+            &lt;/dl&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2 id="linken">Linken vanaf de Index</h2>
+        <p>De pagina bestaat nu, maar je moet de URL handmatig intypen om er te komen (bijvoorbeeld <code>/admin/categories/1</code>). Het is natuurlijk netter om vanuit de index-tabel direct naar de detailpagina te linken.</p>
+
+        <p>We passen <code>resources/views/admin/categories/index.blade.php</code> aan. We gebruiken hiervoor de named route <code>admin.categories.show</code>. Let op: deze route verwacht een parameter (de categorie die je wilt zien).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Parameter doorgeven:</strong><br>
+            De route is gedefinieerd als <code>categories/{category}</code>. Als we de route-functie gebruiken, moeten we aangeven <em>welke</em> categorie we bedoelen. We kunnen simpelweg het hele object meegeven: <code>route('admin.categories.show', $category)</code>. Laravel is slim genoeg om automatisch het ID uit dat object te halen en in de URL te plakken.
+        </div>
+
+        <pre><code class="language-html">
+&lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium"&gt;
+    &lt;a href="{{ route('admin.categories.show', $category) }}" class="text-indigo-600 hover:text-indigo-900 mr-3"&gt;Details&lt;/a&gt;
+    &lt;a href="#" class="text-indigo-600 hover:text-indigo-900"&gt;Wijzig&lt;/a&gt;
+&lt;/td&gt;
+        </code></pre>
+
+        <p>Als je nu naar het overzicht gaat, zie je bij elke rij een link "Details". Als je daarop klikt, kom je op de detailpagina van die specifieke categorie.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

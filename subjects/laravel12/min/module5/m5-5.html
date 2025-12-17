@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order naar PDF - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Order naar PDF</h1>
+        <p>Een bestelling is leuk, maar een factuur is beter. We gaan een PDF genereren van de bestelling die de klant kan downloaden.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan de <code>barryvdh/laravel-dompdf</code> package installeren.</li>
+            <li>Ik kan een HTML view omzetten naar een PDF bestand.</li>
+            <li>Ik kan een download response terugsturen naar de browser.</li>
+        </ul>
+
+        <h3 id="install">Stap 1: Package Installatie</h3>
+        <p>Installeer de dompdf wrapper voor Laravel:</p>
+        <pre><code class="language-bash">composer require barryvdh/laravel-dompdf</code></pre>
+
+        <h3 id="controller">Stap 2: Controller Methode</h3>
+        <p>In de <code>OrderController</code> voegen we een methode toe om de PDF te maken.</p>
+
+        <pre><code class="language-php">
+use Barryvdh\DomPDF\Facade\Pdf;
+
+public function exportPdf(Order $order)
+{
+    // Check eigenaar
+    if ($order->user_id !== Auth::id()) {
+        abort(403);
+    }
+
+    $order->load('orderrows.product');
+
+    // Laad de view in de PDF generator
+    $pdf = Pdf::loadView('open.orders.pdf', ['order' => $order]);
+
+    // Download de PDF
+    return $pdf->download('factuur-'.$order->id.'.pdf');
+}
+        </code></pre>
+
+        <h3 id="view">Stap 3: PDF View</h3>
+        <p>Maak <code>resources/views/open/orders/pdf.blade.php</code>. Dit is simpele HTML (geen Tailwind, want dat werkt slecht in PDF generators). Gebruik inline CSS of een simpele style tag.</p>
+
+        <pre><code class="language-html">
+&lt;html&gt;
+&lt;head&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Factuur #{{ $order->id }}&lt;/h1&gt;
+    &lt;table&gt;
+        &lt;tr&gt;&lt;th&gt;Product&lt;/th&gt;&lt;th&gt;Prijs&lt;/th&gt;&lt;/tr&gt;
+        @foreach($order->orderrows as $row)
+            &lt;tr&gt;
+                &lt;td&gt;{{ $row->product->name }}&lt;/td&gt;
+                &lt;td&gt;&euro; {{ $row->price }}&lt;/td&gt;
+            &lt;/tr&gt;
+        @endforeach
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+
+        <h3 id="route">Stap 4: Route & Link</h3>
+        <p>Voeg de route toe in <code>web.php</code>:</p>
+        <pre><code class="language-php">Route::get('/orders/{order}/pdf', [OrderController::class, 'exportPdf'])
+            ->name('open.orders.pdf');</code></pre>
+
+        <p>En voeg een knop toe op de show pagina:</p>
+        <pre><code class="language-html">
+&lt;a href="{{ route('open.orders.pdf', $order) }}" class="bg-gray-500 text-white
+            px-4 py-2 rounded"&gt;
+    Download PDF
+&lt;/a&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

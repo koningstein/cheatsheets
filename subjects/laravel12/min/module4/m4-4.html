@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Tonen - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Reviews Tonen</h1>
+        <p>Nu we reviews in de database hebben, willen we deze ook tonen bij het product. Dit geeft klanten waardevolle informatie.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan reviews ophalen via Eager Loading.</li>
+            <li>Ik kan het gemiddelde van een collectie berekenen (avg).</li>
+            <li>Ik kan reviews weergeven op de productpagina.</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller Uitbreiden</h3>
+        <p>In de `show` methode van `ProductController` halen we nu ook de reviews op. We gebruiken `with('user')` om ook de naam van de schrijver te hebben, en `paginate(5)` zodat de pagina niet te lang wordt.</p>
+
+        <pre><code class="language-php">
+public function show(Product $product)
+{
+    // Haal de reviews op via de relatie, inclusief de gebruiker
+    $reviews = $product->reviews()->with('user')->latest()->paginate(5);
+
+    return view('open.products.show', [
+        'product' => $product,
+        'reviews' => $reviews
+    ]);
+}
+        </code></pre>
+
+        <h3 id="avg">Stap 2: Gemiddelde Score Berekenen</h3>
+        <p>In de view kunnen we met de `avg()` methode op de reviews collectie direct het gemiddelde uitrekenen en tonen.</p>
+
+        <pre><code class="language-html">
+&lt;div class="flex items-center mb-4"&gt;
+    &lt;span class="text-yellow-500 text-2xl mr-2"&gt;
+        ★ {{ round($product->reviews->avg('rating'), 1) }}
+    &lt;/span&gt;
+    &lt;span class="text-gray-500"&gt;
+        ({{ $product->reviews->count() }} reviews)
+    &lt;/span&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <h3 id="list">Stap 3: Reviews Lijst</h3>
+        <p>Voeg onderaan de `show.blade.php` een sectie toe voor de reviews.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-12"&gt;
+    &lt;h3 class="text-2xl font-bold mb-6"&gt;Klantbeoordelingen&lt;/h3&gt;
+
+    @foreach($reviews as $review)
+        &lt;div class="bg-gray-50 p-4 rounded-lg mb-4"&gt;
+            &lt;div class="flex justify-between items-start"&gt;
+                &lt;h4 class="font-bold text-lg"&gt;{{ $review->title }}&lt;/h4&gt;
+                &lt;span class="text-yellow-500 font-bold"&gt;{{ $review->rating }} ★&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;p class="text-gray-700 mt-2"&gt;{{ $review->body }}&lt;/p&gt;
+
+            &lt;p class="text-xs text-gray-400 mt-3"&gt;
+                Geschreven door {{ $review->user->name }} -
+                {{ $review->created_at->diffForHumans() }}
+            &lt;/p&gt;
+        &lt;/div&gt;
+    @endforeach
+
+    &lt;div class="mt-4"&gt;
+        {{ $reviews->links() }}
+    &lt;/div&gt;
+&lt;/div&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

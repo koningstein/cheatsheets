@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layouts & Tailwind - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Layouts & Tailwind</h1>
+        <p>Voordat we beginnen met het programmeren van de functionaliteit, is het handig om een basis lay-out te hebben. In Laravel gebruiken we hiervoor het <strong>Masterpage</strong> concept (via Views). Dit betekent dat alles wat op elke pagina steeds hetzelfde is (zoals de navigatiebalk) in de masterpage staat, en wat verandert in de sub page.</p>
+
+        <p>Dit implementeert het <strong>Template Method Pattern</strong>: een masterpage definieert de structuur, subpagina's vullen de details in. Het volgt ook het <strong>DRY Principle</strong> (Don't Repeat Yourself).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik snap het concept van Template Inheritance (Masterpages).</li>
+                <li>Ik kan een lay-out opsplitsen in partials (navbar, sidebar).</li>
+                <li>Ik kan `yield` en `include` toepassen.</li>
+                <li>Ik kan een route maken om een view te testen.</li>
+            </ul>
+        </div>
+
+        <h2>Livewire Starterkit</h2>
+        <p>Voor dit project gebruiken we de <strong>Livewire starterkit</strong>. Dit pakket geeft ons direct een goede basis voor authenticatie (registreren, inloggen) en lay-out met Tailwind CSS. De installatie zorgt ervoor dat CSS en JavaScript bestanden correct worden geladen via Vite.</p>
+        <p>Vite wordt gebruikt voor het bundelen van assets. De config staat in <code>vite.config.js</code> en de bestanden staan in <code>resources/css/app.css</code> en <code>resources/js/app.js</code>.</p>
+
+        <h2>De Masterpage Opbouwen</h2>
+        <p>We gaan onze lay-out opsplitsen in kleine, herbruikbare bestanden. Dit implementeert het <strong>Composite Pattern</strong>: grote templates opsplitsen in kleine stukken. Het voordeel is dat elk bestand één doel heeft en je bugs makkelijker kunt vinden.</p>
+
+        <p>We maken de volgende structuur in <code>resources/views/layouts</code>:</p>
+        <ul>
+            <li><code>layoutadmin.blade.php</code> (De masterpage)</li>
+            <li>Map <code>base</code> met daarin:
+                <ul>
+                    <li><code>start.blade.php</code> (HTML head, CSS laden)</li>
+                    <li><code>navbar.blade.php</code> (Bovenbalk)</li>
+                    <li><code>sidebar.blade.php</code> (Zijmenu)</li>
+                    <li><code>end.blade.php</code> (Scripts laden, footer)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>De Masterpage Code</h3>
+        <p>De masterpage <code>layoutadmin.blade.php</code> knoopt alles aan elkaar met <code>@include</code> en <code>@yield</code>.</p>
+
+        <pre><code class="language-html">
+@include('layouts.base.start')
+@include('layouts.base.navbar')
+
+&lt;div class="h-screen flex flex-row flex-wrap"&gt;
+
+    @include('layouts.base.sidebar')
+
+    &lt;div class="bg-gray-100 flex-1 p-6 md:mt-16"&gt;
+        @yield('topmenu')
+
+        @yield('content')
+    &lt;/div&gt;
+
+&lt;/div&gt;
+
+@include('layouts.base.end')
+        </code></pre>
+
+        <h3>Uitleg Blade Directives</h3>
+        <ul>
+            <li><code>@include('pad.naar.bestand')</code>: Laadt een ander Blade-bestand in op die plek.</li>
+            <li><code>@yield('naam')</code>: Definieert een sectie waar subpagina's hun inhoud in kunnen "injecteren".</li>
+        </ul>
+
+        <h2>De Componenten</h2>
+        <p>Laten we kijken wat er in de losse bestanden moet komen.</p>
+
+        <h3>Start (resources/views/layouts/base/start.blade.php)</h3>
+        <p>Hier laden we de CSS in. Omdat we de Livewire starterkit gebruiken, doen we dit via Vite.</p>
+        <pre><code class="language-html">
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;title&gt;Laravel Opdrachten&lt;/title&gt;
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+&lt;/head&gt;
+&lt;body class="bg-gray-100"&gt;
+        </code></pre>
+
+        <h3>Navbar (resources/views/layouts/base/navbar.blade.php)</h3>
+        <p>Hierin maken we de uitlog-knop. Let op: uitloggen is een actie die gegevens verandert (je sessie stopt), daarom moet dit veilig via een POST-request gebeuren voor CSRF bescherming.</p>
+        <pre><code class="language-html">
+&lt;a href="{{ route('logout') }}"
+   onclick="event.preventDefault(); document.getElementById('logout-form').submit();"&gt;
+   Uitloggen
+&lt;/a&gt;
+
+&lt;form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;"&gt;
+    @csrf
+&lt;/form&gt;
+        </code></pre>
+
+        <h3>Sidebar (resources/views/layouts/base/sidebar.blade.php)</h3>
+        <p>In het menu kunnen we bepalen wie wat ziet. Met <code>@auth</code> toon je dingen alleen aan ingelogde gebruikers, met <code>@guest</code> alleen aan gasten (niet ingelogd).</p>
+        <pre><code class="language-html">
+@guest
+    &lt;p&gt;Gast&lt;/p&gt;
+    &lt;a href="{{ route('login') }}"&gt;Login&lt;/a&gt;
+@else
+    &lt;p&gt;Admin&lt;/p&gt;
+    &lt;a href=""&gt;Category admin&lt;/a&gt;
+    &lt;a href=""&gt;Product admin&lt;/a&gt;
+@endguest
+        </code></pre>
+
+        <div class="info-box">
+            <h2>Bestanden Downloaden</h2>
+            <p>Om tijd te besparen kun je de basisbestanden hieronder downloaden. Plaats deze bestanden vervolgens in je project in de map <code>resources/views/layouts/base/</code>. De Css, Javascript en images pak je uit. De mappen moeten dan in de <code>public</code> map geplaatst worden.</p>
+
+            <div class="download-grid">
+                <a href="../../downloads/start.blade.php" download class="download-btn">
+                    📄 start.blade.php
+                </a>
+                <a href="../../downloads/navbar.blade.php" download class="download-btn">
+                    📄 navbar.blade.php
+                </a>
+                <a href="../../downloads/sidebar.blade.php" download class="download-btn">
+                    📄 sidebar.blade.php
+                </a>
+                <a href="../../downloads/end.blade.php" download class="download-btn">
+                    📄 end.blade.php
+                </a>
+                <a href="../../downloads/assets.zip" download class="download-btn">
+                    📄 Css, Javascript & images
+                </a>
+            </div>
+        </div>
+
+        <h2>Testen</h2>
+        <p>Om te kijken of je lay-out werkt, maken we een tijdelijke route aan. Ga naar <code>routes/web.php</code> en voeg dit toe:</p>
+
+        <pre><code class="language-php">
+Route::get('/admin', function () {
+    // We laden direct de masterpage om te testen
+    return view('layouts.layoutadmin');
+})->name('admin');
+        </code></pre>
+
+        <p>Start je server (<code>php artisan serve</code>) en ga in je browser naar <code>/admin</code>. Als het goed is zie je nu je nieuwe structuur!</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

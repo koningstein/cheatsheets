@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Plaatsen - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Reviews Plaatsen</h1>
+        <p>In de vorige module hebben we reviews getoond. Nu is het tijd om de functionaliteit te bouwen waarmee klanten daadwerkelijk hun stem kunnen laten horen. Het maken van een invoerformulier lijkt simpel, maar er komt veel bij kijken: beveiliging, validatie-feedback en gebruikerservaring.</p>
+        <p>We gaan een formulier toevoegen aan de productpagina. Hierbij zorgen we ervoor dat alleen ingelogde gebruikers iets kunnen plaatsen en dat foutieve invoer netjes wordt afgehandeld.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een HTML-formulier maken met een <code>POST</code> method.</li>
+                <li>Ik begrijp waarom de <code>@csrf</code> token essentieel is voor beveiliging.</li>
+                <li>Ik kan validatiefouten tonen bij specifieke velden met de <code>@error</code> directive.</li>
+                <li>Ik kan de functie <code>old()</code> gebruiken om ingevoerde tekst te bewaren bij fouten.</li>
+                <li>Ik kan een succesmelding (Flash Message) tonen na het opslaan.</li>
+            </ul>
+        </div>
+
+        <h2>Het Formulier (Blade)</h2>
+        <p>We plaatsen het formulier onderaan de detailpagina (<code>show.blade.php</code>). Een formulier in Laravel vereist altijd twee dingen:</p>
+        <ol>
+            <li>Een <strong>Action</strong>: Naar welke URL sturen we de data? (De route die we in 4-3 maakten).</li>
+            <li>Een <strong>Method</strong>: Voor het aanmaken van data gebruiken we altijd <code>POST</code>.</li>
+        </ol>
+
+        <h3>Beveiliging: CSRF</h3>
+        <p>Laravel beschermt je applicatie standaard tegen <em>Cross-Site Request Forgery</em> aanvallen. Dit betekent dat een andere website niet zomaar namens jouw gebruiker een formulier kan versturen. Om dit te laten werken, moet je <strong>altijd</strong> de <code>@csrf</code> directive in je formulier zetten. Dit genereert een verborgen veld met een unieke token.</p>
+
+        <h2>Validatie Feedback (@error)</h2>
+        <p>Als een gebruiker vergeet een score te kiezen of de tekst te kort is, stuurt de Controller hem terug. Het is cruciaal dat we dan laten zien <em>wat</em> er fout ging. Hiervoor gebruiken we de <code>@error('veldnaam')</code> directive.</p>
+
+        <p>Ook gebruiken we <code>old('body')</code>. Dit zorgt ervoor dat de tekst die de gebruiker net heeft getypt, weer terug in het vakje staat. Niets is frustrerender dan je hele review opnieuw moeten typen na een klein foutje!</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-10 bg-gray-50 p-6 rounded-lg"&gt;
+    @auth
+        &lt;h3 class="text-xl font-bold mb-4"&gt;Schrijf een review&lt;/h3&gt;
+
+        &lt;form action="{{ route('products.reviews.store', $product) }}" method="POST"&gt;
+            @csrf {{-- CRUCIAAL! --}}
+
+            &lt;!-- Rating Selectie --&gt;
+            &lt;div class="mb-4"&gt;
+                &lt;label for="rating" class="block font-bold mb-1 text-gray-700"&gt;Score&lt;/label&gt;
+                &lt;select name="rating" id="rating" class="w-full border p-2 rounded @error('rating') border-red-500 @enderror"&gt;
+                    &lt;option value="5"&gt;5 Sterren - Geweldig&lt;/option&gt;
+                    &lt;option value="4"&gt;4 Sterren - Goed&lt;/option&gt;
+                    &lt;option value="3"&gt;3 Sterren - Gemiddeld&lt;/option&gt;
+                    &lt;option value="2"&gt;2 Sterren - Matig&lt;/option&gt;
+                    &lt;option value="1"&gt;1 Ster - Slecht&lt;/option&gt;
+                &lt;/select&gt;
+
+                {{-- Foutmelding tonen --}}
+                @error('rating')
+                    &lt;p class="text-red-500 text-sm mt-1"&gt;{{ $message }}&lt;/p&gt;
+                @enderror
+            &lt;/div&gt;
+
+            &lt;!-- Review Tekst --&gt;
+            &lt;div class="mb-4"&gt;
+                &lt;label for="body" class="block font-bold mb-1 text-gray-700"&gt;Jouw mening&lt;/label&gt;
+                &lt;textarea name="body" id="body" rows="4"
+                          class="w-full border p-2 rounded @error('body') border-red-500 @enderror"
+                          placeholder="Vertel wat je van het product vindt..."&gt;{{ old('body') }}&lt;/textarea&gt;
+
+                @error('body')
+                    &lt;p class="text-red-500 text-sm mt-1"&gt;{{ $message }}&lt;/p&gt;
+                @enderror
+            &lt;/div&gt;
+
+            &lt;button type="submit" class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition"&gt;
+                Plaats Review
+            &lt;/button&gt;
+        &lt;/form&gt;
+
+    @else
+        &lt;!-- Als de bezoeker NIET is ingelogd --&gt;
+        &lt;div class="text-center py-4"&gt;
+            &lt;p class="text-gray-600 mb-2"&gt;Wil je een review schrijven?&lt;/p&gt;
+            &lt;a href="{{ route('login') }}" class="text-blue-600 font-bold hover:underline"&gt;
+                Log in om te reageren
+            &lt;/a&gt;
+        &lt;/div&gt;
+    @endauth
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>Succesmelding (Flash Messages)</h2>
+        <p>Wanneer de review succesvol is opgeslagen, wordt de gebruiker teruggestuurd naar de productpagina (via <code>return back()->with('status', '...')</code> in de Controller). We moeten dit bericht nog wel even tonen.</p>
+        <p>Voeg dit stukje code toe <strong>boven</strong> je review-sectie of helemaal bovenaan de pagina:</p>
+
+        <pre><code class="language-html">
+@if (session('status'))
+    &lt;div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert"&gt;
+        &lt;strong class="font-bold"&gt;Bedankt!&lt;/strong&gt;
+        &lt;span class="block sm:inline"&gt;{{ session('status') }}&lt;/span&gt;
+    &lt;/div&gt;
+@endif
+        </code></pre>
+
+        <h2>De Controller Logica (Recap)</h2>
+        <p>Even ter herinnering: om de validatiemeldingen te laten werken, moet je Controller de <code>validate</code> methode gebruiken. Als de validatie faalt, zorgt Laravel er automatisch voor dat:</p>
+        <ol>
+            <li>De gebruiker wordt teruggestuurd (redirect back).</li>
+            <li>De foutmeldingen in de <code>$errors</code> variabele komen.</li>
+            <li>De oude input in de sessie wordt gezet (voor <code>old()</code>).</li>
+        </ol>
+
+        <pre><code class="language-php">
+// In ProductReviewController.php
+public function store(Request $request, Product $product)
+{
+    // Dit triggert automatisch de redirect bij fouten
+    $data = $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'body'   => 'required|string|min:10|max:1000',
+    ]);
+
+    // ... opslaan logica ...
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Testscenario's:</strong><br>
+            1. Probeer het formulier leeg te versturen. Zie je rode teksten?<br>
+            2. Vul wel een score in, maar geen tekst. Is de score nog geselecteerd na de herlaadactie? (Dit vereist <code>@selected(old('rating') == 5)</code> in je options).<br>
+            3. Log uit en controleer of het formulier verdwenen is en de login-link zichtbaar is.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

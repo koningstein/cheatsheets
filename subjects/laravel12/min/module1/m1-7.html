@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailpagina (show) - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller - Show</h1>
+        <p>Soms wil je de details van één specifiek item bekijken. We gebruiken de Show-methode en Model Binding om eenvoudig de gegevens van één record op te halen en te tonen.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een specifiek record ophalen met route parameter.</li>
+            <li>Ik kan een detail view maken.</li>
+        </ul>
+
+        <h3 id="rmb">Stap 1: Route Model Binding</h3>
+        <p>In plaats van een ID te ontvangen en zelf te zoeken (<code>find($id)</code>), laten we Laravel het werk doen. Door <code>Category $category</code> als parameter te gebruiken, zoekt Laravel automatisch de juiste rij.</p>
+
+        <pre><code class="language-php">
+public function show(Category $category)
+{
+    // $category is al gevuld met data!
+    return view('admin.categories.show', [
+        'category' => $category
+    ]);
+}
+        </code></pre>
+
+        <h3 id="link">Stap 2: Linken in Index</h3>
+        <p>In <code>index.blade.php</code> maken we een link. We geven het object mee aan de <code>route()</code> helper.</p>
+        <pre><code class="language-html">
+&lt;a href="{{ route('categories.show', $category) }}"&gt;Details&lt;/a&gt;
+        </code></pre>
+
+        <h3 id="view">Stap 3: Show View</h3>
+        <p>Maak <code>resources/views/admin/categories/show.blade.php</code> en toon de details.</p>
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;div class="card"&gt;
+        &lt;h1&gt;{{ $category->name }}&lt;/h1&gt;
+        &lt;p&gt;ID: {{ $category->id }}&lt;/p&gt;
+        &lt;p&gt;Gemaakt op: {{ $category->created_at }}&lt;/p&gt;
+
+        &lt;a href="{{ route('categories.index') }}"&gt;Terug&lt;/a&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

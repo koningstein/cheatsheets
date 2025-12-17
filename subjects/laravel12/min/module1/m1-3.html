@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layouts & Tailwind - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Layouts & Templates</h1>
+        <p>We gaan een basis lay-out maken voor de admin-omgeving. Hiervoor gebruiken we een masterpage in Blade en Tailwind CSS voor de styling, zodat we een herbruikbare structuur hebben voor alle admin-pagina's.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een Blade layout bestand maken.</li>
+            <li>Ik kan een Tailwind template aanpassen.</li>
+            <li>Ik kan een route naar een view koppelen.</li>
+        </ul>
+
+        <div style="background: var(--primary-light, #fef2f2); padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid var(--primary-color); color: var(--text-main); margin-bottom: 2rem;">
+            <strong>LET OP VOOR DE OPDRACHTEN:</strong><br>
+            Laravel heeft tegenwoordig twee manieren voor layouts. <strong>Voor de opdrachten gebruiken we de KLASSIEKE methode (Deel 1).</strong><br>
+            De automatische tests zijn hierop gebaseerd. De moderne methode (Deel 2) staat hier ter info, omdat je die in de beroepspraktijk (en bij de Flux/Livewire starterkits) veel tegenkomt.
+        </div>
+
+        <h3 id="classic">Deel 1: Klassieke Layouts (Voor de Opdrachten)</h3>
+        <p>Dit is de basismanier van Laravel met <code>@extends</code> en <code>@yield</code>.</p>
+
+        <h4>Stap 1: Bestand aanmaken</h4>
+        <p>Maak het bestand: <code>resources/views/layouts/layoutadmin.blade.php</code>.</p>
+
+        <h4>Stap 2: De Masterpage Code</h4>
+        <p>Hier definiëren we de plekken waar content moet komen met <code>@yield</code>.</p>
+
+        <pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="nl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Laravel Admin&lt;/title&gt;
+    &lt;!-- Tailwind laden via Vite --&gt;
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+&lt;/head&gt;
+&lt;body class="bg-gray-100"&gt;
+
+    &lt;nav class="bg-white shadow p-4"&gt;
+        &lt;a href="/admin/categories" class="font-bold"&gt;Categorieën&lt;/a&gt;
+        &lt;!-- Ruimte voor extra menu items --&gt;
+        @yield('topmenu')
+    &lt;/nav&gt;
+
+    &lt;main class="container mx-auto p-6"&gt;
+        &lt;!-- HIER komt de wisselende inhoud van subpagina's --&gt;
+        @yield('content')
+    &lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+
+        <h4>Stap 3: Gebruik in een View</h4>
+        <p>In je pagina's (zoals <code>index.blade.php</code>) verwijs je naar deze layout:</p>
+        <pre><code class="language-php">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1&gt;Pagina Inhoud&lt;/h1&gt;
+@endsection
+        </code></pre>
+
+        <hr style="margin: 3rem 0; border-top: 1px solid var(--border-color);">
+
+        <h3 id="modern">Deel 2: Moderne Layouts (Livewire & Flux)</h3>
+        <p>Dit gebruikt <strong>Components</strong>. Dit is de standaard in de nieuwe Livewire starterkit.</p>
+
+        <p><strong>Flux Documentatie:</strong> <a href="https://fluxui.dev" target="_blank">https://fluxui.dev</a></p>
+
+        <h4>Stap 1: Bestand Locatie (Anders!)</h4>
+        <p>Het bestand moet staan in: <code>resources/views/components/layouts/layoutadmin.blade.php</code>.</p>
+
+        <h4>Stap 2: De Component Code ($slot)</h4>
+        <p>In plaats van <code>@yield</code> gebruiken we <code>{{ $slot }}</code>.</p>
+
+        <pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @fluxStyles
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;flux:sidebar&gt;...&lt;/flux:sidebar&gt;
+
+        &lt;flux:main&gt;
+            {{ $slot }} &lt;!-- Hier komt de inhoud --&gt;
+        &lt;/flux:main&gt;
+
+        @fluxScripts
+    &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+
+        <h4>Stap 3: Gebruik in een View</h4>
+        <p>Je gebruikt een HTML-achtige tag die verwijst naar de component:</p>
+        <pre><code class="language-html">
+&lt;x-layouts.layoutadmin&gt;
+    &lt;h1&gt;Pagina Inhoud&lt;/h1&gt;
+&lt;/x-layouts.layoutadmin&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

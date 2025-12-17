@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show & Relaties - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Show & Relaties</h1>
+        <p>Op de overzichtspagina (Index) tonen we vaak maar een klein beetje informatie om het overzichtelijk te houden. Als een beheerder alle details wil zien, zoals de volledige omschrijving of de exacte aanmaakdatum, klikt hij door naar de detailpagina.</p>
+        <p>In deze module bouwen we de <code>show</code> view voor Producten. Hierbij moeten we opletten dat we de gekoppelde Categorie-naam netjes tonen, en dat we prijzen en datums in het juiste (Nederlandse) formaat weergeven.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan de <code>show</code> methode implementeren met Route Model Binding.</li>
+                <li>Ik kan data uit een gerelateerd model (Categorie) tonen in de view.</li>
+                <li>Ik kan getallen formatteren naar Euro-notatie (<code>number_format</code>).</li>
+                <li>Ik kan datums formatteren naar leesbare tekst.</li>
+                <li>Ik kan de 'Safe Navigation Operator' gebruiken om errors te voorkomen.</li>
+            </ul>
+        </div>
+
+        <h2>De Controller Methode</h2>
+        <p>We beginnen in de <code>ProductController</code>. De <code>show</code> methode is dankzij Laravel super simpel. We gebruiken weer <strong>Implicit Model Binding</strong>: Laravel zoekt automatisch het product op basis van het ID in de URL.</p>
+
+        <pre><code class="language-php">
+public function show(Product $product): View
+{
+    // Laravel heeft het product al voor ons opgehaald ($product).
+    // We geven het direct door aan de view.
+
+    return view('admin.products.show', [
+        'product' => $product
+    ]);
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Moet ik hier Eager Loading (with) gebruiken?</strong><br>
+            Bij de Index pagina was <code>Product::with('category')->get()</code> essentieel om het N+1 probleem te voorkomen. <br>
+            Bij de Show pagina halen we maar <strong>één</strong> product op. Of we nu 1 query of 2 queries doen (één voor product, één voor categorie) maakt voor de snelheid nauwelijks uit. "Lazy loading" (het pas ophalen als je erom vraagt in de view) is hier dus prima toegestaan.
+        </div>
+
+        <h2>De View Opbouwen</h2>
+        <p>Maak het bestand <code>resources/views/admin/products/show.blade.php</code>. We gebruiken een grid-layout om de data netjes te presenteren.</p>
+
+        <h3>1. De Relatie Tonen</h3>
+        <p>Dit is het belangrijkste stuk. In het Product model hebben we de functie <code>category()</code> gemaakt. In Blade kunnen we die aanroepen als een eigenschap: <code>$product->category</code>.</p>
+        <p>Dit geeft ons het hele Categorie-object terug. Omdat we alleen de naam willen, typen we: <code>$product->category->name</code>.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;div class="max-w-4xl mx-auto"&gt;
+        &lt;div class="flex justify-between items-center mb-6"&gt;
+            &lt;h1 class="text-3xl font-bold"&gt;{{ $product->title }}&lt;/h1&gt;
+            &lt;a href="{{ route('admin.products.index') }}" class="text-blue-600 hover:underline"&gt;
+                &larr; Terug naar overzicht
+            &lt;/a&gt;
+        &lt;/div&gt;
+
+        &lt;div class="bg-white shadow overflow-hidden sm:rounded-lg"&gt;
+            &lt;div class="px-4 py-5 sm:px-6"&gt;
+                &lt;h3 class="text-lg leading-6 font-medium text-gray-900"&gt;Product Details&lt;/h3&gt;
+            &lt;/div&gt;
+
+            &lt;div class="border-t border-gray-200"&gt;
+                &lt;dl&gt;
+                    &lt;!-- Categorie --&gt;
+                    &lt;div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                        &lt;dt class="text-sm font-medium text-gray-500"&gt;Categorie&lt;/dt&gt;
+                        &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;
+                            {{ $product->category->name }}
+                        &lt;/dd&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Omschrijving --&gt;
+                    &lt;div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                        &lt;dt class="text-sm font-medium text-gray-500"&gt;Omschrijving&lt;/dt&gt;
+                        &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;
+                            {{ $product->description }}
+                        &lt;/dd&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Prijs & Voorraad --&gt;
+                    &lt;div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"&gt;
+                        &lt;dt class="text-sm font-medium text-gray-500"&gt;Prijs & Voorraad&lt;/dt&gt;
+                        &lt;dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"&gt;
+                            &euro; {{ number_format($product->price, 2, ',', '.') }}
+                            &lt;span class="text-gray-400 mx-2"&gt;|&lt;/span&gt;
+                            {{ $product->stock }} stuks op voorraad
+                        &lt;/dd&gt;
+                    &lt;/div&gt;
+                &lt;/dl&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Formatteren van Data</h2>
+        <p>Ruwe data uit de database ziet er voor een mens vaak niet mooi uit. Een prijs is <code>19.50</code> (met een punt), maar in Nederland willen we <code>19,50</code> zien.</p>
+
+        <h3>Prijs Formatteren</h3>
+        <p>PHP heeft een ingebouwde functie <code>number_format()</code>.
+            <br>Syntax: <code>number_format(getal, aantal_decimalen, scheidingsteken_decimaal, scheidingsteken_duizend)</code>.</p>
+        <pre><code class="language-php">&euro; {{ number_format($product->price, 2, ',', '.') }}</code></pre>
+
+        <h3>Datum Formatteren</h3>
+        <p>Laravel zorgt ervoor dat de kolommen <code>created_at</code> en <code>updated_at</code> automatisch Carbon-objecten zijn. Carbon is een krachtige datum-bibliotheek.</p>
+        <pre><code class="language-php">{{ $product->created_at->format('d-m-Y H:i') }}</code></pre>
+        <p>Dit toont bijvoorbeeld: <strong>25-12-2024 14:30</strong>.</p>
+
+        <h2>Veiligheid: Safe Navigation (?->)</h2>
+        <p>Hoewel we in onze database hebben ingesteld dat een product <em>altijd</em> een categorie moet hebben, kan er in de code soms iets misgaan (bijvoorbeeld als je Soft Deletes gebruikt en de categorie is verwijderd). Als je dan <code>$product->category->name</code> aanroept, krijg je een error: <em>"Attempt to read property 'name' on null"</em>.</p>
+
+        <p>Om je code robuust te maken, kun je de <strong>Safe Navigation Operator</strong> (<code>?-></code>) gebruiken. Als de categorie niet bestaat, geeft hij <code>null</code> terug in plaats van te crashen.</p>
+
+        <pre><code class="language-php">
+{{-- Veilig: crasht niet als category ontbreekt, toont gewoon niets --}}
+{{ $product->category?->name }}
+
+{{-- Nóg mooier: toon een fallback tekst --}}
+{{ $product->category?->name ?? 'Geen categorie' }}
+        </code></pre>
+
+        <h2>Actieknoppen toevoegen</h2>
+        <p>Onderaan de details is het handig om direct actieknoppen te plaatsen. Zo hoeft de beheerder niet eerst terug naar het overzicht om iets te wijzigen.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-6 flex space-x-3"&gt;
+    &lt;a href="{{ route('admin.products.edit', $product) }}"
+       class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"&gt;
+        Bewerk Product
+    &lt;/a&gt;
+
+    &lt;form action="{{ route('admin.products.destroy', $product) }}" method="POST"
+          onsubmit="return confirm('Weet je het zeker?');"&gt;
+        @csrf
+        @method('DELETE')
+        &lt;button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"&gt;
+            Verwijder Product
+        &lt;/button&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+        </code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

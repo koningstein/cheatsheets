@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destroy & Database Constraints - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Destroy & Database Constraints</h1>
+        <p>Wanneer we records verwijderen, hebben we te maken met database regels (constraints). Wat gebeurt er met gerelateerde data? Soms willen we alles automatisch verwijderen (Cascade), en soms willen we dit juist voorkomen (Restrict).</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan records veilig verwijderen met foreign key constraints.</li>
+            <li>Ik begrijp cascade effecten bij delete.</li>
+            <li>Ik kan een flash message gebruiken bij destroy.</li>
+            <li>Ik kan database exceptions (fouten) opvangen met <code>try-catch</code>.</li>
+        </ul>
+
+        <h3 id="cascade">1. Cascade (Product -> Prices)</h3>
+        <p>In onze migratie (M3.1) hebben we bij prices gezegd: <code>onDelete('cascade')</code>. Als we nu een product verwijderen, ruimt de database <strong>automatisch</strong> alle bijbehorende prijzen op. Hierdoor blijft de database schoon en hoeven we geen extra code te schrijven.</p>
+
+        <pre><code class="language-php">
+// ProductController.php
+
+public function destroy(Product $product)
+{
+    // Dit verwijdert het product EN alle gekoppelde prijzen (door database cascade)
+    $product->delete();
+
+    return to_route('products.index')
+            ->with('status', 'Product verwijderd!');
+}
+        </code></pre>
+
+        <h3 id="restrict">2. Restrict (Category -> Products)</h3>
+        <p>Bij Categorieën hebben we <code>onDelete('restrict')</code> gebruikt. Dit betekent dat je een categorie NIET mag verwijderen als er nog producten aan gekoppeld zijn. Als je dit toch probeert, geeft de database een harde foutmelding (Exception).</p>
+        <p>Om dit netjes af te handelen en de gebruiker een duidelijke melding te geven, gebruiken we een <code>try-catch</code> blok.</p>
+
+        <pre><code class="language-php">
+// CategoryController.php
+
+public function destroy(Category $category)
+{
+    try {
+        $category->delete();
+
+        return to_route('categories.index')
+                ->with('status', 'Categorie verwijderd!');
+
+    } catch (\Throwable $e) {
+        // Vang de database fout op
+        report($e); // Log de technische fout voor developers
+
+        // Stuur de gebruiker terug met een duidelijke foutmelding
+        return to_route('categories.index')
+                ->with('error', 'Kan categorie niet verwijderen: er zijn nog producten
+            gekoppeld!');
+    }
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 27</p>
+            <p>Implementeer destroy voor <strong>Tasks</strong>. Controleer in je migration wat er gebeurt als je een Project of Activity verwijdert (cascade of restrict?). Pas je controller hierop aan zodat de gebruiker juiste feedback krijgt.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

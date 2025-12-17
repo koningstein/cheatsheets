@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Reviews - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Product Reviews</h1>
+        <p>Een webshop zonder reviews voelt vaak onbetrouwbaar. "Social Proof" (zien wat anderen vinden) is cruciaal voor de verkoop. In deze module gaan we een reviewsysteem bouwen.</p>
+        <p>Technisch gezien is een review een koppelingstabel tussen een <strong>Gebruiker</strong> en een <strong>Product</strong>, met extra data (de beoordeling en de tekst). We gaan leren hoe we deze relaties leggen, hoe we de data tonen en hoe we veilig formulieren verwerken waarbij de ingelogde gebruiker automatisch gekoppeld wordt.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Migration maken voor een koppelingstabel met extra data (Reviews).</li>
+                <li>Ik kan de relaties <code>hasMany</code> en <code>belongsTo</code> definiëren tussen User, Product en Review.</li>
+                <li>Ik kan reviews tonen op de productpagina (inclusief naam van de schrijver).</li>
+                <li>Ik kan een formulier maken om reviews op te slaan en valideren.</li>
+                <li>Ik begrijp hoe ik met <code>Auth::id()</code> de huidige gebruiker koppel.</li>
+            </ul>
+        </div>
+
+        <h2>De Database Structuur</h2>
+        <p>We beginnen bij de basis: de database. Een review bestaat uit:</p>
+        <ul>
+            <li>Een ID (primary key).</li>
+            <li>Een koppeling naar de <strong>User</strong> (wie schreef het?).</li>
+            <li>Een koppeling naar het <strong>Product</strong> (waar gaat het over?).</li>
+            <li>De score (bijvoorbeeld 1 tot 5 sterren).</li>
+            <li>De tekst (de mening).</li>
+        </ul>
+
+        <p>Maak het Model en de Migration aan:</p>
+        <pre><code class="language-bash">php artisan make:model Review -m</code></pre>
+
+        <p>Open de migration file en voeg de kolommen toe:</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::create('reviews', function (Blueprint $table) {
+        $table->id();
+
+        // Koppelingen (Foreign Keys)
+        // Als de user of het product wordt verwijderd, verwijder dan ook de review (cascade)
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->foreignId('product_id')->constrained()->onDelete('cascade');
+
+        // De inhoud
+        $table->tinyInteger('rating'); // Een getal, bv. 1 t/m 5
+        $table->text('body');          // De review tekst
+
+        $table->timestamps();
+    });
+}
+        </code></pre>
+
+        <h2>De Relaties (Models)</h2>
+        <p>Nu moeten we Laravel vertellen hoe de modellen met elkaar praten.</p>
+
+        <h3>1. Review Model</h3>
+        <p>Een review "hoort bij" een gebruiker en "hoort bij" een product.
+            Vergeet niet de <code>$fillable</code> property voor Mass Assignment beveiliging!</p>
+
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Review extends Model
+{
+    protected $fillable = ['product_id', 'user_id', 'rating', 'body'];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+}
+        </code></pre>
+
+        <h3>2. Product Model</h3>
+        <p>Een product heeft meerdere reviews. Voeg dit toe aan <code>App\Models\Product.php</code>:</p>
+
+        <pre><code class="language-php">
+public function reviews(): HasMany
+{
+    // Sorteer direct zodat nieuwste reviews bovenaan staan
+    return $this->hasMany(Review::class)->latest();
+}
+        </code></pre>
+
+        <h2>Reviews Tonen (De View)</h2>
+        <p>We gaan terug naar de publieke detailpagina (<code>resources/views/shop/show.blade.php</code>) die we in de vorige module hebben gemaakt. Onder de productinformatie voegen we de reviews toe.</p>
+
+        <p><strong>Let op het N+1 probleem!</strong> Als je 50 reviews toont, en bij elke review de naam van de gebruiker wilt laten zien (<code>$review->user->name</code>), doet Laravel 51 queries.
+            Zorg dat je in je <code>ShopController</code> de users mee ophaalt:</p>
+
+        <pre><code class="language-php">
+// ShopController.php
+public function show(Product $product): View
+{
+    // Laad de reviews EN de gebruikers die ze schreven
+    $product->load('reviews.user');
+
+    return view('shop.show', [
+        'product' => $product
+    ]);
+}
+        </code></pre>
+
+        <h3>De HTML voor de reviews</h3>
+        <p>Voeg dit toe onderaan je show-view:</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-12 bg-white rounded-lg shadow p-6"&gt;
+    &lt;h3 class="text-2xl font-bold mb-4"&gt;Klantbeoordelingen&lt;/h3&gt;
+
+    @forelse($product->reviews as $review)
+        &lt;div class="border-b last:border-0 py-4"&gt;
+            &lt;div class="flex justify-between items-center mb-2"&gt;
+                &lt;div class="font-bold text-gray-800"&gt;
+                    {{ $review->user->name }}
+                &lt;/div&gt;
+                &lt;div class="text-yellow-500"&gt;
+                    {{-- Simpele sterren weergave --}}
+                    {{ str_repeat('★', $review->rating) }}
+                    {{ str_repeat('☆', 5 - $review->rating) }}
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;p class="text-gray-600"&gt;{{ $review->body }}&lt;/p&gt;
+            &lt;span class="text-xs text-gray-400"&gt;
+                {{ $review->created_at->diffForHumans() }}
+            &lt;/span&gt;
+        &lt;/div&gt;
+    @empty
+        &lt;p class="text-gray-500 italic"&gt;Er zijn nog geen reviews voor dit product. Wees de eerste!&lt;/p&gt;
+    @endforelse
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>Reviews Plaatsen (Het Formulier)</h2>
+        <p>Alleen ingelogde gebruikers mogen een review schrijven. We gebruiken de <code>@auth</code> directive om het formulier te tonen of te verbergen.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-8"&gt;
+    @auth
+        &lt;h4 class="text-xl font-bold mb-2"&gt;Schrijf een review&lt;/h4&gt;
+
+        &lt;form action="{{ route('products.reviews.store', $product) }}" method="POST"&gt;
+            @csrf
+
+            &lt;div class="mb-4"&gt;
+                &lt;label class="block font-bold mb-1"&gt;Score&lt;/label&gt;
+                &lt;select name="rating" class="border p-2 rounded w-full"&gt;
+                    &lt;option value="5"&gt;5 Sterren - Geweldig&lt;/option&gt;
+                    &lt;option value="4"&gt;4 Sterren - Goed&lt;/option&gt;
+                    &lt;option value="3"&gt;3 Sterren - Gemiddeld&lt;/option&gt;
+                    &lt;option value="2"&gt;2 Sterren - Matig&lt;/option&gt;
+                    &lt;option value="1"&gt;1 Ster - Slecht&lt;/option&gt;
+                &lt;/select&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+                &lt;label class="block font-bold mb-1"&gt;Jouw mening&lt;/label&gt;
+                &lt;textarea name="body" rows="3" class="border p-2 rounded w-full" required&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+
+            &lt;button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded"&gt;
+                Plaats Review
+            &lt;/button&gt;
+        &lt;/form&gt;
+    @else
+        &lt;div class="bg-gray-100 p-4 rounded text-center"&gt;
+            &lt;a href="{{ route('login') }}" class="text-blue-600 underline"&gt;Log in&lt;/a&gt; om een review te schrijven.
+        &lt;/div&gt;
+    @endauth
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>De Controller Logica (Opslaan)</h2>
+        <p>We maken een aparte controller voor het afhandelen van reviews om de code schoon te houden.</p>
+        <pre><code class="language-bash">php artisan make:controller ProductReviewController</code></pre>
+
+        <p>Voeg de route toe in <code>web.php</code>. Let op: deze route moet beveiligd zijn met <code>auth</code> middleware!</p>
+        <pre><code class="language-php">
+Route::post('products/{product}/reviews', [ProductReviewController::class, 'store'])
+    ->middleware('auth')
+    ->name('products.reviews.store');
+        </code></pre>
+
+        <p>En tot slot de logica in de controller:</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class ProductReviewController extends Controller
+{
+    public function store(Request $request, Product $product)
+    {
+        // 1. Valideer de input
+        $data = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'body'   => 'required|string|min:5',
+        ]);
+
+        // 2. Koppel de huidige gebruiker
+        // We voegen 'user_id' toe aan de array met data
+        $data['user_id'] = Auth::id();
+
+        // 3. Maak de review aan VIA het product
+        // Hierdoor wordt 'product_id' automatisch ingevuld
+        $product->reviews()->create($data);
+
+        return back()->with('status', 'Bedankt voor je review!');
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Veiligheidstip:</strong><br>
+            Door <code>$product->reviews()->create($data)</code> te gebruiken, weet Laravel zeker dat de review bij DIT product hoort. Door <code>Auth::id()</code> handmatig toe te voegen, weet je zeker dat de review gekoppeld is aan de persoon die daadwerkelijk is ingelogd (en niet aan een ID dat iemand via een formulier probeert te spoofen).
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

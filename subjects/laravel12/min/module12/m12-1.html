@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Generatie - Laravel 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<header>
+    <a href="../../index.html" class="logo">
+        <svg width="30" height="30" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0L10 20L10 80L50 100L90 80L90 20L50 0Z"/></svg>
+        Laravel 12
+    </a>
+    <div class="header-controls">
+        <button class="btn-control" id="color-toggle">🎨 Kleur</button>
+        <button class="btn-control" id="theme-toggle">🌓 Thema</button>
+        <button class="mobile-menu-btn" id="menu-toggle">☰</button>
+    </div>
+</header>
+
+<div class="layout-wrapper">
+    <nav class="sidebar-left">
+
+        <div class="nav-group">
+            <h3>Installatie</h3>
+            <div class="nav-item-container">
+                <ul class="submenu" style="display:block; padding-left:0;">
+                    <li><a href="../../index.html" style="border-left:none; padding-left:0.75rem;">Overzicht</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <h3>Opdrachten</h3>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 1: Basis CRUD
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module1/m1-1.html">Model & Migration</a></li>
+                    <li><a href="../module1/m1-2.html">Factory & Seeding</a></li>
+                    <li><a href="../module1/m1-3.html">Layouts & Tailwind</a></li>
+                    <li><a href="../module1/m1-4.html">Controller Index</a></li>
+                    <li><a href="../module1/m1-5.html">Create & Store</a></li>
+                    <li><a href="../module1/m1-6.html">Validatie & Flash</a></li>
+                    <li><a href="../module1/m1-7.html">Detailpagina (Show)</a></li>
+                    <li><a href="../module1/m1-8.html">Edit & Update</a></li>
+                    <li><a href="../module1/m1-9.html">Delete & Destroy</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 2: Users & Security
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module2/m2-1.html">Publieke Layout</a></li>
+                    <li><a href="../module2/m2-2.html">Simpele Publieke Pagina</a></li>
+                    <li><a href="../module2/m2-3.html">Roles & Permissions</a></li>
+                    <li><a href="../module2/m2-4.html">Aanmaken van Users</a></li>
+                    <li><a href="../module2/m2-5.html">Middleware bij Routes</a></li>
+                    <li><a href="../module2/m2-6.html">Rolgebaseerde Toegang</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 3: Advanced Admin
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module3/m3-1.html">Models & Migrations</a></li>
+                    <li><a href="../module3/m3-2.html">Factories met Relaties</a></li>
+                    <li><a href="../module3/m3-3.html">Seeders met Relaties</a></li>
+                    <li><a href="../module3/m3-4.html">Index & Eager Loading</a></li>
+                    <li><a href="../module3/m3-5.html">Permissions</a></li>
+                    <li><a href="../module3/m3-6.html">Create & Dropdowns</a></li>
+                    <li><a href="../module3/m3-7.html">Store & Validatie</a></li>
+                    <li><a href="../module3/m3-8.html">Show & Relaties</a></li>
+                    <li><a href="../module3/m3-9.html">Edit & Pre-select</a></li>
+                    <li><a href="../module3/m3-10.html">Update & Logica</a></li>
+                    <li><a href="../module3/m3-11.html">Delete View</a></li>
+                    <li><a href="../module3/m3-12.html">Destroy & Constraints</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 4: Webshop Features
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module4/m4-1.html">Publieke Productpagina</a></li>
+                    <li><a href="../module4/m4-2.html">De Product Show</a></li>
+                    <li><a href="../module4/m4-3.html">Reviews Setup (DB)</a></li>
+                    <li><a href="../module4/m4-4.html">Reviews Tonen</a></li>
+                    <li><a href="../module4/m4-5.html">Reviews Plaatsen</a></li>
+                    <li><a href="../module4/m4-6.html">Winkelwagen Setup</a></li>
+                    <li><a href="../module4/m4-7.html">Winkelwagen Tonen</a></li>
+                    <li><a href="../module4/m4-8.html">Winkelwagen Wijzigen</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Module 5: Orders & Validatie
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module5/m5-1.html">Orders Structuur</a></li>
+                    <li><a href="../module5/m5-2.html">Order Seeds</a></li>
+                    <li><a href="../module5/m5-3.html">Orders Opslaan</a></li>
+                    <li><a href="../module5/m5-4.html">Orders Tonen</a></li>
+                    <li><a href="../module5/m5-5.html">Order naar PDF</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <h3>Thema's</h3>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Database & Models
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module6/m6-1.html">Migrations & Datatypes</a></li>
+                    <li><a href="../module6/m6-2.html">Foreign Key Constraints</a></li>
+                    <li><a href="../module6/m6-3.html">Model Conventions</a></li>
+                    <li><a href="../module6/m6-4.html">Mass Assignment</a></li>
+                    <li><a href="../module6/m6-5.html">Factories (Faker)</a></li>
+                    <li><a href="../module6/m6-6.html">Seeders & DatabaseState</a></li>
+                    <li><a href="../module6/m6-7.html">Soft Deletes</a></li>
+                    <li><a href="../module6/m6-8.html">Casts & Accessors</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Eloquent Relaties
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module7/m7-1.html">One to One (HasOne)</a></li>
+                    <li><a href="../module7/m7-2.html">One to Many (HasMany)</a></li>
+                    <li><a href="../module7/m7-3.html">Many to Many</a></li>
+                    <li><a href="../module7/m7-4.html">Eager Loading</a></li>
+                    <li><a href="../module7/m7-5.html">Query Scopes</a></li>
+                    <li><a href="../module7/m7-6.html">Collections Methods</a></li>
+                    <li><a href="../module7/m7-7.html">Pivot Tabellen</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Routing & Controllers
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module8/m8-1.html">Basic Routing</a></li>
+                    <li><a href="../module8/m8-2.html">Named Routes & Groups</a></li>
+                    <li><a href="../module8/m8-3.html">Route Model Binding</a></li>
+                    <li><a href="../module8/m8-4.html">Resource Controllers</a></li>
+                    <li><a href="../module8/m8-5.html">Single Action Controllers</a></li>
+                    <li><a href="../module8/m8-6.html">Redirects & Responses</a></li>
+                    <li><a href="../module8/m8-7.html">Dependency Injection</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Blade & Frontend
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module9/m9-1.html">Layout Inheritance</a></li>
+                    <li><a href="../module9/m9-2.html">Components & Slots</a></li>
+                    <li><a href="../module9/m9-3.html">Stacks & Push</a></li>
+                    <li><a href="../module9/m9-4.html">Control Structures</a></li>
+                    <li><a href="../module9/m9-5.html">Auth Directives</a></li>
+                    <li><a href="../module9/m9-6.html">Service Injection</a></li>
+                    <li><a href="../module9/m9-7.html">Tailwind Patterns</a></li>
+                    <li><a href="../module9/m9-8.html">Pagination</a></li>
+                    <li><a href="../module9/m9-9.html">Flash messages</a></li>
+                    <li><a href="../module9/m9-10.html">Livewire</a></li>
+                    <li><a href="../module9/m9-11.html">Flux UI</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Validatie & Forms
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module10/m10-1.html">Controller Validatie</a></li>
+                    <li><a href="../module10/m10-2.html">Errors weergeven</a></li>
+                    <li><a href="../module10/m10-3.html">Form requests</a></li>
+                    <li><a href="../module10/m10-4.html">Database regels</a></li>
+                    <li><a href="../module10/m10-5.html">Custom Error Messages</a></li>
+                    <li><a href="../module10/m10-6.html">CSRF en Old input</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Security & Auth
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module11/m11-1.html">Auth Flow</a></li>
+                    <li><a href="../module11/m11-2.html">Middleware</a></li>
+                    <li><a href="../module11/m11-3.html">Gates</a></li>
+                    <li><a href="../module11/m11-4.html">Policies</a></li>
+                    <li><a href="../module11/m11-5.html">Spatie Permissions</a></li>
+                    <li><a href="../module11/m11-6.html">Password Hashing</a></li>
+                    <li><a href="../module11/m11-7.html">Helper Functions</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container active">
+                <button class="nav-toggle">
+                    Features
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu" style="display: block;">
+                    <li><a href="m12-1.html" class="current">PDF Generatie</a></li>
+                    <li><a href="m12-2.html">Excel Import/Export</a></li>
+                    <li><a href="m12-3.html">Mail & Notifications</a></li>
+                    <li><a href="m12-4.html">File Storage</a></li>
+                    <li><a href="m12-5.html">HTTP Client</a></li>
+                    <li><a href="m12-6.html">Events & Listeners</a></li>
+                    <li><a href="m12-7.html">Artisan Commands</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    Automated Testing
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module13/m13-1.html">Introductie & PHPUnit</a></li>
+                    <li><a href="../module13/m13-2.html">Unit vs Feature Tests</a></li>
+                    <li><a href="../module13/m13-3.html">Introductie Pest</a></li>
+                    <li><a href="../module13/m13-4.html">Unit & Feature Tests (Pest)</a></li>
+                    <li><a href="../module13/m13-5.html">Database Testing & Seeding</a></li>
+                    <li><a href="../module13/m13-6.html">HTTP Testing</a></li>
+                    <li><a href="../module13/m13-7.html">Mocking & Spies</a></li>
+                    <li><a href="../module13/m13-8.html">Faking</a></li>
+                    <li><a href="../module13/m13-9.html">Browser Testing (Dusk)</a></li>
+                </ul>
+            </div>
+            <div class="nav-item-container">
+                <button class="nav-toggle">
+                    QA Tools & Workflow
+                    <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <ul class="submenu">
+                    <li><a href="../module14/m14-1.html">Static Analysis (Larastan)</a></li>
+                    <li><a href="../module14/m14-2.html">Code Style (Pint)</a></li>
+                    <li><a href="../module14/m14-3.html">Debugging & Debugbar</a></li>
+                    <li><a href="../module14/m14-4.html">Git Workflow</a></li>
+                    <li><a href="../module14/m14-5.html">CI/CD Basics</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <h1>PDF Generatie</h1>
+        <p>In zakelijke applicaties is het genereren van PDF-bestanden bijna onvermijdelijk. Denk aan facturen, pakbonnen, contracten of certificaten. Hoewel je HTML in de browser kunt printen, heb je daar geen controle over de exacte paginanummering, pagina-einden en lay-out op verschillende printers.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een PDF genereren met de DomPDF package.</li>
+            <li>Ik weet hoe ik een Blade view kan gebruiken als template voor mijn PDF.</li>
+            <li>Ik kan de PDF als download aanbieden of direct in de browser tonen (streamen).</li>
+        </ul>
+
+        <h3>Waarom: Een vaste lay-out</h3>
+        <p>Een PDF garandeert dat de ontvanger het document precies zo ziet als jij bedoeld hebt, ongeacht of ze het op een telefoon of desktop openen. In Laravel gebruiken we hiervoor de standaard package <strong>laravel-dompdf</strong>. Dit is een 'wrapper' om de DomPDF library, die HTML/CSS omzet naar PDF.</p>
+
+        <h3>Hoe: Installatie en Basisgebruik</h3>
+        <p>Na installatie via Composer (<code>composer require barryvdh/laravel-dompdf</code>), kun je de `Pdf` facade gebruiken. De kracht zit hem in het feit dat je gewoon <strong>Blade Views</strong> kunt hergebruiken. Je hoeft dus geen nieuwe taal te leren om PDF's te maken; je bouwt gewoon HTML.</p>
+
+        <div class="note-box">Bestand: <code>app/Http/Controllers/InvoiceController.php</code></div>
+        <pre><code class="language-php">
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Order;
+
+public function show(Order $order)
+{
+    // 1. Data verzamelen (zoals je gewend bent)
+    $data = [
+        'order' => $order,
+        'customer' => $order->user,
+        'lines' => $order->orderLines,
+    ];
+
+    // 2. View laden in het PDF object
+    // 'pdf.invoice' is gewoon een blade file in resources/views/pdf/invoice.blade.php
+    $pdf = Pdf::loadView('pdf.invoice', $data);
+
+    // 3. Optie A: Downloaden (forceer opslaan bij client)
+    return $pdf->download('factuur-'.$order->id.'.pdf');
+
+    // 3. Optie B: Streamen (toon in browser)
+    // return $pdf->stream();
+}
+        </code></pre>
+
+        <h3>Styling en Beperkingen</h3>
+        <p>Let op: PDF-engines zijn geen moderne webbrowsers. DomPDF ondersteunt CSS 2.1 en een beetje CSS 3. Moderne snufjes zoals Flexbox en CSS Grid werken vaak <strong>niet</strong> of slecht. </p>
+        <p><strong>Advies:</strong> Gebruik voor PDF's ouderwetse <code>&lt;table&gt;</code> structuren voor lay-out en inline CSS of een simpele <code>&lt;style&gt;</code> blok in de head. Externe stylesheets (Tailwind) werken vaak niet goed tenzij je ze compileert naar pure CSS en inline inlaadt.</p>
+
+        <div class="note-box">Bestand: <code>resources/views/pdf/invoice.blade.php</code></div>
+        <pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;Factuur&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; }
+        .page-break { page-break-after: always; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Factuur #{{ $order->id }}&lt;/h1&gt;
+
+    &lt;table class="table"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Product&lt;/th&gt;
+                &lt;th&gt;Prijs&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @foreach($lines as $line)
+                &lt;tr&gt;
+                    &lt;td&gt;{{ $line->product_name }}&lt;/td&gt;
+                    &lt;td&gt;€ {{ number_format($line->price, 2, ',', '.') }}&lt;/td&gt;
+                &lt;/tr&gt;
+            @endforeach
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+    &lt;div class="page-break"&gt;&lt;/div&gt;
+    &lt;p&gt;Voorwaarden op pagina 2...&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit ^Update - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Edit & Update</h1>
+        <p>We kunnen gegevens aanmaken (Create) en lezen (Read). Nu is het tijd voor de 'U' van CRUD: <strong>Update</strong>. Dit proces bestaat net als bij het aanmaken uit twee stappen: eerst tonen we een formulier met de huidige gegevens (Edit), en daarna verwerken we de wijzigingen in de database (Update).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp het verschil tussen de Edit (GET) en Update (PUT/PATCH) acties.</li>
+                <li>Ik kan een formulier vooraf invullen met bestaande data uit de database.</li>
+                <li>Ik begrijp <strong>Method Spoofing</strong> en waarom we <code>@method('PUT')</code> gebruiken.</li>
+                <li>Ik kan gegevens in de database wijzigen via Eloquent.</li>
+                <li>Ik kan validatieregels toepassen waarbij de huidige rij wordt genegeerd (unique validation).</li>
+            </ul>
+        </div>
+
+        <h2>De Edit Methode</h2>
+        <p>De <code>edit</code> methode in de controller lijkt erg op de <code>show</code> methode. We gebruiken weer <strong>Implicit Model Binding</strong> om de juiste categorie op te halen uit de database. Vervolgens geven we deze mee aan een view zodat we het formulier kunnen vullen.</p>
+
+        <pre><code class="language-php">
+/**
+ * Show the form for editing the specified resource.
+ */
+public function edit(Category $category): View
+{
+    return view('admin.categories.edit', [
+        'category' => $category
+    ]);
+}
+        </code></pre>
+
+        <h2>De Edit View</h2>
+        <p>Maak het bestand <code>resources/views/admin/categories/edit.blade.php</code> aan. Je kunt de code van <code>create.blade.php</code> kopiëren, want de formulieren lijken erg op elkaar. Er zijn echter drie cruciale verschillen:</p>
+
+        <ol>
+            <li>De <strong>Action</strong> URL moet naar de update-route wijzen en het ID van de categorie bevatten.</li>
+            <li>We moeten de HTTP-methode veranderen naar <strong>PUT</strong>.</li>
+            <li>De invoervelden moeten de <strong>huidige waarde</strong> bevatten.</li>
+        </ol>
+
+        <h3>1. Method Spoofing (@method)</h3>
+        <p>HTML-formulieren ondersteunen in de browser alleen <code>GET</code> en <code>POST</code>. Ze snappen <code>PUT</code>, <code>PATCH</code> of <code>DELETE</code> niet. Laravel werkt echter volgens de REST-standaard, die zegt dat een update een <code>PUT</code> of <code>PATCH</code> request moet zijn.</p>
+        <p>Om dit op te lossen gebruiken we <strong>Method Spoofing</strong>. We sturen het formulier als POST, maar voegen een verborgen veld toe dat tegen Laravel zegt: "Doe net alsof dit een PUT verzoek is".</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('admin.categories.update', $category) }}" method="POST"&gt;
+    @csrf
+    @method('PUT')
+
+    &lt;!-- Rest van formulier --&gt;
+&lt;/form&gt;
+        </code></pre>
+
+        <h3>2. Waardes vooraf invullen (Pre-filling)</h3>
+        <p>Als je een item bewerkt, wil je niet dat het tekstvak leeg is. Je wilt de huidige naam zien. Tegelijkertijd wil je, als er een validatiefout optreedt, de <em>gewijzigde</em> (foute) invoer zien, niet de originele database waarde.</p>
+        <p>Daarom gebruiken we de <code>old()</code> functie met een tweede parameter: de standaardwaarde.</p>
+
+        <pre><code class="language-html">
+&lt;label for="name"&gt;Naam&lt;/label&gt;
+&lt;input type="text"
+       name="name"
+       value="{{ old('name', $category-&gt;name) }}"
+       class="form-input ..."&gt;
+        </code></pre>
+        <p>Laravel kijkt nu eerst: "Is er 'old' data van een vorige poging?". Zo nee, dan gebruikt hij <code>$category->name</code> uit de database.</p>
+
+        <h2>De Update Methode</h2>
+        <p>Wanneer het formulier verstuurd wordt, komt het bij de <code>update</code> methode in de controller. Hier valideren we de data en slaan we de wijzigingen op.</p>
+
+        <h3>Validatie bij Updates (Uniek probleem)</h3>
+        <p>Stel, je hebt een categorie "Auto's" met ID 5. Je opent het bewerk-scherm en klikt op opslaan zonder de naam te veranderen. Als je validatieregel <code>unique:categories,name</code> is, zal Laravel zeggen: "Fout! De naam Auto's bestaat al." (Namelijk bij ID 5).</p>
+        <p>We moeten tegen de validator zeggen: "De naam moet uniek zijn, <strong>behalve</strong> voor de rij die we nu aan het bewerken zijn."</p>
+
+        <p>Hiervoor maken we een nieuwe Request aan: <code>CategoryUpdateRequest</code>.</p>
+        <pre><code class="language-bash">php artisan make:request CategoryUpdateRequest</code></pre>
+
+        <p>In de <code>rules()</code> methode gebruiken we de <code>Rule</code> helper:</p>
+        <pre><code class="language-php">
+use Illuminate\Validation\Rule;
+
+public function rules(): array
+{
+    return [
+        // We negeren het ID van de huidige categorie ($this->category)
+        'name' => [
+            'required',
+            'string',
+            'max:75',
+            Rule::unique('categories')->ignore($this->category)
+        ],
+    ];
+}
+        </code></pre>
+
+        <h3>De Update Logic</h3>
+        <p>Nu kunnen we de controller methode afmaken. We gebruiken de <code>update()</code> methode op het model. Dit werkt hetzelfde als bij mass assignment bij het aanmaken: je moet zorgen dat de velden in <code>$fillable</code> staan.</p>
+
+        <pre><code class="language-php">
+use App\Http\Requests\CategoryUpdateRequest;
+
+public function update(CategoryUpdateRequest $request, Category $category)
+{
+    // De data is gevalideerd.
+    // $request->validated() geeft een array terug met alleen de veilige, gevalideerde data.
+
+    $category->update($request->validated());
+
+    return to_route('admin.categories.index')
+        ->with('status', 'Categorie succesvol bijgewerkt!');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip: $request->validated()</strong><br>
+            In plaats van handmatig <code>$category->name = $request->name</code> te doen, gebruiken we hier <code>$category->update(...)</code>. Dit is korter en schoner. Door <code>$request->validated()</code> te gebruiken weet je zeker dat je alleen velden opslaat die door je validatie heen zijn gekomen. Dit is extra veilig tegen Mass Assignment.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Opslaan - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Orders Opslaan</h1>
+        <p>Het converteren van een winkelwagen naar een order is een cruciale stap. We moeten de items kopiëren, de winkelwagen legen en de order opslaan in de database.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een <code>OrderController</code> maken met een <code>store</code> methode.</li>
+            <li>Ik kan items uit de winkelwagen kopiëren naar <code>OrderRows</code>.</li>
+            <li>Ik kan de winkelwagen legen na bestelling (<code>Cart::destroy</code>).</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: OrderController</h3>
+        <p>Maak de controller aan: <code>php artisan make:controller Open/OrderController</code>.</p>
+
+        <h3 id="store-logic">Stap 2: Store Logica</h3>
+        <p>In de <code>store</code> methode gebeurt het magische werk.</p>
+
+        <pre><code class="language-php">
+use Gloudemans\Shoppingcart\Facades\Cart;
+use App\Models\Order;
+use App\Models\Orderrow;
+use Illuminate\Support\Facades\Auth;
+
+public function store()
+{
+    // 1. Maak de order aan
+    $order = new Order();
+    $order->user_id = Auth::id();
+    $order->state_id = 1; // Pending
+    $order->save();
+
+    // 2. Loop door de winkelwagen en maak rijen aan
+    foreach(Cart::content() as $item) {
+        $row = new Orderrow();
+        $row->order_id = $order->id;
+        $row->product_id = $item->id;
+        $row->qty = $item->qty;
+        $row->price = $item->price; // Huidige prijs vastleggen
+        $row->save();
+    }
+
+    // 3. Leeg de winkelwagen
+    Cart::destroy();
+
+    return to_route('open.orders.index')
+            ->with('status', 'Bestelling geplaatst!');
+}
+        </code></pre>
+
+        <h3 id="route">Stap 3: Route Maken</h3>
+        <p>We hebben een route nodig die aangeroepen wordt als men op "Afrekenen" klikt.</p>
+
+        <pre><code class="language-php">
+use App\Http\Controllers\Open\OrderController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/orders', [OrderController::class, 'store'])->name('open.orders.store');
+});
+        </code></pre>
+
+        <h3 id="button">Stap 4: Knop Koppelen</h3>
+        <p>Pas de "Afrekenen" knop in <code>resources/views/open/cart/index.blade.php</code> aan zodat het een formulier is.</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('open.orders.store') }}" method="POST"&gt;
+    @csrf
+    &lt;button type="submit" class="bg-green-600 text-white px-6 py-3 rounded
+            hover:bg-green-700"&gt;
+        Afrekenen
+    &lt;/button&gt;
+&lt;/form&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

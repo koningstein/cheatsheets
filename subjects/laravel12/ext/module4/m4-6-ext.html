@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Een Winkelwagen - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Een Winkelwagen</h1>
+        <p>In de vorige modules hebben we de producten getoond en een knop "In Winkelwagen" gemaakt. Nu moeten we zorgen dat die knop ook echt werkt. Maar waar laten we die producten?</p>
+        <p>Als een klant nog niet is ingelogd, kunnen we de producten niet in de database opslaan (want we weten niet wie de klant is). Daarom gebruiken we <strong>Sessions</strong>. Een sessie is een tijdelijk geheugen op de server dat gekoppeld is aan de browser van de bezoeker. Zolang de bezoeker op de site is, onthoudt de sessie wat er in het mandje zit.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp het verschil tussen Database opslag (permanent) en Sessie opslag (tijdelijk).</li>
+                <li>Ik kan een <strong>Associatieve Array</strong> structuur bedenken voor een winkelwagen.</li>
+                <li>Ik kan de Laravel <code>session()</code> helper gebruiken om data op te halen en op te slaan (<code>get</code>, <code>put</code>).</li>
+                <li>Ik kan logica schrijven om te controleren of een product al in de kar zit (aantal ophogen vs nieuw toevoegen).</li>
+            </ul>
+        </div>
+
+        <h2>De Datastructuur</h2>
+        <p>Voordat we gaan programmeren, moeten we nadenken over <em>hoe</em> we de data opslaan. We hebben een lijst met producten nodig. Een simpele lijst (Array) is niet handig, want we moeten snel kunnen zoeken.</p>
+        <p>De beste manier is een associatieve array waarbij het <strong>Product ID</strong> de sleutel (key) is. Zo kunnen we supersnel checken: "Zit product 15 al in de mand?"</p>
+
+        <p><strong>Zo ziet de sessie er straks uit:</strong></p>
+        <pre><code class="language-php">
+[
+    // Key = Product ID
+    15 => [
+        'title' => 'FIFA 24',
+        'price' => 59.99,
+        'quantity' => 2, // Aantal
+        'image' => 'fifa.jpg'
+    ],
+    3 => [
+        'title' => 'GTA V',
+        'price' => 29.99,
+        'quantity' => 1,
+        'image' => 'gta.jpg'
+    ]
+]
+        </code></pre>
+
+        <h2>De Controller Aanmaken</h2>
+        <p>We maken een nieuwe controller die verantwoordelijk is voor alles wat met de winkelwagen te maken heeft (toevoegen, verwijderen, tonen).</p>
+
+        <pre><code class="language-bash">php artisan make:controller CartController</code></pre>
+
+        <h2>Product Toevoegen (De Logica)</h2>
+        <p>In Module 4-2 hebben we een formulier gemaakt dat POST naar een route. Laten we die route eerst maken in <code>routes/web.php</code>.</p>
+
+        <pre><code class="language-php">
+use App\Http\Controllers\CartController;
+
+// Winkelwagen routes
+Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+        </code></pre>
+
+        <p>Nu de logica in de <code>CartController</code>. Hier gebeurt het echte werk. Lees de comments in de code goed!</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use Illuminate\Http\Request;
+
+class CartController extends Controller
+{
+    public function add(Request $request, Product $product)
+    {
+        // 1. Haal de huidige winkelwagen op uit de sessie.
+        // Als er nog geen kar is, begin met een lege array [].
+        $cart = session()->get('cart', []);
+
+        // 2. Bepaal hoeveel de klant wil toevoegen (standaard 1)
+        $quantity = (int) $request->input('quantity', 1);
+
+        // 3. Check: Zit dit product al in de kar?
+        if (isset($cart[$product->id])) {
+            // JA: Hoog het aantal op
+            $cart[$product->id]['quantity'] += $quantity;
+        } else {
+            // NEE: Voeg hem nieuw toe
+            // We slaan alleen de hoognodige data op om de sessie klein te houden
+            $cart[$product->id] = [
+                'title' => $product->title,
+                'price' => $product->price,
+                'quantity' => $quantity,
+                // Eventueel een image path
+            ];
+        }
+
+        // 4. Sla de gewijzigde kar weer op in de sessie
+        session()->put('cart', $cart);
+
+        // 5. Stuur terug met succesmelding
+        return back()->with('status', "{$product->title} is toegevoegd aan je winkelwagen!");
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Let op: Data Consistentie</strong><br>
+            We slaan de prijs op in de sessie (<code>$product->price</code>). Dit is gevaarlijk! Als de beheerder ondertussen de prijs van het product in de database aanpast, heeft de klant in zijn sessie nog de oude prijs staan.<br>
+            In een professionele shop (en in latere modules) checken we bij het afrekenen altijd de actuele prijs nog een keer in de database. Voor nu is dit prima.
+        </div>
+
+        <h2>Feedback Tonen</h2>
+        <p>In Module 4-5 hebben we al een stukje code gemaakt om Flash Messages (<code>session('status')</code>) te tonen. Omdat we <code>return back()</code> gebruiken, komt de klant weer op de productpagina terecht. Als het goed is, verschijnt daar nu de groene balk met "Product is toegevoegd!".</p>
+
+        <h2>Debuggen (Kijken in de sessie)</h2>
+        <p>Soms wil je tijdens het ontwikkelen zien wat er nu precies in je sessie zit. Laravel heeft een handige helper functie <code>dd()</code> (Dump and Die).</p>
+        <p>Je kunt tijdelijk een route maken om te spieken:</p>
+
+        <pre><code class="language-php">
+Route::get('/debug-cart', function() {
+    dd(session('cart'));
+});
+        </code></pre>
+
+        <p>Als je nu producten toevoegt en naar <code>/debug-cart</code> gaat, zou je de array-structuur moeten zien die we aan het begin van dit hoofdstuk bespraken.</p>
+
+        <h2>Samenvatting</h2>
+        <p>Je hebt nu een onzichtbare winkelwagen gebouwd!</p>
+        <ol>
+            <li>De data staat veilig in de sessie van de gebruiker.</li>
+            <li>We gebruiken het Product ID als unieke sleutel.</li>
+            <li>We controleren slim of we moeten ophogen of toevoegen.</li>
+        </ol>
+        <p>In de volgende module gaan we de pagina maken waar de klant de inhoud van zijn winkelwagen kan zien en beheren.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

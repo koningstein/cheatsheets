@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller index - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller - Index</h1>
+        <p>Om de data in de database te beheren, maken we gebruik van een CRUD (Create, Read, Update, Delete). We starten met de Index-methode van een Resource Controller om een overzicht van alle items te tonen.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een resource controller aanmaken.</li>
+            <li>Ik kan data ophalen en doorgeven aan een view.</li>
+            <li>Ik kan een index view maken met een tabel.</li>
+            <li>Ik kan resource routes registreren.</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller Aanmaken</h3>
+        <p>Een Resource Controller bevat standaard al methodes voor alle CRUD-acties. We maken deze in een submap <code>Admin</code> om het netjes te houden.</p>
+        <pre><code class="language-bash">php artisan make:controller --model=Category Admin/CategoryController</code></pre>
+
+        <h3 id="route">Stap 2: Route Registreren</h3>
+        <p>In <code>routes/web.php</code> registreren we de resource route. Dit maakt in één keer alle routes aan (/admin/categories, /create, etc.).</p>
+        <pre><code class="language-php">
+use App\Http\Controllers\Admin\CategoryController;
+
+Route::resource('/admin/categories', CategoryController::class);
+        </code></pre>
+
+        <h3 id="data">Stap 3: Data Ophalen</h3>
+        <p>In de <code>index()</code> methode halen we alle rijen op uit de database met het Model.</p>
+        <pre><code class="language-php">
+public function index()
+{
+    // Haal alle categorieën op
+    $categories = Category::all();
+
+    // Geef de data door aan de view
+    return view('admin.categories.index', [
+        'categories' => $categories
+    ]);
+}
+        </code></pre>
+
+        <h3 id="view">Stap 4: De Index View</h3>
+        <p>Maak <code>resources/views/admin/categories/index.blade.php</code>. We gebruiken <code>@foreach</code> om door de data te loopen.</p>
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1&gt;Overzicht Categorieën&lt;/h1&gt;
+
+    &lt;table class="w-full text-left bg-white"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Naam&lt;/th&gt;
+                &lt;th&gt;Acties&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @foreach($categories as $category)
+                &lt;tr class="border-b"&gt;
+                    &lt;td&gt;{{ $category->name }}&lt;/td&gt;
+                    &lt;td&gt;Edit | Delete&lt;/td&gt;
+                &lt;/tr&gt;
+            @endforeach
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+@endsection
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

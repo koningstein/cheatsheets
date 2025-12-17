@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Plaatsen - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Reviews Plaatsen</h1>
+        <p>Alleen ingelogde gebruikers mogen reviews plaatsen. We gaan een formulier maken op de detailpagina en de data verwerken in een nieuwe controller.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een formulier maken met CSRF-beveiliging.</li>
+            <li>Ik kan data valideren met een Form Request.</li>
+            <li>Ik kan de ingelogde gebruiker (Auth::id()) koppelen aan data.</li>
+        </ul>
+
+        <h3 id="form">Stap 1: Het Formulier (View)</h3>
+        <p>Voeg dit formulier toe aan <code>show.blade.php</code>. We gebruiken <code>@auth</code> om het alleen te tonen aan ingelogde gebruikers. Voor gasten tonen we een inloglink.</p>
+
+        <pre><code class="language-html">
+@auth
+    &lt;div class="bg-white p-6 rounded-lg shadow-md mt-12"&gt;
+        &lt;h3 class="text-xl font-bold mb-4"&gt;Schrijf een review&lt;/h3&gt;
+
+        &lt;form action="{{ route('open.reviews.store') }}" method="POST"&gt;
+            @csrf
+            &lt;input type="hidden" name="product_id" value="{{ $product->id }}"&gt;
+
+            &lt;div class="mb-4"&gt;
+                &lt;label class="block text-sm font-bold mb-2"&gt;Titel&lt;/label&gt;
+                &lt;input type="text" name="title" class="w-full border rounded p-2" required&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+                &lt;label class="block text-sm font-bold mb-2"&gt;Rating (1-5)&lt;/label&gt;
+                &lt;select name="rating" class="w-full border rounded p-2"&gt;
+                    &lt;option value="5"&gt;5 Sterren&lt;/option&gt;
+                    &lt;option value="4"&gt;4 Sterren&lt;/option&gt;
+                    &lt;option value="3"&gt;3 Sterren&lt;/option&gt;
+                    &lt;option value="2"&gt;2 Sterren&lt;/option&gt;
+                    &lt;option value="1"&gt;1 Ster&lt;/option&gt;
+                &lt;/select&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+                &lt;label class="block text-sm font-bold mb-2"&gt;Review&lt;/label&gt;
+                &lt;textarea name="body" class="w-full border rounded p-2"
+            rows="4" required&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+
+            &lt;button type="submit" class="bg-blue-600 text-white px-6 py-2
+            rounded hover:bg-blue-700"&gt;
+                Plaats Review
+            &lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+@else
+    &lt;p class="mt-8 text-center"&gt;
+        &lt;a href="{{ route('login') }}" class="text-blue-600 underline"&gt;Log in&lt;/a&gt;
+            om een review te schrijven.
+    &lt;/p&gt;
+@endauth
+        </code></pre>
+
+        <h3 id="request">Stap 2: Validatie Request</h3>
+        <p>Maak een request aan: <code>php artisan make:request ReviewStoreRequest</code>.</p>
+        <pre><code class="language-php">
+public function rules(): array
+{
+    return [
+        'title' => 'required|string|max:100',
+        'body' => 'required|string|min:10',
+        'rating' => 'required|integer|min:1|max:5',
+        'product_id' => 'required|exists:products,id',
+    ];
+}
+        </code></pre>
+
+        <h3 id="controller">Stap 3: Review Controller</h3>
+        <p>Maak <code>ReviewController</code> aan in de map <code>Open</code>. Hier slaan we de review op.</p>
+
+        <pre><code class="language-php">
+// app/Http/Controllers/Open/ReviewController.php
+
+namespace App\Http\Controllers\Open;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ReviewStoreRequest;
+use App\Models\Review;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+
+class ReviewController extends Controller
+{
+    public function store(ReviewStoreRequest $request): RedirectResponse
+    {
+        $review = new Review();
+
+        // Vul de velden met de gevalideerde data
+        $review->title = $request->title;
+        $review->rating = $request->rating;
+        $review->body = $request->body;
+        $review->product_id = $request->product_id;
+
+        // Koppel de ingelogde gebruiker
+        $review->user_id = Auth::id();
+
+        $review->save();
+
+        return back()->with('status', 'Bedankt voor je review!');
+    }
+}
+        </code></pre>
+
+        <h3 id="route">Stap 4: Route Toevoegen</h3>
+        <p>Voeg de route toe aan <code>routes/web.php</code> zodat het formulier werkt.</p>
+        <pre><code class="language-php">
+// routes/web.php
+use App\Http\Controllers\Open\ReviewController;
+
+Route::post('/reviews', [ReviewController::class, 'store'])->name('open.reviews.store');
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create & Dropdowns - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Create & Dropdowns</h1>
+        <p>We kunnen producten bekijken (Index), maar we moeten ze ook kunnen aanmaken. Bij het maken van een Categorie was dat simpel: je had alleen een tekstveld voor de naam nodig.</p>
+        <p>Bij een Product is het ingewikkelder. Een product <strong>moet</strong> namelijk gekoppeld worden aan een Categorie. We kunnen de gebruiker niet vragen om het ID van de categorie uit zijn hoofd te leren en in te typen. In plaats daarvan willen we een gebruiksvriendelijk keuzemenu (dropdown) tonen met alle beschikbare categorieën.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan data ophalen in de Controller om een formulier te vullen (Select Options).</li>
+                <li>Ik kan een HTML <code>&lt;select&gt;</code> element genereren met een <code>@foreach</code> loop.</li>
+                <li>Ik begrijp het verschil tussen de zichtbare naam en de technische <code>value</code> (ID) in een optie.</li>
+                <li>Ik kan de <code>@selected</code> directive gebruiken om de keuze te onthouden bij validatiefouten (old input).</li>
+                <li>Ik kan invoer valideren op bestaande relaties (<code>exists</code> regel).</li>
+            </ul>
+        </div>
+
+        <h2>De Controller: Data Voorbereiden</h2>
+        <p>Voordat we de view <code>products.create</code> laden, moeten we eerst weten welke categorieën er bestaan. Anders kunnen we de dropdown niet vullen. Dit is een klassiek patroon in MVC: de Controller haalt de benodigde "ingrediënten" op en geeft ze aan de View.</p>
+
+        <p>Open <code>app/Http/Controllers/Admin/ProductController.php</code> en pas de <code>create</code> methode aan:</p>
+
+        <pre><code class="language-php">
+use App\Models\Category; // Vergeet niet te importeren!
+
+public function create(): View
+{
+    // 1. Haal alle categorieën op uit de database
+    // We sorteren ze op naam voor het gebruikersgemak
+    $categories = Category::orderBy('name')->get();
+
+    // 2. Geef ze mee aan de view
+    return view('admin.products.create', [
+        'categories' => $categories
+    ]);
+}
+        </code></pre>
+
+        <h2>De View: Het Formulier</h2>
+        <p>Maak het bestand <code>resources/views/admin/products/create.blade.php</code> aan. De basis (titel, breadcrumbs, formulier-tag) ken je inmiddels. We focussen hier op de invoervelden.</p>
+
+        <h3>Standaard Velden</h3>
+        <p>Voor Titel, Prijs, Voorraad en Beschrijving gebruiken we standaard HTML-inputs.</p>
+
+        <pre><code class="language-html">
+&lt;!-- Titel --&gt;
+&lt;div class="mb-4"&gt;
+    &lt;label for="title" class="block font-bold"&gt;Titel&lt;/label&gt;
+    &lt;input type="text" name="title" id="title" class="border w-full p-2" value="{{ old('title') }}"&gt;
+&lt;/div&gt;
+
+&lt;!-- Prijs (Decimalen) --&gt;
+&lt;div class="mb-4"&gt;
+    &lt;label for="price" class="block font-bold"&gt;Prijs&lt;/label&gt;
+    &lt;input type="number" step="0.01" name="price" id="price" class="border w-full p-2" value="{{ old('price') }}"&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <h3>De Dropdown (Select)</h3>
+        <p>Hier gebeurt het echte werk. Een dropdown bestaat uit een <code>&lt;select&gt;</code> element met daarin meerdere <code>&lt;option&gt;</code> elementen.</p>
+        <p>De structuur van een optie is: <code>&lt;option value="HET_ID"&gt;DE_NAAM&lt;/option&gt;</code>. De gebruiker ziet de naam, maar als het formulier wordt verstuurd, ontvangt Laravel het ID.</p>
+
+
+
+        <pre><code class="language-html">
+&lt;div class="mb-4"&gt;
+    &lt;label for="category_id" class="block font-bold"&gt;Categorie&lt;/label&gt;
+
+    &lt;select name="category_id" id="category_id" class="border w-full p-2"&gt;
+        &lt;option value="" disabled selected&gt;Kies een categorie...&lt;/option&gt;
+
+        @foreach($categories as $category)
+            &lt;option value="{{ $category->id }}"&gt;
+                {{ $category->name }}
+            &lt;/option&gt;
+        @endforeach
+    &lt;/select&gt;
+
+    @error('category_id')
+        &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt;
+    @enderror
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>Gebruiksgemak: Keuze Onthouden (Old Input)</h2>
+        <p>Als de gebruiker het formulier verstuurt maar een fout maakt (bijvoorbeeld: prijs vergeten), herlaadt de pagina. Standaard springt de dropdown dan terug naar "Kies een categorie...". Dat is frustrerend.</p>
+        <p>We moeten controleren: "Is het ID van deze optie gelijk aan wat de gebruiker net had gekozen?". Vroeger schreven we daar ingewikkelde <code>if</code>-statements voor. In moderne Laravel versies gebruiken we de <code>@selected</code> directive.</p>
+
+        <pre><code class="language-html">
+&lt;option value="{{ $category->id }}" @selected(old('category_id') == $category->id)&gt;
+    {{ $category->name }}
+&lt;/option&gt;
+        </code></pre>
+
+        <p>De code <code>old('category_id')</code> kijkt of er vorige invoer was. Als die overeenkomt met het ID van de huidige loop, voegt Laravel automatisch het attribuut <code>selected</code> toe aan de HTML.</p>
+
+        <h2>Validatie: Bestaat het ID wel?</h2>
+        <p>Een hacker kan via "Inspect Element" de values van je dropdown aanpassen en een ID sturen dat helemaal niet bestaat (bijvoorbeeld 9999). Als je dit probeert op te slaan, crasht je database (Foreign Key Constraint Violation).</p>
+        <p>We moeten dus valideren of het ingezonden ID echt bestaat in de <code>categories</code> tabel. Hiervoor gebruiken we de <code>exists</code> regel.</p>
+
+        <p>Maak een Request aan: <code>php artisan make:request ProductStoreRequest</code> en configureer de regels:</p>
+
+        <pre><code class="language-php">
+public function rules(): array
+{
+    return [
+        'title'       => 'required|string|min:3|max:255',
+        'description' => 'required|string',
+        'price'       => 'required|numeric|min:0',
+        'stock'       => 'required|integer|min:0',
+
+        // VEILIGHEID: Check of dit ID wel bestaat in de 'categories' tabel, kolom 'id'
+        'category_id' => 'required|exists:categories,id',
+    ];
+}
+        </code></pre>
+
+        <h2>Opslaan in de Controller</h2>
+        <p>Het opslaan is nu heel eenvoudig, omdat we de veldnamen in het formulier (<code>title</code>, <code>price</code>, <code>category_id</code>) exact hetzelfde hebben genoemd als de kolommen in de database.</p>
+
+        <pre><code class="language-php">
+public function store(ProductStoreRequest $request)
+{
+    // Validatie is al gedaan door de Request class
+
+    Product::create($request->validated());
+
+    return to_route('admin.products.index')
+        ->with('status', 'Product succesvol aangemaakt!');
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Check je Model!</strong><br>
+            Vergeet niet om <code>category_id</code> toe te voegen aan de <code>$fillable</code> array in je <code>Product</code> model. Anders negeert Laravel dit veld stilletjes tijdens het opslaan en krijg je een database error omdat het veld leeg blijft.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

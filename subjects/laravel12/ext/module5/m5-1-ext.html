@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Laravel 12 Module 5</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Orders</h1>
+        <p>Welkom in Module 5! In de vorige module hebben we een winkelwagen gebouwd die in de sessie leeft. Dat is handig voor tijdelijke opslag, maar als de klant betaalt, moeten we de gegevens <strong>permanent</strong> opslaan. We willen immers weten wie wat heeft gekocht, voor welke prijs en wanneer.</p>
+        <p>Dit noemen we een <strong>Order</strong>. Het opslaan van een bestelling is complexer dan een simpel product, omdat een bestelling uit meerdere onderdelen bestaat. In dit hoofdstuk ontwerpen we de database structuur.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik begrijp het verschil tussen tijdelijke data (Sessie/Cart) en permanente data (Database/Order).</li>
+                <li>Ik kan een databaseontwerp maken voor een "Master-Detail" relatie (Orders en OrderItems).</li>
+                <li>Ik kan Migrations schrijven voor de tabellen <code>orders</code> en <code>order_items</code>.</li>
+                <li>Ik begrijp waarom we de <strong>historische prijs</strong> moeten opslaan en niet alleen naar het product moeten verwijzen.</li>
+                <li>Ik kan de Eloquent relaties (HasMany, BelongsTo) leggen tussen User, Order en OrderItem.</li>
+            </ul>
+        </div>
+
+        <h2>Het Database Probleem</h2>
+        <p>Stel, je wilt een bestelling opslaan. Je zou kunnen denken aan één grote tabel:</p>
+        <ul>
+            <li>Order ID: 1</li>
+            <li>Klant: Jan</li>
+            <li>Producten: "FIFA 24, GTA V, Call of Duty"</li>
+            <li>Totaal: 150.00</li>
+        </ul>
+        <p>Dit werkt niet goed. Hoe sla je de aantallen op? Wat als Jan later zijn adres wijzigt? En hoe zoek je makkelijk alle bestellingen met "FIFA 24"?</p>
+
+        <h3>De Oplossing: Twee Tabellen</h3>
+        <p>In databases gebruiken we hiervoor een standaard patroon: <strong>Header & Lines</strong> (Kop en Regels).</p>
+        <ol>
+            <li><strong>Orders (De Kop):</strong> Bevat algemene info (Klant, Datum, Totaalbedrag, Status, Adres).</li>
+            <li><strong>OrderItems (De Regels):</strong> Bevat de specifieke producten (Product ID, Aantal, Prijs per stuk).</li>
+        </ol>
+
+
+
+        <h2>Stap 1: De Order Migratie</h2>
+        <p>We beginnen met de hoofdtabel. Deze koppelen we aan de gebruiker (User).</p>
+        <pre><code class="language-bash">php artisan make:model Order -m</code></pre>
+
+        <p>Open de migration file. We voegen kolommen toe voor de status, het totaalbedrag en de koppeling met de gebruiker.</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::create('orders', function (Blueprint $table) {
+        $table->id();
+
+        // Wie heeft er besteld?
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+        // Financiële data
+        $table->decimal('total_price', 10, 2); // Bijv: 1250.50
+
+        // Status van de bestelling
+        // We gebruiken een string met een standaardwaarde
+        $table->string('status')->default('pending'); // pending, paid, shipped, cancelled
+
+        // Adresgegevens (simpel gehouden voor nu)
+        $table->string('address');
+        $table->string('zipcode');
+        $table->string('city');
+
+        $table->timestamps();
+    });
+}
+        </code></pre>
+
+        <h2>Stap 2: De OrderItem Migratie</h2>
+        <p>Nu de tabel voor de producten <em>binnen</em> de bestelling. Elk item linkt aan één order en één product.</p>
+        <pre><code class="language-bash">php artisan make:model OrderItem -m</code></pre>
+
+        <p>Let goed op de kolom <code>price</code> hieronder. Dit is een belangrijk concept.</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::create('order_items', function (Blueprint $table) {
+        $table->id();
+
+        // Bij welke bestelling hoort dit regeltje?
+        $table->foreignId('order_id')->constrained()->onDelete('cascade');
+
+        // Welk product is het?
+        // Let op: we gebruiken 'set null' of geen cascade bij delete,
+        // want we willen de bestelhistorie behouden ook als het product later verdwijnt.
+        $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
+
+        // Hoeveel stuks?
+        $table->integer('quantity');
+
+        // HISTORISCHE PRIJS (Per stuk)
+        $table->decimal('price', 10, 2);
+
+        $table->timestamps();
+    });
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Waarom slaan we de prijs opnieuw op?</strong><br>
+            Stel: Je koopt vandaag een game voor &euro;60. Volgende week is er uitverkoop en kost de game &euro;40. De beheerder past de prijs aan in de <code>products</code> tabel.<br>
+            Als we in de bestelling alleen verwijzen naar het product, zou jouw factuur van vorige week ineens veranderen naar &euro;40. Dat mag boekhoudkundig niet! Daarom slaan we de prijs op <strong>zoals hij was op het moment van bestellen</strong> (snapshot).
+        </div>
+
+        <h2>Stap 3: De Relaties (Models)</h2>
+        <p>Nu de tabellen klaar zijn, moeten we de relaties definiëren in de Models. Voer eerst je migraties uit: <code>php artisan migrate</code>.</p>
+
+        <h3>Order Model</h3>
+        <p>Een order is van één klant en heeft meerdere regels.</p>
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Order extends Model
+{
+    // Vergeet $fillable niet!
+    protected $fillable = [
+        'user_id', 'total_price', 'status', 'address', 'zipcode', 'city'
+    ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+}
+        </code></pre>
+
+        <h3>OrderItem Model</h3>
+        <p>Een regel hoort bij één order en verwijst naar één product.</p>
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class OrderItem extends Model
+{
+    protected $fillable = ['order_id', 'product_id', 'quantity', 'price'];
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+}
+        </code></pre>
+
+        <h3>User Model</h3>
+        <p>Vergeet niet om ook in je User model de relatie te leggen. Dit is handig om later alle bestellingen van een gebruiker op te vragen (bijv: "Mijn Bestellingen").</p>
+        <pre><code class="language-php">
+// In User.php
+public function orders(): HasMany
+{
+    return $this->hasMany(Order::class)->latest(); // Nieuwste eerst
+}
+        </code></pre>
+
+        <h2>Status Management (Enums)</h2>
+        <p>In de migration gebruikten we strings zoals 'pending' en 'paid'. Om typefouten te voorkomen, is het in moderne Laravel applicaties slim om hier een <strong>Enum</strong> voor te gebruiken. Voor nu houden we het simpel bij strings, maar onthoud dat statussen zoals:</p>
+        <ul>
+            <li><code>pending</code> (Wachten op betaling)</li>
+            <li><code>paid</code> (Betaald, klaar voor verzending)</li>
+            <li><code>shipped</code> (Verzonden)</li>
+            <li><code>cancelled</code> (Geannuleerd)</li>
+        </ul>
+        <p>...essentieel zijn voor de flow van je webshop.</p>
+
+        <h2>Samenvatting</h2>
+        <p>De fundering ligt er. We hebben:</p>
+        <ol>
+            <li>Een tabel voor de bestelling zelf (Order).</li>
+            <li>Een tabel voor de regels op de bestelling (OrderItems).</li>
+            <li>Nagedacht over historische prijzen.</li>
+            <li>Alle relaties gekoppeld in Eloquent.</li>
+        </ol>
+        <p>In de volgende module gaan we de inhoud van de Winkelwagen (uit de Sessie) overzetten naar deze nieuwe Database tabellen.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

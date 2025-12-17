@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="nl" data-theme="light" data-color="red">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tonen van Winkelwagen - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Tonen van Winkelwagen</h1>
+        <p>In de vorige module hebben we producten in de sessie opgeslagen. Nu is het tijd om deze data zichtbaar te maken. We gaan een pagina maken die de inhoud van de sessie uitleest, de totalen berekent en dit in een overzichtelijke tabel toont.</p>
+        <p>Dit is een belangrijk moment voor de klant: hier controleren ze hun bestelling voordat ze gaan betalen. Duidelijkheid is hier dus essentieel.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan data uit de sessie ophalen in de Controller.</li>
+                <li>Ik kan de totaalprijs van de winkelwagen berekenen (Prijs x Aantal).</li>
+                <li>Ik kan een HTML-tabel bouwen die dynamisch gevuld wordt met een <code>foreach</code> loop.</li>
+                <li>Ik kan omgaan met een "Lege Winkelwagen" scenario (Empty State).</li>
+            </ul>
+        </div>
+
+        <h2>Stap 1: Route en Controller</h2>
+        <p>We hebben een pagina nodig waar de winkelwagen staat. Meestal is dit <code>/cart</code>. We voegen een nieuwe methode <code>index</code> toe aan de bestaande <code>CartController</code>.</p>
+
+        <p><strong>De Route (routes/web.php):</strong></p>
+        <pre><code class="language-php">
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+        </code></pre>
+
+        <p><strong>De Controller (CartController.php):</strong></p>
+        <p>Hier halen we de data op. Maar we doen meer: we berekenen hier ook alvast het totaalbedrag. Het is netter om rekenwerk in de Controller te doen dan in de View.</p>
+
+        <pre><code class="language-php">
+public function index()
+{
+    // 1. Haal de kar op (of een lege array als er niets is)
+    $cart = session()->get('cart', []);
+
+    // 2. Bereken het totaalbedrag
+    $total = 0;
+    foreach($cart as $id => $details) {
+        $total += $details['price'] * $details['quantity'];
+    }
+
+    // 3. Stuur alles naar de view
+    return view('shop.cart', [
+        'cart' => $cart,
+        'total' => $total
+    ]);
+}
+        </code></pre>
+
+        <h2>Stap 2: De View (Tabelstructuur)</h2>
+        <p>Maak het bestand <code>resources/views/shop/cart.blade.php</code>.
+            We gebruiken een tabel voor het overzicht. Dit is een klassiek patroon voor winkelwagens.</p>
+
+
+
+        <h3>De "Lege Mand" Check</h3>
+        <p>Als de sessie leeg is (of de variabele <code>$cart</code> bevat geen items), willen we geen lege tabel tonen. We tonen dan een vriendelijke melding.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="container mx-auto px-4 py-8"&gt;
+        &lt;h1 class="text-3xl font-bold mb-6"&gt;Winkelwagen&lt;/h1&gt;
+
+        @if(session('cart') && count(session('cart')) > 0)
+            &lt;div class="bg-white rounded shadow-lg p-6"&gt;
+                
+                &lt;table class="w-full text-left border-collapse"&gt;
+                    &lt;thead&gt;
+                        &lt;tr class="border-b"&gt;
+                            &lt;th class="py-4"&gt;Product&lt;/th&gt;
+                            &lt;th class="py-4"&gt;Prijs&lt;/th&gt;
+                            &lt;th class="py-4"&gt;Aantal&lt;/th&gt;
+                            &lt;th class="py-4"&gt;Subtotaal&lt;/th&gt;
+                            &lt;th class="py-4"&gt;Acties&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        @foreach($cart as $id => $details)
+                            &lt;tr class="border-b last:border-0"&gt;
+                                &lt;!-- Product Naam --&gt;
+                                &lt;td class="py-4"&gt;
+                                    &lt;div class="font-bold"&gt;{{ $details['title'] }}&lt;/div&gt;
+                                &lt;/td&gt;
+                                
+                                &lt;!-- Prijs per stuk --&gt;
+                                &lt;td class="py-4"&gt;
+                                    &euro; {{ number_format($details['price'], 2, ',', '.') }}
+                                &lt;/td&gt;
+                                
+                                &lt;!-- Aantal --&gt;
+                                &lt;td class="py-4"&gt;
+                                    {{ $details['quantity'] }}
+                                &lt;/td&gt;
+                                
+                                &lt;!-- Subtotaal (Prijs x Aantal) --&gt;
+                                &lt;td class="py-4 font-bold"&gt;
+                                    &euro; {{ number_format($details['price'] * $details['quantity'], 2, ',', '.') }}
+                                &lt;/td&gt;
+                                
+                                &lt;!-- Acties (Verwijderen knop komt in volgende module) --&gt;
+                                &lt;td class="py-4"&gt;
+                                    &lt;button class="text-red-500 hover:underline"&gt;Verwijder&lt;/button&gt;
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                        @endforeach
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+
+                &lt;!-- Totaal en Afrekenen --&gt;
+                &lt;div class="mt-8 flex justify-end"&gt;
+                    &lt;div class="w-full md:w-1/3"&gt;
+                        &lt;div class="flex justify-between text-xl font-bold mb-4"&gt;
+                            &lt;span&gt;Totaal:&lt;/span&gt;
+                            &lt;span&gt;&euro; {{ number_format($total, 2, ',', '.') }}&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;a href="#" class="block w-full bg-green-600 text-white text-center font-bold py-3 rounded hover:bg-green-700"&gt;
+                            Afrekenen
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+        @else
+            &lt;!-- De "Empty State" --&gt;
+            &lt;div class="text-center py-12 bg-white rounded shadow"&gt;
+                &lt;p class="text-xl text-gray-600 mb-6"&gt;Je winkelwagen is nog leeg!&lt;/p&gt;
+                &lt;a href="{{ route('shop.index') }}" class="bg-blue-600 text-white font-bold py-3 px-6 rounded hover:bg-blue-700"&gt;
+                    Verder Winkelen
+                &lt;/a&gt;
+            &lt;/div&gt;
+        @endif
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Detail: Subtotalen</h2>
+        <p>In de tabel zie je de kolom "Subtotaal". Dit is belangrijk voor de klant.</p>
+        <ul>
+            <li>Prijs: &euro; 50,00 (Prijs van 1 item)</li>
+            <li>Aantal: 2</li>
+            <li>Subtotaal: &euro; 100,00 (Wat kost deze regel in totaal?)</li>
+        </ul>
+        <p>In de code doen we dit simpelweg door te vermenigvuldigen: <code>$details['price'] * $details['quantity']</code>.</p>
+
+        <h2>Navigatie Update</h2>
+        <p>Het is handig als de klant op elke pagina kan zien dat er iets in zijn kar zit. In je <code>layoutpublic.blade.php</code> (de header) kun je nu een link toevoegen.</p>
+        <p>Je kunt zelfs tellen hoeveel items erin zitten:</p>
+
+        <pre><code class="language-html">
+&lt;a href="{{ route('cart.index') }}" class="relative"&gt;
+    Winkelwagen
+    @if(session('cart'))
+        &lt;span class="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full px-2 py-0.5"&gt;
+            {{ count(session('cart')) }}
+        &lt;/span&gt;
+    @endif
+&lt;/a&gt;
+        </code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>Je hebt nu de visualisatie van de winkelwagen gebouwd. De klant kan zien wat hij heeft toegevoegd, wat het kost en wat het totaalbedrag is. Ook hebben we nagedacht over de situatie waarin de mand leeg is.</p>
+        <p>In de volgende module gaan we zorgen dat de "Verwijder" knop ook echt werkt.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>

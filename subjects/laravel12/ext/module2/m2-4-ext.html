@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12 Module 1</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Aanmaken van Users</h1>
+        <p>In de vorige modules hebben we gewerkt met registratie (waarbij de gebruiker zichzelf aanmaakt) en seeds (automatisch aanmaken). Maar in een beheerdersomgeving wil je vaak handmatig accounts kunnen aanmaken voor collega's of klanten. In deze module bouwen we een admin-pagina om gebruikers toe te voegen.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Resource Controller maken voor Users.</li>
+                <li>Ik begrijp hoe <strong>Hashing</strong> werkt en waarom we wachtwoorden nooit als platte tekst opslaan.</li>
+                <li>Ik kan een formulier maken met een checkbox voor boolean waardes (is_admin).</li>
+                <li>Ik kan validatie toepassen op wachtwoorden (lengte, bevestiging).</li>
+            </ul>
+        </div>
+
+        <h2>De User Controller</h2>
+        <p>We beginnen met het aanmaken van een controller speciaal voor het beheren van gebruikers. Omdat dit een admin-taak is, plaatsen we deze weer in de <code>Admin</code> namespace.</p>
+
+        <pre><code class="language-bash">php artisan make:controller Admin/UserController --resource</code></pre>
+
+        <p>Vergeet niet de route toe te voegen in <code>routes/web.php</code>:</p>
+        <pre><code class="language-php">
+use App\Http\Controllers\Admin\UserController;
+
+// ... binnen je admin routes ...
+Route::resource('admin/users', UserController::class);
+        </code></pre>
+
+        <h2>Wachtwoorden & Hashing</h2>
+        <p>Voordat we gebruikers gaan opslaan, moeten we het hebben over veiligheid. Een van de belangrijkste regels in software development is:</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>WAARSCHUWING:</strong> Sla <strong>NOOIT</strong> wachtwoorden op als "platte tekst" (plain text) in de database.
+        </div>
+
+        <p>Als je database ooit uitlekt (en dat gebeurt bij de grootste bedrijven), liggen alle wachtwoorden op straat. Daarom gebruiken we <strong>Hashing</strong>. Een hash is een wiskundige reeks tekens die onomkeerbaar is. Je kunt van "geheim123" wel een hash maken, maar van de hash nooit meer terug naar "geheim123".</p>
+
+        <h3>Hash Facade</h3>
+        <p>Laravel maakt dit heel makkelijk met de <code>Hash</code> facade. De standaard techniek die Laravel gebruikt is <strong>Bcrypt</strong> (of Argon2), wat op dit moment de industriestandaard is.</p>
+
+        <pre><code class="language-php">
+use Illuminate\Support\Facades\Hash;
+
+// Zo maak je een veilige hash:
+$hashedPassword = Hash::make('geheim123');
+        </code></pre>
+
+        <h2>De Create View</h2>
+        <p>Maak het bestand <code>resources/views/admin/users/create.blade.php</code> aan. Dit formulier lijkt op dat van Categorieën, maar met extra velden voor e-mail, wachtwoord en de admin-checkbox.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1 class="text-2xl font-bold mb-4"&gt;Nieuwe Gebruiker&lt;/h1&gt;
+
+    &lt;form action="{{ route('admin.users.store') }}" method="POST" class="max-w-lg"&gt;
+        @csrf
+
+        &lt;!-- Naam --&gt;
+        &lt;div class="mb-4"&gt;
+            &lt;label class="block mb-2 font-bold"&gt;Naam&lt;/label&gt;
+            &lt;input type="text" name="name" class="border w-full p-2 rounded" value="{{ old('name') }}"&gt;
+            @error('name') &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;!-- Email --&gt;
+        &lt;div class="mb-4"&gt;
+            &lt;label class="block mb-2 font-bold"&gt;Email&lt;/label&gt;
+            &lt;input type="email" name="email" class="border w-full p-2 rounded" value="{{ old('email') }}"&gt;
+            @error('email') &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;!-- Wachtwoord --&gt;
+        &lt;div class="mb-4"&gt;
+            &lt;label class="block mb-2 font-bold"&gt;Wachtwoord&lt;/label&gt;
+            &lt;input type="password" name="password" class="border w-full p-2 rounded"&gt;
+            @error('password') &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt; @enderror
+        &lt;/div&gt;
+
+        &lt;!-- Is Admin Checkbox --&gt;
+        &lt;div class="mb-4"&gt;
+            &lt;label class="inline-flex items-center"&gt;
+                &lt;input type="checkbox" name="is_admin" class="form-checkbox h-5 w-5 text-red-600" value="1"&gt;
+                &lt;span class="ml-2 text-gray-700"&gt;Maak deze gebruiker Admin&lt;/span&gt;
+            &lt;/label&gt;
+        &lt;/div&gt;
+
+        &lt;button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded"&gt;Opslaan&lt;/button&gt;
+    &lt;/form&gt;
+@endsection
+        </code></pre>
+
+        <h2>Opslaan (Store Logic)</h2>
+        <p>In de <code>UserController</code> gaan we de data verwerken. Let goed op hoe we het wachtwoord en de checkbox behandelen.</p>
+
+        <h3>1. Validatie</h3>
+        <p>E-mailadressen moeten uniek zijn. Wachtwoorden moeten sterk genoeg zijn.</p>
+
+        <h3>2. Checkboxen in HTML</h3>
+        <p>Een eigenaardigheid van HTML-checkboxen is: als ze <strong>niet</strong> aangevinkt zijn, worden ze <strong>niet</strong> meegestuurd in het request. Als ze <strong>wel</strong> aangevinkt zijn, sturen ze de waarde "1" (of "on").</p>
+        <p>In Laravel controleren we dit met <code>$request->has('is_admin')</code> of door een default waarde te gebruiken.</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash; // Importeer Hash!
+
+class UserController extends Controller
+{
+    public function create()
+    {
+        return view('admin.users.create');
+    }
+
+    public function store(Request $request)
+    {
+        // 1. Valideer de invoer
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8', // Minimaal 8 tekens
+        ]);
+
+        // 2. Maak een nieuwe user aan (OOP manier)
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        // 3. Hash het wachtwoord!
+        $user->password = Hash::make($request->password);
+
+        // 4. Verwerk de checkbox
+        // $request->has() geeft true als het vinkje aan staat, anders false
+        $user->is_admin = $request->has('is_admin');
+
+        $user->save();
+
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Gebruiker succesvol aangemaakt!');
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Pro Tip: Wachtwoord Bevestigen</strong><br>
+            Wil je zeker weten dat de gebruiker geen typefout maakt in het wachtwoord? Voeg een extra veld toe in je HTML: <code>name="password_confirmation"</code>.<br>
+            Pas vervolgens je validatie aan naar: <code>'password' => 'required|confirmed|min:8'</code>.<br>
+            Laravel checkt dan automatisch of <code>password</code> en <code>password_confirmation</code> identiek zijn.
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roles & permissions - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Roles & Permissions</h1>
+        <p>We gebruiken de package <code>spatie/laravel-permission</code> om rollen en rechten te beheren. Dit is de standaard in de Laravel community.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan de Spatie Permission package installeren en configureren.</li>
+            <li>Ik kan de <code>HasRoles</code> trait toepassen op het User model.</li>
+            <li>Ik kan rollen en permissies aanmaken via een seeder.</li>
+        </ul>
+
+        <h3 id="install">Stap 1: Installatie</h3>
+        <pre><code class="language-bash">composer require spatie/laravel-permission</code></pre>
+
+        <h3 id="config">Stap 2: Configuratie</h3>
+        <p>Voeg de ServiceProvider toe in <code>bootstrap/providers.php</code> (Nieuw in Laravel 11/12):</p>
+        <pre><code class="language-php">
+return [
+    App\Providers\AppServiceProvider::class,
+    Spatie\Permission\PermissionServiceProvider::class, // Toevoegen
+];
+        </code></pre>
+
+        <p>Publiceer de configuratie en migraties:</p>
+        <pre><code class="language-bash">php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"</code></pre>
+
+        <p>Voer de migratie uit:</p>
+        <pre><code class="language-bash">php artisan migrate</code></pre>
+
+        <h3 id="model">Stap 3: Model Setup</h3>
+        <p>Voeg de <code>HasRoles</code> trait toe aan je <code>User</code> model.</p>
+        <pre><code class="language-php">use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable {
+    use HasRoles;
+}</code></pre>
+
+        <h3 id="seeder">Stap 4: Role & Permission Seeder</h3>
+        <p>We maken een seeder om de rollen en permissies aan te maken.</p>
+        <pre><code class="language-bash">php artisan make:seeder RoleAndPermissionSeeder</code></pre>
+
+        <p>In <code>database/seeders/RoleAndPermissionSeeder.php</code>:</p>
+        <pre><code class="language-php">
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+public function run(): void
+{
+    // Reset cached roles and permissions
+    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+    // Permissies aanmaken
+    Permission::create(['name' => 'create category']);
+    Permission::create(['name' => 'edit category']);
+    Permission::create(['name' => 'delete category']);
+
+    // Rollen aanmaken en permissies geven
+    $role = Role::create(['name' => 'sales']);
+    $role->givePermissionTo(['create category', 'edit category']);
+
+    $role = Role::create(['name' => 'admin']);
+    $role->givePermissionTo(Permission::all());
+}
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

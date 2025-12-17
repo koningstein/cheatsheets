@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit & Pre-select - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Edit & Pre-select</h1>
+        <p>Bij het bewerken van records moeten we niet alleen de huidige waarden in tekstvelden tonen, maar ook de juiste opties selecteren in dropdowns. Dit is cruciaal voor een goede gebruikerservaring.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een edit formulier maken met dropdowns voor relaties.</li>
+            <li>Ik kan de huidige foreign key waarde pre-selecteren.</li>
+            <li>Ik kan oude input (<code>old()</code>) combineren met database waarden.</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller (Edit)</h3>
+        <p>Voor de edit pagina hebben we het product nodig (voor de values) én de lijst met categorieën (voor de dropdown).</p>
+
+        <pre><code class="language-php">
+public function edit(Product $product)
+{
+    $categories = Category::all();
+
+    return view('admin.products.edit', [
+        'product' => $product,
+        'categories' => $categories
+    ]);
+}
+        </code></pre>
+
+        <h3 id="view-dropdown">Stap 2: View: Pre-select in Dropdown</h3>
+        <p>Dit is de truc: we moeten controleren of de optie in de loop gelijk is aan de <code>category_id</code> van het product. We gebruiken <code>old()</code> met als tweede parameter de database waarde. Dit zorgt ervoor dat bij een validatiefout de oude keuze blijft staan, en bij het eerste laden de database waarde wordt gekozen.</p>
+
+        <pre><code class="language-html">
+&lt;label class="block text-sm font-medium text-gray-700"&gt;Categorie:&lt;/label&gt;
+&lt;select name="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
+            focus:border-indigo-500 focus:ring-indigo-500"&gt;
+
+    @foreach($categories as $category)
+        &lt;option value="{{ $category->id }}"
+            {{-- Check: is dit de oude input? Of is dit de waarde uit de DB? --}}
+            @selected(old('category_id', $product->category_id) == $category->id)
+        &gt;
+            {{ $category->name }}
+        &lt;/option&gt;
+    @endforeach
+
+&lt;/select&gt;
+        </code></pre>
+
+        <h3 id="view-price">Stap 3: Prijs veld</h3>
+        <p>Voor de prijs halen we de laatste prijs op via de relatie <code>latest_price</code>. Ook hier gebruiken we <code>old()</code> voor de fallback.</p>
+
+        <pre><code class="language-html">
+&lt;label class="block text-sm font-medium text-gray-700"&gt;Huidige Prijs:&lt;/label&gt;
+&lt;input type="number" step="0.01" name="price"
+       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
+            focus:border-indigo-500 focus:ring-indigo-500"
+            value="{{ old('price', $product->latest_price ?
+            $product->latest_price->price : '') }}"&gt;
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 24</p>
+            <p>Maak de Edit pagina voor <strong>Tasks</strong>. Zorg dat User, Project en Activity dropdowns de juiste huidige waarde selecteren.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

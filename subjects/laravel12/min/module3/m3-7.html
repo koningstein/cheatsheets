@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store & Validatie - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Store & Validatie</h1>
+        <p>Bij het opslaan van data met relaties komt meer kijken. We moeten foreign keys valideren zodat we geen koppelingen maken naar data die niet bestaat, en soms moeten we data verdelen over meerdere tabellen.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een <code>TaskStoreRequest</code> maken met complexe validatie.</li>
+            <li>Ik kan foreign keys valideren (<code>integer</code>, <code>exists</code>).</li>
+            <li>Ik kan data opslaan waarbij de volgorde belangrijk is (eerst parent, dan child).</li>
+        </ul>
+
+        <h3 id="validation-request">Stap 1: Validatie Request</h3>
+        <p>We maken <code>ProductStoreRequest</code>. Let op de validatie van de foreign key: deze MOET bestaan in de database. Hiervoor gebruiken we de <code>exists</code> regel.</p>
+
+        <pre><code class="language-php">
+public function rules(): array
+{
+    return [
+        'name' => 'required|string|max:75',
+
+        // Foreign key validatie: moet bestaan in tabel categories, kolom id
+        'category_id' => 'required|integer|exists:categories,id',
+
+        // Prijs validatie (voor de andere tabel)
+        'price' => 'required|numeric|min:0|max:999999.99',
+    ];
+}
+        </code></pre>
+
+        <h3 id="store-method">Stap 2: Opslaan (Store Methode)</h3>
+        <p>In de controller moeten we twee dingen doen: eerst het Product aanmaken, en daarna de Prijs (want de prijs heeft het product_id nodig).</p>
+
+        <pre><code class="language-php">
+public function store(ProductStoreRequest $request)
+{
+    // 1. Maak Product
+    $product = new Product();
+    $product->name = $request->name;
+    $product->category_id = $request->category_id;
+    $product->save(); // Nu heeft $product een ID!
+
+    // 2. Maak Prijs (gekoppeld aan product)
+    $price = new Price();
+    $price->price = $request->price;
+    $price->effdate = now(); // Huidige datum/tijd
+    $price->product_id = $product->id; // Koppel ID van stap 1
+    $price->save();
+
+    return to_route('products.index')
+            ->with('status', 'Product en prijs opgeslagen!');
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 22</p>
+            <p>Pas dit toe op <strong>Tasks</strong>. Een Task heeft foreign keys naar <code>project_id</code> en <code>activity_id</code> (verplicht) en <code>user_id</code> (optioneel/nullable). Vergeet de <code>exists</code> validatie niet!</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

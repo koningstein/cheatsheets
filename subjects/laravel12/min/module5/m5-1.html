@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Structuur - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Orders Structuur</h1>
+        <p>Wanneer een klant afrekent, wordt de inhoud van de winkelwagen omgezet in een bestelling (Order). We moeten hiervoor de database structuur opzetten.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een Model en Migratie maken voor Orders en Orderregels.</li>
+            <li>Ik kan relaties definiëren tussen Order, User, State en Product.</li>
+            <li>Ik begrijp het verschil tussen een pivot table en een apart model voor orderregels.</li>
+        </ul>
+
+        <h3 id="generate">Stap 1: Models & Migrations Genereren</h3>
+        <p>We hebben drie nieuwe entiteiten nodig: <code>Order</code> (de bestelling), <code>Orderrow</code> (de regels in de bestelling) en <code>State</code> (de status van de bestelling, bijv. 'betaald').</p>
+        <pre><code class="language-bash">
+php artisan make:model Order -m
+php artisan make:model Orderrow -m
+php artisan make:model State -m
+        </code></pre>
+
+        <h3 id="migration-order">Stap 2: Migratie Orders</h3>
+        <p>Een order hoort bij een gebruiker en heeft een status. We slaan ook de datum op.</p>
+
+        <pre><code class="language-php">
+// database/migrations/xxxx_xx_xx_create_orders_table.php
+Schema::create('orders', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')->constrained(); // Wie bestelt?
+    $table->foreignId('state_id')->constrained(); // Status (betaald/verzonden)
+    $table->timestamps();
+});
+        </code></pre>
+
+        <h3 id="migration-state">Stap 3: Migratie States</h3>
+        <p>Simpele tabel voor statussen.</p>
+        <pre><code class="language-php">
+// database/migrations/xxxx_xx_xx_create_states_table.php
+Schema::create('states', function (Blueprint $table) {
+    $table->id();
+    $table->string('name'); // Bijv. 'Pending', 'Paid', 'Shipped'
+    $table->timestamps();
+});
+        </code></pre>
+
+        <h3 id="migration-orderrow">Stap 4: Migratie Orderrows</h3>
+        <p>Hier slaan we op welk product is gekocht, hoeveel stuks, en - heel belangrijk - <strong>wat de prijs was op dat moment</strong>. Productprijzen kunnen namelijk veranderen, maar de prijs in een oude bestelling mag nooit meer wijzigen.</p>
+
+        <pre><code class="language-php">
+// database/migrations/xxxx_xx_xx_create_orderrows_table.php
+Schema::create('orderrows', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('order_id')->constrained()->onDelete('cascade');
+    $table->foreignId('product_id')->constrained()->onDelete('restrict'); // Product mag niet weg als het verkocht is.
+
+    $table->integer('qty'); // Aantal
+    $table->decimal('price', 8, 2); // Prijs op moment van koop
+    $table->timestamps();
+});
+        </code></pre>
+
+        <h3 id="relations">Stap 5: Relaties in Models</h3>
+        <p>Vergeet niet de relaties in de Models te zetten, zodat we straks makkelijk <code>$order->orderrows</code> kunnen doen.</p>
+
+        <pre><code class="language-php">
+// app/Models/Order.php
+public function user(): BelongsTo { return $this->belongsTo(User::class); }
+public function state(): BelongsTo { return $this->belongsTo(State::class); }
+public function orderrows(): HasMany { return $this->hasMany(Orderrow::class); }
+        </code></pre>
+
+        <pre><code class="language-php">
+// app/Models/Orderrow.php
+public function product(): BelongsTo { return $this->belongsTo(Product::class); }
+public function order(): BelongsTo { return $this->belongsTo(Order::class); }
+        </code></pre>
+
+        <p>Voer tenslotte de migraties uit:</p>
+        <pre><code class="language-bash">php artisan migrate</code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

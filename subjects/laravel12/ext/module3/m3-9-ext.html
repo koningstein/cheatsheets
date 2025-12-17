@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit & Pre-select - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Edit & Pre-select</h1>
+        <p>We kunnen producten aanmaken en bekijken. Nu is het tijd om ze te wijzigen. Stel je hebt een typfout gemaakt in de titel, of je wilt het product aan een andere categorie koppelen.</p>
+        <p>Voor het bewerken (Edit) gebruiken we grotendeels hetzelfde formulier als bij het aanmaken (Create). Er is echter een belangrijk verschil: <strong>de invoervelden moeten vooraf ingevuld zijn</strong>. Voor tekstvelden is dit makkelijk, maar voor de dropdown (categorie selectie) moeten we zorgen dat de juiste optie automatisch geselecteerd is.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan de <code>edit</code> methode opzetten en de benodigde data (product + categorieën) doorgeven.</li>
+                <li>Ik kan tekstvelden vooraf invullen met <code>old()</code> en een standaardwaarde uit de database.</li>
+                <li>Ik kan in een dropdown de juiste optie selecteren met de <code>@selected</code> directive.</li>
+                <li>Ik begrijp hoe ik Method Spoofing (<code>@method('PUT')</code>) toepas bij updates.</li>
+            </ul>
+        </div>
+
+        <h2>De Controller: Data Verzamelen</h2>
+        <p>Net als bij de <code>create</code> methode, hebben we voor de <code>edit</code> pagina twee dingen nodig:</p>
+        <ol>
+            <li>Het product dat we willen bewerken (zodat we de huidige titel/prijs weten).</li>
+            <li>De lijst met alle categorieën (zodat we de dropdown kunnen vullen).</li>
+        </ol>
+
+        <p>Open <code>app/Http/Controllers/Admin/ProductController.php</code>:</p>
+
+        <pre><code class="language-php">
+public function edit(Product $product): View
+{
+    // 1. Haal alle categorieën op voor de dropdown
+    $categories = Category::orderBy('name')->get();
+
+    // 2. Geef zowel het product als de categorieën mee aan de view
+    return view('admin.products.edit', [
+        'product' => $product,
+        'categories' => $categories
+    ]);
+}
+        </code></pre>
+
+        <h2>De View: Formulier en Method Spoofing</h2>
+        <p>Maak het bestand <code>resources/views/admin/products/edit.blade.php</code> aan. Je kunt de code van <code>create.blade.php</code> kopiëren als basis, maar we moeten een paar cruciale wijzigingen doorvoeren.</p>
+
+        <h3>1. De Form Action en Methode</h3>
+        <p>Een HTML-formulier ondersteunt alleen GET en POST. Voor het updaten gebruiken we in Laravel echter een <strong>PUT</strong> request. Dit lossen we op met <code>@method('PUT')</code>.</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('admin.products.update', $product) }}" method="POST"&gt;
+    @csrf
+    @method('PUT')
+
+    &lt;!-- Velden hieronder... --&gt;
+&lt;/form&gt;
+        </code></pre>
+
+        <h3>2. Tekstvelden Vooraf Invullen</h3>
+        <p>We gebruiken de helper functie <code>old('veldnaam', 'standaardwaarde')</code>.
+            <br>Laravel kijkt eerst: "Is er net een validatiefout geweest? Zo ja, pak de oude invoer."
+            <br>Zo nee, dan pakt hij de tweede parameter: de waarde uit de database.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mb-4"&gt;
+    &lt;label for="title"&gt;Titel&lt;/label&gt;
+    &lt;input type="text" name="title"
+           value="{{ old('title', $product->title) }}"
+           class="border w-full p-2"&gt;
+&lt;/div&gt;
+
+&lt;div class="mb-4"&gt;
+    &lt;label for="price"&gt;Prijs&lt;/label&gt;
+    &lt;input type="number" step="0.01" name="price"
+           value="{{ old('price', $product->price) }}"
+           class="border w-full p-2"&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>De Dropdown: Pre-select Logic</h2>
+        <p>Dit is vaak het lastigste onderdeel voor beginners. We hebben een lijst met categorieën (in de loop) en we hebben het product dat we bewerken.</p>
+        <p>We moeten tegen de <code>&lt;option&gt;</code> zeggen: "Ben jij de categorie die bij dit product hoort? Zo ja, word geselecteerd!"</p>
+
+        <p>Vanaf Laravel 9 gebruiken we hiervoor de handige <code>@selected</code> directive. De logica binnen de haakjes moet <code>true</code> of <code>false</code> zijn.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mb-4"&gt;
+    &lt;label for="category_id"&gt;Categorie&lt;/label&gt;
+
+    &lt;select name="category_id" class="border w-full p-2"&gt;
+        @foreach($categories as $category)
+            &lt;option value="{{ $category->id }}"
+                @selected(old('category_id', $product->category_id) == $category->id)&gt;
+
+                {{ $category->name }}
+            &lt;/option&gt;
+        @endforeach
+    &lt;/select&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>De logica uitgelegd:</strong><br>
+            <code>old('category_id', $product->category_id)</code><br>
+            1. Laravel kijkt eerst of de gebruiker het formulier net heeft verzonden (bij een validatiefout). Zo ja, pak die keuze.<br>
+            2. Is dat niet zo? Pak dan het ID uit de database (<code>$product->category_id</code>).<br>
+            3. Vergelijk dat ID met het ID van de huidige optie in de loop (<code>$category->id</code>).<br>
+            4. Is het gelijk? Dan voegt Laravel het attribuut <code>selected="selected"</code> toe aan de HTML.
+        </div>
+
+        <h2>De Update Request</h2>
+        <p>Voor de validatie bij het updaten maken we vaak een nieuw Request bestand aan: <code>UpdateProductRequest</code>. Waarom? Soms zijn de regels bij updaten anders dan bij aanmaken (bijvoorbeeld bij unieke titels: de titel mag hetzelfde blijven als hij al van ditzelfde product is).</p>
+
+        <pre><code class="language-bash">php artisan make:request UpdateProductRequest</code></pre>
+
+        <p>Voor nu zijn de regels grotendeels gelijk aan de StoreRequest, dus je kunt de inhoud overnemen.</p>
+
+        <h2>Afhandeling in de Controller</h2>
+        <p>Tot slot verwerken we de wijzigingen in de database. Dit is heel schoon dankzij Eloquent.</p>
+
+        <pre><code class="language-php">
+public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+{
+    // 1. Haal de gevalideerde data op
+    $data = $request->validated();
+
+    // 2. Update het product
+    // Eloquent werkt de kolommen bij die in $fillable staan
+    $product->update($data);
+
+    // 3. Redirect
+    return to_route('admin.products.index')
+        ->with('status', 'Product succesvol bijgewerkt!');
+}
+        </code></pre>
+
+        <h2>Testen</h2>
+        <p>Ga naar je applicatie en probeer het volgende:</p>
+        <ul>
+            <li>Klik op "Bewerk" bij een product.</li>
+            <li>Controleer of de titel, prijs en omschrijving zijn ingevuld.</li>
+            <li><strong>Controleer of de juiste categorie in de dropdown staat.</strong></li>
+            <li>Wijzig de categorie en sla op.</li>
+            <li>Kijk in het overzicht of de wijziging is doorgevoerd.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

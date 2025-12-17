@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Setup (Database) - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Reviews Setup (Database)</h1>
+        <p>We gaan de mogelijkheid toevoegen om reviews achter te laten bij producten. Hiervoor moeten we eerst de database en models voorbereiden.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een Model en Migratie maken voor Reviews.</li>
+            <li>Ik kan relaties definiëren tussen Review, User en Product.</li>
+            <li>Ik kan testdata genereren met een Factory en Seeder.</li>
+        </ul>
+
+        <h3 id="generate">Stap 1: Model & Migratie Genereren</h3>
+        <p>We gebruiken het artisan commando om in één keer het Model, de Migration, de Factory en de Seeder aan te maken.</p>
+        <pre><code class="language-bash">php artisan make:model Review -mfs</code></pre>
+
+        <h3 id="migration">Stap 2: Migratie Configureren</h3>
+        <p>In de migration file definiëren we de tabelstructuur. Een review heeft een titel, inhoud, rating (score) en is gekoppeld aan een gebruiker en een product.</p>
+
+        <pre><code class="language-php">
+// database/migrations/xxxx_xx_xx_create_reviews_table.php
+Schema::create('reviews', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->text('body');
+    $table->integer('rating'); // Cijfer van 1 tot 5
+
+    // Relaties met cascade delete (als user/product weg is, review ook weg)
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->foreignId('product_id')->constrained()->onDelete('cascade');
+
+    $table->timestamps();
+});
+        </code></pre>
+
+        <h3 id="relations">Stap 3: Relaties in Models</h3>
+        <p>Zorg dat Laravel de relaties snapt door ze in de Models te zetten.</p>
+
+        <pre><code class="language-php">
+// app/Models/Review.php
+public function user() {
+    return $this->belongsTo(User::class);
+}
+public function product() {
+    return $this->belongsTo(Product::class);
+}
+        </code></pre>
+
+        <pre><code class="language-php">
+// app/Models/Product.php
+public function reviews() {
+    return $this->hasMany(Review::class);
+}
+        </code></pre>
+
+        <h3 id="seeding">Stap 4: Factory & Seeding</h3>
+        <p>Vul de `ReviewFactory.php` met neodata via Faker.</p>
+        <pre><code class="language-php">
+return [
+    'title' => $this->faker->sentence,
+    'body' => $this->faker->paragraph,
+    'rating' => $this->faker->numberBetween(1, 5),
+    'user_id' => User::all()->random()->id, // Kies een willekeurige user
+    'product_id' => Product::all()->random()->id, // Kies een willekeurig product
+];
+        </code></pre>
+
+        <p><strong>Belangrijk:</strong> Voeg de seeder toe aan <code>database/seeders/DatabaseSeeder.php</code> zodat hij ook daadwerkelijk wordt uitgevoerd.</p>
+
+        <pre><code class="language-php">
+// DatabaseSeeder.php
+public function run(): void
+{
+    $this->call([
+        // ... andere seeders ...
+        ReviewSeeder::class,
+    ]);
+}
+        </code></pre>
+
+        <p>Voer daarna het commando uit om alles te verversen:</p>
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

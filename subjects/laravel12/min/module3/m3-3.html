@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seeders met relaties - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+
+    <main class="main-content">
+        <h1>Seeders met Relaties</h1>
+        <p>In plaats van losse seeders die willekeurige ID's pakken, bouwen we de structuur logisch op. Dit zorgt voor consistente testdata waarbij relaties correct zijn gekoppeld.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan seeders aanpassen om gerelateerde data aan te maken.</li>
+            <li>Ik begrijp hoe "Magic Methods" in factories werken (bijv. <code>hasPrices</code>).</li>
+            <li>Ik begrijp de volgorde van seeden bij relaties.</li>
+        </ul>
+
+        <h3 id="magic-methods">1. Magic Methods</h3>
+        <p>Als je model een relatie heeft, bijvoorbeeld <code>public function prices()</code> in het Product model, dan kun je in de factory de magic method <code>hasPrices()</code> gebruiken. Laravel snapt dan automatisch dat er gerelateerde records aangemaakt moeten worden.</p>
+
+        <h3 id="product-seeder">2. De ProductSeeder</h3>
+        <p>We maken alles aan vanuit de Categorie. Zo weten we zeker dat elke categorie producten heeft, en elk product weer prijzen heeft. Dit creëert een mooie boomstructuur van data.</p>
+
+        <pre><code class="language-php">
+// database/seeders/ProductSeeder.php
+public function run(): void
+{
+    // 1. Maak 25 Categorieën
+    Category::factory()
+        ->times(25)
+        // 2. Elke categorie krijgt 5 Producten (relatie: products)
+        ->has(
+            Product::factory()
+                ->times(5)
+                // 3. Elk product krijgt 3 Prijzen (relatie: prices)
+                ->hasPrices(3)
+        )
+        ->create();
+}
+        </code></pre>
+
+        <h3 id="database-seeder">3. DatabaseSeeder Volgorde</h3>
+        <p>Zorg dat de volgorde in de <code>DatabaseSeeder</code> klopt. Eerst de basisconfiguratie (zoals rollen en gebruikers), dan pas de inhoudelijke data.</p>
+
+        <pre><code class="language-php">
+public function run(): void
+{
+    $this->call([
+        RoleAndPermissionSeeder::class,
+        UserSeeder::class,
+        ProductSeeder::class,
+    ]);
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 18</p>
+            <p>Maak seeders voor <code>Activities</code> (vaste waarden zoals 'Todo', 'Done'). Pas de <code>ProjectSeeder</code> aan zodat elk project minstens 2 taken heeft. Maak ook een <code>TaskSeeder</code> voor losse taken indien nodig.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

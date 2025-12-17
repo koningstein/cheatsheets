@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validatie & flash - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller - Validatie</h1>
+        <p>We mogen niet zomaar alle invoer accepteren. Om de integriteit van de data te waarborgen, voegen we validatie toe aan het opslaan-proces door middel van een FormRequest.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een FormRequest maken.</li>
+            <li>Ik kan validatieregels toepassen (required, min, max, unique).</li>
+            <li>Ik kan validatiefouten tonen in views.</li>
+            <li>Ik kan flash messages gebruiken.</li>
+        </ul>
+
+        <h3 id="request">Stap 1: FormRequest Maken</h3>
+        <p>We verplaatsen de validatie naar een eigen class om de controller netjes te houden.</p>
+        <pre><code class="language-bash">php artisan make:request CategoryStoreRequest</code></pre>
+
+        <h3 id="regels">Stap 2: Regels Instellen</h3>
+        <p>In <code>app/Http/Requests/CategoryStoreRequest.php</code>:</p>
+        <pre><code class="language-php">
+public function authorize(): bool
+{
+    return true; // Zet op TRUE, anders mag niemand het formulier sturen!
+}
+
+public function rules(): array
+{
+    return [
+        'name' => 'required|string|max:75|unique:categories',
+    ];
+}
+        </code></pre>
+
+        <h3 id="controller-validatie">Stap 3: Controller Aanpassen</h3>
+        <p>We vervangen <code>Request</code> door <code>CategoryStoreRequest</code>. Laravel voert nu automatisch de validatie uit voordat jouw code draait.</p>
+        <pre><code class="language-php">
+// Importeer de class bovenaan!
+use App\Http\Requests\CategoryStoreRequest;
+
+public function store(CategoryStoreRequest $request)
+{
+    // Sla op met gevalideerde data
+    Category::create($request->validated());
+
+    // Redirect met flash message
+    return to_route('categories.index')
+            ->with('status', 'Categorie succesvol aangemaakt!');
+}
+        </code></pre>
+
+        <h3 id="errors">Stap 4: Fouten Tonen</h3>
+        <p>In <code>create.blade.php</code> tonen we foutmeldingen bij het veld met <code>@error</code>. Ook zorgen we dat de ingevulde tekst blijft staan met <code>old()</code>.</p>
+        <pre><code class="language-html">
+&lt;label&gt;Naam:&lt;/label&gt;
+&lt;input type="text" name="name" value="{{ old('name') }}"&gt;
+
+@error('name')
+    &lt;p class="text-red-500"&gt;{{ $message }}&lt;/p&gt;
+@enderror
+        </code></pre>
+
+        <h3 id="succes">Stap 5: Succesbericht</h3>
+        <p>In <code>index.blade.php</code> controleren we op de sessie variabele 'status'.</p>
+        <pre><code class="language-html">
+@if(session('status'))
+    &lt;div class="bg-green-100 p-4 mb-4"&gt;
+        {{ session('status') }}
+    &lt;/div&gt;
+@endif
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

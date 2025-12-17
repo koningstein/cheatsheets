@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factories met Relaties - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Factories met Relaties</h1>
+        <p>In Module 1 hebben we al kort gewerkt met Factories om simpele data te genereren. Nu we in Module 3 werken met relaties (een Product hoort bij een Categorie), wordt het genereren van data iets complexer. We willen namelijk niet dat Laravel zomaar willekeurige getallen invult bij <code>category_id</code>, want dat ID moet wel écht bestaan in de categorieën-tabel.</p>
+        <p>In deze les leer je hoe je Factories slim configureert zodat ze automatisch de bijbehorende relaties aanmaken.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Factory aanmaken voor een Model met relaties (Product).</li>
+                <li>Ik kan in de Factory-definitie verwijzen naar een ander Model (automatische koppeling).</li>
+                <li>Ik begrijp hoe ik met 'Magic Methods' zoals <code>has()</code> en <code>for()</code> relaties kan seeden.</li>
+                <li>Ik kan complexe datastructuren (zoals 5 categorieën met elk 10 producten) genereren in de DatabaseSeeder.</li>
+            </ul>
+        </div>
+
+        <h2>Product Factory Aanmaken</h2>
+        <p>We beginnen met het genereren van de factory voor ons Product model.</p>
+
+        <pre><code class="language-bash">php artisan make:factory ProductFactory</code></pre>
+
+        <p>Open het bestand <code>database/factories/ProductFactory.php</code>. Hier gaan we definiëren hoe een nep-product eruitziet.</p>
+
+        <h2>De Definitie & Relatie</h2>
+        <p>Het invullen van titel, prijs en voorraad kennen we al via Faker. Het nieuwe onderdeel is de <code>category_id</code>.</p>
+        <p>Je zou misschien denken dat je hier een willekeurig getal moet invullen, zoals <code>rand(1, 10)</code>. Maar wat als Categorie 10 helemaal niet bestaat? Dan crasht je seeder.</p>
+        <p>De oplossing van Laravel is elegant: je roept de Factory van de Categorie aan <em>binnen</em> de Factory van het Product.</p>
+
+        <pre><code class="language-php">
+namespace Database\Factories;
+
+use App\Models\Category; // Vergeet deze import niet!
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ProductFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            'title' => $this->faker->sentence(3), // Een titel van 3 woorden
+            'description' => $this->faker->paragraph(),
+            'price' => $this->faker->randomFloat(2, 5, 100), // Getal met 2 decimalen, tussen 5 en 100
+            'stock' => $this->faker->numberBetween(0, 50),
+
+            // HIER GEBEURT DE MAGIE:
+            // Laravel maakt automatisch een nieuwe Categorie aan voor dit product,
+            // pakt het ID daarvan, en vult het hier in.
+            'category_id' => Category::factory(),
+        ];
+    }
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Hoe werkt dit precies?</strong><br>
+            Als jij straks zegt: "Maak 1 Product", ziet Laravel dat <code>category_id</code> verwijst naar een <code>Category::factory()</code>. Hij pauzeert even, maakt eerst die categorie aan, pakt het ID, en maakt dan pas het product af.<br>
+            Als jij echter zélf al een categorie meegeeft bij het aanmaken, slaat Laravel deze stap slim over.
+        </div>
+
+        <h2>De DatabaseSeeder Instellen</h2>
+        <p>Nu gaan we naar <code>database/seeders/DatabaseSeeder.php</code> om onze "plantjes" te zaaien. Er zijn verschillende manieren om dit aan te pakken.</p>
+
+        <h3>Manier 1: De "Luie" Manier (Niet aanbevolen)</h3>
+        <p>Als je dit doet:</p>
+        <pre><code class="language-php">Product::factory(10)->create();</code></pre>
+        <p>Dan maakt Laravel 10 producten aan. Maar... omdat in onze factory staat dat elk product een <code>Category::factory()</code> nodig heeft, maakt hij ook <strong>10 verschillende categorieën</strong> aan (één voor elk product). Dat is vaak niet wat je wilt in een webshop. Je wilt vaak dat producten gegroepeerd zijn.</p>
+
+        <h3>Manier 2: De Magic Methods (Wel aanbevolen)</h3>
+        <p>We willen bijvoorbeeld: "Maak 5 categorieën, en geef elke categorie 10 producten". Laravel heeft hier leesbare methodes voor: <code>has()</code> (heeft) en <code>for()</code> (voor).</p>
+
+        <p>Omdat we in Module 3-1 de relatie <code>products()</code> in het Category model hebben gedefinieerd (<code>hasMany</code>), kunnen we dit nu gebruiken:</p>
+
+        <pre><code class="language-php">
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
+
+public function run(): void
+{
+    // Maak eerst de standaard users aan (zoals in Module 2)
+    User::factory()->create([
+        'name' => 'Admin User',
+        'email' => 'admin@test.com',
+        'is_admin' => true,
+    ]);
+
+    // OPTIE A: Vanuit de Categorie gedacht (De 'has' manier)
+    // "Maak 5 categorieën die elk 10 producten hebben"
+    Category::factory(5)
+        ->has(Product::factory()->count(10))
+        ->create();
+
+    // OPTIE B: Vanuit het Product gedacht (De 'for' manier)
+    // "Maak 10 producten voor een specifieke nieuwe categorie"
+    Product::factory(10)
+        ->for(Category::factory()->create(['name' => 'Speciale Aanbiedingen']))
+        ->create();
+}
+        </code></pre>
+
+        <h3>Manier 3: Recycle (Laravel 8+)</h3>
+        <p>Soms heb je al categorieën (bijvoorbeeld handmatig aangemaakt) en wil je producten willekeurig verdelen over die bestaande lijst. Daarvoor is <code>recycle()</code> handig.</p>
+
+        <pre><code class="language-php">
+// Maak eerst 3 specifieke categorieën
+$categories = Category::factory()->createMany([
+    ['name' => 'Games'],
+    ['name' => 'Consoles'],
+    ['name' => 'Accessoires'],
+]);
+
+// Maak 50 producten en verdeel ze willekeurig over die 3 categorieën
+Product::factory(50)
+    ->recycle($categories)
+    ->create();
+        </code></pre>
+
+        <h2>Uitvoeren</h2>
+        <p>Laten we de database verversen om te zien of het werkt. Let op: dit gooit al je oude data weg!</p>
+
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+
+        <p>Als je nu in je database kijkt (bijv. in de tabel <code>products</code>), zie je dat de kolom <code>category_id</code> netjes gevuld is met ID's die ook echt bestaan in de <code>categories</code> tabel.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

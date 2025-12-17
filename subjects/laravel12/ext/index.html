@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startpagina - Laravel 12 Extended</title>
+    <script src="theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div data-include="header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="sidebar.html"></div>
+
+    <main class="main-content">
+        <style>
+            .hero-section {
+                background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--bg-content) 100%);
+                padding: 3rem 2rem;
+                border-radius: 1rem;
+                border: 1px solid var(--border-color);
+                margin-bottom: 3rem;
+                text-align: center;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            .hero-section h1 {
+                margin-top: 0;
+                color: var(--primary-color);
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .hero-section p {
+                font-size: 1.2rem;
+                color: var(--text-main);
+                max-width: 700px;
+                margin: 0 auto;
+                line-height: 1.6;
+            }
+
+            .section-title {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+                margin-top: 3rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid var(--border-color);
+                color: var(--text-main);
+                font-size: 1.5rem;
+            }
+
+            .curriculum-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 1.5rem;
+            }
+
+            /* Styling voor de module-kaarten */
+            .main-content a.card {
+                background: var(--bg-content);
+                border: 1px solid var(--border-color);
+                border-radius: 0.75rem;
+                padding: 2rem;
+                transition: all 0.3s ease;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                text-decoration: none !important;
+                color: var(--text-main) !important;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .main-content a.card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 4px;
+                height: 100%;
+                background: var(--primary-color);
+                opacity: 0.5;
+                transition: opacity 0.3s;
+            }
+
+            .main-content a.card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+                border-color: var(--primary-color);
+            }
+
+            .main-content a.card:hover::before {
+                opacity: 1;
+            }
+
+            .card-badge {
+                display: inline-block;
+                background-color: var(--primary-light);
+                color: var(--primary-color);
+                font-size: 0.85rem;
+                font-weight: 700;
+                padding: 0.25rem 0.75rem;
+                border-radius: 4px;
+                margin-bottom: 1rem;
+                width: fit-content;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .theme-badge {
+                background-color: var(--bg-body);
+                color: var(--text-muted);
+                border: 1px solid var(--border-color);
+            }
+
+            .card h3 {
+                margin: 0 0 1rem 0;
+                font-size: 1.4rem;
+                color: var(--text-main);
+                font-weight: 600;
+            }
+
+            .card p {
+                margin: 0;
+                color: var(--text-muted);
+                font-size: 1rem;
+                line-height: 1.6;
+                flex-grow: 1;
+            }
+        </style>
+
+        <div class="hero-section">
+            <h1>Laravel 12 Theorieboek</h1>
+            <p>
+                Welkom bij de <strong>Extended Editie</strong>. Dit is de volledige documentatie voor het bouwen van moderne webapplicaties.
+                Hier vind je diepgaande uitleg, achtergrondinformatie over design patterns (MVC), en uitgebreide code-voorbeelden.
+            </p>
+        </div>
+
+        <h2 class="section-title">Lesmodules</h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">
+            Het kerncurriculum waarin we stapsgewijs een volledige webshop met admin-paneel realiseren.
+        </p>
+
+        <div class="curriculum-grid">
+            <a href="pages/module1/m1-1-ext.html" class="card">
+                <span class="card-badge">Module 1</span>
+                <h3>Basis & Setup</h3>
+                <p>De fundamenten van Laravel. Installatie, mappenstructuur en de eerste stappen met CRUD (Create, Read, Update, Delete).</p>
+            </a>
+
+            <a href="pages/module2/m2-1-ext.html" class="card">
+                <span class="card-badge">Module 2</span>
+                <h3>Users & Beveiliging</h3>
+                <p>Alles over Authenticatie. Inloggen, registreren, wachtwoorden hashen en beveiligde routes (Middleware).</p>
+            </a>
+
+            <a href="pages/module3/m3-1-ext.html" class="card">
+                <span class="card-badge">Module 3</span>
+                <h3>Advanced Admin</h3>
+                <p>Bouw een professioneel beheersysteem. Relaties (1-op-veel), complexe formulieren, validatie en database integriteit.</p>
+            </a>
+
+            <a href="pages/module4/m4-1-ext.html" class="card">
+                <span class="card-badge">Module 4</span>
+                <h3>Webshop Frontend</h3>
+                <p>De publieke kant van de winkel. Producten tonen, interactieve winkelwagen (Sessions) en klantbeoordelingen (Reviews).</p>
+            </a>
+
+            <a href="pages/module5/m5-1-ext.html" class="card">
+                <span class="card-badge">Module 5</span>
+                <h3>Orders & Afhandeling</h3>
+                <p>Van winkelwagen naar bestelling. Database transacties, master-detail opslag en het genereren van PDF-facturen.</p>
+            </a>
+        </div>
+
+        <h2 class="section-title">Thema's & Verdieping</h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">
+            In de Extended versie focussen we ons op de praktijkopdrachten. Voor losse theorie over specifieke onderwerpen zoals Relations of Testing verwijzen we naar de <strong>Cheatsheet versie</strong>.
+        </p>
+
+    </main>
+
+    <aside class="sidebar-right">
+    </aside>
+</div>
+
+<div data-include="footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

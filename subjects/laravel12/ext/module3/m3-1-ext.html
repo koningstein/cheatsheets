@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Models & Migrations - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Models & Migrations</h1>
+        <p>Welkom in Module 3! In deze module gaan we het admin-paneel uitbreiden. We hebben nu categorieën en gebruikers, maar de kern van een webshop ontbreekt nog: de <strong>Producten</strong>. In dit hoofdstuk leggen we de basis voor de producten en leren we hoe we tabellen aan elkaar koppelen via <strong>Relaties</strong> (Foreign Keys).</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Model en Migration maken voor een entiteit met veel data (Product).</li>
+                <li>Ik begrijp het verschil tussen datatypes zoals <code>decimal</code>, <code>text</code> en <code>string</code>.</li>
+                <li>Ik kan een <strong>Foreign Key</strong> (relatie) toevoegen in een database migration.</li>
+                <li>Ik kan een <strong>One-to-Many</strong> relatie definiëren in Eloquent Models (<code>belongsTo</code> & <code>hasMany</code>).</li>
+                <li>Ik kan Mass Assignment beveiligen met <code>$fillable</code>.</li>
+            </ul>
+        </div>
+
+        <h2>Casus: Producten</h2>
+        <p>Een product is complexer dan een categorie. Waar een categorie vaak alleen een naam heeft, heeft een product veel meer eigenschappen:</p>
+        <ul>
+            <li><strong>Titel:</strong> De naam van het spel.</li>
+            <li><strong>Beschrijving:</strong> Een langere tekst met uitleg.</li>
+            <li><strong>Prijs:</strong> Een bedrag (met decimalen).</li>
+            <li><strong>Voorraad:</strong> Een getal (hoeveel hebben we er nog?).</li>
+            <li><strong>Categorie:</strong> Een koppeling naar de categorie waar het bij hoort.</li>
+        </ul>
+
+        <h2>Aanmaken met Artisan</h2>
+        <p>We beginnen op de bekende manier. We maken een Model en een Migration tegelijk aan.</p>
+
+        <pre><code class="language-bash">php artisan make:model Product -m</code></pre>
+
+        <p>Je vindt nu twee nieuwe bestanden:</p>
+        <ol>
+            <li><code>app/Models/Product.php</code></li>
+            <li><code>database/migrations/xxxx_xx_xx_create_products_table.php</code></li>
+        </ol>
+
+        <h2>De Migratie (Database Structuur)</h2>
+        <p>Open het migratiebestand. Hier gaan we de kolommen definiëren. Let goed op de datatypes die we kiezen.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip: Geld is geen Float!</strong><br>
+            Gebruik voor geld <strong>nooit</strong> <code>float</code> of <code>double</code>. Door de manier waarop computers rekenen, kunnen er afrondingsfouten ontstaan (bijv. €19.999999999).<br>
+            Gebruik altijd <code>decimal</code>. Hierbij geef je de precisie op. <code>decimal(8, 2)</code> betekent: maximaal 8 cijfers in totaal, waarvan 2 achter de komma (bijv. 123456,78). Een andere optie is om de prijs als integers (centen) op te slaan.
+        </div>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::create('products', function (Blueprint $table) {
+        $table->id();
+
+        // Standaard velden
+        $table->string('title');                // Korte tekst (Varchar 255)
+        $table->text('description');            // Lange tekst (zonder limiet)
+        $table->decimal('price', 8, 2);         // Geld: Max 999.999,99
+        $table->integer('stock')->default(0);   // Gehele getallen, standaard 0
+
+        // De Relatie (Foreign Key)
+        // Dit maakt een kolom 'category_id' aan die verwijst naar 'id' in 'categories'
+        $table->foreignId('category_id')
+              ->constrained()           // Zorgt voor database-niveau checks
+              ->onDelete('cascade');    // Als categorie weg is -> product ook weg? (Of 'set null')
+
+        $table->timestamps();
+    });
+}
+        </code></pre>
+
+        <h3>Uitleg foreignId</h3>
+        <p>De regel <code>$table->foreignId('category_id')->constrained();</code> is een "magic method" in Laravel. Het doet het volgende:</p>
+        <ol>
+            <li>Het maakt een kolom <code>category_id</code> (unsigned big integer).</li>
+            <li>Het ziet het woord <code>category</code> en zoekt automatisch naar een tabel <code>categories</code>.</li>
+            <li>Het legt een relatie met de <code>id</code> kolom van die tabel.</li>
+        </ol>
+
+        <h2>Eloquent Relaties</h2>
+        <p>De database weet nu van de koppeling, maar Laravel's Eloquent nog niet. We moeten in de Models definiëren hoe ze zich tot elkaar verhouden.</p>
+
+        <h3>1. Product Model (BelongsTo)</h3>
+        <p>Een product <em>hoort bij</em> één categorie. Open <code>app/Models/Product.php</code>.</p>
+
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Product extends Model
+{
+    // Maak de velden invulbaar voor later (Mass Assignment)
+    protected $fillable = [
+        'title',
+        'description',
+        'price',
+        'stock',
+        'category_id'
+    ];
+
+    // Definieer de relatie
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+}
+        </code></pre>
+
+        <h3>2. Category Model (HasMany)</h3>
+        <p>Andersom geldt: Een categorie <em>heeft meerdere</em> producten. Open <code>app/Models/Category.php</code>.</p>
+
+        <pre><code class="language-php">
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Category extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['name'];
+
+    // Let op: meervoud 'products', want het zijn er meerdere
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+}
+        </code></pre>
+
+        <h2>Migratie Uitvoeren</h2>
+        <p>Nu alles klaarstaat, voeren we de wijzigingen door in de database.</p>
+
+        <pre><code class="language-bash">php artisan migrate</code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Foutmelding: "General error: 1005 Can't create table"?</strong><br>
+            Krijg je een foreign key constraint error? Dat betekent vaak dat de datatypes niet overeenkomen of dat de tabel waar je naar verwijst (categories) nog niet bestaat. Zorg dat de migration van Categories een oudere datum/tijdstempel heeft dan de Product migration, zodat Laravel ze in de juiste volgorde aanmaakt.
+        </div>
+
+        <p>Gefeliciteerd! Je database structuur voor de webshop staat nu stevig. In de volgende modules gaan we deze data vullen en beheren.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

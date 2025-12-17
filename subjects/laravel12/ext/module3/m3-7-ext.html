@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store & Validatie - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Store & Validatie</h1>
+        <p>In de vorige les hebben we het formulier (de View) gemaakt met een dropdown menu. Nu gaan we zorgen dat de data die daaruit komt, veilig wordt opgeslagen in de database. Omdat we met relaties werken (een product gekoppeld aan een categorie), komt er een belangrijk nieuw stukje beveiliging bij: <strong>Referential Integrity Validation</strong>.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Form Request aanmaken specifiek voor Producten.</li>
+                <li>Ik begrijp waarom we Foreign Keys (zoals <code>category_id</code>) moeten valideren.</li>
+                <li>Ik kan de validatieregel <code>exists</code> toepassen om database errors te voorkomen.</li>
+                <li>Ik kan getallen en bedragen valideren (<code>numeric</code>, <code>min</code>).</li>
+                <li>Ik kan data opslaan via Mass Assignment en de gebruiker feedback geven.</li>
+            </ul>
+        </div>
+
+        <h2>De Form Request</h2>
+        <p>We houden onze Controller schoon door de validatielogica te verplaatsen naar een apart Request bestand. Als je dit in de vorige les al had aangemaakt, kijken we er nu in detail naar. Zo niet, maak hem dan aan:</p>
+
+        <pre><code class="language-bash">php artisan make:request StoreProductRequest</code></pre>
+
+        <p>Open <code>app/Http/Requests/StoreProductRequest.php</code>.</p>
+
+        <h2>Validatieregels voor Relaties</h2>
+        <p>Dit is het belangrijkste onderdeel van deze module. Een gebruiker stuurt via het formulier een <code>category_id</code> mee (bijvoorbeeld "5").</p>
+        <p>Maar wat als een hacker dat ID verandert naar "9999" (een categorie die niet bestaat)?</p>
+        <ul>
+            <li><strong>Zonder validatie:</strong> Laravel probeert het op te slaan -> De database ziet dat ID 9999 niet bestaat -> De database geeft een harde <em>Foreign Key Constraint Violation</em> error -> De gebruiker ziet een crashend scherm (500 Server Error).</li>
+            <li><strong>Met validatie:</strong> Laravel checkt eerst of ID 9999 bestaat -> Zo niet, dan wordt de gebruiker teruggestuurd naar het formulier met een nette foutmelding ("De gekozen categorie bestaat niet").</li>
+        </ul>
+
+        <h3>De Exists Regel</h3>
+        <p>De regel hiervoor is <code>exists:tabelnaam,kolomnaam</code>.</p>
+
+        <pre><code class="language-php">
+public function rules(): array
+{
+    return [
+        'title'       => 'required|string|max:255',
+        'description' => 'required|string',
+
+        // Geldig getal, mag niet negatief zijn
+        'price'       => 'required|numeric|min:0',
+
+        // Geheel getal (geen halve voorraad), minstens 0
+        'stock'       => 'required|integer|min:0',
+
+        // CRUCIAAL: Check in de tabel 'categories' in de kolom 'id'
+        'category_id' => 'required|exists:categories,id',
+    ];
+}
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip: Komma's en Punten</strong><br>
+            Programmeertalen en databases werken met punten voor decimalen (<code>10.50</code>). Nederlanders typen vaak een komma (<code>10,50</code>). De regel <code>numeric</code> accepteert alleen punten.<br>
+            Wil je komma's toestaan? Dan moet je de input aanpassen vòòrdat je valideert (met <code>prepareForValidation</code>) of een frontend mask gebruiken. Voor nu gaan we uit van de standaard punt-notatie.
+        </div>
+
+        <h2>De Controller Opschonen</h2>
+        <p>Nu de validatie geregeld is, kan de <code>store</code> methode in de <code>ProductController</code> heel simpel blijven. We gebruiken <strong>Dependency Injection</strong> om onze nieuwe Request klasse binnen te halen.</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest; // Importeer de Request!
+use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
+
+class ProductController extends Controller
+{
+    // ... andere methodes ...
+
+    public function store(StoreProductRequest $request): RedirectResponse
+    {
+        // 1. Validatie is automatisch gedaan.
+        // Als het fout was, is de gebruiker al teruggestuurd.
+
+        // 2. Haal de gevalideerde data op (veilig!)
+        $data = $request->validated();
+
+        // 3. Sla op in de database
+        Product::create($data);
+
+        // 4. Redirect met succesmelding
+        return to_route('admin.products.index')
+            ->with('status', 'Product succesvol aangemaakt!');
+    }
+}
+        </code></pre>
+
+        <h2>Mass Assignment Check</h2>
+        <p>De regel <code>Product::create($data)</code> werkt alleen als je in je Model hebt aangegeven welke velden gevuld mogen worden. Dit is een herhaling, maar essentieel.</p>
+        <p>Open <code>app/Models/Product.php</code> en controleer de <code>$fillable</code> array:</p>
+
+        <pre><code class="language-php">
+protected $fillable = [
+    'title',
+    'description',
+    'price',
+    'stock',
+    'category_id', // Vergeet deze niet!
+];
+        </code></pre>
+        <p>Als je <code>category_id</code> hier vergeet, slaat Laravel het product wel op, maar blijft de koppeling met de categorie leeg (of krijg je een error als die kolom niet leeg mag zijn).</p>
+
+        <h2>Testen</h2>
+        <p>Nu is het tijd om te testen. Probeer de volgende scenario's:</p>
+        <ol>
+            <li><strong>Het blije pad:</strong> Vul alles correct in en kies een categorie. Het product moet in de lijst verschijnen.</li>
+            <li><strong>Validatie fouten:</strong> Laat de titel leeg of vul "-5" in bij de prijs. Je moet rode foutmeldingen zien.</li>
+            <li><strong>Hacker test:</strong> Inspecteer de dropdown in je browser (Rechtermuisknop -> Inspecteren). Verander de <code>value</code> van een optie naar "9999". Probeer op te slaan. Als het goed is, vangt Laravel dit af en zegt: "Ongeldige waarde voor categorie".</li>
+        </ol>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

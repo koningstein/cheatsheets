@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit & update - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller - Edit & Update</h1>
+        <p>Data moet gewijzigd kunnen worden. We maken een Edit-pagina met een vooraf ingevuld formulier en een Update-methode die de wijzigingen verwerkt, inclusief validatie.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een pre-filled formulier maken.</li>
+            <li>Ik kan PUT/PATCH method gebruiken.</li>
+            <li>Ik kan update validatie toepassen met unique rule exception.</li>
+            <li>Ik kan bestaande data updaten.</li>
+        </ul>
+
+        <h3 id="edit">Stap 1: Edit Methode</h3>
+        <p>We halen het record op via Model Binding en tonen het formulier.</p>
+        <pre><code class="language-php">
+public function edit(Category $category)
+{
+    return view('admin.categories.edit', [
+        'category' => $category
+    ]);
+}
+        </code></pre>
+
+        <h3 id="form">Stap 2: Edit Formulier</h3>
+        <p>Maak <code>edit.blade.php</code>. Drie belangrijke punten:</p>
+        <ol>
+            <li>Actie gaat naar <code>categories.update</code>.</li>
+            <li>Methode is POST, maar we voegen <code>@method('PUT')</code> toe.</li>
+            <li>Value gebruikt <code>old()</code> met als tweede parameter de database waarde: <code>old('name', $category->name)</code>.</li>
+        </ol>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1&gt;Wijzigen&lt;/h1&gt;
+
+    &lt;form action="{{ route('categories.update', $category) }}" method="POST"&gt;
+        @csrf
+        @method('PUT')
+
+        &lt;label&gt;Naam:&lt;/label&gt;
+        &lt;input type="text" name="name"
+               value="{{ old('name', $category->name) }}"&gt;
+
+        &lt;button type="submit"&gt;Wijzigen&lt;/button&gt;
+    &lt;/form&gt;
+@endsection
+        </code></pre>
+
+        <h3 id="request">Stap 3: Update Request</h3>
+        <p>Bij het updaten mag de naam "uniek" zijn, behalve als het de naam van <em>dit</em> record zelf is. We maken een nieuwe request:</p>
+        <pre><code class="language-bash">php artisan make:request CategoryUpdateRequest</code></pre>
+
+        <pre><code class="language-php">
+// app/Http/Requests/CategoryUpdateRequest.php
+public function rules(): array
+{
+    // Haal ID op van huidige categorie
+    $id = $this->category->id;
+
+    return [
+        // "name" moet uniek zijn in tabel "categories", behalve rij met "$id"
+        'name' => 'required|max:75|unique:categories,name,' . $id
+    ];
+}
+        </code></pre>
+
+        <h3 id="update">Stap 4: Update Methode</h3>
+        <pre><code class="language-php">
+public function update(CategoryUpdateRequest $request, Category $category)
+{
+    $category->update($request->validated());
+
+    return to_route('categories.index')
+            ->with('status', 'Gewijzigd!');
+}
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

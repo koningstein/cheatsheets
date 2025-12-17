@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index & Eager Loading - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Index & Eager Loading</h1>
+        <p>We hebben de database gevuld met realistische data. Nu is het tijd om deze data te tonen in het admin-paneel. We gaan een overzichtspagina (Index) maken voor de producten.</p>
+        <p>Omdat we bij producten ook de naam van de <strong>Categorie</strong> willen tonen, lopen we tegen een klassiek performance-probleem aan: het N+1 probleem. In dit hoofdstuk leer je wat dat is en hoe je het oplost.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een Resource Controller maken voor Producten.</li>
+                <li>Ik kan data uit een relatie tonen in een Blade view (<code>$product->category->name</code>).</li>
+                <li>Ik begrijp wat het <strong>N+1 probleem</strong> is en waarom het slecht is voor performance.</li>
+                <li>Ik kan <strong>Eager Loading</strong> toepassen met de <code>with()</code> methode.</li>
+                <li>Ik kan <strong>Paginering</strong> (Pagination) toepassen op grote datasets.</li>
+            </ul>
+        </div>
+
+        <h2>De Product Controller</h2>
+        <p>Eerst maken we de controller aan, net zoals we bij Categorieën en Users hebben gedaan.</p>
+
+        <pre><code class="language-bash">php artisan make:controller Admin/ProductController --resource</code></pre>
+
+        <p>Vergeet niet om de route toe te voegen in je `routes/web.php` binnen de admin-groep:</p>
+        <pre><code class="language-php">Route::resource('products', ProductController::class);</code></pre>
+
+        <h2>De Index Methode (De "Foute" Manier)</h2>
+        <p>We beginnen simpel. We halen alle producten op en sturen ze naar de view. Let op: we doen dit expres even op de "naive" manier om het probleem te demonstreren.</p>
+
+        <pre><code class="language-php">
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Product;
+use Illuminate\View\View;
+
+class ProductController extends Controller
+{
+    public function index(): View
+    {
+        // Haal alle producten op (nog zonder optimalisatie)
+        $products = Product::all();
+
+        return view('admin.products.index', [
+            'products' => $products
+        ]);
+    }
+}
+        </code></pre>
+
+        <h2>De View met Relaties</h2>
+        <p>Maak het bestand <code>resources/views/admin/products/index.blade.php</code>. We maken een tabel die de titel, prijs, voorraad én de **categorienaam** toont.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1 class="text-2xl font-bold mb-4"&gt;Producten Beheer&lt;/h1&gt;
+
+    &lt;table class="min-w-full bg-white border"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th class="py-2 px-4 border-b"&gt;Titel&lt;/th&gt;
+                &lt;th class="py-2 px-4 border-b"&gt;Categorie&lt;/th&gt; &lt;!-- Relatie kolom --&gt;
+                &lt;th class="py-2 px-4 border-b"&gt;Prijs&lt;/th&gt;
+                &lt;th class="py-2 px-4 border-b"&gt;Voorraad&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @foreach($products as $product)
+                &lt;tr&gt;
+                    &lt;td class="py-2 px-4 border-b"&gt;{{ $product->title }}&lt;/td&gt;
+
+                    &lt;!-- HIER HALEN WE DE RELATIE OP --&gt;
+                    &lt;td class="py-2 px-4 border-b"&gt;
+                        {{ $product->category->name }}
+                    &lt;/td&gt;
+
+                    &lt;td class="py-2 px-4 border-b"&gt;&euro; {{ $product->price }}&lt;/td&gt;
+                    &lt;td class="py-2 px-4 border-b"&gt;{{ $product->stock }}&lt;/td&gt;
+                &lt;/tr&gt;
+            @endforeach
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+@endsection
+        </code></pre>
+
+        <p>Dit werkt prima! Je ziet netjes de namen van de categorieën. Maar onder de motorkap gebeurt er iets rampzaligs.</p>
+
+        <h2>Het N+1 Probleem</h2>
+        <p>Stel je hebt <strong>50 producten</strong> op je pagina staan.</p>
+        <ol>
+            <li>Laravel voert 1 query uit om alle producten op te halen: <br><code>SELECT * FROM products</code>.</li>
+            <li>Vervolgens begint de loop in je HTML.</li>
+            <li>Bij product 1 vraag je om de categorie. Laravel moet naar de database: <br><code>SELECT * FROM categories WHERE id = 5</code>.</li>
+            <li>Bij product 2 vraag je om de categorie. Laravel moet weer naar de database: <br><code>SELECT * FROM categories WHERE id = 3</code>.</li>
+        </ol>
+        <p>Voor 50 producten voert Laravel dus <strong>51 queries</strong> uit (1 voor de lijst + 50 voor de categorieën). Dit heet het N+1 probleem. Als je 1000 producten hebt, doe je 1001 queries. Dit maakt je applicatie ontzettend traag.</p>
+
+        <h2>De Oplossing: Eager Loading</h2>
+        <p>We moeten tegen Laravel zeggen: "Als je de producten ophaalt, haal dan <strong>meteen</strong> (eager) alle bijbehorende categorieën mee op."</p>
+        <p>Dit doen we met de <code>with()</code> functie in de controller.</p>
+
+        <pre><code class="language-php">
+public function index(): View
+{
+    // Gebruik 'with' om de relatie vooraf te laden
+    $products = Product::with('category')->get();
+
+    return view('admin.products.index', [
+        'products' => $products
+    ]);
+}
+        </code></pre>
+
+        <p><strong>Het resultaat:</strong> Laravel doet nu nog maar <strong>2 queries</strong>, ongeacht hoeveel producten je hebt:</p>
+        <ol>
+            <li><code>SELECT * FROM products</code></li>
+            <li><code>SELECT * FROM categories WHERE id IN (1, 2, 3, 5, ...)</code></li>
+        </ol>
+        <p>Laravel koppelt ze daarna in het geheugen aan elkaar. Dit is veel sneller!</p>
+
+        <h2>Paginering (Pagination)</h2>
+        <p>Als je webshop groeit en je hebt 5000 producten, wil je die niet allemaal op één pagina laden (ook niet met Eager Loading). We willen de pagina opknippen in stukjes van bijvoorbeeld 10 of 20 producten.</p>
+        <p>Vervang <code>get()</code> door <code>paginate()</code>:</p>
+
+        <pre><code class="language-php">
+public function index(): View
+{
+    // Eager loading + Pagination gecombineerd
+    // Laatste producten eerst (latest)
+    $products = Product::with('category')->latest()->paginate(10);
+
+    return view('admin.products.index', [
+        'products' => $products
+    ]);
+}
+        </code></pre>
+
+        <h3>Links tonen in Blade</h3>
+        <p>In je view moet je nu de knoppen ("Vorige", "Volgende") tonen. Dit doe je onder de tabel:</p>
+
+        <pre><code class="language-html">
+    &lt;/table&gt;
+
+    &lt;div class="mt-4"&gt;
+        {{ $products->links() }}
+    &lt;/div&gt;
+
+@endsection
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Zien de knoppen er raar uit?</strong><br>
+            Standaard gebruikt Laravel Tailwind CSS voor de paginering, maar soms moet je dit expliciet aanzetten als ze er "gebroken" uitzien (grote grijze pijlen).
+            <br><br>
+            Ga naar <code>app/Providers/AppServiceProvider.php</code> en voeg dit toe in de boot-methode:<br>
+            <code>Paginator::useTailwind();</code> (vergeet de import bovenaan niet: <code>use Illuminate\Pagination\Paginator;</code>).
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

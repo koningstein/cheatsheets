@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Middleware bij routes - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Middleware bij routes</h1>
+        <p>Niet iedereen mag zomaar overal bij. We gebruiken middleware om routes te beveiligen, zodat alleen ingelogde gebruikers of gebruikers met specifieke rechten toegang krijgen tot bepaalde pagina's.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan middleware aliases registreren in bootstrap/app.php.</li>
+            <li>Ik kan een custom 403 error page maken.</li>
+            <li>Ik kan redirect after login aanpassen.</li>
+            <li>Ik kan auth middleware op routes toepassen.</li>
+            <li>Ik kan conditionele content tonen (@auth/@guest).</li>
+        </ul>
+
+        <h3 id="aliases">Stap 1: Middleware Aliases Registreren</h3>
+        <p>Om de middleware van Spatie te kunnen gebruiken, moeten we deze registreren in <code>bootstrap/app.php</code>. We voegen hier alle aliases toe.</p>
+
+        <pre><code class="language-php">
+// bootstrap/app.php
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
+    })
+    // ...
+        </code></pre>
+
+        <h3 id="routes">Stap 2: Routes Beveiligen</h3>
+        <p>In <code>routes/web.php</code> kunnen we nu een groep maken die beveiligd is. We willen dat alleen gebruikers met de rol <strong>admin</strong> of <strong>sales</strong> bij de admin-routes kunnen.</p>
+
+        <pre><code class="language-php">
+// routes/web.php
+
+Route::group(['middleware' => ['role:sales|admin']], function () {
+
+    // Deze routes zijn nu beveiligd
+    Route::resource('/admin/categories', Admin\CategoryController::class);
+
+});
+        </code></pre>
+
+        <h3 id="error">Stap 3: Custom 403 Error Pagina</h3>
+        <p>Als iemand geen toegang heeft, zien ze een standaard "403 | Forbidden" scherm. We willen dit in onze eigen stijl.</p>
+        <p>Maak een bestand aan: <code>resources/views/errors/403.blade.php</code>.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"&gt;
+        &lt;strong class="font-bold"&gt;Error!&lt;/strong&gt;
+        &lt;span class="block sm:inline"&gt;{{ $exception->getMessage() }}&lt;/span&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

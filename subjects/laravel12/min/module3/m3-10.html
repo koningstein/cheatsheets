@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update & Logica - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Update & Logica</h1>
+        <p>Bij het updaten van data moeten we vaak slimme logica toepassen. Mag je een naam wijzigen naar iets dat al bestaat? En wat doen we als een prijs verandert: overschrijven we de oude of bewaren we de historie?</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een UpdateRequest maken (met unieke regels).</li>
+            <li>Ik kan logica toepassen bij updates (nieuwe prijs aanmaken ipv overschrijven).</li>
+        </ul>
+
+        <h3 id="update-request">Stap 1: Update Request</h3>
+        <p>Bij het updaten mag de naam "uniek" zijn, behalve als het de naam van ditzelfde product is. In <code>ProductUpdateRequest</code> lossen we dit op door het ID uit te zonderen.</p>
+
+        <pre><code class="language-php">
+public function rules(): array
+{
+    // Haal het huidige product op uit de route
+    $id = $this->product->id;
+
+    return [
+        // Uniek in products, behalve record met $id
+        'name' => 'required|string|max:75|unique:products,name,' . $id,
+        'category_id' => 'required|exists:categories,id',
+        'price' => 'required|numeric|max:999999.99',
+    ];
+}
+        </code></pre>
+
+        <h3 id="update-logic">Stap 2: Update Logica (Prijs Historie)</h3>
+        <p>Als de prijs is veranderd, willen we de oude prijs <strong>niet</strong> overschrijven. We willen een <strong>nieuwe</strong> prijsregel aanmaken in de history tabel, zodat we weten wat de prijs vroeger was. Dit zorgt voor een correcte prijsgeschiedenis.</p>
+
+        <pre><code class="language-php">
+public function update(ProductUpdateRequest $request, Product $product)
+{
+    // 1. Update Product gegevens
+    $product->name = $request->name;
+    $product->category_id = $request->category_id;
+    $product->save();
+
+    // 2. Check of prijs veranderd is
+    // $product->latest_price is de relatie die we eerder maakten
+    if ($request->price != $product->latest_price->price) {
+
+        // Maak NIEUWE prijs aan (niet overschrijven!)
+        $price = new Price();
+        $price->price = $request->price;
+        $price->effdate = now();
+        $price->product_id = $product->id;
+        $price->save();
+    }
+
+    return to_route('products.index');
+}
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 25</p>
+            <p>Implementeer de update voor <strong>Tasks</strong>. Zorg dat je <code>project_id</code> en <code>activity_id</code> kunt wijzigen. Let op: je hoeft hier geen historiek bij te houden, dus een gewone update is voldoende.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

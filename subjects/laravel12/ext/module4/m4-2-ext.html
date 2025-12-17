@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Product Show - Laravel 12 Module 4</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>De Product Show</h1>
+        <p>Op de overzichtspagina ziet de klant een lijst met producten. Als ze geïnteresseerd zijn, klikken ze door naar de detailpagina. Dit is de pagina waar je de klant moet overtuigen. Hier toon je de volledige omschrijving, de specificaties, de exacte prijs en natuurlijk: de <strong>Bestelknop</strong>.</p>
+        <p>In deze module bouwen we deze pagina en leren we hoe we data gebruiksvriendelijk presenteren. We letten daarbij ook op details zoals voorraadstatus en formattering.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan Route Model Binding toepassen in een publieke controller.</li>
+                <li>Ik kan een overzichtelijke layout maken met twee kolommen (afbeelding vs info).</li>
+                <li>Ik kan logica in Blade schrijven om te tonen of een product op voorraad is.</li>
+                <li>Ik kan prijzen netjes formatteren naar Euro-notatie.</li>
+                <li>Ik kan een HTML-formulier voorbereiden voor de winkelwagen-actie (POST).</li>
+            </ul>
+        </div>
+
+        <h2>De Route en Controller</h2>
+        <p>Dit is een herhaling van de Admin-kant, maar nu voor de publieke bezoeker. We gebruiken <strong>Implicit Model Binding</strong>. Dit betekent dat Laravel automatisch het product zoekt op basis van het ID in de URL.</p>
+
+        <p><strong>De Route (routes/web.php):</strong></p>
+        <pre><code class="language-php">
+use App\Http\Controllers\ShopController;
+
+// URL voorbeeld: /product/15
+Route::get('/product/{product}', [ShopController::class, 'show'])->name('shop.show');
+        </code></pre>
+
+        <p><strong>De Controller (ShopController.php):</strong></p>
+        <pre><code class="language-php">
+public function show(Product $product): View
+{
+    // Laravel heeft het product al gevonden.
+    // Wij hoeven het alleen maar door te geven aan de view.
+    return view('shop.show', [
+        'product' => $product
+    ]);
+}
+        </code></pre>
+
+        <h2>De View Opbouwen</h2>
+        <p>Een goede productpagina bestaat vaak uit twee delen:</p>
+        <ol>
+            <li><strong>Links:</strong> De productafbeelding(en).</li>
+            <li><strong>Rechts:</strong> De titel, prijs, omschrijving en actieknoppen.</li>
+        </ol>
+        <p>We gebruiken Tailwind CSS classes zoals <code>md:flex</code> en <code>md:w-1/2</code> om dit responsive te maken. Op mobiel staat alles onder elkaar, op desktop naast elkaar.</p>
+
+        <h3>De Basis Structuur</h3>
+        <p>Maak of bewerk <code>resources/views/shop/show.blade.php</code>:</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;div class="container mx-auto px-4 py-8"&gt;
+
+        &lt;!-- Breadcrumb (Kruimelpad) --&gt;
+        &lt;nav class="text-sm text-gray-500 mb-6"&gt;
+            &lt;a href="{{ route('shop.index') }}" class="hover:text-red-600"&gt;Shop&lt;/a&gt;
+            &span class="mx-2"&gt;/&lt;/span&gt;
+            &lt;span class="text-gray-900"&gt;{{ $product->title }}&lt;/span&gt;
+        &lt;/nav&gt;
+
+        &lt;div class="bg-white rounded-lg shadow-lg overflow-hidden"&gt;
+            &lt;div class="md:flex"&gt;
+
+                &lt;!-- Linkerkant: Afbeelding --&gt;
+                &lt;div class="md:w-1/2 bg-gray-100 h-96 flex items-center justify-center"&gt;
+                    {{-- Hier komt later de echte afbeelding --}}
+                    &lt;span class="text-gray-400 text-4xl"&gt;📷&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Rechterkant: Info --&gt;
+                &lt;div class="p-8 md:w-1/2 flex flex-col justify-center"&gt;
+
+                    &lt;!-- Categorie Label --&gt;
+                    &lt;div class="uppercase tracking-wide text-sm text-red-600 font-bold"&gt;
+                        {{ $product->category->name }}
+                    &lt;/div&gt;
+
+                    &lt;h1 class="mt-2 text-3xl font-bold text-gray-900 leading-tight"&gt;
+                        {{ $product->title }}
+                    &lt;/h1&gt;
+
+                    &lt;p class="mt-4 text-gray-600 leading-relaxed"&gt;
+                        {{ $product->description }}
+                    &lt;/p&gt;
+
+                    &lt;!-- Prijs & Voorraad Sectie (zie hieronder) --&gt;
+                    @include('shop.partials.price-stock')
+
+                    &lt;!-- Winkelwagen Knop Sectie --&gt;
+                    @include('shop.partials.add-to-cart')
+
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <h2>Detail 1: Prijs en Voorraad</h2>
+        <p>Een prijs moet eruitzien als een prijs (met twee decimalen en een euroteken). Ook willen we de klant direct laten weten of het product er nog is. Dit doen we met een <code>if/else</code> statement in Blade.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-6 flex items-center"&gt;
+    &lt;span class="text-3xl font-bold text-gray-900"&gt;
+        &euro; {{ number_format($product->price, 2, ',', '.') }}
+    &lt;/span&gt;
+
+    @if($product->stock > 10)
+        &lt;span class="ml-4 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded"&gt;
+            Op voorraad
+        &lt;/span&gt;
+    @elseif($product->stock > 0)
+        &lt;span class="ml-4 px-2 py-1 bg-orange-100 text-orange-800 text-xs font-semibold rounded"&gt;
+            Bijna op! (Nog {{ $product->stock }})
+        &lt;/span&gt;
+    @else
+        &lt;span class="ml-4 px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded"&gt;
+            Uitverkocht
+        &lt;/span&gt;
+    @endif
+&lt;/div&gt;
+        </code></pre>
+
+        <h2>Detail 2: De Actieknop (Formulier)</h2>
+        <p>Veel beginners maken de fout om van de "In Winkelwagen" knop een simpele link (`&lt;a&gt;`) te maken. <strong>Doe dit niet!</strong></p>
+        <p>Het toevoegen van een product aan je mandje is een actie die de "status" van de server verandert (er komt iets bij in de sessie of database). Volgens de regels van HTTP moet dit dus een <strong>POST</strong> request zijn. Daarom gebruiken we een formulier.</p>
+
+        <pre><code class="language-html">
+&lt;div class="mt-8"&gt;
+    @if($product->stock > 0)
+        &lt;form action="{{ route('cart.add', $product) }}" method="POST"&gt;
+            @csrf
+
+            &lt;div class="flex gap-4"&gt;
+                &lt;!-- Aantal input --&gt;
+                &lt;input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}"
+                       class="w-20 border rounded px-3 py-2 text-center"&gt;
+
+                &lt;button type="submit"
+                        class="flex-1 bg-green-600 text-white font-bold py-3 px-6 rounded hover:bg-green-700 transition duration-200"&gt;
+                    In Winkelwagen
+                &lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    @else
+        &lt;button disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3 px-6 rounded cursor-not-allowed"&gt;
+            Niet beschikbaar
+        &lt;/button&gt;
+    &lt;/endif&gt;
+&lt;/div&gt;
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Let op: Route cart.add</strong><br>
+            De route <code>cart.add</code> bestaat waarschijnlijk nog niet in je applicatie. Als je deze pagina nu laadt, krijg je een foutmelding. Je kunt de <code>action="..."</code> even leeg laten (<code>action="#"</code>) totdat we in de volgende module de winkelwagen-logica gaan bouwen.
+        </div>
+
+        <h2>Veiligheid: CSRF</h2>
+        <p>Omdat we een formulier gebruiken voor de bestelknop, mogen we de <code>@csrf</code> token niet vergeten. Zonder deze token zal Laravel het verzoek blokkeren met een "419 Page Expired" foutmelding. Dit beschermt je webshop tegen aanvallen van buitenaf.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

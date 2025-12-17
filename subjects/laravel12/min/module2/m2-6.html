@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rolgebaseerde toegang - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Rolgebaseerde Toegang</h1>
+        <p>We hebben de routes beveiligd, maar soms wil je in de view knoppen verbergen of in de controller specifieke methodes beveiligen.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan elementen in Blade verbergen op basis van permissies.</li>
+            <li>Ik kan controller actions beveiligen met middleware.</li>
+            <li>Ik begrijp het verschil tussen <code>@role</code> en <code>@can</code>.</li>
+        </ul>
+
+        <h3 id="blade">Stap 1: Blade Directives (@role & @can)</h3>
+        <p>In <code>resources/views/admin/categories/index.blade.php</code> willen we de "Delete" knop verbergen voor gebruikers die dit niet mogen.</p>
+        <p>Je kunt <code>@role('admin')</code> gebruiken, maar beter is <code>@can('delete category')</code>. Dit kijkt naar de permissie, wat flexibeler is.</p>
+
+        <pre><code class="language-html">
+&lt;td&gt;
+    &lt;a href="..."&gt;Edit&lt;/a&gt;
+
+    @can('delete category')
+        | &lt;a href="..."&gt;Delete&lt;/a&gt;
+    @endcan
+&lt;/td&gt;
+        </code></pre>
+
+        <h3 id="controller">Stap 2: Controller Beveiliging (Middleware)</h3>
+        <p>In de <code>CategoryController</code> moeten we ook checks inbouwen. We gebruiken hiervoor de <code>HasMiddleware</code> interface (nieuw in Laravel 11/12).</p>
+
+        <pre><code class="language-php">
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+
+class CategoryController extends Controller implements HasMiddleware
+{
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(PermissionMiddleware::using('index category'), only:['index']),
+            new Middleware(PermissionMiddleware::using('create category'), only:['create', 'store']),
+            new Middleware(PermissionMiddleware::using('edit category'), only:['edit', 'update']),
+            new Middleware(PermissionMiddleware::using('delete category'), only:['delete', 'destroy']),
+        ];
+    }
+
+    // ... rest van de controller ...
+}
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Winkelwagen Tonen</h1>
+        <p>Nu we producten kunnen toevoegen, moeten we de inhoud van de winkelwagen ook kunnen bekijken.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan de inhoud van de winkelwagen ophalen met <code>Cart::content()</code>.</li>
+            <li>Ik kan de winkelwagen tonen in een tabel.</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller (Index)</h3>
+        <p>In de `CartController` maken we de `index` methode. We halen de items en het totaal op.</p>
+
+        <pre><code class="language-php">
+public function index()
+{
+    return view('open.cart.index', [
+        'items' => Cart::content(),
+        'total' => Cart::total(),
+    ]);
+}
+        </code></pre>
+
+        <h3 id="route">Stap 2: Route</h3>
+        <p>Voeg de route toe aan <code>web.php</code>:</p>
+        <pre><code class="language-php">Route::get('/cart', [CartController::class, 'index'])->name('cart.index');</code></pre>
+
+        <h3 id="view">Stap 3: View (Tabel)</h3>
+        <p>Maak <code>resources/views/open/cart/index.blade.php</code>. We tonen een tabel met de items.</p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutpublic')
+
+@section('content')
+    &lt;h1 class="text-3xl font-bold mb-6"&gt;Winkelwagen&lt;/h1&gt;
+
+    @if(Cart::count() > 0)
+        &lt;table class="w-full bg-white shadow-md rounded overflow-hidden"&gt;
+            &lt;thead class="bg-gray-100"&gt;
+                &lt;tr&gt;
+                    &lt;th class="p-3 text-left"&gt;Product&lt;/th&gt;
+                    &lt;th class="p-3 text-left"&gt;Prijs&lt;/th&gt;
+                    &lt;th class="p-3 text-left"&gt;Aantal&lt;/th&gt;
+                    &lt;th class="p-3 text-left"&gt;Totaal&lt;/th&gt;
+                    &lt;th class="p-3 text-left"&gt;Actie&lt;/th&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+                @foreach($items as $item)
+                    &lt;tr class="border-b"&gt;
+                        &lt;td class="p-3"&gt;{{ $item->name }}&lt;/td&gt;
+                        &lt;td class="p-3"&gt;&euro; {{ $item->price }}&lt;/td&gt;
+                        &lt;td class="p-3"&gt;{{ $item->qty }}&lt;/td&gt;
+                        &lt;td class="p-3"&gt;&euro; {{ $item->subtotal }}&lt;/td&gt;
+                        &lt;td class="p-3"&gt;
+                            &lt;!-- Acties komen hier (M4.8) --&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                @endforeach
+            &lt;/tbody&gt;
+        &lt;/table&gt;
+
+        &lt;div class="mt-6 text-right"&gt;
+            &lt;h3 class="text-2xl font-bold"&gt;Totaal: &euro; {{ $total }}&lt;/h3&gt;
+            &lt;a href="#" class="inline-block mt-4 bg-green-600 text-white px-6 py-3
+            rounded hover:bg-green-700"&gt;
+                Afrekenen
+            &lt;/a&gt;
+        &lt;/div&gt;
+    @else
+        &lt;p&gt;Je winkelwagen is nog leeg.&lt;/p&gt;
+    @endif
+@endsection
+        </code></pre>
+
+        <h3 id="menu-counter">Stap 4: Menu Teller</h3>
+        <p>Het is handig als je in de navigatiebalk ziet hoeveel items er in je kar zitten. Voeg dit toe aan je <code>layoutpublic.blade.php</code>.</p>
+        <pre><code class="language-html">
+&lt;a href="{{ route('cart.index') }}" class="..."&gt;
+    Winkelwagen
+    @if(Cart::count() > 0)
+        &lt;span class="bg-red-500 text-white rounded-full px-2 text-xs"&gt;
+            {{ Cart::count() }}
+        &lt;/span&gt;
+    @endif
+&lt;/a&gt;
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seeders met Relaties - Laravel 12 Module 3</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Seeders met Relaties</h1>
+        <p>In de vorige module hebben we onze <code>ProductFactory</code> slim gemaakt: hij kan automatisch een categorie aanmaken als dat nodig is. Nu gaan we kijken naar de <strong>DatabaseSeeder</strong>. Het doel is om een realistische dataset te krijgen waarbij producten logisch verdeeld zijn over categorieën, in plaats van een chaos aan losse data.</p>
+        <p>Laravel biedt hiervoor krachtige "Magic Methods" waarmee je relaties heel leesbaar kunt uitschrijven.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan het verschil uitleggen tussen de methodes <code>has()</code> en <code>for()</code>.</li>
+                <li>Ik kan parent-child relaties seeden (bijv. 1 categorie met 10 producten).</li>
+                <li>Ik kan de <code>recycle()</code> methode gebruiken om producten te verdelen over bestaande categorieën.</li>
+                <li>Ik kan een complete, schone <code>DatabaseSeeder</code> opbouwen voor een webshop.</li>
+            </ul>
+        </div>
+
+        <h2>Het Probleem van Losse Factories</h2>
+        <p>Stel, je wilt 50 producten in je webshop om mee te testen. Je zou dit kunnen doen in je seeder:</p>
+        <pre><code class="language-php">Product::factory(50)->create();</code></pre>
+        <p>Omdat in onze Factory staat: <code>'category_id' => Category::factory()</code>, gebeurt er nu iets onhandigs. Voor <strong>elk</strong> van de 50 producten wordt een <strong>nieuwe</strong> categorie aangemaakt. Je eindigt dus met 50 producten en 50 verschillende categorieën.</p>
+        <p>In een echte webshop wil je waarschijnlijk 5 categorieën, met in elke categorie 10 producten. Dat gaan we nu oplossen.</p>
+
+        <h2>Relaties Seeden (Magic Methods)</h2>
+        <p>Laravel heeft zogenaamde "Magic Methods" om relaties te leggen tijdens het seeden. Deze methodes zijn gebaseerd op de namen van de relaties die je in je Models hebt gedefinieerd (<code>category()</code> en <code>products()</code>).</p>
+
+        <h3>1. De "Has" Methode (Van Parent naar Child)</h3>
+        <p>Als je denkt vanuit de Categorie (de ouder/parent), dan zeg je: "Een categorie <strong>heeft</strong> producten".</p>
+
+        <pre><code class="language-php">
+use App\Models\Category;
+use App\Models\Product;
+
+// Maak 5 categorieën aan.
+// Geef ELK van die categorieën 10 producten.
+Category::factory(5)
+    ->has(Product::factory()->count(10))
+    ->create();
+        </code></pre>
+        <p>Resultaat: 5 categorieën en 50 producten (netjes verdeeld).</p>
+
+        <h3>2. De "For" Methode (Van Child naar Parent)</h3>
+        <p>Soms denk je andersom. Je wilt een specifiek product maken en dat <strong>voor</strong> een specifieke categorie bestemmen.</p>
+
+        <pre><code class="language-php">
+// Maak eerst een specifieke categorie
+$saleCategory = Category::factory()->create(['name' => 'Uitverkoop']);
+
+// Maak 20 producten VOOR die specifieke categorie
+Product::factory(20)
+    ->for($saleCategory)
+    ->create();
+        </code></pre>
+
+        <h2>Modellen Hergebruiken (Recycle)</h2>
+        <p>Een moderne en krachtige techniek in Laravel is <code>recycle()</code>. Dit is handig als je een vaste set categorieën hebt (bijvoorbeeld: Games, Consoles, Accessoires) en je een grote berg producten willekeurig over deze groepen wilt verdelen.</p>
+
+        <p>Dit voorkomt dat er nieuwe categorieën worden aangemaakt; Laravel "recyclet" de categorieën die je meegeeft.</p>
+
+        <pre><code class="language-php">
+// 1. Maak 3 vaste categorieën
+$categories = Category::factory()->createMany([
+    ['name' => 'PlayStation 5'],
+    ['name' => 'Xbox Series X'],
+    ['name' => 'Nintendo Switch'],
+]);
+
+// 2. Maak 100 producten
+// Laravel kiest voor elk product willekeurig één van de bovenstaande 3 categorieën
+Product::factory(100)
+    ->recycle($categories)
+    ->create();
+        </code></pre>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Tip:</strong> De <code>recycle()</code> methode werkt ook voor Users! Je kunt bijvoorbeeld een lijst met 10 gebruikers maken en vervolgens 50 orders aanmaken die willekeurig aan die 10 gebruikers worden gekoppeld.
+        </div>
+
+        <h2>De Complete DatabaseSeeder</h2>
+        <p>Laten we alles samenvoegen in één bestand. We willen een database met:</p>
+        <ol>
+            <li>Een Admin account (om in te loggen).</li>
+            <li>Een paar vaste categorieën.</li>
+            <li>Een flinke lijst producten verdeeld over die categorieën.</li>
+        </ol>
+
+        <p>Open <code>database/seeders/DatabaseSeeder.php</code>:</p>
+
+        <pre><code class="language-php">
+namespace Database\Seeders;
+
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // 1. Admin aanmaken (altijd handig voor development)
+        User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@test.com',
+            'password' => bcrypt('password'),
+            'is_admin' => true,
+        ]);
+
+        // 2. Klanten aanmaken (optioneel, voor later)
+        User::factory(10)->create();
+
+        // 3. Categorieën aanmaken
+        $categories = Category::factory()->createMany([
+            ['name' => 'Action RPG'],
+            ['name' => 'Shooters'],
+            ['name' => 'Strategy'],
+            ['name' => 'Sports'],
+        ]);
+
+        // 4. Producten aanmaken en verdelen
+        Product::factory(40)
+            ->recycle($categories) // Verdeel over de 4 categorieën hierboven
+            ->create();
+
+        // 5. Een specifieke 'Highlight' categorie met extra veel producten
+        Category::factory()
+            ->has(Product::factory()->count(15))
+            ->create(['name' => 'Populaire Games']);
+    }
+}
+        </code></pre>
+
+        <h2>Uitvoeren en Controleren</h2>
+        <p>Nu je seeder klaar is, voeren we hem uit. Omdat we de database structuur niet hebben gewijzigd, kunnen we <code>db:seed</code> gebruiken, maar vaak is een verse start fijner:</p>
+
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+
+        <p>Check je database (via PHPMyAdmin). Je zou nu een mooi gevulde <code>products</code> tabel moeten zien waarbij de <code>category_id</code> kolom netjes verwijst naar de ID's uit de <code>categories</code> tabel.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

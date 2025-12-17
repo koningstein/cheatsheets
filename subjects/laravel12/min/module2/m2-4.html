@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aanmaken van users - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Aanmaken van Users</h1>
+        <p>Om te kunnen inloggen en testen, maken we vaste gebruikers aan via een seeder. We koppelen ze direct aan de rollen die we in M2.3 hebben gemaakt.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan specifieke testgebruikers aanmaken via een seeder.</li>
+            <li>Ik kan rollen toewijzen aan gebruikers.</li>
+            <li>Ik kan seeders in de juiste volgorde uitvoeren.</li>
+        </ul>
+
+        <h3 id="seeder">Stap 1: UserSeeder Aanmaken</h3>
+        <pre><code class="language-bash">php artisan make:seeder UserSeeder</code></pre>
+
+        <h3 id="code">Stap 2: Users Toevoegen</h3>
+        <p>In <code>database/seeders/UserSeeder.php</code> gebruiken we de factory om specifieke users te maken. We overschrijven de naam, email en wachtwoord.</p>
+
+        <pre><code class="language-php">
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+public function run(): void
+{
+    // Maak Admin
+    $admin = User::factory()->create([
+        'name' => 'Admin',
+        'email' => 'admin@webshop.nl',
+        'password' => Hash::make('test1234')
+    ]);
+    $admin->assignRole('admin');
+
+    // Maak Sales
+    $sales = User::factory()->create([
+        'name' => 'Sales',
+        'email' => 'sales@webshop.nl',
+        'password' => Hash::make('test1234')
+    ]);
+    $sales->assignRole('sales');
+
+    // Maak Customer
+    $customer = User::factory()->create([
+        'name' => 'Customer',
+        'email' => 'customer@webshop.nl',
+        'password' => Hash::make('test1234')
+    ]);
+    $customer->assignRole('customer');
+}
+        </code></pre>
+
+        <h3 id="database-seeder">Stap 3: DatabaseSeeder Configureren</h3>
+        <p>Zorg dat de seeders in de juiste volgorde staan in <code>database/seeders/DatabaseSeeder.php</code>. Eerst permissies, dan users!</p>
+        <pre><code class="language-php">
+$this->call([
+    RoleAndPermissionSeeder::class,
+    UserSeeder::class,
+    // andere seeders...
+]);
+        </code></pre>
+
+        <h3 id="uitvoeren">Stap 4: Uitvoeren</h3>
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

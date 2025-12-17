@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="red">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order naar PDF - Laravel 12 Module 5</title>
+    <script src="../../theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Order naar PDF</h1>
+        <p>In de vorige modules hebben we een dashboard gemaakt waarop de beheerder de bestellingen kan zien. Maar de klant wil natuurlijk ook een bewijs van de bestelling hebben, oftewel: een factuur. Het standaardformaat hiervoor is PDF.</p>
+        <p>Laravel kan uit zichzelf geen PDF's maken. Daar hebben we een externe bibliotheek (package) voor nodig. In de Laravel-wereld is <strong>laravel-dompdf</strong> de standaard. Hiermee kunnen we een Blade-view (HTML) omzetten naar een downloadbaar PDF-bestand.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <h2>Leeruitkomsten</h2>
+            <ul style="margin-bottom: 0;">
+                <li>Ik kan een externe package installeren via Composer (<code>barryvdh/laravel-dompdf</code>).</li>
+                <li>Ik kan een Blade-view maken die geschikt is voor PDF-generatie (met tabellen).</li>
+                <li>Ik begrijp waarom moderne CSS (Flexbox/Grid) vaak niet werkt in PDF-generators.</li>
+                <li>Ik kan een Controller-methode maken die een PDF streamt of downloadt.</li>
+                <li>Ik kan een knop toevoegen aan het dashboard om de factuur te genereren.</li>
+            </ul>
+        </div>
+
+        <h2>Stap 1: De Package Installeren</h2>
+        <p>We gebruiken Composer om de bibliotheek aan ons project toe te voegen. Open je terminal en typ:</p>
+
+        <pre><code class="language-bash">composer require barryvdh/laravel-dompdf</code></pre>
+
+        <p>Laravel ontdekt de package automatisch. Je hoeft meestal niets in je configuratiebestanden aan te passen.</p>
+
+        <h2>Stap 2: De Route en Controller</h2>
+        <p>We hebben een actie nodig die wordt uitgevoerd als iemand op "Download Factuur" klikt. We voegen een methode toe aan de <code>OrderController</code>.</p>
+
+        <p><strong>Route (routes/web.php):</strong></p>
+        <pre><code class="language-php">
+Route::get('orders/{order}/invoice', [OrderController::class, 'invoice'])
+    ->name('admin.orders.invoice');
+        </code></pre>
+
+        <p><strong>Controller (Admin/OrderController.php):</strong></p>
+        <p>We gebruiken de <code>Pdf</code> facade om de view in te laden. Let op de import bovenaan!</p>
+
+        <pre><code class="language-php">
+use Barryvdh\DomPDF\Facade\Pdf; // Importeer de PDF class
+
+public function invoice(Order $order)
+{
+    // Zorg dat we alle data hebben (items en productnamen)
+    $order->load('items.product', 'user');
+
+    // Laad de view in de PDF wrapper
+    $pdf = Pdf::loadView('admin.orders.invoice', [
+        'order' => $order
+    ]);
+
+    // Optie A: Download het bestand direct
+    // return $pdf->download("factuur-{$order->id}.pdf");
+
+    // Optie B: Open het bestand in de browser (Stream)
+    return $pdf->stream("factuur-{$order->id}.pdf");
+}
+        </code></pre>
+
+        <h2>Stap 3: De Factuur View (HTML & CSS)</h2>
+        <p>Nu komt het lastigste gedeelte. We moeten een Blade-bestand maken: <code>resources/views/admin/orders/invoice.blade.php</code>.</p>
+
+        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+            <strong>Let op: Geen Tailwind of Flexbox!</strong><br>
+            De DomPDF library is gebaseerd op oudere HTML-standaarden. Moderne technieken zoals Flexbox, CSS Grid en Tailwind classes werken vaak <strong>niet</strong> of zien er raar uit in de PDF.<br>
+            Voor PDF's moeten we "ouderwets" werken met HTML <code>&lt;table&gt;</code> en inline CSS om de layout goed te krijgen.
+        </div>
+
+        <pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;Factuur #{{ $order->id }}&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; font-size: 14px; }
+        .header { width: 100%; border-bottom: 2px solid #ddd; margin-bottom: 20px; padding-bottom: 10px; }
+        .logo { font-size: 24px; font-weight: bold; color: #333; }
+
+        /* Ouderwetse tabellen voor layout */
+        .details-table { width: 100%; margin-bottom: 20px; }
+        .details-table td { vertical-align: top; }
+
+        .items-table { width: 100%; border-collapse: collapse; }
+        .items-table th { background: #f4f4f4; text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        .items-table td { padding: 8px; border-bottom: 1px solid #ddd; }
+
+        .total-row td { font-weight: bold; font-size: 16px; border-top: 2px solid #333; }
+        .text-right { text-align: right; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;div class="header"&gt;
+        &lt;span class="logo"&gt;Mijn Webshop&lt;/span&gt;
+        &lt;div style="float: right;"&gt;Datum: {{ $order->created_at->format('d-m-Y') }}&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Klantgegevens & Bedrijfsgegevens naast elkaar via een tabel --&gt;
+    &lt;table class="details-table"&gt;
+        &lt;tr&gt;
+            &lt;td&gt;
+                &lt;strong&gt;Factuur voor:&lt;/strong&gt;&lt;br&gt;
+                {{ $order->user->name }}&lt;br&gt;
+                {{ $order->address }}&lt;br&gt;
+                {{ $order->zipcode }} {{ $order->city }}&lt;br&gt;
+                {{ $order->user->email }}
+            &lt;/td&gt;
+            &lt;td class="text-right"&gt;
+                &lt;strong&gt;Ordernummer:&lt;/strong&gt; #{{ $order->id }}&lt;br&gt;
+                &lt;strong&gt;Status:&lt;/strong&gt; {{ ucfirst($order->status) }}
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;!-- De Producten --&gt;
+    &lt;table class="items-table"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Product&lt;/th&gt;
+                &lt;th&gt;Prijs&lt;/th&gt;
+                &lt;th&gt;Aantal&lt;/th&gt;
+                &lt;th class="text-right"&gt;Totaal&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @foreach($order->items as $item)
+                &lt;tr&gt;
+                    &lt;td&gt;{{ $item->product?->title ?? 'Product verwijderd' }}&lt;/td&gt;
+                    &lt;td&gt;&euro; {{ number_format($item->price, 2, ',', '.') }}&lt;/td&gt;
+                    &lt;td&gt;{{ $item->quantity }}&lt;/td&gt;
+                    &lt;td class="text-right"&gt;
+                        &euro; {{ number_format($item->price * $item->quantity, 2, ',', '.') }}
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            @endforeach
+
+            &lt;!-- Totaalrij --&gt;
+            &lt;tr class="total-row"&gt;
+                &lt;td colspan="3" class="text-right"&gt;Totaal:&lt;/td&gt;
+                &lt;td class="text-right"&gt;
+                    &euro; {{ number_format($order->total_price, 2, ',', '.') }}
+                &lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+    &lt;div style="margin-top: 40px; font-size: 12px; color: #777;"&gt;
+        Bedankt voor je bestelling! Maak het bedrag over binnen 14 dagen.
+    &lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+
+        <h2>Stap 4: De Knop Toevoegen</h2>
+        <p>Ga terug naar je detailpagina (<code>resources/views/admin/orders/show.blade.php</code>) en voeg een knop toe bovenaan de pagina, naast de "Terug" knop.</p>
+
+        <pre><code class="language-html">
+&lt;a href="{{ route('admin.orders.invoice', $order) }}"
+   class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-4"
+   target="_blank"&gt;
+    📄 Download Factuur
+&lt;/a&gt;
+        </code></pre>
+
+        <p>We gebruiken <code>target="_blank"</code> zodat de PDF in een nieuw tabblad opent. Dit is wel zo gebruiksvriendelijk.</p>
+
+        <h2>Afbeeldingen in PDF</h2>
+        <p>Als je een logo wilt toevoegen (<code>&lt;img src="..."&gt;</code>), loop je vaak tegen problemen aan. DomPDF kan niet goed bij relatieve paden (zoals <code>/images/logo.png</code>). Gebruik de Laravel helper <code>public_path()</code> om het volledige pad op de harde schijf te krijgen.</p>
+
+        <pre><code class="language-html">
+{{-- Fout: --}}
+&lt;img src="/images/logo.png"&gt;
+
+{{-- Goed: --}}
+&lt;img src="{{ public_path('images/logo.png') }}"&gt;
+        </code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>Je hebt nu een professionele PDF-generator gebouwd. Je hebt geleerd dat:</p>
+        <ol>
+            <li>Je externe packages nodig hebt voor PDF's (DomPDF).</li>
+            <li>Je ouderwetse HTML/CSS moet gebruiken voor de styling.</li>
+            <li>Je <code>public_path()</code> moet gebruiken voor afbeeldingen.</li>
+        </ol>
+        <p>Hiermee is Module 5 afgerond. Je hebt nu een volledig werkend administratiepaneel met orderbeheer!</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+</body>
+</html>

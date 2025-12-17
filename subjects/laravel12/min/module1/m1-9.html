@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete & destroy - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Resource Controller - Delete & Destroy</h1>
+        <p>Het verwijderen van data moet veilig gebeuren. We maken een bevestigingspagina (Delete) voordat de data daadwerkelijk uit de database wordt verwijderd (Destroy).</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een delete bevestigingspagina maken.</li>
+            <li>Ik kan disabled input fields gebruiken.</li>
+            <li>Ik kan DELETE method gebruiken.</li>
+            <li>Ik kan records verwijderen uit database.</li>
+        </ul>
+
+        <h3 id="extra-route">Stap 1: Extra Route</h3>
+        <p>Omdat we een bevestigingsscherm willen ("Weet u het zeker?"), hebben we een extra route nodig. Plaats deze <strong>boven</strong> de resource route in <code>web.php</code>.</p>
+        <pre><code class="language-php">
+// Route voor het bevestigingsscherm
+Route::get('/admin/categories/{category}/delete',
+    [CategoryController::class, 'delete'])
+    ->name('categories.delete');
+
+Route::resource('/admin/categories', CategoryController::class);
+        </code></pre>
+
+        <h3 id="delete">Stap 2: Delete Methode</h3>
+        <p>Deze methode toont alleen het scherm, hij verwijdert nog niets.</p>
+        <pre><code class="language-php">
+public function delete(Category $category)
+{
+    return view('admin.categories.delete', [
+        'category' => $category
+    ]);
+}
+        </code></pre>
+
+        <h3 id="view">Stap 3: Delete View</h3>
+        <p>Maak <code>delete.blade.php</code>. Hier gebruik je een formulier met <code>@method('DELETE')</code>.</p>
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;h1 class="text-red-600"&gt;Verwijderen?&lt;/h1&gt;
+    &lt;p&gt;Weet je zeker dat je {{ $category->name }} wilt verwijderen?&lt;/p&gt;
+
+    &lt;form action="{{ route('categories.destroy', $category) }}" method="POST"&gt;
+        @csrf
+        @method('DELETE')
+
+        &lt;button type="submit" class="bg-red-500 text-white p-2"&gt;
+            Ja, weg ermee
+        &lt;/button&gt;
+
+        &lt;a href="{{ route('categories.index') }}"&gt;Annuleren&lt;/a&gt;
+    &lt;/form&gt;
+@endsection
+        </code></pre>
+
+        <h3 id="destroy">Stap 4: Destroy Methode</h3>
+        <p>Dit is de methode die daadwerkelijk verwijdert.</p>
+        <pre><code class="language-php">
+public function destroy(Category $category)
+{
+    $category->delete();
+
+    return to_route('categories.index')
+            ->with('status', 'Categorie verwijderd!');
+}
+        </code></pre>
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

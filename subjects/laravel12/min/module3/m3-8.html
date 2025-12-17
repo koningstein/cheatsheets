@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show met Relaties - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Show met Relaties</h1>
+        <p>Op een detailpagina wil je vaak meer zien dan alleen de velden uit één tabel. Je wilt ook de gerelateerde informatie tonen, zoals de categorie waartoe een product behoort of de geschiedenis van prijzen.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een detail view maken met gerelateerde data (historie).</li>
+            <li>Ik kan conditionele weergave gebruiken (N/A bij null).</li>
+            <li>Ik kan via relaties doorlijsten (bijv. alle prijzen van een product).</li>
+        </ul>
+
+        <h3 id="controller">Stap 1: Controller</h3>
+        <p>De <code>show</code> methode is simpel dankzij Route Model Binding. We sturen het product naar de view. Omdat de relaties in het model zijn gedefinieerd, zijn ze automatisch beschikbaar.</p>
+
+        <pre><code class="language-php">
+public function show(Product $product)
+{
+    // Omdat we 'prices' relatie hebben in Model, hoeven we niets extra's te doen hier
+    return view('admin.products.show', ['product' => $product]);
+}
+        </code></pre>
+
+        <h3 id="view-details">Stap 2: De View (Details)</h3>
+        <p>In de view tonen we de product details én de categorie naam. We kunnen direct de relatie aanspreken.</p>
+
+        <pre><code class="language-html">
+&lt;h1 class="text-2xl font-bold mb-4"&gt;{{ $product->name }}&lt;/h1&gt;
+&lt;p class="mb-4"&gt;&lt;strong&gt;Categorie:&lt;/strong&gt; {{ $product->category->name }}&lt;/p&gt;
+        </code></pre>
+
+        <h3 id="view-relations">Stap 3: Relaties Tonen (Lijst)</h3>
+        <p>Omdat een product meerdere prijzen heeft (historie), kunnen we die ook tonen. We loopen door de relatie <code>prices</code>. We kunnen in de view sorteren, al is het vaak beter om dit in de controller of model te doen.</p>
+
+        <pre><code class="language-html">
+&lt;h3 class="text-xl font-semibold mb-2"&gt;Prijs Historie&lt;/h3&gt;
+&lt;table class="min-w-full bg-white border border-gray-300"&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th class="py-2 px-4 border-b"&gt;Datum&lt;/th&gt;
+            &lt;th class="py-2 px-4 border-b"&gt;Prijs&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        {{-- Sorteer in de view op datum (nieuwste eerst) --}}
+        @foreach($product->prices->sortByDesc('effdate') as $price)
+            &lt;tr&gt;
+                &lt;td class="py-2 px-4 border-b"&gt;{{ $price->effdate }}&lt;/td&gt;
+                &lt;td class="py-2 px-4 border-b"&gt;&euro; {{ $price->price }}&lt;/td&gt;
+            &lt;/tr&gt;
+        @endforeach
+    &lt;/tbody&gt;
+&lt;/table&gt;
+        </code></pre>
+
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6" role="alert">
+            <p class="font-bold">Opdracht 23</p>
+            <p>Maak de Show pagina voor <strong>Tasks</strong>. Toon de taak naam, project naam en activity naam. Let op: User is optioneel. Als er geen user is (<code>$task->user == null</code>), toon dan "N/A".</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>

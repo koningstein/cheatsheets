@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model & Migration - Laravel 12</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <link rel="stylesheet" href="../../style.css">
+
+    <script src="../../theme-init.js"></script>
+</head>
+<body>
+
+<div data-include="../../header.html"></div>
+
+<div class="layout-wrapper">
+
+    <div data-include="../../sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Model & Migration</h1>
+        <p>De fundering van je applicatie: interactie met de database via Eloquent Models en het structureren van je database met Migrations.</p>
+
+        <h2>Leeruitkomsten</h2>
+        <ul style="margin-bottom: 2rem;">
+            <li>Ik kan een model aanmaken met een Artisan commando.</li>
+            <li>Ik kan een migration aanmaken met een Artisan commando.</li>
+            <li>Ik kan kolommen toevoegen aan een migration.</li>
+            <li>Ik kan migrations uitvoeren.</li>
+        </ul>
+
+        <h3 id="mvc-data">1. Het Concept: MVC & Data</h3>
+        <p>Laravel werkt volgens het <strong>MVC-principe</strong> (Model-View-Controller). De <strong>Model</strong> is hierin verantwoordelijk voor alle interactie met de data. In de regel heeft elke tabel in je database een eigen Model.</p>
+
+        <div style="background: var(--primary-light, #fef2f2); padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid var(--primary-color); color: var(--text-main, #1e293b); margin-bottom: 1.5rem;">
+            <strong>Naming Conventions:</strong>
+            <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                <li><strong>Model:</strong> Enkelvoud, PascalCase (bijv. <code>Category</code>)</li>
+                <li><strong>Tabel:</strong> Meervoud, snake_case (bijv. <code>categories</code>)</li>
+            </ul>
+        </div>
+
+        <h3 id="artisan">2. Aanmaken met Artisan</h3>
+        <p>In Laravel maken we bijna nooit handmatig bestanden aan. We gebruiken de command-line interface <strong>Artisan</strong>. We kunnen een Model en een Migration tegelijk aanmaken met de <code>-m</code> vlag (flag).</p>
+        <p>In dit voorbeeld maken we een <strong>Category</strong> aan:</p>
+
+        <pre><code class="language-bash">
+# Maak Model én Migration (-m)
+php artisan make:model Category -m
+        </code></pre>
+
+        <h3 id="migration">3. Migratie Bewerken</h3>
+        <p>Na het uitvoeren van het commando vind je in de map <code>database/migrations/</code> een nieuw bestand. Hierin definiëren we de structuur (kolommen) van de tabel.</p>
+        <p>Standaard zijn <code>id()</code> en <code>timestamps()</code> al aanwezig. We voegen hier een <code>name</code> kolom aan toe.</p>
+
+        <pre><code class="language-php">
+public function up(): void
+{
+    Schema::create('categories', function (Blueprint $table) {
+        $table->id(); // Primary Key (Auto Increment)
+
+        // Voeg hier je eigen kolommen toe
+        $table->string('name', 75); // Varchar(75)
+
+        $table->timestamps(); // created_at & updated_at
+    });
+}
+        </code></pre>
+
+        <h3 id="uitvoeren">4. Uitvoeren</h3>
+        <p>Het bestand is nu slechts een "bouwtekening". Om de tabel daadwerkelijk in de database te zetten, moet je de migratie uitvoeren:</p>
+        <pre><code class="language-bash">php artisan migrate</code></pre>
+
+        <p>Heb je een fout gemaakt in je migration of wil je opnieuw beginnen? Pas het migration-bestand aan en draai:</p>
+        <pre><code class="language-bash">php artisan migrate:fresh</code></pre>
+        <p><em>Let op: <code>migrate:fresh</code> gooit je hele database leeg!</em></p>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="../../footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../script.js"></script>
+
+</body>
+</html>
