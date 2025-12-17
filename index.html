@@ -1,10 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="red">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koningstein Lesmateriaal - Home</title>
+
+    <script src="assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        /* Specifieke override voor de homepage: Geen sidebar, volledige breedte */
+        .layout-wrapper {
+            grid-template-columns: 1fr !important; /* Forceer 1 kolom */
+            max-width: 1200px; /* Iets breder voor het overzicht */
+        }
+        .sidebar-left, .sidebar-right {
+            display: none !important; /* Verberg sidebars op de homepagina */
+        }
+        .main-content {
+            width: 100%;
+            max-width: 100%;
+            border-left: none; /* Geen lijntje links */
+        }
+
+        /* Visuele aanpassing voor de badges */
+        .card-badge.php { background-color: rgba(79, 93, 149, 0.1); color: #4F5D95; }
+        .card-badge.python { background-color: rgba(55, 118, 171, 0.1); color: #3776AB; }
+        .card-badge.csharp { background-color: rgba(104, 33, 122, 0.1); color: #68217A; }
+        .card-badge.laravel { background-color: rgba(255, 45, 32, 0.1); color: #FF2D20; }
+        .card-badge.django { background-color: rgba(9, 46, 32, 0.1); color: #092E20; }
+        .card-badge.spider { background-color: rgba(255, 0, 0, 0.1); color: #D32F2F; }
+    </style>
 </head>
 <body>
 
+<div data-include="components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="components/sidebar.html" class="sidebar-left"></div>
+
+    <main class="main-content">
+
+        <div class="hero-section" style="border-color: var(--border-color);">
+            <h1>Welkom</h1>
+            <p>
+                Kies een onderwerp hieronder om naar de lesstof, opdrachten en cheatsheets te gaan.
+                Hier vind je documentatie voor verschillende programmeertalen en frameworks.
+            </p>
+        </div>
+
+        <h2 class="section-title">Beschikbare Vakken</h2>
+
+        <div class="curriculum-grid">
+
+            <a href="subjects/laravel12/min/index.html" class="card">
+                <span class="card-badge laravel">Framework</span>
+                <h3>Laravel 12</h3>
+                <p>Modern PHP framework voor webapplicaties. Van installatie en routing tot geavanceerde Eloquent relaties en authenticatie.</p>
+            </a>
+
+            <a href="#" class="card" style="opacity: 0.7;">
+                <span class="card-badge php">Backend</span>
+                <h3>OOP PHP</h3>
+                <p>Object Georiënteerd Programmeren in PHP. Classes, objects, inheritance en interfaces. (Nog niet beschikbaar)</p>
+            </a>
+
+            <a href="#" class="card" style="opacity: 0.7;">
+                <span class="card-badge spider">Hardware / Python</span>
+                <h3>OOP SpiderPI</h3>
+                <p>Programmeer een robot-spin met Python. Leer hardware aansturen via object georiënteerde code. (Nog niet beschikbaar)</p>
+            </a>
+
+            <a href="#" class="card" style="opacity: 0.7;">
+                <span class="card-badge python">Backend</span>
+                <h3>OOP Python</h3>
+                <p>De basis van classes en objecten in Python. Data structures, file handling en basic algorithms. (Nog niet beschikbaar)</p>
+            </a>
+
+            <a href="#" class="card" style="opacity: 0.7;">
+                <span class="card-badge django">Framework</span>
+                <h3>Django</h3>
+                <p>Het high-level Python web framework. "Batteries included" web development voor snelle realisatie. (Nog niet beschikbaar)</p>
+            </a>
+
+            <a href="#" class="card" style="opacity: 0.7;">
+                <span class="card-badge csharp">Backend</span>
+                <h3>OOP C#</h3>
+                <p>Applicatieontwikkeling met C# en .NET. Sterk getypeerde object structuren en design patterns. (Nog niet beschikbaar)</p>
+            </a>
+
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right"></aside>
+</div>
+
+<div data-include="components/footer.html"></div>
+
+<script src="assets/js/script.js"></script>
 </body>
 </html>

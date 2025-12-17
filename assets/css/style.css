@@ -187,7 +187,36 @@ header {
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.logo {
+/* --- Branding (Split Header) --- */
+.branding {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.brand-home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: color 0.2s;
+    text-decoration: none;
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.brand-home:hover {
+    color: var(--primary-color);
+    background-color: var(--bg-body);
+}
+
+.brand-separator {
+    color: var(--border-color);
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+.brand-title {
     font-weight: 700;
     font-size: 1.25rem;
     color: var(--primary-color);
@@ -195,6 +224,21 @@ header {
     align-items: center;
     gap: 0.5rem;
     text-decoration: none;
+}
+
+.brand-title .subject-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.brand-title:hover {
+    opacity: 0.9;
+}
+
+/* Voor mobiel: verberg het huisje als er weinig ruimte is, of maak kleiner */
+@media (max-width: 480px) {
+    .brand-title span { font-size: 1rem; }
+    .branding { gap: 0.5rem; }
 }
 
 .header-controls { display: flex; gap: 0.5rem; align-items: center; }
