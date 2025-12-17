@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laravel 12 Cheatsheet - Overzicht</title>
+    <title>Startpagina - Laravel 12 Basic</title>
 
+    <script src="../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="theme-init.js"></script>
+    <link rel="stylesheet" href="../../../assets/css/style.css">
 </head>
 <body>
 
-<div data-include="header.html"></div>
+<div data-include="../../../components/header.html"></div>
 
 <div class="layout-wrapper">
-    <div data-include="sidebar.html"></div>
+    <div data-include="../../../components/sidebar.html"></div>
 
     <main class="main-content">
 
 
         <div class="hero-section">
             <h1>Laravel 12 Curriculum</h1>
-            <p>Welkom bij de interactieve cheatsheet. Gebruik het menu aan de linkerkant om te navigeren door de installatie, het opdrachtentraject en de verdiepende thema's.</p>
+            <p>Welkom bij de Basic Editie. Alle onderwerpen worden in het kort behandeld..</p>
         </div>
 
         <h2 class="section-title">
@@ -31,31 +31,31 @@
         <p style="margin-bottom: 2rem; color: var(--text-muted);">Stap-voor-stap modules waarin we samen een webshop en admin-paneel bouwen.</p>
 
         <div class="curriculum-grid">
-            <a href="pages/module1/m1-1.html" class="card">
+            <a href="module1/m1-1.html" class="card">
                 <span class="card-badge">Module 1</span>
                 <h3>Basis CRUD</h3>
                 <p>De basis van Laravel. Models, Migrations en Controllers opzetten voor een simpele administratie.</p>
             </a>
 
-            <a href="pages/module2/m2-1.html" class="card">
+            <a href="module2/m2-1.html" class="card">
                 <span class="card-badge">Module 2</span>
                 <h3>Users & Security</h3>
                 <p>Authenticatie (inloggen/registreren), gebruikersbeheer en middleware voor beveiliging.</p>
             </a>
 
-            <a href="pages/module3/m3-1.html" class="card">
+            <a href="module3/m3-1.html" class="card">
                 <span class="card-badge">Module 3</span>
                 <h3>Advanced Admin</h3>
                 <p>Een professioneel admin-dashboard bouwen met complexe formulieren, relaties en rechtenstructuren.</p>
             </a>
 
-            <a href="pages/module4/m4-1.html" class="card">
+            <a href="module4/m4-1.html" class="card">
                 <span class="card-badge">Module 4</span>
                 <h3>Webshop Features</h3>
                 <p>De voorkant van de winkel. Producten tonen, winkelwagen functionaliteit en reviews systeem.</p>
             </a>
 
-            <a href="pages/module5/m5-1.html" class="card">
+            <a href="module5/m5-1.html" class="card">
                 <span class="card-badge">Module 5</span>
                 <h3>Orders & Validatie</h3>
                 <p>Het afrekenproces, database transacties, complexe validatieregels en PDF facturen genereren.</p>
@@ -68,55 +68,55 @@
         <p style="margin-bottom: 2rem; color: var(--text-muted);">Verdiepende naslagwerken over specifieke onderdelen van het framework.</p>
 
         <div class="curriculum-grid">
-            <a href="pages/module6/m6-1.html" class="card">
+            <a href="module6/m6-1.html" class="card">
                 <span class="card-badge theme-badge">Database</span>
                 <h3>Database & Models</h3>
                 <p>Alles over database structuur, conventies, factories en geavanceerde Eloquent features.</p>
             </a>
 
-            <a href="pages/module7/m7-1.html" class="card">
+            <a href="module7/m7-1.html" class="card">
                 <span class="card-badge theme-badge">Relaties</span>
                 <h3>Eloquent Relaties</h3>
                 <p>Diepgang in hoe tabellen met elkaar communiceren (1-op-1, 1-op-veel, veel-op-veel).</p>
             </a>
 
-            <a href="pages/module8/m8-1.html" class="card">
+            <a href="module8/m8-1.html" class="card">
                 <span class="card-badge theme-badge">Routing</span>
                 <h3>Routing & Controllers</h3>
                 <p>Hoe URL's werken, dependency injection en slimme routing trucs.</p>
             </a>
 
-            <a href="pages/module9/m9-1.html" class="card">
+            <a href="module9/m9-1.html" class="card">
                 <span class="card-badge theme-badge">Frontend</span>
                 <h3>Blade & Frontend</h3>
                 <p>De view-laag. Components, layouts en integratie met frontend frameworks.</p>
             </a>
 
-            <a href="pages/module10/m10-1.html" class="card">
+            <a href="module10/m10-1.html" class="card">
                 <span class="card-badge theme-badge">Validatie</span>
                 <h3>Validatie & Forms</h3>
                 <p>Veilige input verwerking, custom error messages en form requests.</p>
             </a>
 
-            <a href="pages/module11/m11-1.html" class="card">
+            <a href="module11/m11-1.html" class="card">
                 <span class="card-badge theme-badge">Security</span>
                 <h3>Security & Auth</h3>
                 <p>Beveiliging, rechten (Gates/Policies), wachtwoorden hashen en e-mail verificatie.</p>
             </a>
 
-            <a href="pages/module12/m12-1.html" class="card">
+            <a href="module12/m12-1.html" class="card">
                 <span class="card-badge theme-badge">Features</span>
                 <h3>Features</h3>
                 <p>Extra functionaliteiten zoals bestandsopslag, externe API calls, events en mail.</p>
             </a>
 
-            <a href="pages/module13/m13-1.html" class="card">
+            <a href="module13/m13-1.html" class="card">
                 <span class="card-badge theme-badge">Automated Testing</span>
                 <h3>Automated Testing</h3>
                 <p>Code kwaliteit garanderen met tests (Pest, PHPUnit, Dusk).</p>
             </a>
 
-            <a href="pages/module14/m14-1.html" class="card">
+            <a href="module14/m14-1.html" class="card">
                 <span class="card-badge theme-badge">QA Tools & Workflow</span>
                 <h3>QA Tools & Workflow</h3>
                 <p>Professionele workflow met Static Analysis, Code Style tools en Git.</p>
@@ -127,8 +127,10 @@
     <aside class="sidebar-right">
     </aside>
 </div>
-<div data-include="footer.html"></div>
+
+<div data-include="../../../components/footer.html"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="script.js"></script>
+<script src="../../../assets/js/script.js"></script>
 </body>
 </html>

@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model & Migration - Laravel 12 Module 1</title>
-    <script src="../../theme-init.js"></script>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
 
-<div data-include="../../header.html"></div>
+<div data-include="../../../../components/header.html"></div>
 
 <div class="layout-wrapper">
-    <div data-include="../../sidebar.html"></div>
+    <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
         <h1>Model & Migration</h1>
         <p>In deze eerste module leggen we de basis voor onze applicatie. We kijken naar de structuur van Laravel, hoe we met de database communiceren en hoe we tabellen aanmaken via code. Dit is essentieel voordat we beginnen met het bouwen van de webshop.</p>
 
         <h2>Leeruitkomsten</h2>
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <div class="info-box">
             <ul style="margin-bottom: 0;">
                 <li>Ik begrijp wat het MVC-design pattern inhoudt.</li>
                 <li>Ik kan uitleggen wat Eloquent ORM is en waarom we het gebruiken.</li>
@@ -112,7 +113,7 @@ public function up(): void
         <p>De code is geschreven, maar de tabel bestaat nog niet in de database. Om de migration daadwerkelijk uit te voeren, typ je:</p>
         <pre><code class="language-bash">php artisan migrate</code></pre>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <div class="info-box">
             <strong>Foutmelding: "Specified key was too long"?</strong><br>
             Krijg je een error met deze tekst? Dit gebeurt vaak bij wat oudere versies van MySQL (bijvoorbeeld in XAMPP of WAMP) omdat de standaard tekenset te veel ruimte inneemt voor de index.<br><br>
             Je kunt dit oplossen door Laravel te vertellen dat teksten standaard wat korter moeten zijn. Ga naar <code>app/Providers/AppServiceProvider.php</code> en voeg in de <code>boot()</code> methode deze regel toe:<br>
@@ -123,7 +124,7 @@ public function up(): void
         <h2>Tabel Wijzigen</h2>
         <p>Stel je hebt een foutje gemaakt: de naam mag toch maar 75 tekens lang zijn in plaats van 100. Of je bent een kolom vergeten.</p>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <div class="info-box">
             <strong>Let op:</strong> Pas <strong>nooit</strong> een oude migration aan die je al hebt uitgevoerd op een productie-omgeving of die al gedeeld is met je team! Als je dat doet, loopt de database niet meer synchroon met de code. Maak in plaats daarvan een <strong>nieuwe</strong> migration die de wijziging beschrijft.
         </div>
 
@@ -164,8 +165,9 @@ public function down(): void
     </aside>
 </div>
 
-<div data-include="../../footer.html"></div>
+<div data-include="../../../../components/footer.html"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="../../script.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

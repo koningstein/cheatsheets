@@ -1,0 +1,312 @@
+{
+  "laravel12": {
+    "min": {
+      "title": "Laravel 12 (Basis)",
+      "menu": [
+        {
+          "title": "Installatie",
+          "items": [
+            { "label": "Overzicht", "url": "index.html" }
+          ]
+        },
+        {
+          "title": "Opdrachten",
+          "items": [
+            {
+              "label": "Module 1: Basis CRUD",
+              "url": "#",
+              "items": [
+                { "label": "Model & Migration", "url": "module1/m1-1.html" },
+                { "label": "Factory & Seeding", "url": "module1/m1-2.html" },
+                { "label": "Layouts & Tailwind", "url": "module1/m1-3.html" },
+                { "label": "Controller Index", "url": "module1/m1-4.html" },
+                { "label": "Create & Store", "url": "module1/m1-5.html" },
+                { "label": "Validatie & Flash", "url": "module1/m1-6.html" },
+                { "label": "Detailpagina (Show)", "url": "module1/m1-7.html" },
+                { "label": "Edit & Update", "url": "module1/m1-8.html" },
+                { "label": "Delete & Destroy", "url": "module1/m1-9.html" }
+              ]
+            },
+            {
+              "label": "Module 2: Users & Security",
+              "url": "#",
+              "items": [
+                { "label": "Publieke Layout", "url": "module2/m2-1.html" },
+                { "label": "Simpele Publieke Pagina", "url": "module2/m2-2.html" },
+                { "label": "Roles & Permissions", "url": "module2/m2-3.html" },
+                { "label": "Aanmaken van Users", "url": "module2/m2-4.html" },
+                { "label": "Middleware bij Routes", "url": "module2/m2-5.html" },
+                { "label": "Rolgebaseerde Toegang", "url": "module2/m2-6.html" }
+              ]
+            },
+            {
+              "label": "Module 3: Advanced Admin",
+              "url": "#",
+              "items": [
+                { "label": "Models & Migrations", "url": "module3/m3-1.html" },
+                { "label": "Factories met Relaties", "url": "module3/m3-2.html" },
+                { "label": "Seeders met Relaties", "url": "module3/m3-3.html" },
+                { "label": "Index & Eager Loading", "url": "module3/m3-4.html" },
+                { "label": "Permissions", "url": "module3/m3-5.html" },
+                { "label": "Create & Dropdowns", "url": "module3/m3-6.html" },
+                { "label": "Store & Validatie", "url": "module3/m3-7.html" },
+                { "label": "Show & Relaties", "url": "module3/m3-8.html" },
+                { "label": "Edit & Pre-select", "url": "module3/m3-9.html" },
+                { "label": "Update & Logica", "url": "module3/m3-10.html" },
+                { "label": "Delete View", "url": "module3/m3-11.html" },
+                { "label": "Destroy & Constraints", "url": "module3/m3-12.html" }
+              ]
+            },
+            {
+              "label": "Module 4: Webshop Features",
+              "url": "#",
+              "items": [
+                { "label": "Publieke Productpagina", "url": "module4/m4-1.html" },
+                { "label": "De Product Show", "url": "module4/m4-2.html" },
+                { "label": "Reviews Setup (DB)", "url": "module4/m4-3.html" },
+                { "label": "Reviews Tonen", "url": "module4/m4-4.html" },
+                { "label": "Reviews Plaatsen", "url": "module4/m4-5.html" },
+                { "label": "Winkelwagen Setup", "url": "module4/m4-6.html" },
+                { "label": "Winkelwagen Tonen", "url": "module4/m4-7.html" },
+                { "label": "Winkelwagen Wijzigen", "url": "module4/m4-8.html" }
+              ]
+            },
+            {
+              "label": "Module 5: Orders & Validatie",
+              "url": "#",
+              "items": [
+                { "label": "Orders Structuur", "url": "module5/m5-1.html" },
+                { "label": "Order Seeds", "url": "module5/m5-2.html" },
+                { "label": "Orders Opslaan", "url": "module5/m5-3.html" },
+                { "label": "Orders Tonen", "url": "module5/m5-4.html" },
+                { "label": "Order naar PDF", "url": "module5/m5-5.html" }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Thema's",
+          "items": [
+            {
+              "label": "Module 6: Database & Models",
+              "url": "#",
+              "items": [
+                { "label": "Migrations & Datatypes", "url": "module6/m6-1.html" },
+                { "label": "Foreign Key Constraints", "url": "module6/m6-2.html" },
+                { "label": "Model Conventions", "url": "module6/m6-3.html" },
+                { "label": "Mass Assignment", "url": "module6/m6-4.html" },
+                { "label": "Factories (Faker)", "url": "module6/m6-5.html" },
+                { "label": "Seeders & DatabaseState", "url": "module6/m6-6.html" },
+                { "label": "Soft Deletes", "url": "module6/m6-7.html" },
+                { "label": "Casts & Accessors", "url": "module6/m6-8.html" }
+              ]
+            },
+            {
+              "label": "Module 7: Eloquent Relaties",
+              "url": "#",
+              "items": [
+                { "label": "One to One (HasOne)", "url": "module7/m7-1.html" },
+                { "label": "One to Many (HasMany)", "url": "module7/m7-2.html" },
+                { "label": "Many to Many", "url": "module7/m7-3.html" },
+                { "label": "Eager Loading", "url": "module7/m7-4.html" },
+                { "label": "Query Scopes", "url": "module7/m7-5.html" },
+                { "label": "Collections Methods", "url": "module7/m7-6.html" },
+                { "label": "Pivot Tabellen", "url": "module7/m7-7.html" }
+              ]
+            },
+            {
+              "label": "Module 8: Routing & Controllers",
+              "url": "#",
+              "items": [
+                { "label": "Basic Routing", "url": "module8/m8-1.html" },
+                { "label": "Named Routes & Groups", "url": "module8/m8-2.html" },
+                { "label": "Route Model Binding", "url": "module8/m8-3.html" },
+                { "label": "Resource Controllers", "url": "module8/m8-4.html" },
+                { "label": "Single Action Controllers", "url": "module8/m8-5.html" },
+                { "label": "Redirects & Responses", "url": "module8/m8-6.html" },
+                { "label": "Dependency Injection", "url": "module8/m8-7.html" }
+              ]
+            },
+            {
+              "label": "Module 9: Blade & Frontend",
+              "url": "#",
+              "items": [
+                { "label": "Layout Inheritance", "url": "module9/m9-1.html" },
+                { "label": "Components & Slots", "url": "module9/m9-2.html" },
+                { "label": "Stacks & Push", "url": "module9/m9-3.html" },
+                { "label": "Control Structures", "url": "module9/m9-4.html" },
+                { "label": "Auth Directives", "url": "module9/m9-5.html" },
+                { "label": "Service Injection", "url": "module9/m9-6.html" },
+                { "label": "Tailwind Patterns", "url": "module9/m9-7.html" },
+                { "label": "Pagination", "url": "module9/m9-8.html" },
+                { "label": "Flash messages", "url": "module9/m9-9.html" },
+                { "label": "Livewire", "url": "module9/m9-10.html" },
+                { "label": "Flux UI", "url": "module9/m9-11.html" }
+              ]
+            },
+            {
+              "label": "Module 10: Validatie & Forms",
+              "url": "#",
+              "items": [
+                { "label": "Controller Validatie", "url": "module10/m10-1.html" },
+                { "label": "Errors weergeven", "url": "module10/m10-2.html" },
+                { "label": "Form requests", "url": "module10/m10-3.html" },
+                { "label": "Database regels", "url": "module10/m10-4.html" },
+                { "label": "Custom Error Messages", "url": "module10/m10-5.html" },
+                { "label": "CSRF en Old input", "url": "module10/m10-6.html" }
+              ]
+            },
+            {
+              "label": "Module 11: Security & Auth",
+              "url": "#",
+              "items": [
+                { "label": "Auth Flow", "url": "module11/m11-1.html" },
+                { "label": "Middleware", "url": "module11/m11-2.html" },
+                { "label": "Gates", "url": "module11/m11-3.html" },
+                { "label": "Policies", "url": "module11/m11-4.html" },
+                { "label": "Spatie Permissions", "url": "module11/m11-5.html" },
+                { "label": "Password Hashing", "url": "module11/m11-6.html" },
+                { "label": "Helper Functions", "url": "module11/m11-7.html" }
+              ]
+            },
+            {
+              "label": "Features",
+              "url": "#",
+              "items": [
+                { "label": "PDF Generatie", "url": "module12/m12-1.html" },
+                { "label": "Excel Import/Export", "url": "module12/m12-2.html" },
+                { "label": "Mail & Notifications", "url": "module12/m12-3.html" },
+                { "label": "File Storage", "url": "module12/m12-4.html" },
+                { "label": "HTTP Client", "url": "module12/m12-5.html" },
+                { "label": "Events & Listeners", "url": "module12/m12-6.html" },
+                { "label": "Artisan Commands", "url": "module12/m12-7.html" }
+              ]
+            },
+            {
+              "label": "Automated Testing",
+              "url": "#",
+              "items": [
+                { "label": "Introductie & PHPUnit", "url": "module13/m13-1.html" },
+                { "label": "Unit vs Feature Tests", "url": "module13/m13-2.html" },
+                { "label": "Introductie Pest", "url": "module13/m13-3.html" },
+                { "label": "Unit & Feature Tests (Pest)", "url": "module13/m13-4.html" },
+                { "label": "Database Testing & Seeding", "url": "module13/m13-5.html" },
+                { "label": "HTTP Testing", "url": "module13/m13-6.html" },
+                { "label": "Mocking & Spies", "url": "module13/m13-7.html" },
+                { "label": "Faking", "url": "module13/m13-8.html" },
+                { "label": "Browser Testing (Dusk)", "url": "module13/m13-9.html" }
+              ]
+            },
+            {
+              "label": "QA Tools & Workflow",
+              "url": "#",
+              "items": [
+                { "label": "Static Analysis (Larastan)", "url": "module14/m14-1.html" },
+                { "label": "Code Style (Pint)", "url": "module14/m14-2.html" },
+                { "label": "Debugging & Debugbar", "url": "module14/m14-3.html" },
+                { "label": "Git Workflow", "url": "module14/m14-4.html" },
+                { "label": "CI/CD Basics", "url": "module14/m14-5.html" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ext": {
+      "title": "Laravel 12 (Extended)",
+      "menu": [
+        {
+          "title": "Installatie",
+          "items": [
+            { "label": "Overzicht", "url": "index.html" }
+          ]
+        },
+        {
+          "title": "Opdrachten",
+          "items": [
+            {
+              "label": "Module 1: Basis CRUD",
+              "url": "#",
+              "items": [
+                { "label": "Model & Migration", "url": "module1/m1-1-ext.html" },
+                { "label": "Factory & Seeding", "url": "module1/m1-2-ext.html" },
+                { "label": "Layouts & Tailwind", "url": "module1/m1-3-ext.html" },
+                { "label": "Controller Index", "url": "module1/m1-4-ext.html" },
+                { "label": "Create & Store", "url": "module1/m1-5-ext.html" },
+                { "label": "Validatie & Flash", "url": "module1/m1-6-ext.html" },
+                { "label": "Detailpagina (Show)", "url": "module1/m1-7-ext.html" },
+                { "label": "Edit & Update", "url": "module1/m1-8-ext.html" },
+                { "label": "Delete & Destroy", "url": "module1/m1-9-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 2: Users & Security",
+              "url": "#",
+              "items": [
+                { "label": "Publieke Layout", "url": "module2/m2-1-ext.html" },
+                { "label": "Simpele Publieke Pagina", "url": "module2/m2-2-ext.html" },
+                { "label": "Roles & Permissions", "url": "module2/m2-3-ext.html" },
+                { "label": "Aanmaken van Users", "url": "module2/m2-4-ext.html" },
+                { "label": "Middleware bij Routes", "url": "module2/m2-5-ext.html" },
+                { "label": "Rolgebaseerde Toegang", "url": "module2/m2-6-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 3: Advanced Admin",
+              "url": "#",
+              "items": [
+                { "label": "Models & Migrations", "url": "module3/m3-1-ext.html" },
+                { "label": "Factories met Relaties", "url": "module3/m3-2-ext.html" },
+                { "label": "Seeders met Relaties", "url": "module3/m3-3-ext.html" },
+                { "label": "Index & Eager Loading", "url": "module3/m3-4-ext.html" },
+                { "label": "Permissions", "url": "module3/m3-5-ext.html" },
+                { "label": "Create & Dropdowns", "url": "module3/m3-6-ext.html" },
+                { "label": "Store & Validatie", "url": "module3/m3-7-ext.html" },
+                { "label": "Show & Relaties", "url": "module3/m3-8-ext.html" },
+                { "label": "Edit & Pre-select", "url": "module3/m3-9-ext.html" },
+                { "label": "Update & Logica", "url": "module3/m3-10-ext.html" },
+                { "label": "Delete View", "url": "module3/m3-11-ext.html" },
+                { "label": "Destroy & Constraints", "url": "module3/m3-12-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 4: Webshop Features",
+              "url": "#",
+              "items": [
+                { "label": "Publieke Productpagina", "url": "module4/m4-1-ext.html" },
+                { "label": "De Product Show", "url": "module4/m4-2-ext.html" },
+                { "label": "Reviews Setup (DB)", "url": "module4/m4-3-ext.html" },
+                { "label": "Reviews Tonen", "url": "module4/m4-4-ext.html" },
+                { "label": "Reviews Plaatsen", "url": "module4/m4-5-ext.html" },
+                { "label": "Winkelwagen Setup", "url": "module4/m4-6-ext.html" },
+                { "label": "Winkelwagen Tonen", "url": "module4/m4-7-ext.html" },
+                { "label": "Winkelwagen Wijzigen", "url": "module4/m4-8-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 5: Orders & Validatie",
+              "url": "#",
+              "items": [
+                { "label": "Orders Structuur", "url": "module5/m5-1-ext.html" },
+                { "label": "Order Seeds", "url": "module5/m5-2-ext.html" },
+                { "label": "Orders Opslaan", "url": "module5/m5-3-ext.html" },
+                { "label": "Orders Tonen", "url": "module5/m5-4-ext.html" },
+                { "label": "Order naar PDF", "url": "module5/m5-5-ext.html" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "oopphp": {
+      "min": {
+        "title": "OOP PHP (Basis)",
+        "menu": []
+      },
+      "ext": {
+        "title": "OOP PHP (Extended)",
+        "menu": []
+      }
+    }
+  }
+}

@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Een Winkelwagen - Laravel 12 Module 4</title>
-    <script src="../../theme-init.js"></script>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
 
-<div data-include="../../header.html"></div>
+<div data-include="../../../../components/header.html"></div>
 
 <div class="layout-wrapper">
-    <div data-include="../../sidebar.html"></div>
+    <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Een Winkelwagen</h1>
+        <h1>Winkelwagen setup</h1>
         <p>In de vorige modules hebben we de producten getoond en een knop "In Winkelwagen" gemaakt. Nu moeten we zorgen dat die knop ook echt werkt. Maar waar laten we die producten?</p>
         <p>Als een klant nog niet is ingelogd, kunnen we de producten niet in de database opslaan (want we weten niet wie de klant is). Daarom gebruiken we <strong>Sessions</strong>. Een sessie is een tijdelijk geheugen op de server dat gekoppeld is aan de browser van de bezoeker. Zolang de bezoeker op de site is, onthoudt de sessie wat er in het mandje zit.</p>
 
@@ -147,14 +148,15 @@ Route::get('/debug-cart', function() {
     <aside class="sidebar-right">
         <div class="toc-container">
             <h4>Inhoud</h4>
-            <ul id="toc-list" class="toc-list"></ul>
+            <ul id="toc-list" class="toc-list">
+            </ul>
         </div>
     </aside>
 </div>
 
-<div data-include="../../footer.html"></div>
+<div data-include="../../../../components/footer.html"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="../../script.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

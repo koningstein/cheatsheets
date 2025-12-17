@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="nl" data-theme="light" data-color="red">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete & destroy - Laravel 12</title>
+    <title>Resource Controller - Delete & Destroy - Laravel 12 Module 1</title>
 
+    <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-
-    <link rel="stylesheet" href="../../style.css">
-
-    <script src="../../theme-init.js"></script>
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
 
-<div data-include="../../header.html"></div>
+<div data-include="../../../../components/header.html"></div>
 
 <div class="layout-wrapper">
-
-    <div data-include="../../sidebar.html"></div>
+    <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
         <h1>Resource Controller - Delete & Destroy</h1>
@@ -89,13 +86,18 @@ public function destroy(Category $category)
         </code></pre>
     </main>
 
-    <aside class="sidebar-right"></aside>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
 </div>
 
-<div data-include="../../footer.html"></div>
+<div data-include="../../../../components/footer.html"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="../../script.js"></script>
-
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

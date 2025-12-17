@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         includeElements.forEach(el => {
             const filePath = el.getAttribute("data-include");
-
             // Bepaal het "basis pad" (bijv. "../../" als filePath "../../sidebar.html" is)
             const lastSlashIndex = filePath.lastIndexOf("/");
             const basePath = lastSlashIndex !== -1 ? filePath.substring(0, lastSlashIndex + 1) : "";
@@ -68,158 +67,271 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- HOOFD LOGICA (Start pas na inladen HTML) ---
     function initPageLogic() {
-        initThemeLogic();
-        initColorLogic();
-        initSidebarLogic();
-        initTOC();
-        initViewToggle();
-        initLogoLink(); // <--- DEZE HEB IK TOEGEVOEGD
-    }
+        // Context bepalen (Welk vak? Welke modus?)
+        const context = getCurrentContext();
+        const rootPath = getRootPath();
 
-    // --- NIEUW: LOGO LINK FIX ---
-    function initLogoLink() {
-        const logoLink = document.getElementById('logo-link') || document.querySelector('a.logo');
-        if (!logoLink) return;
+        // Data ophalen en UI bouwen
+        fetch(rootPath + 'data/navigation.json')
+            .then(response => {
+                if (!response.ok) throw new Error("Kon navigation.json niet vinden");
+                return response.json();
+            })
+            .then(data => {
+                // Als we data hebben voor dit vak
+                if (context.isFound && data[context.subject]) {
+                    const subjectData = data[context.subject][context.mode]; // Pak 'min' of 'ext' data
 
-        const path = window.location.pathname;
-
-        // Controleer of we in een 'pages' submap zitten.
-        // Dit werkt voor zowel de normale structuur ('/pages/module1/...')
-        // als de extended structuur ('/ext/pages/module1/...').
-        if (path.includes('/pages/')) {
-            // We zitten 2 niveaus diep (moduleX -> pages), dus we moeten 2 niveaus omhoog.
-            // - Vanuit 'ext/pages/module1/' ga je naar 'ext/index.html' (Extended Home)
-            // - Vanuit 'pages/module1/' ga je naar 'index.html' (Cheatsheet Home)
-            logoLink.href = "../../index.html";
-        } else {
-            // We zitten waarschijnlijk al op de root (index.html) of de extended root (ext/index.html).
-            // De link verwijst gewoon naar 'index.html' in de huidige map.
-            logoLink.href = "index.html";
-        }
-    }
-
-    // --- NIEUW: VIEW TOGGLE (Extended vs Cheatsheet) ---
-    function initViewToggle() {
-        const toggleBtn = document.getElementById('view-toggle');
-        if (!toggleBtn) return;
-
-        const path = window.location.pathname;
-        const filename = path.split("/").pop();
-        let targetUrl = ""; // Hier slaan we het doel op
-
-        // 1. Check of we op de Homepagina zitten (index.html)
-        if (filename === 'index.html' || filename === '') {
-            toggleBtn.style.display = ''; // Zichtbaar maken
-
-            if (path.includes('/ext/')) {
-                // EXTENDED Home -> ga naar ROOT Home
-                toggleBtn.innerHTML = '🔄 Cheatsheet';
-                toggleBtn.title = "Ga naar Cheatsheet view";
-                targetUrl = "../index.html";
-            } else {
-                // ROOT Home -> ga naar EXTENDED Home
-                toggleBtn.innerHTML = '🔄 Extended';
-                toggleBtn.title = "Ga naar Extended view";
-                targetUrl = "ext/index.html";
-            }
-        }
-        // 2. Check voor Module pagina's (bijv. m1-1.html)
-        else {
-            const regex = /m(\d+)-(\d+)(-ext)?\.html/;
-            const match = filename.match(regex);
-
-            if (match) {
-                toggleBtn.style.display = ''; // Zichtbaar maken
-
-                const moduleId = parseInt(match[1]);
-                const pageId = match[2];
-                const isExtended = !!match[3];
-
-                if (isExtended) {
-                    // SITUATIE: Extended pagina (3 mappen diep in 'ext') -> Link naar Cheatsheet
-                    toggleBtn.innerHTML = '🔄 Cheatsheet';
-                    toggleBtn.title = "Ga naar Cheatsheet view";
-                    // Pad: ../../../ (terug naar root) -> pages/moduleX/...
-                    targetUrl = `../../../pages/module${moduleId}/m${moduleId}-${pageId}.html`;
-
-                } else {
-                    // SITUATIE: Cheatsheet pagina (2 mappen diep) -> Link naar Extended
-                    toggleBtn.innerHTML = '🔄 Extended';
-                    toggleBtn.title = "Ga naar Extended view";
-
-                    // Pad: ../../ (terug naar root) -> ext/pages/moduleX/...
-                    // Let op: controleer of je module > 5 inmiddels ook extended paginas heeft!
-                    if (moduleId <= 5) {
-                        targetUrl = `../../ext/pages/module${moduleId}/m${moduleId}-${pageId}-ext.html`;
+                    if (subjectData) {
+                        initHeaderAndFooter(subjectData.title);
+                        buildSidebarMenu(subjectData.menu); // Sidebar bouwen
                     } else {
-                        // Fallback als de extended versie nog niet bestaat
-                        targetUrl = `../../ext/pages/module1/m1-1-ext.html`;
+                        console.warn(`Geen data gevonden voor modus: ${context.mode}`);
                     }
                 }
-            } else {
-                toggleBtn.style.display = 'none';
-                return;
-            }
-        }
+            })
+            .catch(err => console.error('Menu laden mislukt:', err))
+            .finally(() => {
+                // Zaken die ook zonder JSON moeten werken of erna komen
+                initThemeLogic();
+                initColorLogic();
+                initSidebarInteractions(); // De klik-events voor de net gebouwde sidebar
+                initTOC();
+                initViewToggle(context);
+                initLogoLink(rootPath);
+            });
+    }
 
-        // 3. Pas de link toe (Robuust voor zowel <a> als <button>)
-        if (targetUrl) {
-            if (toggleBtn.tagName === 'A') {
-                // Als het een <a> tag is
-                toggleBtn.href = targetUrl;
+    // --- HELPER: CONTEXT BEPALEN ---
+    function getCurrentContext() {
+        const path = window.location.pathname;
+        // Verwachte structuur: .../subjects/[subjectNaam]/[min of ext]/...
+        const parts = path.split('/');
+        const subjectsIndex = parts.indexOf('subjects');
+
+        if (subjectsIndex !== -1 && parts.length > subjectsIndex + 2) {
+            return {
+                subject: parts[subjectsIndex + 1], // bijv. "laravel12"
+                mode: parts[subjectsIndex + 2],    // bijv. "min" of "ext"
+                isFound: true
+            };
+        }
+        return { isFound: false, subject: '', mode: 'min' };
+    }
+
+    // --- HELPER: ROOT PAD BEPALEN ---
+    function getRootPath() {
+        const path = window.location.pathname;
+        const parts = path.split('/');
+        const subjectsIndex = parts.indexOf('subjects');
+
+        // Als we in 'subjects' zitten, moeten we terugrekenen naar de root
+        if (subjectsIndex !== -1) {
+            const depth = parts.length - (subjectsIndex + 1);
+            return "../".repeat(depth);
+        }
+        return ""; // Al op root of onbekende structuur
+    }
+
+    // --- UI: HEADER & FOOTER TITELS ---
+    function initHeaderAndFooter(title) {
+        const headerTitle = document.getElementById('header-title');
+        const footerTitle = document.getElementById('footer-title');
+
+        if (headerTitle) headerTitle.textContent = " " + title;
+        if (footerTitle) footerTitle.textContent = title + " Cheatsheet";
+    }
+
+    // --- UI: SIDEBAR BOUWEN (UIT JSON) ---
+    function buildSidebarMenu(menuItems) {
+        const navContainer = document.getElementById('dynamic-nav');
+        if (!navContainer) return;
+        navContainer.innerHTML = '';
+
+        // --- FIX VOOR LINKS ---
+        // Als we in een module-map zitten (bijv. /module1/), moeten we voor alle links "../" zetten
+        // om terug te gaan naar de 'root' van de min/ext modus, anders plakken we paden aan elkaar vast.
+        const path = window.location.pathname;
+        const isInModuleSubfolder = path.includes('/module');
+        const linkPrefix = isInModuleSubfolder ? "../" : "";
+
+        menuItems.forEach(group => {
+            // 1. Maak de groep (bijv. "Opdrachten")
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'nav-group';
+
+            const h3 = document.createElement('h3');
+            h3.textContent = group.title;
+            groupDiv.appendChild(h3);
+
+            // 2. Loop door items in de groep
+            const itemContainer = document.createElement('div');
+            itemContainer.className = 'nav-item-container';
+
+            const ul = document.createElement('ul');
+            ul.className = 'submenu';
+
+            // Check of items in deze groep sub-items hebben (zoals modules)
+            const hasSubItems = group.items.some(item => item.items && item.items.length > 0);
+
+            if (hasSubItems) {
+                // ACCORDION STIJL (Module 1, Module 2...)
+                group.items.forEach(module => {
+                    const moduleContainer = document.createElement('div');
+                    moduleContainer.className = 'nav-item-container'; // Wrapper voor toggle
+
+                    const button = document.createElement('button');
+                    button.className = 'nav-toggle';
+                    // Label in span voor CSS uitlijning
+                    button.innerHTML = `<span>${module.label}</span><svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>`;
+                    moduleContainer.appendChild(button);
+
+                    const subUl = document.createElement('ul');
+                    subUl.className = 'submenu';
+
+                    if(module.items) {
+                        module.items.forEach(link => {
+                            const li = document.createElement('li');
+                            const a = document.createElement('a');
+                            // HIER PASSEN WE DE PREFIX TOE
+                            a.href = linkPrefix + link.url;
+                            a.textContent = link.label;
+                            checkActiveLink(a);
+                            li.appendChild(a);
+                            subUl.appendChild(li);
+                        });
+                    }
+                    moduleContainer.appendChild(subUl);
+                    groupDiv.appendChild(moduleContainer);
+                });
             } else {
-                // Als het een <button> is
-                toggleBtn.onclick = function() {
-                    window.location.href = targetUrl;
-                };
+                // SIMPELE LIJST (Installatie -> Overzicht)
+                ul.style.display = 'block';
+                ul.style.paddingLeft = '0';
+
+                group.items.forEach(link => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    // HIER PASSEN WE DE PREFIX TOE
+                    a.href = linkPrefix + link.url;
+                    a.textContent = link.label;
+                    if(link.label === 'Overzicht') {
+                        a.style.borderLeft = 'none';
+                        a.style.paddingLeft = '0.75rem';
+                    }
+                    checkActiveLink(a);
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                });
+                itemContainer.appendChild(ul);
+                groupDiv.appendChild(itemContainer);
             }
+
+            navContainer.appendChild(groupDiv);
+        });
+    }
+
+    function checkActiveLink(aTag) {
+        // Simpele check: komt de href overeen met het einde van de URL?
+        const currentFile = window.location.pathname.split('/').pop();
+        const linkFile = aTag.getAttribute('href').split('/').pop();
+
+        if (currentFile && linkFile === currentFile) {
+            aTag.classList.add('current');
         }
     }
 
-    // --- SIDEBAR LOGICA ---
-    function initSidebarLogic() {
-        const currentPath = window.location.pathname.split("/").pop();
-        const links = document.querySelectorAll(".sidebar-left a");
-
-        links.forEach(link => {
-            const linkHref = link.getAttribute("href");
-            const linkFile = linkHref ? linkHref.split("/").pop() : "";
-
-            if (linkFile === currentPath && currentPath !== "") {
-                link.classList.add("current");
-                const submenu = link.closest(".submenu");
-                if (submenu) {
-                    submenu.style.display = "block";
-                    const parentGroup = link.closest(".nav-item-container");
-                    if (parentGroup) {
-                        parentGroup.classList.add("active");
-                        setTimeout(() => {
-                            parentGroup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }, 100);
-                    }
+    // --- SIDEBAR INTERACTIES ---
+    function initSidebarInteractions() {
+        // 1. Openklappen van het menu waar de huidige pagina in zit
+        const currentLink = document.querySelector(".sidebar-nav a.current");
+        if (currentLink) {
+            const submenu = currentLink.closest(".submenu");
+            if (submenu) {
+                submenu.style.display = "block";
+                const parentContainer = submenu.closest(".nav-item-container");
+                if (parentContainer) {
+                    parentContainer.classList.add("active");
+                    setTimeout(() => {
+                        parentContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
                 }
             }
-        });
+        }
 
+        // 2. Toggles werkend maken
         const navToggles = document.querySelectorAll('.nav-toggle');
         navToggles.forEach(toggle => {
-            toggle.addEventListener('click', () => {
+            toggle.onclick = () => {
                 const container = toggle.closest('.nav-item-container');
                 container.classList.toggle('active');
-            });
+
+                const sub = container.querySelector('.submenu');
+                if(sub) {
+                    if(container.classList.contains('active')){
+                        sub.style.display = 'block';
+                    } else {
+                        sub.style.display = 'none';
+                    }
+                }
+            };
         });
 
+        // 3. Mobile menu
         const menuBtn = document.getElementById('menu-toggle');
         const sidebarLeft = document.querySelector('.sidebar-left');
+        const closeBtn = document.getElementById('close-sidebar');
+
         if(menuBtn && sidebarLeft) {
-            menuBtn.addEventListener('click', () => {
-                sidebarLeft.classList.toggle('open');
-            });
+            menuBtn.onclick = () => sidebarLeft.classList.toggle('open');
+            if(closeBtn) closeBtn.onclick = () => sidebarLeft.classList.remove('open');
+
             document.addEventListener('click', (e) => {
                 if(window.innerWidth <= 768 && sidebarLeft.classList.contains('open') && !sidebarLeft.contains(e.target) && e.target !== menuBtn) {
                     sidebarLeft.classList.remove('open');
                 }
             });
+        }
+    }
+
+    // --- VIEW TOGGLE ---
+    function initViewToggle(context) {
+        const toggleBtn = document.getElementById('view-toggle');
+        if (!toggleBtn || !context.isFound) return;
+
+        const currentPath = window.location.pathname;
+        const filename = currentPath.split("/").pop();
+        let targetPath = '';
+        let label = '';
+
+        toggleBtn.style.display = '';
+
+        if (context.mode === 'min') {
+            targetPath = currentPath.replace('/min/', '/ext/');
+            label = '🔄 Extended';
+            if (!filename.includes('index.html') && !filename.includes('-ext.html')) {
+                targetPath = targetPath.replace('.html', '-ext.html');
+            }
+        } else {
+            targetPath = currentPath.replace('/ext/', '/min/');
+            label = '🔄 Basis';
+            targetPath = targetPath.replace('-ext.html', '.html');
+        }
+
+        toggleBtn.textContent = label;
+        toggleBtn.onclick = () => window.location.href = targetPath;
+    }
+
+    // --- LOGO LINK ---
+    function initLogoLink(rootPath) {
+        const logoLink = document.getElementById('logo-link');
+        if (logoLink) {
+            const path = window.location.pathname;
+            if (path.includes('/module')) {
+                logoLink.href = "../index.html"; // 1 map omhoog uit module map
+            } else {
+                logoLink.href = "index.html"; // we zitten al op root level
+            }
         }
     }
 
