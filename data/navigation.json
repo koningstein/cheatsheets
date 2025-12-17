@@ -88,7 +88,7 @@
           "title": "Thema's",
           "items": [
             {
-              "label": "Module 6: Database & Models",
+              "label": "Database & Models",
               "url": "#",
               "items": [
                 { "label": "Migrations & Datatypes", "url": "module6/m6-1.html" },
@@ -102,7 +102,7 @@
               ]
             },
             {
-              "label": "Module 7: Eloquent Relaties",
+              "label": "Eloquent Relaties",
               "url": "#",
               "items": [
                 { "label": "One to One (HasOne)", "url": "module7/m7-1.html" },
@@ -115,7 +115,7 @@
               ]
             },
             {
-              "label": "Module 8: Routing & Controllers",
+              "label": "Routing & Controllers",
               "url": "#",
               "items": [
                 { "label": "Basic Routing", "url": "module8/m8-1.html" },
@@ -128,7 +128,7 @@
               ]
             },
             {
-              "label": "Module 9: Blade & Frontend",
+              "label": "Blade & Frontend",
               "url": "#",
               "items": [
                 { "label": "Layout Inheritance", "url": "module9/m9-1.html" },
@@ -145,7 +145,7 @@
               ]
             },
             {
-              "label": "Module 10: Validatie & Forms",
+              "label": "Validatie & Forms",
               "url": "#",
               "items": [
                 { "label": "Controller Validatie", "url": "module10/m10-1.html" },
@@ -157,7 +157,7 @@
               ]
             },
             {
-              "label": "Module 11: Security & Auth",
+              "label": "Security & Auth",
               "url": "#",
               "items": [
                 { "label": "Auth Flow", "url": "module11/m11-1.html" },
