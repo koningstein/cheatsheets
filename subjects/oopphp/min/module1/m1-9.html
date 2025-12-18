@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Named Arguments - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Named Arguments</h1>
+
+        <h3>Wat zijn Named Arguments?</h3>
+        <p>Named Arguments is een functie in PHP 8.0 waarmee je bij het aanroepen van een methode kunt aangeven welke parameter welke waarde krijgt. Je doet dit door de naam van de parameter erbij te zetten.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Bij het aanmaken van een kaart heb je soms optionele eigenschappen:</p>
+            <ul>
+                <li><strong>faceUp:</strong> Is de kaart zichtbaar? (standaard true)</li>
+                <li><strong>isDealt:</strong> Is de kaart uitgedeeld? (standaard false)</li>
+            </ul>
+            <p>Met Named Arguments kun je alleen de parameters invullen die je wilt, zonder alle parameters in de juiste volgorde te zetten.</p>
+        </div>
+
+        <h3>Waarom Named Arguments gebruiken?</h3>
+        <ul>
+            <li>Bij functies met veel parameters</li>
+            <li>Bij functies met optionele parameters</li>
+            <li>Wanneer je sommige parameters wilt overslaan terwijl je andere wilt instellen</li>
+        </ul>
+
+        <h3>Voorbeeld met standaardwaarden</h3>
+        <p>Hier is een Card class met optionele parameters:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public function __construct(
+        public $suit,
+        public $value,
+        public $faceUp = true,
+        public $isDealt = false
+    ) {
+    }
+}</code></pre>
+
+        <h3>Zonder Named Arguments</h3>
+        <p>Je moet alle argumenten in de juiste volgorde meegeven:</p>
+
+        <pre><code class="language-php">$card1 = new Card("Hearts", "10", true, true);
+$card2 = new Card("Spades", "Ace", true, false);</code></pre>
+
+        <h3>Met Named Arguments</h3>
+        <p>Je kunt parameters bij naam aangeven:</p>
+
+        <pre><code class="language-php">$card1 = new Card(
+    suit: "Hearts",
+    value: "10",
+    faceUp: true,
+    isDealt: true
+);
+
+// Je kunt ook alleen specifieke parameters wijzigen
+$card2 = new Card(
+    suit: "Spades",
+    value: "Ace",
+    isDealt: true  // faceUp behoudt standaardwaarde
+);</code></pre>
+
+        <h3>Combinatie van positional en named arguments</h3>
+        <p>Je kunt de eerste argumenten normaal meegeven en de laatste met naam:</p>
+
+        <pre><code class="language-php">// Eerste argumenten normaal, laatste met naam
+$card3 = new Card("Diamonds", "King", isDealt: true);</code></pre>
+
+        <div class="info-box">
+            <h3>Regels</h3>
+            <ul>
+                <li>Positional arguments moeten altijd vóór named arguments komen</li>
+                <li>Je kunt niet "tussenin overslaan" met positional arguments</li>
+            </ul>
+        </div>
+
+        <h3>Voordelen</h3>
+        <ul>
+            <li><strong>Duidelijk:</strong> Je ziet meteen welke waarde bij welke parameter hoort</li>
+            <li><strong>Flexibel:</strong> Je kunt parameters overslaan die een standaardwaarde hebben</li>
+            <li><strong>Makkelijker:</strong> De volgorde van de argumenten is minder belangrijk</li>
+        </ul>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

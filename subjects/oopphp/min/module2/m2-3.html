@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composer installeren - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Wat is Composer?</h1>
+
+        <p>Composer is een tool om externe code (packages) te beheren in PHP. Het is vergelijkbaar met npm voor JavaScript of pip voor Python.</p>
+
+        <div class="info-box">
+            <h3>Wat kan Composer voor je doen?</h3>
+            <ul>
+                <li><strong>Packages installeren:</strong> je kunt externe libraries installeren met één commando</li>
+                <li><strong>Autoloading:</strong> classes worden automatisch geladen volgens de PSR-4 standaard</li>
+                <li><strong>Versies beheren:</strong> je beheert welke versies van packages je gebruikt</li>
+                <li><strong>Updates:</strong> je kunt alle packages updaten met één commando</li>
+            </ul>
+        </div>
+
+        <h3>Composer installeren</h3>
+        <p>Controleer eerst of Composer al geïnstalleerd is:</p>
+
+        <pre><code class="language-bash"># Terminal / Command Prompt
+composer --version
+
+# Als dit een versie toont, is Composer geïnstalleerd!
+# Anders: download Composer van https://getcomposer.org/</code></pre>
+
+        <div class="info-box">
+            <h3>Installatie</h3>
+            <ul>
+                <li><strong>Voor Windows:</strong> Download de installer van getcomposer.org en volg de wizard</li>
+                <li><strong>Voor Mac/Linux:</strong> Volg de instructies op de Composer website</li>
+            </ul>
+        </div>
+
+        <h3>Composer initialiseren in je project</h3>
+        <p>Ga naar je project map en start Composer:</p>
+
+        <pre><code class="language-bash"># Terminal
+cd /pad/naar/jouw/blackjack-project
+composer init
+
+Beantwoord de volgende vragen:
+Package name: blackjack/game
+Description: Een Blackjack-spel met objectgeoriënteerde PHP
+Author: [Jouw naam en email]
+Minimum Stability: [leeg laten - enter]
+Package Type: project
+License: [leeg laten - enter]
+Dependencies: no
+Dev dependencies: no
+PSR-4 autoload: [enter]
+Confirm: yes</code></pre>
+
+        <h3>composer.json bestand</h3>
+        <p>Na het commando <code>composer init</code> maakt Composer een <code>composer.json</code> bestand aan:</p>
+
+        <pre><code class="language-json">{
+    "name": "blackjack/game",
+    "description": "Een Blackjack-spel met objectgeoriënteerde PHP",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Blackjack\\": "src/"
+        }
+    },
+    "require": {}
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Belangrijk</h3>
+            <p>Als Composer automatisch <code>"Blackjack\\Rpggame\\"</code> heeft toegevoegd, pas dit dan aan naar <code>"Blackjack\\"</code>.</p>
+        </div>
+
+        <h3>Autoloader genereren</h3>
+        <p>Maak de autoloader bestanden aan met:</p>
+
+        <pre><code class="language-bash"># Terminal
+composer dump-autoload
+
+# Dit maakt een vendor/ directory aan met de autoloader</code></pre>
+
+        <h3>Wat krijg je na composer init?</h3>
+        <ul>
+            <li><strong>composer.json:</strong> dit bestand bevat de configuratie van je project en welke packages je gebruikt</li>
+            <li><strong>composer.lock:</strong> dit bestand bevat de exacte versies van alle geïnstalleerde packages (komt na de eerste install)</li>
+            <li><strong>vendor/:</strong> deze map bevat alle geïnstalleerde packages en de autoloader</li>
+            <li><strong>vendor/autoload.php:</strong> dit is het autoloader bestand dat je moet includen in je code</li>
+        </ul>
+
+        <h3>.gitignore aanpassen</h3>
+        <p>Voeg de vendor directory toe aan je .gitignore:</p>
+
+        <pre><code class="language-bash"># .gitignore
+vendor/
+
+# De composer.lock blijft wel in git
+# (deze houdt exact bij welke versies geïnstalleerd zijn)</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom vendor/ niet committen?</h3>
+            <p>De vendor/ map kan groot worden en bevat code van externe packages. Andere developers kunnen deze map opnieuw aanmaken met het commando <code>composer install</code>.</p>
+        </div>
+
+        <h3>Composer voordelen</h3>
+        <ul>
+            <li><strong>PSR-4 standaard:</strong> dit is de standaard manier voor autoloading die veel PHP projecten gebruiken</li>
+            <li><strong>Geen eigen autoloader nodig:</strong> Composer regelt het automatisch laden van je classes</li>
+            <li><strong>Package management:</strong> je kunt libraries installeren zoals Symfony en Laravel components</li>
+            <li><strong>Updates:</strong> je kunt alle packages updaten met één commando</li>
+        </ul>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

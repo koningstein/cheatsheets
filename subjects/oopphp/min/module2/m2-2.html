@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoload met namespaces - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Wat zijn namespaces?</h1>
+
+        <p>Namespaces zijn een manier om je code te organiseren in logische groepen. Ze werken als mappen voor je classes. Hiermee voorkom je dat twee classes met dezelfde naam problemen geven.</p>
+
+        <div class="info-box">
+            <h3>Waarom namespaces?</h3>
+            <p>Stel je voor dat je in je Blackjack-applicatie een <code>Card</code> class hebt. Je wilt ook een externe library gebruiken die ook een <code>Card</code> class heeft. Zonder namespaces krijg je dan een conflict!</p>
+        </div>
+
+        <h3>Voordelen van namespaces</h3>
+        <ul>
+            <li><strong>Naamconflicten voorkomen:</strong> twee classes met dezelfde naam kunnen zonder problemen naast elkaar bestaan</li>
+            <li><strong>Code organiseren:</strong> je kunt gerelateerde classes logisch groeperen</li>
+            <li><strong>Overzicht behouden:</strong> je krijgt een duidelijke structuur in grote projecten</li>
+            <li><strong>Standaard:</strong> volgt de PSR-4 standaard die veel PHP projecten gebruiken</li>
+        </ul>
+
+        <h3>Namespaces declareren</h3>
+        <p>Je maakt een namespace bovenaan je class bestand met het keyword <code>namespace</code>:</p>
+
+        <pre><code class="language-php">// Card.php
+&lt;?php
+namespace Blackjack;
+
+class Card
+{
+    // Class inhoud...
+}
+?&gt;</code></pre>
+
+        <pre><code class="language-php">// Deck.php
+&lt;?php
+namespace Blackjack;
+
+class Deck
+{
+    // Class inhoud...
+}
+?&gt;</code></pre>
+
+        <pre><code class="language-php">// Player.php
+&lt;?php
+namespace Blackjack;
+
+class Player
+{
+    // Class inhoud...
+}
+?&gt;</code></pre>
+
+        <h3>Namespaces gebruiken met 'use'</h3>
+        <p>Je kunt classes uit een namespace importeren met het keyword <code>use</code>:</p>
+
+        <pre><code class="language-php">// index.php
+&lt;?php
+require_once 'autoload.php';
+
+// Importeer classes met use statement
+use Blackjack\Card;
+use Blackjack\Deck;
+use Blackjack\Player;
+
+// Nu kun je de classes gewoon gebruiken
+$card = new Card("Hearts", "Ace");
+$deck = new Deck();
+$player = new Player("John");
+
+echo $card->getCardName();  // Output: Ace of Hearts
+echo $player->getName();     // Output: John
+?&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Alternatief</h3>
+            <p>Je kunt ook de volledige namespace gebruiken zonder het <code>use</code> keyword:</p>
+            <pre><code class="language-php">$card = new \Blackjack\Card("Hearts", "Ace");</code></pre>
+            <p>Maar dit maakt je code minder leesbaar bij veel gebruik.</p>
+        </div>
+
+        <h3>Autoloader aanpassen voor namespaces</h3>
+        <p>Je autoloader moet aangepast worden om met namespaces te werken:</p>
+
+        <pre><code class="language-php">// autoload.php
+&lt;?php
+spl_autoload_register(function($className) {
+    // Haal alleen de class naam op, zonder namespace
+    // Bijvoorbeeld: "Blackjack\Card" wordt "Card"
+    $parts = explode('\\', $className);
+    $className = end($parts);
+
+    // Maak bestandsnaam
+    $file = $className . '.php';
+
+    // Laad bestand als het bestaat
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});
+?&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Let op</h3>
+            <p>De <code>explode('\\')</code> functie splitst de namespace tekst bij elke backslash. Let op: je moet een dubbele backslash <code>'\\'</code> gebruiken omdat een enkele backslash een escape character is in PHP!</p>
+        </div>
+
+        <h3>Complete voorbeeld</h3>
+
+        <pre><code class="language-php">// Card.php
+&lt;?php
+namespace Blackjack;
+
+class Card
+{
+    public function __construct(
+        public string $suit,
+        public string $value
+    ) {
+    }
+
+    public function getCardName(): string
+    {
+        return $this->value . " of " . $this->suit;
+    }
+}
+?&gt;</code></pre>
+
+        <pre><code class="language-php">// index.php
+&lt;?php
+require_once 'autoload.php';
+
+use Blackjack\Card;
+
+$aceHearts = new Card("Hearts", "Ace");
+echo $aceHearts->getCardName();  // Output: Ace of Hearts
+?&gt;</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

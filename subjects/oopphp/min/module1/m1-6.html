@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getters - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Getters</h1>
+
+        <h3>Wat is een Getter?</h3>
+        <p>Een getter is een methode die je gebruikt om de waarde van een property op te halen. Getters geven je controle over hoe gegevens worden weergegeven en kunnen de gegevens aanpassen voordat je ze teruggeeft.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Stel je voor: in een kaartspel wil je soms de waarde van een kaart op een bepaalde manier laten zien:</p>
+            <ul>
+                <li>De waarde altijd met een hoofdletter laten beginnen (bijv. "ace" wordt "Ace")</li>
+                <li>De volledige naam van de kaart samenstellen uit meerdere properties</li>
+                <li>Berekende waarden teruggeven (bijv. totale punten van alle kaarten)</li>
+            </ul>
+        </div>
+
+        <h3>Waarom Getters gebruiken?</h3>
+        <ul>
+            <li><strong>Controle:</strong> Je bepaalt hoe gegevens worden weergegeven</li>
+            <li><strong>Aanpassen:</strong> Je kunt gegevens veranderen voordat je ze teruggeeft</li>
+            <li><strong>Encapsulation (bescherming):</strong> Je verbergt de interne structuur van je object</li>
+        </ul>
+
+        <h3>Een Getter maken</h3>
+        <p>Een getter begint meestal met het woord <code>get</code>, gevolgd door de naam van de property:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $value;
+
+    public function getValue()
+    {
+        return ucfirst($this->value);  // Eerste letter hoofdletter
+    }
+}</code></pre>
+
+        <h3>Een Getter gebruiken</h3>
+        <p>Je roept een getter aan zoals elke andere methode:</p>
+
+        <pre><code class="language-php">$card = new Card();
+$card->value = "ace";
+echo $card->getValue();  // Output: Ace</code></pre>
+
+        <h3>Getters en Setters combineren</h3>
+        <p>In de praktijk gebruik je getters en setters vaak samen, zodat je volledige controle hebt over je properties:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $suit;
+    public $value;
+
+    public function setSuit($suit)
+    {
+        $validSuits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+
+        if (!in_array($suit, $validSuits)) {
+            return "Error: Invalid suit";
+        }
+
+        $this->suit = $suit;
+        return "Suit set to " . $suit;
+    }
+
+    public function getSuit()
+    {
+        return $this->suit;
+    }
+}</code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

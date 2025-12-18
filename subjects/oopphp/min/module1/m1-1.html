@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Class</h1>
+
+        <h3>Wat is een Class?</h3>
+        <p>Een class is de blauwdruk van een object. Het is een sjabloon waarin je beschrijft wat voor eigenschappen en acties een object heeft. Je kunt een class vergelijken met een bouwplan voor een huis: het plan zelf is nog geen huis, maar je kunt er wel meerdere huizen mee bouwen.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Stel je voor: je maakt een kaartspel. Dan kun je een class Card maken. Deze class beschrijft hoe een kaart eruitziet en wat een kaart kan doen. Maar de class is nog geen echte kaart! Pas later maak je echte kaarten zoals "Harten Aas" of "Schoppen Boer" op basis van deze class.</p>
+        </div>
+
+        <h3>Hoe ziet een Class eruit?</h3>
+        <p>Een class in PHP begint altijd met het woord <code>class</code>, gevolgd door de naam die je de class geeft. De opening curly bracket <code>{</code> zet je op de volgende regel.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Hier komt de inhoud
+}</code></pre>
+
+        <h3>Belangrijke regels voor een Class</h3>
+
+        <h4>1. Naamgeving</h4>
+        <p>Gebruik PascalCase voor de naam van een class:</p>
+        <ul>
+            <li>Elk woord in de naam begint met een hoofdletter</li>
+            <li>Voorbeelden: <code>Card</code>, <code>BlackjackPlayer</code>, <code>DeckManager</code></li>
+        </ul>
+
+        <h4>2. Bestandsnaam</h4>
+        <p>De bestandsnaam moet precies hetzelfde zijn als de naam van de class, met <code>.php</code> erachter. Bijvoorbeeld: als je de class <code>Card</code> noemt, dan heet het bestand <code>Card.php</code>.</p>
+        <br>
+        <h4>3. Structuur</h4>
+        <p>De opening curly bracket <code>{</code> van een class zet je op de volgende regel, precies onder de naam van de class.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Properties en methods komen hier
+}</code></pre>
+
+        <pre><code class="language-php">class BlackjackPlayer
+{
+    // Properties en methods komen hier
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

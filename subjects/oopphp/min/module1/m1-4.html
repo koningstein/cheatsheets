@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methoden - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Methoden</h1>
+
+        <h3>Wat zijn Methoden?</h3>
+        <p>Methoden zijn functies die bij een class horen. Ze beschrijven wat een object kan doen. Terwijl properties de gegevens van een object zijn, bepalen methoden de acties.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Een <code>Card</code> class kan bijvoorbeeld deze methoden hebben:</p>
+            <ul>
+                <li><strong>display():</strong> Toont de informatie van de kaart</li>
+                <li><strong>flip():</strong> Draait de kaart om (van open naar dicht of andersom)</li>
+                <li><strong>getValue():</strong> Geeft de waarde van de kaart terug</li>
+            </ul>
+        </div>
+
+        <h3>Methoden toevoegen</h3>
+        <p>Je maakt een methode binnen een class op dezelfde manier als een functie, maar dan binnen de curly brackets van de class:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $suit;
+    public $value;
+    public $points;
+
+    public function display()
+    {
+        echo "This is the " . $this->value . " of " . $this->suit;
+    }
+}</code></pre>
+
+        <p>Je kunt ook de kortere schrijfwijze gebruiken met curly brackets binnen een string:</p>
+
+        <pre><code class="language-php">public function display()
+{
+    echo "This is the {$this->value} of {$this->suit}";
+}</code></pre>
+
+        <h3>Het $this keyword</h3>
+        <p>Het keyword <code>$this</code> verwijst naar het huidige object. Je gebruikt <code>$this</code> om <strong>binnen een methode</strong> toegang te krijgen tot de properties van het object.</p>
+
+        <h3>Methoden aanroepen</h3>
+        <p>Buiten de class roep je een methode aan met de pijl-operator <code>-&gt;</code>:</p>
+
+        <pre><code class="language-php">$card = new Card();
+$card->suit = "Hearts";
+$card->value = "King";
+$card->display();  // Output: This is the King of Hearts</code></pre>
+
+        <div class="info-box">
+            <h3>Let op</h3>
+            <p>Gebruik altijd <code>$this-&gt;</code> binnen een methode om naar properties van het huidige object te verwijzen. Vergeet de <code>$</code> niet voor <code>this</code>!</p>
+            <p>Let op: schrijf <code>$this->suit</code> en NIET <code>$this->$suit</code>. De naam van de property krijgt zelf geen <code>$</code> symbool!</p>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

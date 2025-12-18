@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: OOP Basis</h1>
+
+        <p>Module 1 behandelde de basis van Object Oriented Programming in PHP. Je hebt geleerd hoe je <strong>classes</strong> en <strong>objects</strong> maakt, hoe je gegevens opslaat met <strong>properties</strong>, en hoe je functionaliteit toevoegt met <strong>methods</strong>.</p>
+
+        <h3>Kernconcepten</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 20%;">Concept</th>
+                    <th style="width: 35%;">Uitleg</th>
+                    <th>Syntax (Voorbeeld)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Class</td>
+                    <td>Blauwdruk voor objecten</td>
+                    <td><code>class Card { }</code></td>
+                </tr>
+                <tr>
+                    <td>Object</td>
+                    <td>Instantie van een class</td>
+                    <td><code>$card = new Card();</code></td>
+                </tr>
+                <tr>
+                    <td>Property</td>
+                    <td>Eigenschap van een object</td>
+                    <td><code>public $suit;</code></td>
+                </tr>
+                <tr>
+                    <td>Method</td>
+                    <td>Functie binnen een class</td>
+                    <td><code>public function display() { }</code></td>
+                </tr>
+                <tr>
+                    <td>Setter</td>
+                    <td>Methode om property te wijzigen</td>
+                    <td><code>public function setSuit($suit) { }</code></td>
+                </tr>
+                <tr>
+                    <td>Getter</td>
+                    <td>Methode om property op te halen</td>
+                    <td><code>public function getSuit() { }</code></td>
+                </tr>
+                <tr>
+                    <td>Constructor</td>
+                    <td>Initialisatie bij object aanmaak</td>
+                    <td><code>public function __construct() { }</code></td>
+                </tr>
+                <tr>
+                    <td>Promoted Properties</td>
+                    <td>Properties declareren in constructor</td>
+                    <td><code>__construct(public $suit) { }</code></td>
+                </tr>
+                <tr>
+                    <td>Named Arguments</td>
+                    <td>Parameters bij naam aanroepen</td>
+                    <td><code>new Card(suit: "Hearts")</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Belangrijke Keywords</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 20%;">Keyword</th>
+                    <th style="width: 35%;">Gebruik</th>
+                    <th>Voorbeeld</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>class</code></td>
+                    <td>Definieert een class</td>
+                    <td><code>class Card { }</code></td>
+                </tr>
+                <tr>
+                    <td><code>new</code></td>
+                    <td>Maakt een nieuw object aan</td>
+                    <td><code>$card = new Card();</code></td>
+                </tr>
+                <tr>
+                    <td><code>public</code></td>
+                    <td>Maakt property/method overal toegankelijk</td>
+                    <td><code>public $suit;</code></td>
+                </tr>
+                <tr>
+                    <td><code>$this</code></td>
+                    <td>Verwijst naar huidige object</td>
+                    <td><code>$this->suit</code></td>
+                </tr>
+                <tr>
+                    <td><code>-></code></td>
+                    <td>Toegang tot property/method</td>
+                    <td><code>$card->suit</code></td>
+                </tr>
+                <tr>
+                    <td><code>__construct</code></td>
+                    <td>Constructor methode naam</td>
+                    <td><code>public function __construct() { }</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Best Practices</h3>
+        <div class="info-box">
+            <ul style="margin-bottom: 0;">
+                <li><strong>Naamgeving:</strong> Gebruik PascalCase voor class namen (bijv. <code>Card</code>, <code>BlackjackPlayer</code>)</li>
+                <li><strong>Bestandsnaam:</strong> Moet precies hetzelfde zijn als de class naam (bijv. <code>Card.php</code>)</li>
+                <li><strong>Constructor:</strong> Is altijd de eerste methode in een class</li>
+                <li><strong>$this keyword:</strong> Schrijf <code>$this->suit</code> en NIET <code>$this->$suit</code></li>
+                <li><strong>Validatie:</strong> Gebruik setters voor properties die validatie nodig hebben</li>
+                <li><strong>Promoted Properties:</strong> Gebruik alleen voor properties zonder validatie</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

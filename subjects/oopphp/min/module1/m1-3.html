@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Properties</h1>
+
+        <h3>Wat zijn Properties?</h3>
+        <p>Properties zijn de eigenschappen van een object. Ze bepalen welke informatie een object kan bevatten. Je kunt een property zien als een variabele die bij een class hoort. Elk object heeft zijn eigen waarden voor deze properties.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Stel je voor: je maakt een Blackjack-kaartspel. Dan kun je een class <code>Card</code> maken met eigenschappen zoals:</p>
+            <ul>
+                <li><strong>suit:</strong> De soort kaart (bijvoorbeeld "Harten" of "Schoppen")</li>
+                <li><strong>value:</strong> De waarde van de kaart (bijvoorbeeld "Koning" of "3")</li>
+                <li><strong>points:</strong> De punten die de kaart waard is (bijvoorbeeld 10)</li>
+                <li><strong>image:</strong> De bestandsnaam van de afbeelding die de kaart weergeeft</li>
+            </ul>
+        </div>
+
+        <h3>Properties toevoegen aan een Class</h3>
+        <p>Je maakt een property door in de class het woord <code>public</code> te schrijven, gevolgd door de naam van de property:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $suit;
+    public $value;
+    public $points;
+    public $image;
+}</code></pre>
+
+        <h3>Properties gebruiken</h3>
+        <p>Je kunt properties gebruiken en veranderen met de pijl-operator <code>-&gt;</code>:</p>
+
+        <pre><code class="language-php">$card = new Card();
+$card->suit = "Hearts";
+$card->value = "Ace";
+$card->points = 11;
+
+echo $card->suit;  // Output: Hearts</code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

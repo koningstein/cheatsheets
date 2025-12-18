@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructor - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Constructor</h1>
+
+        <h3>Wat is een Constructor?</h3>
+        <p>Een constructor is een speciale methode die automatisch wordt uitgevoerd wanneer je een nieuw object aanmaakt. Je gebruikt een constructor om eigenschappen van een object direct in te stellen bij het aanmaken.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Stel je voor: bij het aanmaken van een kaart wil je direct de belangrijkste eigenschappen instellen:</p>
+            <ul>
+                <li>Zonder constructor: je moet na het aanmaken elke property apart instellen</li>
+                <li>Met constructor: alle properties worden in één keer ingesteld bij het aanmaken</li>
+                <li>Dit voorkomt dat je een "lege" kaart hebt zonder waarden</li>
+            </ul>
+        </div>
+
+        <h3>Waarom een Constructor gebruiken?</h3>
+        <ul>
+            <li><strong>Efficiënt:</strong> Je bespaart tijd door alle eigenschappen in één keer in te stellen</li>
+            <li><strong>Consistent:</strong> Alle objecten worden op dezelfde manier geïnitialiseerd</li>
+            <li><strong>Flexibel:</strong> Je kunt eenvoudig meerdere objecten maken met verschillende beginwaarden</li>
+        </ul>
+
+        <h3>Een Constructor maken</h3>
+        <p>In PHP heet een constructor altijd <code>__construct</code>. Je kunt parameters toevoegen om waarden aan properties toe te wijzen:</p>
+
+        <div class="info-box">
+            <h3>Tip</h3>
+            <p>De constructor zet je altijd als eerste methode in een class. Dit maakt de code overzichtelijk en laat meteen zien welke waarden nodig zijn om een object aan te maken.</p>
+        </div>
+
+        <pre><code class="language-php">class Card
+{
+    public $suit;
+    public $value;
+    public $image;
+
+    public function __construct($suit, $value, $image)
+    {
+        $this->suit = $suit;
+        $this->value = $value;
+        $this->image = $image;
+    }
+}</code></pre>
+
+        <h3>Een Constructor gebruiken</h3>
+        <p>Wanneer je een object aanmaakt met <code>new</code>, geef je de waarden automatisch door aan de constructor:</p>
+
+        <pre><code class="language-php">$card = new Card("Hearts", "King", "king_hearts.png");
+
+echo $card->suit;   // Output: Hearts
+echo $card->value;  // Output: King</code></pre>
+
+        <div class="info-box">
+            <h3>Begrippen</h3>
+            <ul>
+                <li><strong>Parameters:</strong> De variabelen in de constructor, zoals <code>$suit</code> en <code>$value</code></li>
+                <li><strong>Argumenten:</strong> De echte waarden die je meegeeft, zoals <code>"Hearts"</code> en <code>"King"</code></li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
