@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debuggen met PHPStorm en Xdebug - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Debuggen met PHPStorm en Xdebug</h1>
+
+        <h3>Wat is debuggen?</h3>
+        <p>Debuggen is het proces van het identificeren en oplossen van fouten in je code. Met een debugger kun je:</p>
+        <ul>
+            <li><strong>Code stap voor stap uitvoeren</strong>: Zie precies wat er gebeurt bij elke regel</li>
+            <li><strong>Variabelen inspecteren</strong>: Bekijk de waarden van objecten en properties tijdens runtime</li>
+            <li><strong>Methode-aanroepen volgen</strong>: Step into methodes om hun werking te begrijpen</li>
+            <li><strong>Problemen sneller vinden</strong>: Veel efficiënter dan echo of var_dump()</li>
+        </ul>
+
+
+
+        <div class="info-box">
+            <h3>Waarom debuggen belangrijk is</h3>
+            <p>In plaats van gissen waar een probleem zit, zie je direct wat er gebeurt in je code. Dit bespaart enorm veel tijd en helpt je beter te begrijpen hoe objecten en methoden samenwerken.</p>
+        </div>
+
+        <h3>Xdebug configureren</h3>
+        <p>Xdebug is een krachtige PHP-extensie die debuggen mogelijk maakt. Zo stel je het in:</p>
+
+        <h4>Stap 1: Xdebug activeren in WampServer</h4>
+        <ul>
+            <li>Klik op het WampServer-icoontje in de systeembalk</li>
+            <li>Ga naar: <strong>PHP → PHP Extensions → xdebug</strong> (moet aangevinkt zijn)</li>
+        </ul>
+
+        <h4>Stap 2: php.ini controleren</h4>
+        <ul>
+            <li>Klik op het WampServer-icoontje → <strong>PHP → php.ini [apache module]</strong></li>
+            <li>Zoek onderaan het bestand naar de Xdebug configuratie</li>
+            <li>Zorg dat de debug mode correct is ingesteld:</li>
+        </ul>
+        <pre><code class="language-ini">xdebug.mode = debug</code></pre>
+        <ul>
+            <li>Herstart WampServer als je wijzigingen hebt gemaakt</li>
+        </ul>
+
+        <h4>Stap 3: Browser-plugin installeren</h4>
+        <p>Om debugging te starten vanuit je browser, heb je een plugin nodig:</p>
+        <ul>
+            <li><strong>Chrome</strong>: Installeer "Xdebug Helper by JetBrains" vanuit de Chrome Web Store</li>
+            <li><strong>Firefox</strong>: Installeer "Xdebug Helper by JetBrains" vanuit Firefox Add-ons</li>
+            <li>Pin de extensie vast op je browser balk</li>
+            <li>Klik op het Xdebug-icoon en selecteer: <strong>Debug</strong></li>
+        </ul>
+
+        <h3>Debuggen in PHPStorm</h3>
+
+        <h4>Breakpoints plaatsen</h4>
+        <p>Een <strong>breakpoint</strong> is een punt waar de code pauzeert zodat je variabelen kunt inspecteren.</p>
+        <ul>
+            <li>Open index.php in PHPStorm</li>
+            <li>Klik in de gutter (marge) naast het regelnummer om een breakpoint te plaatsen</li>
+            <li>Het breakpoint wordt gemarkeerd met een rode cirkel</li>
+        </ul>
+
+        <div class="info-box">
+            <h3>Voorbeeld breakpoint locaties</h3>
+            <pre><code class="language-php">// Breakpoint bij het aanmaken van een object
+$deck = new Deck(); // ← Plaats hier breakpoint 1
+
+// Breakpoint bij het instellen van data
+$game->dealCard($player); // ← Plaats hier breakpoint 2
+
+// Breakpoint bij belangrijke actie
+$game->determineWinner(); // ← Plaats hier breakpoint 3</code></pre>
+        </div>
+
+        <h4>Debug listener activeren</h4>
+        <ul>
+            <li>Klik op het telefoon-icoon in de bovenste toolbar van PHPStorm</li>
+            <li>Het icoon moet <strong>groen</strong> worden (= listener is actief)</li>
+            <li>PHPStorm is nu klaar om debug-sessies te ontvangen</li>
+        </ul>
+
+        <h3>Debug-acties: Code stap voor stap doorlopen</h3>
+        <p>Zodra PHPStorm pauzeert bij een breakpoint, kun je deze acties gebruiken:</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Actie</th>
+                    <th>Sneltoets</th>
+                    <th>Wat doet het?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Step Over</strong></td>
+                    <td>F8</td>
+                    <td>Ga naar de volgende regel, zonder in methodes te stappen</td>
+                </tr>
+                <tr>
+                    <td><strong>Step Into</strong></td>
+                    <td>F7</td>
+                    <td>Stap in een methode om de code binnen die methode te volgen</td>
+                </tr>
+                <tr>
+                    <td><strong>Step Out</strong></td>
+                    <td>Shift+F8</td>
+                    <td>Voltooi de huidige methode en keer terug naar de aanroepende code</td>
+                </tr>
+                <tr>
+                    <td><strong>Resume</strong></td>
+                    <td>F9</td>
+                    <td>Ga door met uitvoeren tot het volgende breakpoint</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Variables venster: Waarden inspecteren</h3>
+        <p>Het <strong>Variables</strong> venster in PHPStorm toont alle beschikbare variabelen en hun waarden op het huidige punt in de code.</p>
+
+        <div class="info-box">
+            <h3>Wat kun je inspecteren?</h3>
+            <ul>
+                <li><strong>Objecten</strong>: Klap objecten uit om hun properties te zien</li>
+                <li><strong>Arrays</strong>: Bekijk alle elementen en hun waarden</li>
+                <li><strong>Primitieve types</strong>: Integers, strings, booleans, etc.</li>
+                <li><strong>Geneste objecten</strong>: Objecten die zelf weer objecten bevatten (bijv. $player->hand->cards)</li>
+            </ul>
+        </div>
+
+        <h3>Praktijkvoorbeeld: Blackjack game debuggen</h3>
+        <p>Een typisch debug-scenario bij een Blackjack spel:</p>
+
+        <div class="info-box">
+            <ol style="margin-bottom: 0;">
+                <li>Plaats breakpoint bij <code>$game->dealCard($player)</code></li>
+                <li>Start debug sessie door de pagina te verversen</li>
+                <li>Wanneer code pauzeert: <strong>Step Into (F7)</strong> om in de dealCard() methode te stappen</li>
+                <li>Inspecteer in Variables venster: de $deck en zie welke kaarten nog beschikbaar zijn</li>
+                <li><strong>Step Into (F7)</strong> bij calculateScore() om te zien hoe de score wordt berekend</li>
+                <li>Bekijk hoe de hand van de speler verandert na elke kaart</li>
+                <li><strong>Resume (F9)</strong> om het spel te voltooien</li>
+            </ol>
+        </div>
+
+        <h3>Veelgemaakte fouten</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Probleem</th>
+                    <th>Oplossing</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>PHPStorm pauzeert niet bij breakpoint</td>
+                    <td>Controleer of: 1) Debug listener is geactiveerd (groen telefoon-icoon), 2) Browser plugin staat op "Debug", 3) Xdebug juist is geconfigureerd</td>
+                </tr>
+                <tr>
+                    <td>Kan variabelen niet zien in Variables venster</td>
+                    <td>Mogelijk is de variabele nog niet geïnitialiseerd op dit punt in de code. Step verder met F8 of F7</td>
+                </tr>
+                <tr>
+                    <td>Code stopt bij onverwachte plek</td>
+                    <td>Controleer of er geen oude breakpoints meer actief zijn. Gebruik Ctrl+Shift+F8 om alle breakpoints te bekijken</td>
+                </tr>
+                <tr>
+                    <td>Browser blijft laden na debug sessie</td>
+                    <td>Klik op het stop-icoon in PHPStorm, of druk F9 om de code te hervatten</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box">
+            <h3>Best practices voor debuggen</h3>
+            <ul>
+                <li>Plaats breakpoints op strategische plekken (object creatie, belangrijke methodes, loops)</li>
+                <li>Gebruik Step Into (F7) om te begrijpen hoe methodes werken</li>
+                <li>Gebruik Step Over (F8) om snel door bekende code heen te gaan</li>
+                <li>Inspecteer objecten grondig in het Variables venster om hun toestand te begrijpen</li>
+                <li>Verwijder breakpoints die je niet meer nodig hebt</li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

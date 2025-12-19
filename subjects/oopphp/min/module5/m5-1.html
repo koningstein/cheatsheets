@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introductie inheritance - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Introductie inheritance</h1>
+
+        <div class="info-box">
+            <h3>Het Probleem</h3>
+            <p>Naarmate je applicatie groeit, krijg je vaak te maken met klassen die "alles" proberen te doen. In ons Blackjack spel hebben we een <code>Player</code> en een <code>Dealer</code>. Ze lijken op elkaar (beiden hebben kaarten), maar gedragen zich anders.</p>
+            <p>Een veelgemaakte fout is om al deze logica in één gigantische class te proppen.</p>
+        </div>
+
+        <h3>Voorbeeld: De "God Class" Player</h3>
+        <p>Kijk eens naar deze code. We proberen zowel de menselijke speler als de dealer in één <code>Player</code> class te vangen:</p>
+
+        <pre><code class="language-php">class Player
+{
+    private string $role; // 'human' of 'dealer'
+    private array $hand = [];
+    private int $balance = 1000; // Alleen voor humans
+
+    public function __construct(string $role)
+    {
+        $this->role = $role;
+    }
+
+    public function playTurn(): void
+    {
+        if ($this->role === 'human') {
+            // Wacht op input van gebruiker (Hit of Stand)
+            // Mag splitsen of verdubbelen
+        } elseif ($this->role === 'dealer') {
+            // Automatische regels:
+            // Moet kaarten pakken tot score 17 is
+            // Mag NIET splitsen of verdubbelen
+        }
+    }
+
+    public function placeBet(int $amount): void
+    {
+        if ($this->role === 'dealer') {
+            throw new Exception("De dealer zet geen geld in!");
+        }
+        $this->balance -= $amount;
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom is dit slecht?</h3>
+            <ul>
+                <li><strong>Onnodige checks:</strong> Je code staat vol met <code>if ($role === 'dealer')</code> statements.</li>
+                <li><strong>Overbodige properties:</strong> De Dealer heeft geen <code>$balance</code> nodig, maar sleept die property wel overal mee naartoe.</li>
+                <li><strong>Kwetsbaar:</strong> Als je iets wijzigt voor de Dealer, breek je per ongeluk misschien iets voor de Speler.</li>
+                <li><strong>Overtreding SRP:</strong> De class heeft niet één verantwoordelijkheid, maar probeert iedereen te zijn.</li>
+            </ul>
+        </div>
+
+        <p>Dit noemen we een <strong>God Class</strong> (of "Blob"): een class die te veel weet en te veel doet. Het is een bekend "Anti-Pattern" in programmeren.</p>
+
+        <h3>De Oplossing: Inheritance (Overerving)</h3>
+        <p>In plaats van één grote class met if-statements, kunnen we specifieke classes maken voor elke rol. Maar we willen óók geen code dupliceren (zoals het beheren van de kaarten).</p>
+
+        <p>Dit is waar <strong>Inheritance</strong> (Overerving) van pas komt. We maken een basis class voor de gedeelde eigenschappen, en specifieke classes voor het unieke gedrag.</p>
+
+        <pre><code class="language-php">// De structuur waar we naartoe werken:
+
+class Player { ... }         // Basis (kaarten, score)
+class Human extends Player { ... } // Specifiek (geld, input)
+class Dealer extends Player { ... } // Specifiek (regels)</code></pre>
+
+        <div class="info-box">
+            <h3>Volgende stap</h3>
+            <p>In de volgende module leer je hoe je het keyword <code>extends</code> gebruikt om deze nette structuur op te zetten en je code duplicatie-vrij te maken.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

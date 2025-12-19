@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Inheritance</h1>
+
+        <p>Module 5 stond in het teken van <strong>Inheritance (Overerving)</strong>. Je hebt geleerd hoe je code duplicatie voorkomt en een logische hiërarchie van classes opzet. In plaats van alles in één "God Class" te stoppen, splits je functionaliteit op in Parents en Children.</p>
+
+        <h3>Belangrijke Keywords</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Keyword</th>
+                    <th>Doel</th>
+                    <th>Voorbeeld</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>extends</code></td>
+                    <td>Geeft aan dat een class erft van een andere class.</td>
+                    <td><code>class Dealer extends Player</code></td>
+                </tr>
+                <tr>
+                    <td><code>protected</code></td>
+                    <td>Zichtbaarheid: Toegankelijk voor class én children.</td>
+                    <td><code>protected array $hand;</code></td>
+                </tr>
+                <tr>
+                    <td><code>parent::</code></td>
+                    <td>Verwijst naar de parent class (voor methodes/constructors).</td>
+                    <td><code>parent::__construct();</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Visibility Levels</h3>
+        <p>Bij inheritance is het kiezen van de juiste visibility essentieel voor veiligheid en flexibiliteit:</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Visibility</th>
+                    <th>Eigen Class</th>
+                    <th>Child Class</th>
+                    <th>Buitenwereld</th>
+                    <th>Gebruik</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>private</code></td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                    <td>❌ Nee</td>
+                    <td>Unieke data (bijv. <code>$balance</code> van HumanPlayer).</td>
+                </tr>
+                <tr>
+                    <td><code>protected</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                    <td>Gedeelde data (bijv. <code>$hand</code> van Player).</td>
+                </tr>
+                <tr>
+                    <td><code>public</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>Interactie (bijv. <code>addCard()</code>).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Constructors & Initialisatie</h3>
+        <p>Wanneer een Child class een eigen constructor heeft, wordt de Parent constructor <strong>niet</strong> automatisch uitgevoerd. Je moet deze expliciet aanroepen.</p>
+
+        <pre><code class="language-php">class HumanPlayer extends Player
+{
+    private int $balance;
+
+    public function __construct(string $name, int $balance)
+    {
+        // 1. Eerst de basis initialiseren (hand leegmaken)
+        parent::__construct($name);
+
+        // 2. Daarna specifieke eigenschappen instellen
+        $this->balance = $balance;
+    }
+}</code></pre>
+
+        <h3>Method Overriding</h3>
+        <p>Je kunt het gedrag van een parent-methode aanpassen (overriding) in een child class. Dit doe je door de methode opnieuw te definiëren met dezelfde naam.</p>
+
+
+
+        <pre><code class="language-php">class Dealer extends Player
+{
+    // Override: Zelfde naam als in Player, maar ander gedrag
+    public function playTurn(): void
+    {
+        // Dealer volgt vaste regels: pakken tot 17
+        while ($this->getScore() < 17) {
+            $this->addCard(new Card());
+        }
+    }
+}</code></pre>
+
+        <h3>Ontwerp Principes (DRY)</h3>
+        <div class="info-box">
+            <ul>
+                <li><strong>DRY (Don't Repeat Yourself):</strong> Voorkom dat je dezelfde code (zoals score berekenen) kopieert naar HumanPlayer én Dealer. Zet dit in de Parent class.</li>
+                <li><strong>Encapsulatie:</strong> Gebruik <code>protected</code> zodat de Dealer bij zijn kaarten kan, maar de buitenwereld niet.</li>
+                <li><strong>Polymorfisme:</strong> Omdat zowel Dealer als HumanPlayer een <code>Player</code> zijn, kun je ze in een lijst door elkaar gebruiken (bijv. <code>foreach ($players as $p) { $p->getScore(); }</code>).</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

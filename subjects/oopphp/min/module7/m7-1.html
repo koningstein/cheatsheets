@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Methods (Validatie) - OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Static Methods: Validatie</h1>
+
+        <div class="info-box">
+            <h3>Methoden zonder Objecten?</h3>
+            <p>Tot nu toe riepen we methoden altijd aan op een object: <code>$player->getScore()</code>. Dit is logisch, want de score hoort bij <em>die specifieke speler</em>.</p>
+            <p>Maar sommige dingen zijn universeel. Neem de regels van Blackjack. Is "Harten" een geldige kaartkleur? Dat antwoord is altijd "Ja", ongeacht welke kaarten er op tafel liggen. Het slaat nergens op om eerst een <code>new Card()</code> aan te moeten maken, puur om te vragen of een kleur bestaat.</p>
+        </div>
+
+        <h3>Het Static Keyword</h3>
+        <p>Met het keyword <code>static</code> maak je eigenschappen en methoden die bij de <strong>Class</strong> horen, in plaats van bij een object. Je kunt ze direct gebruiken zonder <code>new</code>.</p>
+
+
+
+        <h3>Voorbeeld: Kaart Validatie</h3>
+        <p>We maken een statische lijst met geldige kleuren en een statische methode om te checken of een input geldig is.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Static property: Hoort bij de Blauwdruk, niet bij één kaart
+    private static array $validSuits = ['Hearts', 'Diamonds', 'Spades', 'Clubs'];
+
+    // Static method: Kan aangeroepen worden zonder kaart-object
+    public static function isValidSuit(string $suit): bool
+    {
+        // Let op: we gebruiken self:: in plaats van $this->
+        return in_array($suit, self::$validSuits);
+    }
+}</code></pre>
+
+        <h3>Aanroepen met Dubbele Punt (::)</h3>
+        <p>Om een statische methode te gebruiken, gebruik je de naam van de class, gevolgd door <code>::</code> (de Scope Resolution Operator).</p>
+
+        <pre><code class="language-php">// FOUT:
+// $card = new Card();
+// $card->isValidSuit('Hearts'); // Dit is onnodig en verwarrend
+
+// GOED: Direct via de Class naam
+if (Card::isValidSuit('Hearts')) {
+    echo "Dit is een geldige kleur!";
+} else {
+    echo "Foutieve invoer!";
+}</code></pre>
+
+        <div class="info-box">
+            <h3>$this vs self::</h3>
+            <div class="table-wrapper">
+                <table class="summary-table">
+                    <thead>
+                    <tr>
+                        <th>Context</th>
+                        <th>Verwijzing</th>
+                        <th>Betekenis</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>Object</strong> (niet-static)</td>
+                        <td><code>$this-></code></td>
+                        <td>Verwijst naar <em>dit specifieke object</em> (bijv. de kaart die ik nu vastheb).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Class</strong> (static)</td>
+                        <td><code>self::</code></td>
+                        <td>Verwijst naar <em>de code van de class zelf</em> (de algemene regels).</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3>Wanneer gebruik je Static?</h3>
+        <p>Gebruik static methoden voor <strong>hulpfuncties</strong> die geen toegang nodig hebben tot de data van een specifiek object. Denk aan:</p>
+        <ul>
+            <li>Validatie (<code>Card::isValidSuit</code>)</li>
+            <li>Berekeningen (<code>Calculator::add</code>)</li>
+            <li>Formattering (<code>Formatter::formatMoney</code>)</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meerdere pagina's met $_GET - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Meerdere pagina's met $_GET</h1>
+
+        <div class="info-box">
+            <h3>Routing met $_GET</h3>
+            <p>Met één index.php bestand kun je meerdere pagina's maken door gebruik te maken van $_GET parameters. De gebruiker navigeert tussen pagina's via links met verschillende GET parameters.</p>
+
+            <p><strong>Voorbeeld URLs:</strong></p>
+            <ul>
+                <li><code>index.php</code> - Home pagina</li>
+                <li><code>index.php?page=createPlayer</code> - Speler aanmaken</li>
+                <li><code>index.php?page=playerList</code> - Lijst met spelers</li>
+                <li><code>index.php?page=viewPlayer&id=5</code> - Speler bekijken</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Switch statement voor routing</h3>
+
+        <div class="info-box">
+            <p>Een switch statement is overzichtelijker dan veel if-elseif statements als je veel verschillende pagina's hebt. Je checkt de waarde van <code>$page</code> en voert voor elke case andere code uit.</p>
+        </div>
+
+        <pre><code class="language-php">$page = $_GET['page'] ?? 'home';
+
+switch ($page) {
+    case 'createPlayer':
+        // Toon formulier
+        $template->display('createPlayerForm.tpl');
+        break;
+
+    case 'playerList':
+        // Toon lijst
+        $players = $playerList->getPlayers();
+        $template->assign('players', $players);
+        $template->display('playerList.tpl');
+        break;
+
+    case 'viewPlayer':
+        // Toon detail pagina
+        // Code hier
+        break;
+
+    default:
+        // Home pagina
+        $template->display('home.tpl');
+        break;
+}</code></pre>
+
+        <div class="info-box">
+            <h4>Belangrijke onderdelen:</h4>
+            <ul>
+                <li><code>switch ($page)</code> - Check de waarde van $page</li>
+                <li><code>case 'createPlayer':</code> - Als $page deze waarde heeft</li>
+                <li><code>break;</code> - Stop en ga niet verder naar volgende cases</li>
+                <li><code>default:</code> - Als geen enkele case matcht (fallback)</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>Vergeet break niet!</h3>
+            <p>Zonder <code>break;</code> blijft PHP doorgaan met de volgende case. Dit heet "fall-through" en is bijna altijd een bug.</p>
+        </div>
+
+        <h3>Meerdere GET parameters</h3>
+
+        <div class="info-box">
+            <p>Je kunt meerdere GET parameters combineren om specifieke data op te halen. Bijvoorbeeld een speler bekijken op basis van naam.</p>
+        </div>
+
+
+
+        <pre><code class="language-php">// URL: index.php?page=viewPlayer&name=John
+$page = $_GET['page'] ?? 'home';
+
+switch ($page) {
+    case 'viewPlayer':
+        // Haal naam parameter op
+        $name = $_GET['name'] ?? null;
+
+        if ($name !== null) {
+            // Haal speler op met deze naam
+            $player = $playerList->getPlayerByName($name);
+
+            if ($player !== null) {
+                $template->assign('player', $player);
+                $template->display('playerDetail.tpl');
+            } else {
+                // Speler niet gevonden
+                $template->assign('error', 'Player not found');
+                $template->display('error.tpl');
+            }
+        }
+        break;
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Validatie is belangrijk</h3>
+            <ul>
+                <li>Check of de parameter bestaat (<code>?? null</code>)</li>
+                <li>Check of het object bestaat voordat je het gebruikt</li>
+                <li>Toon een foutmelding als de parameter ontbreekt of ongeldig is</li>
+            </ul>
+        </div>
+
+        <h3>Links maken naar andere pagina's</h3>
+
+        <div class="info-box">
+            <p>In je templates maak je links met GET parameters om naar andere pagina's te navigeren:</p>
+        </div>
+
+        <pre><code class="language-php">&lt;!-- Link naar create pagina --&gt;
+&lt;a href="index.php?page=createPlayer" class="btn btn-success"&gt;
+    New Player
+&lt;/a&gt;
+
+&lt;!-- Link naar detail pagina met naam --&gt;
+&lt;a href="index.php?page=viewPlayer&name={$player->getName()}" class="btn btn-primary"&gt;
+    View Details
+&lt;/a&gt;
+
+&lt;!-- Link naar home (geen parameters) --&gt;
+&lt;a href="index.php" class="btn btn-secondary"&gt;
+    Home
+&lt;/a&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Meerdere parameters combineren</h3>
+            <ul>
+                <li>Eerste parameter: <code>?page=viewPlayer</code></li>
+                <li>Tweede parameter: <code>&name=John</code></li>
+                <li>Volledige URL: <code>index.php?page=viewPlayer&name=John</code></li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>Belangrijke punten</h3>
+            <ul>
+                <li>Gebruik switch statement voor routing met meerdere pagina's</li>
+                <li>Vergeet <code>break;</code> niet na elke case</li>
+                <li>Haal GET parameters op binnen de case waar je ze nodig hebt</li>
+                <li>Valideer GET parameters voordat je ze gebruikt</li>
+                <li>Gebruik <code>default:</code> voor fallback (meestal home pagina)</li>
+                <li>Meerdere parameters combineren met <code>&</code></li>
+                <li>Check of object bestaat voordat je het gebruikt</li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

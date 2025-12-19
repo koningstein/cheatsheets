@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inheritance Basis (Extends) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Inheritance Basis (Extends)</h1>
+
+        <div class="info-box">
+            <h3>Het Extends Keyword</h3>
+            <p>Om code duplicatie te voorkomen, gebruiken we <strong>Inheritance</strong> (overerving). We definiëren een algemene "ouder" (Parent) class met alle gedeelde code, en laten de specifieke classes (Children) daarvan "erven".</p>
+            <p>In PHP doe je dit met het keyword <code>extends</code>.</p>
+        </div>
+
+
+
+        <h3>Stap 1: De Parent Class (Player.php)</h3>
+        <p>Eerst schonen we de <code>Player</code> class op. Hierin laten we <strong>alleen</strong> de code staan die voor <strong>iedereen</strong> geldt (zowel mensen als dealers).</p>
+
+        <pre><code class="language-php">class Player
+{
+    // Iedereen heeft kaarten nodig
+    protected array $hand = [];
+
+    // Iedereen moet kaarten kunnen krijgen
+    public function addCard(Card $card)
+    {
+        $this->hand[] = $card;
+    }
+
+    // Iedereen heeft een score nodig
+    public function getScore(): int
+    {
+        // ... logica om score te berekenen ...
+    }
+}</code></pre>
+
+        <h3>Stap 2: De Child Classes (Dealer.php)</h3>
+        <p>Nu kunnen we de <code>Dealer</code> class heel simpel maken. We hoeven de methodes <code>addCard</code> en <code>getScore</code> niet meer te typen, want die "erft" hij van <code>Player</code>.</p>
+
+        <pre><code class="language-php">// Let op: extends Player
+class Dealer extends Player
+{
+    // Deze class is nu leeg!
+    // Maar... hij heeft wél addCard() en getScore() tot zijn beschikking.
+}</code></pre>
+
+        <div class="info-box">
+            <h3>"Is een..." relatie</h3>
+            <p>Door inheritance te gebruiken, zeggen we: "Een Dealer <strong>is een</strong> Player". Alles wat een Player kan, kan een Dealer nu ook.</p>
+        </div>
+
+        <h3>Stap 3: Specifieke Child Classes (HumanPlayer.php)</h3>
+        <p>De <code>HumanPlayer</code> erft ook van <code>Player</code>, maar voegt zijn eigen unieke eigenschappen toe (geld).</p>
+
+        <pre><code class="language-php">class HumanPlayer extends Player
+{
+    // Unieke eigenschap voor HumanPlayer
+    private int $balance = 1000;
+
+    // Unieke methode voor HumanPlayer
+    public function placeBet(int $amount)
+    {
+        $this->balance -= $amount;
+    }
+}</code></pre>
+
+        <h3>Het resultaat</h3>
+        <p>Je kunt nu gewoon methodes aanroepen op de Dealer, ook al staan ze niet letterlijk in zijn bestand:</p>
+
+        <pre><code class="language-php">$dealer = new Dealer();
+$dealer->addCard(new Card('Hearts', 'Ace')); // Werkt via overerving!
+echo $dealer->getScore(); // Werkt ook!</code></pre>
+
+        <div class="info-box">
+            <h3>Terminologie</h3>
+            <ul>
+                <li><strong>Parent Class</strong> (of Super Class): De basis class (Player).</li>
+                <li><strong>Child Class</strong> (of Sub Class): De class die erft (Dealer).</li>
+                <li><strong>Inheritance:</strong> Het mechanisme waarmee properties en methods worden doorgegeven.</li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

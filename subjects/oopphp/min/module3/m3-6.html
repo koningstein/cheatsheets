@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Methoden - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Private Methoden</h1>
+
+        <h3>Waarom `private` bij methoden?</h3>
+        <p>Net als bij properties, beschermt het trefwoord <code>private</code> methoden tegen aanroepen van buiten de class. Dit heeft twee belangrijke voordelen:</p>
+        <ul>
+            <li><strong>Verbergen van details</strong>: Ingewikkelde stappen die alleen intern nodig zijn, worden verborgen. Andere programmeurs hoeven alleen de publieke methoden te kennen.</li>
+            <li><strong>Overzichtelijkheid</strong>: Je kunt lange, ingewikkelde publieke methoden opdelen in kleinere, leesbare private methoden.</li>
+        </ul>
+
+
+
+        <pre><code class="language-php">class Game
+{
+    public function playRound(Player $player, Player $dealer): string
+    {
+        $this->dealInitialCards($player, $dealer);  // Private methode
+        $this->playerTurn($player);                  // Private methode
+        $this->dealerTurn($dealer);                  // Private methode
+
+        return $this->determineWinner($player, $dealer);
+    }
+
+    // Deze methode kan alleen door playRound() worden aangeroepen
+    private function dealInitialCards(Player $player, Player $dealer): void
+    {
+        // ... logica voor het uitdelen van kaarten ...
+    }
+
+    // Deze methode is ook niet extern aan te roepen
+    private function playerTurn(Player $player): void
+    {
+        // ... logica voor de beurt van de speler ...
+    }
+}</code></pre>
+
+        <h3>Voordelen van Private Methoden</h3>
+
+        <div class="info-box">
+            <h3>Makkelijker onderhoud</h3>
+            <p>Stel je wilt de logica voor het uitdelen van kaarten wijzigen (<code>dealInitialCards</code>). Omdat deze <code>private</code> is, weet je zeker dat alleen de <code>Game</code> class hierdoor wordt beïnvloed. Je hoeft je geen zorgen te maken dat andere delen van de applicatie deze methode direct gebruiken.</p>
+        </div>
+
+        <div class="info-box">
+            <h3>Fout bij Externe Aanroep</h3>
+            <p>Als je van buiten de class probeert een private methode aan te roepen, geeft PHP een fatale fout (Error):</p>
+            <pre><code class="language-php">$game = new Game();
+// Dit veroorzaakt een fatale fout!
+$game->dealInitialCards($player, $dealer); </code></pre>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Van Code naar Webapplicatie</h1>
+
+        <p>Module 4 ging over het <strong>verbinden van OOP met webtechnologie</strong>. Je hebt geleerd hoe je code debugt, templates gebruikt, formulieren verwerkt en gebruikersdata beheert.</p>
+
+        <h3>Debuggen</h3>
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Doel</th>
+                    <th>Gebruik</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Xdebug + PHPStorm</td>
+                    <td>Code stap voor stap doorlopen.</td>
+                    <td>Zet breakpoints, gebruik F8 (Step Over), F7 (Step Into)</td>
+                </tr>
+                <tr>
+                    <td>PHPStan</td>
+                    <td>Statische code-analyse voor typefouten.</td>
+                    <td><code>vendor/bin/phpstan analyse</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Smarty Template Engine</h3>
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Concept</th>
+                    <th>Doel</th>
+                    <th>Syntaxis</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Assign</td>
+                    <td>Data van PHP naar template sturen.</td>
+                    <td><code>$smarty->assign('character', $warrior);</code></td>
+                </tr>
+                <tr>
+                    <td>Display</td>
+                    <td>Template tonen.</td>
+                    <td><code>$smarty->display('character.tpl');</code></td>
+                </tr>
+                <tr>
+                    <td>Template variabele</td>
+                    <td>Data gebruiken in template.</td>
+                    <td><code>{$character->getName()}</code></td>
+                </tr>
+                <tr>
+                    <td>Extends</td>
+                    <td>Layout hergebruiken.</td>
+                    <td><code>{extends file="layout.tpl"}</code></td>
+                </tr>
+                <tr>
+                    <td>Block</td>
+                    <td>Content sectie definiëren.</td>
+                    <td><code>{block name="content"}...{/block}</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Bootstrap Framework</h3>
+        <p>Bootstrap biedt kant-en-klare CSS classes voor professionele layouts:</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Classes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Form</td>
+                    <td><code>form-control, form-select, form-label</code></td>
+                </tr>
+                <tr>
+                    <td>Button</td>
+                    <td><code>btn btn-primary, btn-secondary</code></td>
+                </tr>
+                <tr>
+                    <td>Alert</td>
+                    <td><code>alert alert-danger, alert-success</code></td>
+                </tr>
+                <tr>
+                    <td>Card</td>
+                    <td><code>card, card-body, card-header</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Superglobals</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Superglobal</th>
+                    <th>Wanneer gebruiken</th>
+                    <th>Voorbeeld</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>$_POST</td>
+                    <td>Formulierdata versturen (niet in URL).</td>
+                    <td><code>$name = $_POST['name'] ?? '';</code></td>
+                </tr>
+                <tr>
+                    <td>$_GET</td>
+                    <td>Navigatie tussen pagina's (wel in URL).</td>
+                    <td><code>$page = $_GET['page'] ?? 'home';</code></td>
+                </tr>
+                <tr>
+                    <td>$_SESSION</td>
+                    <td>Data bewaren tussen pagina's.</td>
+                    <td><code>$_SESSION['user'] = $user;</code></td>
+                </tr>
+                <tr>
+                    <td>$_SERVER</td>
+                    <td>Check of formulier verzonden is.</td>
+                    <td><code>$_SERVER['REQUEST_METHOD'] === 'POST'</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Formulier Workflow</h3>
+
+
+
+        <pre><code class="language-php">// 1. Check POST request
+if ($page === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 2. Valideer input
+    if (empty($_POST['name'])) {
+        $smarty->assign('error', 'Naam verplicht');
+        $smarty->display('form.tpl');
+        exit;
+    }
+
+    // 3. Maak object
+    $character = new Character($_POST['name'], $_POST['role']);
+
+    // 4. Bewaar in sessie
+    $_SESSION['characters'][] = $character;
+
+    // 5. Toon bevestiging
+    $smarty->display('created.tpl');
+    exit;
+}</code></pre>
+
+        <h3>Routing met Switch</h3>
+        <pre><code class="language-php">session_start();
+$page = $_GET['page'] ?? 'home';
+
+// POST afhandelen komt VOOR switch
+if ($page === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verwerk formulier...
+}
+
+// GET afhandelen met switch
+switch ($page) {
+    case 'create':
+        $smarty->display('form.tpl');
+        break;
+    case 'list':
+        $smarty->display('list.tpl');
+        break;
+    default:
+        $smarty->display('home.tpl');
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smarty Template Engine - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Smarty Template Engine</h1>
+
+        <h3>Wat is Smarty?</h3>
+        <p>Smarty is een template engine voor PHP die de presentatielaag (HTML) scheidt van de applicatielogica (PHP). Dit maakt je code:</p>
+        <ul>
+            <li><strong>Overzichtelijker</strong>: HTML en PHP staan niet door elkaar</li>
+            <li><strong>Onderhoudbaarder</strong>: Designers kunnen templates aanpassen zonder PHP kennis</li>
+            <li><strong>Herbruikbaarder</strong>: Templates kunnen worden gedeeld tussen verschillende pagina's</li>
+            <li><strong>Veiliger</strong>: Smarty escaped automatisch output, wat XSS-aanvallen voorkomt</li>
+        </ul>
+
+
+
+        <div class="info-box">
+            <h3>Waarom Template Engines?</h3>
+            <p>In plaats van HTML en PHP te mixen met echo-statements, gebruik je templates waarin je alleen variabelen injecteert. De business logic blijft in je PHP code, terwijl de presentatie in template bestanden zit.</p>
+        </div>
+
+        <h3>Smarty installeren via Composer</h3>
+        <p>Smarty installeer je via Composer, de dependency manager voor PHP:</p>
+
+        <pre><code class="language-bash"># In de terminal, in de hoofdmap van je project
+composer require smarty/smarty</code></pre>
+
+        <p>Na de installatie vind je Smarty in de <code>vendor/smarty</code> map.</p>
+
+        <h3>Mappenstructuur voor Templates</h3>
+        <p>Maak de volgende mappenstructuur aan in je project:</p>
+
+
+
+        <pre><code class="language-plaintext">project/
+├── src/                    # Je OOP classes
+├── templates/              # Template bestanden (.tpl)
+├── templates_c/            # Gecompileerde templates (automatisch aangemaakt)
+├── vendor/                 # Composer dependencies
+├── .gitignore             # Git ignore bestand
+├── composer.json          # Composer configuratie
+└── index.php              # Hoofdbestand</code></pre>
+
+        <div class="info-box">
+            <h3>Belangrijk: .gitignore aanpassen</h3>
+            <p>Voeg <code>templates_c/</code> toe aan je .gitignore bestand. Deze map bevat automatisch gegenereerde gecompileerde templates en hoort niet in version control.</p>
+        </div>
+
+        <h3>Smarty configureren in index.php</h3>
+        <p>Zo configureer je Smarty in je PHP code:</p>
+
+        <pre><code class="language-php">&lt;?php
+require_once 'vendor/autoload.php';
+
+use Smarty\Smarty;
+use Blackjack\Deck;
+use Blackjack\Player;
+use Blackjack\Game;
+
+// Smarty initialiseren
+$template = new Smarty();
+$template->setTemplateDir('templates');
+$template->setCompileDir('templates_c');
+
+// Objecten aanmaken
+$deck = new Deck();
+$player = new Player("John");
+$dealer = new Player("Dealer");
+
+// Objecten aan template toewijzen
+$template->assign('player', $player);
+$template->assign('dealer', $dealer);
+$template->assign('deck', $deck);
+
+// Template weergeven
+$template->display('game.tpl');</code></pre>
+
+        <h3>Smarty Syntax: Variabelen weergeven</h3>
+        <p>In een Smarty template gebruik je accolades met dollarteken om variabelen weer te geven:</p>
+
+        <h4>Basis variabelen</h4>
+        <pre><code class="language-html">&lt;!-- Eenvoudige variabele --&gt;
+&lt;p&gt;Speler: {$playerName}&lt;/p&gt;
+
+&lt;!-- Array element --&gt;
+&lt;p&gt;Eerste kaart: {$cards[0]}&lt;/p&gt;</code></pre>
+
+        <h4>Object properties en methoden</h4>
+        <pre><code class="language-html">&lt;!-- Getter methode aanroepen --&gt;
+&lt;h2&gt;{$player-&gt;getName()}&lt;/h2&gt;
+
+&lt;!-- Geneste object methoden --&gt;
+&lt;p&gt;Score: {$player-&gt;getHand()-&gt;calculateScore()}&lt;/p&gt;
+
+&lt;!-- Property (als public) --&gt;
+&lt;p&gt;Aantal kaarten: {$deck-&gt;count}&lt;/p&gt;</code></pre>
+
+        <h3>Template bestand maken</h3>
+        <p>Maak een bestand <code>templates/game.tpl</code> met HTML en Smarty variabelen:</p>
+
+        <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="nl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Blackjack Game&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Blackjack Game&lt;/h1&gt;
+
+    &lt;div class="player-info"&gt;
+        &lt;h2&gt;Speler: {$player->getName()}&lt;/h2&gt;
+        &lt;p&gt;Score: {$player->getHand()->calculateScore()}&lt;/p&gt;
+
+        &lt;h3&gt;Kaarten:&lt;/h3&gt;
+        &lt;ul&gt;
+        {foreach $player->getHand()->getCards() as $card}
+            &lt;li&gt;{$card->getRank()} of {$card->getSuit()}&lt;/li&gt;
+        {/foreach}
+        &lt;/ul&gt;
+    &lt;/div&gt;
+
+    &lt;div class="dealer-info"&gt;
+        &lt;h2&gt;Dealer: {$dealer->getName()}&lt;/h2&gt;
+        &lt;p&gt;Score: {$dealer->getHand()->calculateScore()}&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h3>Smarty Control Structures</h3>
+
+        <h4>If statements</h4>
+        <pre><code class="language-html">{if $player-&gt;getHand()-&gt;calculateScore() &gt; 21}
+    &lt;p class="bust"&gt;BUST! Je score is te hoog.&lt;/p&gt;
+{elseif $player-&gt;getHand()-&gt;calculateScore() == 21}
+    &lt;p class="blackjack"&gt;BLACKJACK!&lt;/p&gt;
+{else}
+    &lt;p&gt;Je kunt nog een kaart trekken.&lt;/p&gt;
+{/if}</code></pre>
+
+        <h4>Foreach loops</h4>
+        <pre><code class="language-html">&lt;h3&gt;Alle kaarten:&lt;/h3&gt;
+&lt;ul&gt;
+{foreach $cards as $card}
+    &lt;li&gt;{$card-&gt;getRank()} of {$card-&gt;getSuit()}&lt;/li&gt;
+{/foreach}
+&lt;/ul&gt;
+
+&lt;!-- Met index --&gt;
+{foreach $cards as $index =&gt; $card}
+    &lt;p&gt;Kaart {$index + 1}: {$card-&gt;getRank()}&lt;/p&gt;
+{/foreach}</code></pre>
+
+        <h4>Lege arrays checken</h4>
+        <pre><code class="language-html">{if count($cards) &gt; 0}
+    &lt;ul&gt;
+    {foreach $cards as $card}
+        &lt;li&gt;{$card-&gt;getRank()}&lt;/li&gt;
+    {/foreach}
+    &lt;/ul&gt;
+{else}
+    &lt;p&gt;Geen kaarten beschikbaar.&lt;/p&gt;
+{/if}</code></pre>
+
+        <h3>Voor- en nadelen van Smarty</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Voordelen</th>
+                    <th>Nadelen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Scheiding tussen logica en presentatie</td>
+                    <td>Extra syntax om te leren</td>
+                </tr>
+                <tr>
+                    <td>Automatische output escaping (beveiliging)</td>
+                    <td>Iets langzamer dan pure PHP (compilatie)</td>
+                </tr>
+                <tr>
+                    <td>Template hergebruik en overerving mogelijk</td>
+                    <td>Debugging kan complexer zijn</td>
+                </tr>
+                <tr>
+                    <td>Designers hoeven geen PHP te kennen</td>
+                    <td>Extra dependency in je project</td>
+                </tr>
+                <tr>
+                    <td>Caching ingebouwd voor betere performance</td>
+                    <td>Templates_c map moet schrijfbaar zijn</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Veelgebruikte Smarty methoden</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Methode</th>
+                    <th>Beschrijving</th>
+                    <th>Voorbeeld</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>assign()</code></td>
+                    <td>Wijs een variabele toe aan de template</td>
+                    <td><code>$template->assign('name', 'John');</code></td>
+                </tr>
+                <tr>
+                    <td><code>display()</code></td>
+                    <td>Toon een template</td>
+                    <td><code>$template->display('game.tpl');</code></td>
+                </tr>
+                <tr>
+                    <td><code>setTemplateDir()</code></td>
+                    <td>Stel de template directory in</td>
+                    <td><code>$template->setTemplateDir('templates');</code></td>
+                </tr>
+                <tr>
+                    <td><code>setCompileDir()</code></td>
+                    <td>Stel de compile directory in</td>
+                    <td><code>$template->setCompileDir('templates_c');</code></td>
+                </tr>
+                <tr>
+                    <td><code>fetch()</code></td>
+                    <td>Haal template output op als string</td>
+                    <td><code>$html = $template->fetch('game.tpl');</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Praktijkvoorbeeld: Complete workflow</h3>
+
+
+
+        <div class="info-box">
+            <h3>Blackjack game met Smarty</h3>
+
+            <p><strong>Stap 1: index.php - PHP logica</strong></p>
+            <pre><code class="language-php">&lt;?php
+require_once 'vendor/autoload.php';
+
+use Smarty\Smarty;
+use Blackjack\Game;
+use Blackjack\Player;
+
+// Smarty configureren
+$template = new Smarty();
+$template->setTemplateDir('templates');
+$template->setCompileDir('templates_c');
+
+// Game logica
+$game = new Game();
+$player = new Player("John");
+$dealer = new Player("Dealer");
+
+$game->dealInitialCards($player, $dealer);
+$winner = $game->determineWinner($player, $dealer);
+
+// Data aan template geven
+$template->assign('player', $player);
+$template->assign('dealer', $dealer);
+$template->assign('winner', $winner);
+
+// Template tonen
+$template->display('game.tpl');</code></pre>
+
+            <p><strong>Stap 2: templates/game.tpl - HTML presentatie</strong></p>
+            <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Blackjack&lt;/title&gt;
+    &lt;style&gt;
+        .player { background: lightblue; padding: 20px; }
+        .dealer { background: lightcoral; padding: 20px; }
+        .winner { font-weight: bold; color: green; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Blackjack Game&lt;/h1&gt;
+
+    &lt;div class="player"&gt;
+        &lt;h2&gt;{$player->getName()}&lt;/h2&gt;
+        &lt;p&gt;Score: {$player->getHand()->calculateScore()}&lt;/p&gt;
+        &lt;ul&gt;
+        {foreach $player->getHand()->getCards() as $card}
+            &lt;li&gt;{$card->getRank()} of {$card->getSuit()}&lt;/li&gt;
+        {/foreach}
+        &lt;/ul&gt;
+    &lt;/div&gt;
+
+    &lt;div class="dealer"&gt;
+        &lt;h2&gt;{$dealer->getName()}&lt;/h2&gt;
+        &lt;p&gt;Score: {$dealer->getHand()->calculateScore()}&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;p class="winner"&gt;Winnaar: {$winner}&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+
+        <div class="info-box">
+            <h3>Best practices</h3>
+            <ul>
+                <li>Houd alle business logic in PHP, templates zijn alleen voor presentatie</li>
+                <li>Gebruik duidelijke variabele namen in je templates</li>
+                <li>Controleer altijd of arrays/collecties leeg zijn voordat je eroverheen loopt</li>
+                <li>Gebruik getters in plaats van directe property access voor encapsulatie</li>
+                <li>Geef templates beschrijvende namen (bijv. <code>playerOverview.tpl</code> in plaats van <code>page1.tpl</code>)</li>
+                <li>Voeg <code>templates_c/</code> toe aan .gitignore</li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

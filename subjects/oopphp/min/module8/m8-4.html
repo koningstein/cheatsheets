@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read (Select) & Hydration - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Read: Select (Multi-Table)</h1>
+
+        <div class="info-box">
+            <h3>Voorbereiden op Relaties</h3>
+            <p>In simpele queries haal je data uit één tabel. Maar in serieuze applicaties wil je vaak data combineren. Bijvoorbeeld: je wilt een score ophalen uit de <code>scores</code> tabel, maar ook de naam van de speler uit de <code>players</code> tabel.</p>
+            <p>Om dit te ondersteunen, bouwen we onze <code>select</code> methode zo dat hij niet één tabelnaam accepteert, maar een lijst van tabellen en de gewenste kolommen.</p>
+        </div>
+
+        <h3>De Structuur van de Aanroep</h3>
+        <p>In plaats van een simpele string, geven we een array mee. De <strong>Key</strong> is de tabelnaam, de <strong>Value</strong> is een array van kolomnamen.</p>
+
+        <pre><code class="language-php">// Ik wil alles (*) van 'scores' en de naam van 'players'
+$tablesAndColumns = [
+    'scores'  => ['*'],
+    'players' => ['name', 'avatar']
+];
+
+$db->select($tablesAndColumns);</code></pre>
+
+        <h3>De Select Methode Implementeren</h3>
+        <p>In de methode moeten we deze array uit elkaar trekken om de juiste SQL te bouwen. We moeten expliciet de tabelnaam voor de kolom zetten (bijv. <code>players.name</code>) om verwarring te voorkomen.</p>
+
+        <pre><code class="language-php">public function select(array $tableColumns, array $conditions = []): array
+{
+    $selectedColumns = [];
+    $tableNames = [];
+
+    // 1. Loop door de tabellen en kolommen
+    foreach ($tableColumns as $table => $columns) {
+        $tableNames[] = $table; // Sla tabelnaam op voor FROM
+
+        foreach ($columns as $column) {
+            if ($column === '*') {
+                // Selecteer alles van deze tabel
+                $selectedColumns[] = "$table.*";
+            } else {
+                // Specifieke kolom met prefix (bijv. players.name)
+                $selectedColumns[] = "$table.$column";
+            }
+        }
+    }
+
+    // 2. Maak de strings voor de query
+    $columnString = implode(', ', $selectedColumns); // "scores.*, players.name"
+    $tableString  = implode(', ', $tableNames);      // "scores, players"
+
+    // 3. Bouw de query
+    // Let op: Zonder WHERE clausule krijg je nu nog te veel resultaten
+    // als je meerdere tabellen gebruikt (Cartesian Product).
+    // De WHERE implementeren we in de volgende stap.
+    $sql = "SELECT $columnString FROM $tableString";
+
+    $stmt = $this->connection->prepare($sql);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}</code></pre>
+
+
+
+        <h3>Hydration (Van Array naar Object)</h3>
+        <p>De database geeft nog steeds ruwe arrays terug. Het is aan jouw code om hier bruikbare objecten van te maken. Dit noemen we <strong>Hydration</strong>.</p>
+
+        <pre><code class="language-php">class ScoreList
+{
+    private array $scores = [];
+
+    public function loadAll()
+    {
+        $db = DatabaseManager::getConnection();
+
+        // Vraag de data op volgens de nieuwe structuur
+        $rows = $db->select(['scores' => ['*']]);
+
+        foreach ($rows as $row) {
+            // Zet de ruwe array om naar een Score object
+            $score = new Score();
+            $score->setPoints($row['points']);
+            // ... zet overige properties ...
+
+            $this->scores[] = $score;
+        }
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li>De <code>select</code> methode accepteert nu een complexe array: <code>['tabel' => ['kolommen']]</code>.</li>
+                <li>De SQL wordt dynamisch opgebouwd: <code>SELECT tabel.kolom FROM tabel1, tabel2</code>.</li>
+                <li>Dit is de <strong>voorbereiding</strong> op Joins en Where-clausules; zonder <code>WHERE</code> mag je dit nu eigenlijk alleen voor één tabel tegelijk gebruiken om duplicaten te voorkomen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

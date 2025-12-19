@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splitsen van class - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Splitsen van class</h1>
+
+        <div class="info-box">
+            <h3>De Naïeve Oplossing: Kopiëren en Plakken</h3>
+            <p>Om van de "God Class" af te komen, is de eerste gedachte vaak: "Ik maak gewoon twee losse bestanden: <code>HumanPlayer.php</code> en <code>Dealer.php</code>."</p>
+            <p>Je kopieert de oude <code>Player</code> code naar beide bestanden en verwijdert wat je niet nodig hebt. De Dealer heeft geen geld, dus dat haal je weg uit <code>Dealer.php</code>.</p>
+        </div>
+
+        <h3>Het Resultaat: Twee bijna identieke classes</h3>
+        <p>Kijk wat er gebeurt met de code. Beide classes hebben nog steeds kaarten nodig, moeten scores berekenen en kaarten ontvangen.</p>
+
+
+
+        <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4>HumanPlayer.php</h4>
+                <pre><code class="language-php">class HumanPlayer
+{
+    private array $hand = [];
+    private int $balance = 1000;
+
+    public function addCard(Card $card) {
+        $this->hand[] = $card;
+    }
+
+    public function getScore() {
+        // ... complexe berekening ...
+    }
+}</code></pre>
+            </div>
+            <div style="flex: 1; min-width: 300px;">
+                <h4>Dealer.php</h4>
+                <pre><code class="language-php">class Dealer
+{
+    private array $hand = [];
+    // Geen balance (dat is het verschil)
+
+    public function addCard(Card $card) {
+        $this->hand[] = $card; // DUPLICAAT!
+    }
+
+    public function getScore() {
+        // ... complexe berekening ... // DUPLICAAT!
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Het probleem met duplicatie</h3>
+        <p>Op het eerste gezicht lijkt het probleem opgelost: je hebt geen if-statements meer nodig voor de rollen. Maar je hebt een nieuw, groter probleem gecreëerd.</p>
+
+        <div class="info-box">
+            <h3>Onderhoudsnachtmerrie</h3>
+            <p>Stel je ontdekt een bug in de <code>getScore()</code> methode (bijvoorbeeld: Azen worden verkeerd geteld). Je moet deze bug nu <strong>op twee plekken</strong> oplossen: in <code>HumanPlayer.php</code> én in <code>Dealer.php</code>. Vergeet je er één? Dan is je spel stuk.</p>
+        </div>
+
+        <h3>DRY: Don't Repeat Yourself</h3>
+        <p>Een van de belangrijkste principes in software development is <strong>DRY</strong>. Elke keer dat je code kopieert en plakt, moet er een alarmbel afgaan.</p>
+
+
+
+        <div class="info-box">
+            <h3>De oplossing: Inheritance</h3>
+            <p>We hebben een manier nodig om de <strong>gemeenschappelijke code</strong> (kaarten, score berekenen) op één plek te definiëren, en alleen de <strong>verschillen</strong> (geld, spelregels) in de specifieke classes te zetten.</p>
+            <p>In de volgende stap leren we hoe we dit doen met <code>extends</code>.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
