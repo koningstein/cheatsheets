@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 6</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Abstractie & Polymorfisme</h1>
+
+        <p>Module 6 stond in het teken van <strong>Abstractie</strong>. Je hebt geleerd hoe je structuren afdwingt in je code. Een <code>Player</code> is geen concreet ding meer, maar een concept (blauwdruk) waaraan alle specifieke spelers moeten voldoen.</p>
+
+        <h3>Abstracte Classes</h3>
+        <p>Met het keyword <code>abstract</code> voorkom je dat er objecten van een class worden gemaakt. Het dient puur als basis voor inheritance.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Resultaat</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>abstract class Player</code></td>
+                    <td>Mag NIET aangemaakt worden met <code>new</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>class Dealer extends Player</code></td>
+                    <td>Mag WEL aangemaakt worden (mits implementatie compleet is).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <pre><code class="language-php">// FOUT: Kan abstracte class niet instantiëren
+$p = new Player();
+
+// GOED: HumanPlayer is concreet
+$p = new HumanPlayer("John");</code></pre>
+
+        <h3>Abstracte Methoden (Het Contract)</h3>
+        <p>Een abstracte methode heeft geen body (geen <code>{}</code>) en eindigt met een puntkomma. Het dwingt alle child classes om deze methode te implementeren.</p>
+
+
+
+        <pre><code class="language-php">abstract class Player
+{
+    // Het contract: Iedereen MOET kunnen beslissen
+    abstract public function makeDecision(): string;
+}
+
+class Dealer extends Player
+{
+    // De implementatie: Dealer volgt regels
+    public function makeDecision(): string {
+        return ($this->getScore() < 17) ? 'hit' : 'stand';
+    }
+}</code></pre>
+
+        <h3>Polymorfisme</h3>
+        <p>Doordat we zeker weten dat elke <code>Player</code> de methode <code>makeDecision</code> heeft (dankzij de abstracte definitie), kunnen we polymorfisme toepassen in de Game loop.</p>
+
+        <div class="info-box">
+            <p><strong>Polymorfisme</strong> betekent dat verschillende objecten (Human, Dealer) reageren op dezelfde methode-aanroep (<code>makeDecision</code>), maar elk hun eigen unieke gedrag vertonen.</p>
+        </div>
+
+        <h3>User Interface Workflow</h3>
+        <p>In deze module heb je ook geleerd hoe je input van de gebruiker (via formulieren) koppelt aan je objecten.</p>
+
+        <ol>
+            <li><strong>View (HTML):</strong> Gebruiker kiest een actie in een <code>&lt;form&gt;</code>.</li>
+            <li><strong>Controller (PHP):</strong> Vangt <code>$_POST</code> op.</li>
+            <li><strong>Setter:</strong> Controller geeft de keuze door aan het object: <code>$human->setNextAction(...)</code>.</li>
+            <li><strong>Polymorfe Call:</strong> Controller roept <code>$game->playRound()</code> aan, die intern <code>makeDecision()</code> gebruikt.</li>
+        </ol>
+
+
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

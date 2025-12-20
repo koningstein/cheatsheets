@@ -83,21 +83,6 @@
             <p>Als je in <code>index.php</code> probeert om <code>$dealer->calculateHandValue()</code> direct aan te roepen, krijg je een <strong>Fatal Error</strong>. En dat is goed! Je dwingt de programmeur om de nette publieke methodes (zoals <code>getScore</code>) te gebruiken, terwijl de Dealer intern wel bij de rekenmachine kan.</p>
         </div>
 
-        <h3>Toepassing in de RPG Opdracht</h3>
-        <p>In de opdracht voor deze module ga je dit principe gebruiken om stats aan te passen. Je maakt een protected methode <code>modifyTemporaryStats</code> in de Parent (Character). De Child classes (zoals Warrior en Mage) roepen deze methode aan om zichzelf buffs te geven.</p>
-
-        <pre><code class="language-php">// In Character (Parent)
-protected function modifyTemporaryStats(int $attackMod, int $defenseMod): void {
-    $this->tempAttack += $attackMod;
-    $this->tempDefense += $defenseMod;
-}
-
-// In Warrior (Child)
-public function goBerserk() {
-    // Warrior weet niet HOE de stats werken, hij vraagt gewoon om een boost
-    // via de protected methode van zijn ouder.
-    $this->modifyTemporaryStats(10, -5);
-}</code></pre>
 
     </main>
 

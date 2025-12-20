@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setters (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Setters: De Poortwachters</h1>
+
+        <p>In de vorige lessen heb je geleerd hoe je properties (eigenschappen) van een object kunt aanpassen. Je deed dat waarschijnlijk zo:</p>
+        <pre><code class="language-php">$card->points = 10;</code></pre>
+        <p>Dat werkt prima, maar er zit een groot risico aan. Wat als iemand (of jijzelf per ongeluk) dit doet?</p>
+        <pre><code class="language-php">$card->points = -500; // Fout! Een kaart kan geen minpunten hebben.
+$card->points = "Banaan"; // Fout! Punten moeten een getal zijn.</code></pre>
+        <p>Als je dit toelaat, crasht je hele Blackjack spel. Om dit te voorkomen, gebruiken we <strong>Setters</strong>.</p>
+
+        <h3>Wat is een Setter?</h3>
+        <p>Een setter is een methode (functie) die als enige taak heeft: <strong>een waarde veilig opslaan</strong>. In plaats van dat je direct de property aanpast, vraag je aan de setter of hij het voor je wil doen.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Discotheek</h3>
+            <p>Stel je een discotheek voor.</p>
+            <ul>
+                <li><strong>Zonder Setter:</strong> De achterdeur staat open. Iedereen kan zomaar naar binnen lopen, ook mensen die te jong zijn of wapens bij zich hebben. Het wordt een chaos.</li>
+                <li><strong>Met Setter:</strong> Er staat een beveiliger (de Portier) bij de deur. Hij controleert je ID en fouilleert je.
+                    <ul>
+                        <li>Is alles goed? Dan laat hij je binnen (slaat de waarde op).</li>
+                        <li>Klopt er iets niet? Dan stuurt hij je weg (geeft een foutmelding).</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <h3>Waarom doen we dit? (Validatie)</h3>
+        <p>In Blackjack zijn er regels. Een kaart kan bijvoorbeeld nooit meer dan 11 punten waard zijn (een Aas is 11, Plaatjes zijn 10). Als we direct toegang geven tot de property <code>$points</code>, kunnen we die regel niet afdwingen.</p>
+        <p>Met een setter bouwen we een controle in. Dit noemen we <strong>validatie</strong>.</p>
+
+        <h3>Stap voor Stap: Een Setter bouwen</h3>
+        <p>We gaan nu een methode maken die de punten van een kaart veilig opslaat. De naam van zo'n methode begint altijd met <code>set</code>, gevolgd door de naam van de property (bijv. <code>setPoints</code>).</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $points;
+
+    // De Setter methode
+    public function setPoints($incomingPoints)
+    {
+        // Stap 1: Controleer op negatieve getallen
+        if ($incomingPoints < 0) {
+            return "Error: Punten mogen niet negatief zijn!";
+        }
+
+        // Stap 2: Controleer op te hoge getallen (max 11 in Blackjack)
+        if ($incomingPoints > 11) {
+            return "Error: Punten mogen niet hoger zijn dan 11!";
+        }
+
+        // Stap 3: Alles is veilig! Sla de waarde op in het object.
+        $this->points = $incomingPoints;
+
+        // Stap 4: Geef een bevestiging terug
+        return "Succes: Punten zijn ingesteld op " . $incomingPoints;
+    }
+}</code></pre>
+
+        <h3>Wat gebeurt hier precies?</h3>
+        <p>Laten we de code hierboven ontleden:</p>
+        <ol>
+            <li><strong>De Input:</strong> De methode krijgt een waarde binnen (`$incomingPoints`).</li>
+            <li><strong>De Poortwachter (If-statements):</strong> We kijken of de waarde aan de regels voldoet. Zo niet, dan stoppen we direct en geven we een foutmelding terug (`return`).</li>
+            <li><strong>De Opslag:</strong> Pas als alle checks voorbij zijn, gebruiken we <code>$this->points = ...</code> om de waarde echt op te slaan.</li>
+        </ol>
+
+        <h3>De Setter gebruiken</h3>
+        <p>Nu we de setter hebben gemaakt, moeten we onszelf aanleren om <strong>nooit meer</strong> direct de property aan te passen. We gebruiken voortaan altijd de methode.</p>
+
+        <pre><code class="language-php">$myCard = new Card();
+
+// SCENARIO 1: We proberen iets illegaals
+$bericht = $myCard->setPoints(50);
+echo $bericht;
+// Output: "Error: Punten mogen niet hoger zijn dan 11!"
+// (De waarde in $myCard->points is nog steeds leeg/niet veranderd)
+
+echo "&lt;br&gt;";
+
+// SCENARIO 2: We doen het goed
+$bericht = $myCard->setPoints(10);
+echo $bericht;
+// Output: "Succes: Punten zijn ingesteld op 10"
+// (De waarde is nu veilig opgeslagen)</code></pre>
+
+        <div class="info-box">
+            <h3>Tip: Feedback is belangrijk</h3>
+            <p>In het voorbeeld hierboven laten we de setter een tekst (string) teruggeven. Zo weet de rest van je programma of het gelukt is. In latere modules leer je nog betere manieren om fouten te melden (zoals Exceptions), maar voor nu is een duidelijk tekstbericht prima.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan?</h3>
+        <p>Een veelgemaakte fout is dat studenten de setter wel <em>maken</em>, maar hem vervolgens vergeten te <em>gebruiken</em>.</p>
+        <pre><code class="language-php">$card = new Card();
+$card->setPoints(500); // De setter zegt "Error", maar slaat niks op.
+$card->points = 500;   // Oeps! Je hebt de beveiliger genegeerd en bent via de achterdeur gegaan.</code></pre>
+        <p>In de volgende module gaan we die "achterdeur" definitief dichtmetselen (met <code>private</code>), zodat je wel verplicht bent om de setter te gebruiken.</p>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Setters</strong> beschermen je object tegen foute data.</li>
+            <li>Je voert <strong>validatie</strong> (controles) uit voordat je opslaat.</li>
+            <li>Je gebruikt <code>$this->property = $waarde</code> pas als je zeker weet dat de waarde goed is.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

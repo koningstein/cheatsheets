@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Objecten bewaren in $_SESSION - OOP PHP Module 4</title>
+    <title>Objecten in $_SESSION - OOP PHP Module 4</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,262 +18,67 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Objecten bewaren in $_SESSION</h1>
+        <h1>Objecten in $_SESSION</h1>
 
-        <div class="info-box">
-            <h3>Het probleem: objecten verdwijnen</h3>
-            <p>Als een gebruiker een object aanmaakt (bijvoorbeeld een speler), bestaat dat object alleen tijdens dat ene verzoek. Zodra de pagina opnieuw laadt, is het object weg.</p>
+        <p>Normaal gesproken wordt een PHP-object vernietigd zodra de pagina is geladen. Om objecten te onthouden (zoals een lijst met spelers), slaan we ze op in <code>$_SESSION</code>.</p>
 
-            <pre><code class="language-php">// Verzoek 1: speler aanmaken
-$player = new Player("John", 1000);
+        <h3>1. De Gouden Regel (Volgorde)</h3>
+        <p>Omdat je objecten opslaat, moet PHP eerst weten hoe de Class eruitziet <strong>voordat</strong> hij de sessie opent. Doe je dit verkeerd, dan krijg je een foutmelding (<code>__PHP_Incomplete_Class</code>).</p>
 
-// Verzoek 2: speler is weg!
-// $player bestaat niet meer</code></pre>
-        </div>
+        <pre><code class="language-php">// 1. EERST de classes laden
+require 'vendor/autoload.php';
+use Blackjack\Game;
 
+// 2. DAARNA pas de sessie starten
+session_start();</code></pre>
 
+        <h3>2. Een Container Class maken</h3>
+        <p>Sla liever niet allemaal losse objecten op in de sessie. Maak één "Hoofd Class" (bijv. <code>Game</code> of <code>PlayerList</code>) die een array van objecten bevat.</p>
 
-        <div class="info-box">
-            <h3>De oplossing: $_SESSION</h3>
-            <p>Met <code>$_SESSION</code> kun je data (inclusief objecten) bewaren tussen verschillende pagina-aanvragen. PHP slaat deze data op de server op en koppelt het aan de gebruiker via een unieke session ID.</p>
-
-            <pre><code class="language-php">// Verzoek 1: speler opslaan
-$_SESSION['player'] = $player;
-
-// Verzoek 2: speler ophalen
-$player = $_SESSION['player'];
-// Nu kun je de speler weer gebruiken!</code></pre>
-        </div>
-
-        <h3>session_start()</h3>
-
-        <div class="info-box">
-            <p>Voor je $_SESSION kunt gebruiken, moet je <code>session_start()</code> aanroepen. Dit moet altijd <strong>helemaal bovenaan</strong> je script staan, na de require en use statements.</p>
-
-            <p><strong>Waarom na autoload en use?</strong></p>
-            <p>Als je objecten opslaat in $_SESSION, serialiseert PHP deze objecten (zet ze om naar een string). Bij het ophalen moet PHP weten wat voor type object het is om het te kunnen deserialiseren. Als je <code>session_start()</code> aanroept <em>voordat</em> de class definities zijn geladen (via autoload), herkent PHP de objecten niet. Je krijgt dan een <code>__PHP_Incomplete_Class</code> foutmelding.</p>
-        </div>
-
-
-
-        <div class="info-box">
-            <p><strong>De juiste volgorde:</strong></p>
-            <ol>
-                <li><code>require_once 'vendor/autoload.php'</code> - Laad autoloader</li>
-                <li><code>use</code> statements - Importeer benodigde classes</li>
-                <li><code>session_start()</code> - Start sessie (nu kent PHP alle classes)</li>
-            </ol>
-        </div>
-
-        <pre><code class="language-php">&lt;?php
-require_once 'vendor/autoload.php';
-
-use Smarty\Smarty;
-use Game\PlayerList;
-
-// Start sessie NA autoload en use statements
-session_start();
-
-// Rest van de code...
-</code></pre>
-
-        <div class="info-box">
-            <h3>Waarschuwing</h3>
-            <p><code>session_start()</code> moet worden aangeroepen <em>voordat</em> er output naar de browser wordt gestuurd. Dus geen echo, HTML, of witruimte vóór deze regel!</p>
-        </div>
-
-        <h3>Class met array van objecten</h3>
-
-        <div class="info-box">
-            <p>In plaats van losse objecten op te slaan, maak je een class die meerdere objecten in een array bewaart. Dit houdt je code overzichtelijk.</p>
-
-            <p><strong>Voordelen:</strong></p>
-            <ul>
-                <li>Alle objecten staan op één plek</li>
-                <li>Je hoeft maar één ding op te slaan in de sessie</li>
-                <li>Je kunt methodes maken om objecten toe te voegen, op te halen, etc.</li>
-            </ul>
-        </div>
-
-
-
-        <h4>Voorbeeld: PlayerList class</h4>
-        <pre><code class="language-php">&lt;?php
-
-namespace Game;
-
-/**
- * Class PlayerList
- * Bewaart meerdere Player objecten in een array
- */
-class PlayerList
+        <pre><code class="language-php">class PlayerList
 {
-    /**
-     * @var Player[] Array van Player objecten
-     */
+    // Hierin bewaren we alle spelers
     private array $players = [];
 
-    /**
-     * Voeg een speler toe aan de lijst
-     *
-     * @param Player $player De speler om toe te voegen
-     * @return string Bevestigingsbericht
-     */
-    public function addPlayer(Player $player): string
+    public function addPlayer(Player $player)
     {
         $this->players[] = $player;
-        return "Player {$player->getName()} added to list";
     }
 
-    /**
-     * Haal alle spelers op
-     *
-     * @return Player[] Array met alle spelers
-     */
     public function getPlayers(): array
     {
         return $this->players;
     }
-
-    /**
-     * Tel het aantal spelers
-     *
-     * @return int Aantal spelers in de lijst
-     */
-    public function getTotalPlayers(): int
-    {
-        return count($this->players);
-    }
 }</code></pre>
 
+        <h3>3. De Workflow (index.php)</h3>
+        <p>In je hoofdbestand gebruik je altijd dit stappenplan:</p>
+
+        <pre><code class="language-php">// STAP A: Ophalen (of nieuw maken)
+// Bestaat de lijst al in de sessie? Haal hem op.
+// Zo niet (??), maak een nieuwe, lege lijst.
+$myList = $_SESSION['playerList'] ?? new PlayerList();
+
+// STAP B: Aanpassen
+// Bijvoorbeeld: nieuwe speler toevoegen uit formulier
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $p = new Player($_POST['name']);
+    $myList->addPlayer($p);
+}
+
+// STAP C: Opslaan
+// Zet de (gewijzigde) lijst terug in de sessie voor de volgende keer
+$_SESSION['playerList'] = $myList;</code></pre>
+
         <div class="info-box">
-            <h4>Belangrijke onderdelen:</h4>
+            <h3>Samenvatting</h3>
             <ul>
-                <li><code>private array $players = []</code> - Array om objecten in te bewaren</li>
-                <li><code>$this->players[]</code> - Voegt element toe aan einde van array</li>
-                <li><code>@var Player[]</code> - PHPDoc die aangeeft dat het een array van Player objecten is</li>
-                <li>Alle methodes hebben return types en PHPDoc commentaar</li>
+                <li><strong>Volgorde:</strong> Autoload &rarr; session_start().</li>
+                <li><strong>Opslaan:</strong> Stop objecten in een lijst/array in een class.</li>
+                <li><strong>Cyclus:</strong> Ophalen uit sessie &rarr; Wijzigen &rarr; Terugzetten in sessie.</li>
             </ul>
         </div>
 
-        <h3>Object ophalen of aanmaken</h3>
-
-        <div class="info-box">
-            <p>Bij elke request check je of er al een collection object in de sessie staat. Zo ja, dan gebruik je die. Zo nee, dan maak je een nieuwe aan.</p>
-        </div>
-
-        <pre><code class="language-php">// Haal PlayerList op uit sessie, of maak nieuwe aan
-$playerList = $_SESSION['playerList'] ?? new PlayerList();</code></pre>
-
-        <div class="info-box">
-            <h4>Null coalescing operator (??)</h4>
-            <p>De <code>??</code> operator checkt of de linker waarde bestaat en niet null is:</p>
-            <ul>
-                <li>Als <code>$_SESSION['playerList']</code> bestaat → gebruik die waarde</li>
-                <li>Als het niet bestaat of null is → gebruik de waarde rechts (nieuwe PlayerList)</li>
-            </ul>
-
-            <p>Dit is korter dan:</p>
-            <pre><code class="language-php">if (isset($_SESSION['playerList'])) {
-    $playerList = $_SESSION['playerList'];
-} else {
-    $playerList = new PlayerList();
-}</code></pre>
-        </div>
-
-        <h3>Objecten toevoegen aan de lijst</h3>
-
-        <div class="info-box">
-            <p>Als een nieuw object wordt aangemaakt (bijvoorbeeld via een formulier), voeg je het toe aan de PlayerList.</p>
-        </div>
-
-        <pre><code class="language-php">// Na het aanmaken van een Player object
-$player = new Player($_POST['name'], (int)$_POST['chips']);
-
-// Voeg toe aan de PlayerList
-$playerList->addPlayer($player);</code></pre>
-
-        <h3>PlayerList opslaan in sessie</h3>
-
-        <div class="info-box">
-            <p>Aan het <strong>einde</strong> van je index.php moet je de collection altijd terugzetten in de sessie. Dit zorgt ervoor dat alle wijzigingen bewaard blijven voor de volgende request.</p>
-        </div>
-
-        <pre><code class="language-php">// Aan het einde van index.php, na alle routing
-$_SESSION['playerList'] = $playerList;</code></pre>
-
-        <div class="info-box">
-            <h3>Belangrijk</h3>
-            <p>Dit moet altijd gebeuren, ook als er niets is gewijzigd aan de PlayerList. Anders gaan wijzigingen verloren.</p>
-        </div>
-
-        <h3>Objecten uit de lijst ophalen</h3>
-
-        <div class="info-box">
-            <p>Om alle objecten uit de collection te tonen, haal je ze op met een getter method en geef je ze door aan het template.</p>
-        </div>
-
-        <pre><code class="language-php">// Haal alle spelers op
-$players = $playerList->getPlayers();
-
-// Wijs toe aan template
-$template->assign('players', $players);
-$template->display('playerList.tpl');</code></pre>
-
-        <h4>Template met foreach loop</h4>
-        <pre><code class="language-php">{extends file="layout.tpl"}
-
-{block name="content"}
-    &lt;h1 class="mt-5"&gt;Player List&lt;/h1&gt;
-
-    {if count($players) > 0}
-        &lt;table class="table table-striped"&gt;
-            &lt;thead class="table-dark"&gt;
-                &lt;tr&gt;
-                    &lt;th&gt;#&lt;/th&gt;
-                    &lt;th&gt;Name&lt;/th&gt;
-                    &lt;th&gt;Chips&lt;/th&gt;
-                &lt;/tr&gt;
-            &lt;/thead&gt;
-            &lt;tbody&gt;
-                {foreach $players as $index => $player}
-                &lt;tr&gt;
-                    &lt;td&gt;{$index + 1}&lt;/td&gt;
-                    &lt;td&gt;{$player->getName()}&lt;/td&gt;
-                    &lt;td&gt;{$player->getChips()}&lt;/td&gt;
-                &lt;/tr&gt;
-                {/foreach}
-            &lt;/tbody&gt;
-        &lt;/table&gt;
-    {else}
-        &lt;div class="alert alert-info"&gt;
-            &lt;p&gt;No players yet. Create your first player!&lt;/p&gt;
-        &lt;/div&gt;
-    {/if}
-{/block}</code></pre>
-
-        <div class="info-box">
-            <h4>Smarty syntax:</h4>
-            <ul>
-                <li><code>{foreach $players as $player}</code> - Loop door array</li>
-                <li><code>{foreach $players as $index => $player}</code> - Loop met index (begint bij 0)</li>
-                <li><code>{if count($players) > 0}</code> - Check of array niet leeg is</li>
-                <li><code>{$index + 1}</code> - Berekeningen zijn mogelijk</li>
-            </ul>
-        </div>
-
-        <div class="info-box">
-            <h3>Belangrijke punten</h3>
-            <ul>
-                <li><code>session_start()</code> moet bovenaan, na require/use statements</li>
-                <li>Als session_start() te vroeg, herkent PHP de objecten niet (__PHP_Incomplete_Class)</li>
-                <li>Maak een class met een array om meerdere objecten te bewaren</li>
-                <li>Gebruik null coalescing operator: <code>$_SESSION['key'] ?? default</code></li>
-                <li>Sla de lijst <strong>altijd</strong> op aan het einde van het script</li>
-                <li>Elke gebruiker heeft zijn eigen sessie (onafhankelijk)</li>
-                <li>Gebruik PHPDoc en type hints in je classes</li>
-            </ul>
-        </div>
     </main>
 
     <aside class="sidebar-right">

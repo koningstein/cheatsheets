@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Datatypes (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Property Datatypes: Etiketten plakken</h1>
+
+        <p>In de vorige lessen heb je geleerd hoe je properties (eigenschappen) maakt. Dat deed je vaak zo:</p>
+        <pre><code class="language-php">public $score;</code></pre>
+        <p>Dit werkt, maar het is een beetje slordig. PHP weet namelijk niet wat voor soort data erin hoort. Is het een getal? Een stuk tekst? Een hele lijst?</p>
+        <p>Vanaf nu gaan we <strong>etiketten plakken</strong>. We vertellen PHP precies wat er in een variabele mag zitten. Dit noemen we <em>Typed Properties</em>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Keukenkastjes</h3>
+            <p>Stel je voor dat je de keuken inruimt.</p>
+            <ul>
+                <li><strong>Zonder Types:</strong> Je hebt een pot waar "Spul" op staat. Je kunt er suiker in doen, maar je broertje kan er per ongeluk zout in gooien. Resultaat: vieze koffie.</li>
+                <li><strong>Met Types:</strong> Je hebt een pot waar met grote letters "SUIKER" op staat. Als iemand er zout in probeert te doen, zeg jij: "Ho, stop! Dat past niet bij het etiket."</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Hoe werkt het?</h3>
+        <p>Je zet het type data (het etiket) tussen het woordje <code>public</code> (of private) en de naam van de variabele.</p>
+
+        <pre><code class="language-php">class Player
+{
+    // Hier mag ALLEEN een heel getal in (bijv. 10 of 100)
+    public int $score;
+
+    // Hier mag ALLEEN tekst in (bijv. "Sjaak")
+    public string $name;
+
+    // Hier mag ALLEEN waar/niet-waar in
+    public bool $isActive;
+}</code></pre>
+
+        <h3>Waarom doen we dit?</h3>
+        <p>Misschien denk je: "Wat maakt het uit?" Maar in grote applicaties is dit levensreddend.</p>
+        <ul>
+            <li><strong>Zekerheid:</strong> Als jij de property <code>$score</code> gebruikt, weet je 100% zeker dat het een getal is. Je kunt er dus veilig mee rekenen.</li>
+            <li><strong>Vroegtijdige foutmeldingen:</strong> Als je per ongeluk tekst in een getal-veld stopt, geeft PHP direct een foutmelding (TypeError). Dat klinkt vervelend, maar het is beter dat je programma crasht tijdens het bouwen, dan dat het stiekem verkeerd rekent tijdens het spel.</li>
+        </ul>
+
+        <h3>Nullable Properties (Het vraagteken)</h3>
+        <p>Soms heb je een property die in het begin nog leeg is. Denk aan de winnaar van een potje Blackjack.</p>
+        <ul>
+            <li>Als het spel begint, is er nog <strong>geen</strong> winnaar (<code>null</code>).</li>
+            <li>Als het spel klaar is, is de winnaar een <strong>tekst</strong> (bijv. "Dealer").</li>
+        </ul>
+        <p>Om te zeggen: "Het moet tekst zijn, OF het mag leeg zijn", gebruiken we een vraagteken <code>?</code> voor het type.</p>
+
+        <pre><code class="language-php">class Game
+{
+    // ?string betekent: Het is een string, of het is null.
+    public ?string $winner = null;
+
+    public function setWinner(string $name)
+    {
+        $this->winner = $name;
+    }
+}</code></pre>
+
+        <h3>Readonly Properties (Alleen-lezen)</h3>
+        <p>Soms heb je gegevens die <strong>nooit meer mogen veranderen</strong> nadat ze zijn ingesteld. Denk aan je geboortedatum of je BSN-nummer.</p>
+        <p>In PHP gebruik je hiervoor het woord <code>readonly</code>. Dit betekent: je mag het één keer instellen (bij het maken van het object), en daarna staat het vast.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Tatoeage vs. Make-up</h3>
+            <ul>
+                <li><strong>Gewone Property:</strong> Make-up. Je doet het op, haalt het weg, en doet iets anders op. Het kan altijd veranderen.</li>
+                <li><strong>Readonly Property:</strong> Een tatoeage. Je laat hem zetten (bij het aanmaken), en daarna zit hij er voor altijd. Je kunt hem niet even veranderen.</li>
+            </ul>
+        </div>
+
+        <pre><code class="language-php">class GameSession
+{
+    // Het ID van het spel mag nooit veranderen, anders raken we de score kwijt!
+    public readonly int $id;
+
+    public function __construct(int $id)
+    {
+        // Dit is het enige moment dat we $id mogen vullen
+        $this->id = $id;
+    }
+}
+
+$game = new GameSession(55);
+// $game->id = 56; // FOUT! PHP zegt: Dit mag niet, het is readonly.</code></pre>
+
+        <h3>Wat kan er fout gaan?</h3>
+
+        <h4>1. Readonly met standaardwaarde</h4>
+        <p>Je mag bij <code>readonly</code> geen standaardwaarde (default value) geven bij de declaratie.</p>
+        <pre><code class="language-php">// FOUT:
+public readonly string $status = "Start";
+
+// GOED:
+public readonly string $status; // Vul hem in de constructor</code></pre>
+
+        <h4>2. Verkeerd type toewijzen</h4>
+        <p>Als je zegt dat iets een <code>int</code> is, en je stopt er <code>"tien"</code> (tekst) in, krijg je een <strong>Fatal Error</strong>.</p>
+
+        <h3>Stap voor Stap: De veilige Card class</h3>
+        <p>Laten we alles combineren in een modern voorbeeld voor ons kaartspel.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Suit en Value mogen na het maken van de kaart niet meer veranderen.
+    // Een Harten Aas wordt nooit ineens een Schoppen Boer.
+    // Daarom maken we ze readonly.
+
+    public readonly string $suit;
+    public readonly string $value;
+
+    // De kaart kan open of dicht liggen. Dit verandert wel, dus GEEN readonly.
+    // Het is wel altijd true of false (bool).
+    public bool $isFaceUp = false;
+
+    public function __construct(string $suit, string $value)
+    {
+        $this->suit = $suit;
+        $this->value = $value;
+    }
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

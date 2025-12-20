@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debuggen met PHPStorm en Xdebug (Uitgebreid) - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Debuggen: Zet het licht aan</h1>
+
+        <p>Tot nu toe heb je waarschijnlijk <code>var_dump()</code> of <code>echo</code> gebruikt om te kijken wat er in een variabele zit. Dat werkt, maar het is een beetje als sleutelen aan een auto in het donker. Je gokt waar het probleem zit.</p>
+        <p>In deze module leer je werken met <strong>Xdebug</strong>. Dit is een tool waarmee je de code tijdelijk kunt <strong>pauzeren</strong> terwijl hij draait. Zo kun je in alle rust rondkijken.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Beveiligingscamera</h3>
+            <ul>
+                <li><strong>var_dump():</strong> Je maakt een foto van de plaats delict. Je ziet alleen het resultaat (de rommel), maar niet wie het gedaan heeft.</li>
+                <li><strong>Xdebug:</strong> Je hebt een videocamera. Je kunt de beelden frame voor frame afspelen, terugspoelen en pauzeren. Je ziet precies <em>wanneer</em> en <em>waarom</em> het misging.</li>
+            </ul>
+        </div>
+
+        <h3>Deel 1: De Driehoek van Debuggen</h3>
+        <p>Om te kunnen debuggen moeten drie programma's met elkaar samenwerken. Dit is vaak het lastigste stukje, dus lees goed:</p>
+        <ol>
+            <li><strong>De Server (Wamp/XAMPP):</strong> Hier draait PHP. Die moet weten dat hij pauzes mag inlassen.</li>
+            <li><strong>De Browser (Chrome/Firefox):</strong> Die moet het signaal geven: "Nu wil ik debuggen!".</li>
+            <li><strong>De Editor (PHPStorm):</strong> Die moet het telefoontje aannemen en de code tonen.</li>
+        </ol>
+
+
+
+        <h3>Deel 2: Installatie & Configuratie</h3>
+        <p>We gaan dit stap voor stap instellen. Je hoeft dit meestal maar één keer te doen.</p>
+
+        <h4>Stap A: Xdebug aanzetten in WampServer</h4>
+        <p>PHP heeft Xdebug standaard in huis, maar het staat vaak uit omdat het de server iets trager maakt.</p>
+        <ul>
+            <li>Klik op het groene <strong>WampServer icoontje</strong> in je taakbalk.</li>
+            <li>Ga naar het menu <strong>PHP</strong>.</li>
+            <li>Ga naar <strong>PHP Extensions</strong>.</li>
+            <li>Zoek in de lijst naar <strong>xdebug</strong> en klik erop zodat er een vinkje ✔️ voor staat.</li>
+        </ul>
+
+        <h4>Stap B: De instellingen (php.ini)</h4>
+        <p>Soms staat de extensie aan, maar weet hij niet wat hij moet doen. We moeten de "modus" goed zetten.</p>
+        <ul>
+            <li>Klik weer op WampServer -> <strong>PHP</strong>.</li>
+            <li>Klik op <strong>php.ini</strong>. Er opent nu een kladblok-bestand.</li>
+            <li>Gebruik <code>Ctrl + F</code> om te zoeken naar: <code>[xdebug]</code>.</li>
+            <li>Zoek de regel met <code>xdebug.mode</code>. Zorg dat deze er zo uitziet:</li>
+        </ul>
+        <pre><code class="language-ini">xdebug.mode = debug</code></pre>
+        <p><em>Sla het bestand op en herstart WampServer (Restart All Services).</em></p>
+
+        <h4>Stap C: De Browser Helper</h4>
+        <p>Je browser heeft een knop nodig om tegen de server te zeggen: "Ik ben een developer, start de debugger!".</p>
+        <ul>
+            <li>Installeer de extensie <strong>Xdebug Helper</strong> (voor Chrome of Firefox).</li>
+            <li>Je ziet nu een grijs beestje (insect/bug) in je adresbalk.</li>
+            <li>Klik erop en kies <strong>Debug</strong>. Het beestje wordt groen 🟢.</li>
+        </ul>
+
+        <hr>
+
+        <h3>Deel 3: Je eerste debug sessie</h3>
+        <p>Alles is ingesteld. Tijd om de magie te zien.</p>
+
+        <h4>1. Het Breakpoint (Het Stopbord)</h4>
+        <p>Je moet PHPStorm vertellen <em>waar</em> hij moet stoppen. Dit doe je met een <strong>Breakpoint</strong>.</p>
+        <ul>
+            <li>Open <code>index.php</code> in PHPStorm.</li>
+            <li>Klik in de grijze balk <strong>naast</strong> een regelnummer (bijvoorbeeld regel 10).</li>
+            <li>Er verschijnt een rode bol 🔴. Dit is je stopbord.</li>
+        </ul>
+
+        <h4>2. De Telefoon opnemen</h4>
+        <p>PHPStorm moet "luisteren" naar inkomende verbindingen van je browser. Rechtsboven in PHPStorm zie je een icoontje van een telefoonhoorn.</p>
+        <ul>
+            <li>Klik op de telefoonhoorn met het rode verbodsbordje.</li>
+            <li>Hij wordt nu groen met golfjes ernaast 🟢. PHPStorm luistert nu.</li>
+        </ul>
+
+        <h4>3. De Actie</h4>
+        <p>Ga naar je browser en ververs de pagina (F5).
+            <br><strong>BAM!</strong> Je browser blijft laden (draaiend cirkeltje), en PHPStorm springt naar de voorgrond. De regel met de rode bol is nu blauw geworden. De tijd staat stil.</p>
+
+
+
+        <h3>Deel 4: Navigeren door de tijd (F7 vs F8)</h3>
+        <p>Nu de code stilstaat, ben jij de baas. Je hebt een paar knoppen om de code stapje voor stapje verder te laten gaan. Het verschil tussen deze knoppen is cruciaal.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Knop</th>
+                    <th>Naam</th>
+                    <th>Uitleg</th>
+                    <th>Wanneer gebruiken?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>F8</strong></td>
+                    <td>Step Over<br>(Stap Over)</td>
+                    <td>Voer de regel uit, maar <strong>sla details over</strong>. Als er een functie staat, doet hij die functie wel, maar hij laat je niet zien hoe.</td>
+                    <td>Als je de functie vertrouwt (bijv. <code>shuffle()</code> van PHP zelf) en gewoon naar de volgende regel wilt.</td>
+                </tr>
+                <tr>
+                    <td><strong>F7</strong></td>
+                    <td>Step Into<br>(Stap In)</td>
+                    <td>Duik <strong>in</strong> de functie. Je springt naar het bestand waar die functie staat.</td>
+                    <td>Als je wilt zien <em>hoe</em> jouw eigen methode (bijv. <code>dealCard()</code>) precies werkt.</td>
+                </tr>
+                <tr>
+                    <td><strong>F9</strong></td>
+                    <td>Resume<br>(Hervatten)</td>
+                    <td>Haal de pauze eraf. De code rent door tot het volgende rode breakpoint (of tot het einde).</td>
+                    <td>Als je klaar bent met kijken en verder wilt.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box">
+            <h3>Voorbeeld: F7 of F8?</h3>
+            <pre><code class="language-php">$deck->shuffle();      // Regel A
+$player->addCard();    // Regel B</code></pre>
+            <p>Stel je staat op Regel A:</p>
+            <ul>
+                <li>Druk je <strong>F8 (Over)</strong>? Dan worden de kaarten geschud en spring je direct naar Regel B.</li>
+                <li>Druk je <strong>F7 (Into)</strong>? Dan spring je naar het bestand <code>Deck.php</code>, midden in de <code>shuffle</code> functie.</li>
+            </ul>
+        </div>
+
+        <h3>Deel 5: De Waarheid zien (Variables)</h3>
+        <p>Dit is waarom we debuggen. Onderaan in PHPStorm zie je het tabblad <strong>Variables</strong>.</p>
+        <p>Hier zie je de <em>echte</em> waarden van alle variabelen op dit exacte moment.</p>
+        <ul>
+            <li>Is <code>$score</code> stiekem een string ("21") in plaats van een int (21)? Hier zie je het.</li>
+            <li>Zit er een <code>Card</code> object in de array, of is het <code>null</code>? Hier zie je het.</li>
+        </ul>
+        <p>Je kunt pijltjes <code>></code> openklappen om diep in objecten te kijken. Je kunt zelfs zien wat <code>$this</code> is!</p>
+
+        <h3>Problemen oplossen (Troubleshooting)</h3>
+        <p>Werkt het niet? Check deze lijst:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Probleem</th>
+                    <th>Oplossing</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>De browser laadt gewoon door, PHPStorm doet niks.</td>
+                    <td>1. Staat de "telefoon" in PHPStorm op groen?<br>2. Staat het "beestje" in Chrome op groen (Debug)?<br>3. Heb je wel een Rood Breakpoint gezet?</td>
+                </tr>
+                <tr>
+                    <td>Ik zie "Waiting for incoming connection".</td>
+                    <td>Klik op "Accept". Dit is de eerste keer dat ze elkaar ontmoeten.</td>
+                </tr>
+                <tr>
+                    <td>WampServer instellingen werken niet.</td>
+                    <td>Heb je WampServer herstart na het wijzigen van php.ini? (Rechtermuisknop -> Refresh werkt niet, je moet echt "Restart All Services" doen).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

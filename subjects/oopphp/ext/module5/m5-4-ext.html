@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected & Wrappers (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Protected properties & wrappers</h1>
+
+        <p>In de vorige les hebben we Inheritance (overerving) geleerd. We hebben een Parent (Player) en een Child (Dealer). Dit werkt geweldig, maar we lopen tegen een beveiligingsprobleem aan.</p>
+
+        <h3>Het Probleem met Private</h3>
+        <p>Tot nu toe hebben we geleerd: <em>"Maak properties altijd private."</em></p>
+        <p>Maar <code>private</code> is wel heel erg streng. Het betekent: "Alleen IK mag hierbij. Niemand anders."</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Dagboek</h3>
+            <p>Stel je voor dat de <code>Player</code> (de Ouder) een dagboek heeft. Hij heeft dit <code>private</code> gemaakt.</p>
+            <ul>
+                <li>Mag de buurman het lezen? <strong>Nee.</strong></li>
+                <li>Mag zijn eigen kind (de <code>Dealer</code>) het lezen? <strong>Nee!</strong></li>
+            </ul>
+            <p>Bij <code>private</code> blijven de deuren zelfs gesloten voor je eigen kinderen.</p>
+        </div>
+
+        <h3>Het gevolg in code</h3>
+        <p>Kijk wat er gebeurt als de Dealer (het kind) probeert de kaarten (<code>$hand</code>) van de Player (de ouder) te lezen:</p>
+
+        <pre><code class="language-php">class Player {
+    // Private: Alleen Player.php mag hierbij!
+    private array $hand = [];
+}
+
+class Dealer extends Player {
+    public function showFirstCard() {
+        // FOUTMELDING!
+        // De Dealer mag niet bij $this->hand komen, want die is private in Player.
+        return $this->hand[0];
+    }
+}</code></pre>
+
+        <h3>De Oplossing: Protected</h3>
+        <p>We hebben een middenweg nodig. We willen dat de buitenwereld (index.php) er niet bij kan, maar de kinderen (Dealer) wel.</p>
+        <p>Dit heet <strong>protected</strong>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het WiFi-wachtwoord</h3>
+            <p>Denk aan het WiFi-wachtwoord van je huis.</p>
+            <ul>
+                <li>Mag de buurman (Buitenwereld) het weten? <strong>Nee.</strong></li>
+                <li>Mag jij (Ouder) het weten? <strong>Ja.</strong></li>
+                <li>Mogen je kinderen (Child) het weten? <strong>Ja!</strong></li>
+            </ul>
+            <p>Het is een "familiegeheim".</p>
+        </div>
+
+        <p>Laten we de code aanpassen. We veranderen <code>private</code> naar <code>protected</code> in de Parent:</p>
+
+        <pre><code class="language-php">class Player {
+    // Protected: Verboden voor vreemden, toegestaan voor familie
+    protected array $hand = [];
+}
+
+class Dealer extends Player {
+    public function showFirstCard() {
+        // NU WERKT HET WEL!
+        // De Dealer is familie, dus hij mag bij $this->hand.
+        return $this->hand[0];
+    }
+}</code></pre>
+
+        <h3>Overzicht van Toegang (Visibility)</h3>
+        <p>Hier zie je de drie niveaus op een rij. Dit tabelletje moet je goed uit je hoofd leren.</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Keyword</th>
+                    <th>De Class zelf</th>
+                    <th>De Kinderen (extends)</th>
+                    <th>De Buitenwereld (index.php)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>public</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja (Openbaar park)</td>
+                </tr>
+                <tr>
+                    <td><code>protected</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee (Familiehuis)</td>
+                </tr>
+                <tr>
+                    <td><code>private</code></td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                    <td>❌ Nee (Kluis)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Wrapper Methods: Veilig naar buiten</h3>
+        <p>Nu denk je misschien: <em>"Waarom maken we niet gewoon alles public? Dat is toch makkelijker?"</em></p>
+        <p>Nee! Als je de kaarten (<code>$hand</code>) public maakt, kan iemand in <code>index.php</code> valsspelen door er stiekem een Aas bij te stoppen. We willen de data beschermen (Encapsulation).</p>
+
+        <p>Maar soms moet de buitenwereld wel <em>iets</em> weten. Bijvoorbeeld de totaalscore. Hiervoor gebruiken we een <strong>Wrapper Method</strong>.</p>
+
+        <div class="info-box">
+            <h3>Nieuwe Vergelijking: De Bankmedewerker</h3>
+            <p>Stel je voor dat de class een <strong>Bank</strong> is.</p>
+            <ul>
+                <li>De kluis met goud is <code>protected</code> (alleen voor bankmedewerkers).</li>
+                <li>De klant (Buitenwereld) kan niet zomaar de kluis inlopen om geld te pakken.</li>
+                <li>De klant moet naar de baliemedewerker (een <strong>Public Wrapper Method</strong>) gaan.</li>
+            </ul>
+            <p>De medewerker (de functie <code>geldOpnemen()</code>) doet eerst een check: "Heb je wel genoeg saldo?". Pas als dat klopt, haalt hij het geld uit de kluis en geeft het aan jou.</p>
+        </div>
+
+
+
+        <h4>Voorbeeld: Score berekenen</h4>
+        <p>De hand is <code>protected</code>. Niemand mag de kaarten zien of aanraken. Maar we willen wel de score weten.</p>
+
+        <pre><code class="language-php">class Player {
+    protected array $hand = [];
+
+    // Deze methode is PUBLIC.
+    // Hij fungeert als het loket waar de buitenwereld informatie mag vragen.
+    public function getScore(): int {
+        // Omdat deze functie IN de class staat, mag hij bij de protected $hand.
+        $score = 0;
+        foreach ($this->hand as $card) {
+            $score += $card->getValue();
+        }
+        return $score;
+    }
+}
+
+// In index.php:
+$player = new Player();
+// echo $player->hand; // FOUT! Mag niet (Klant mag niet in kluis).
+echo $player->getScore(); // GOED! Via de wrapper methode (Vraag het de medewerker).</code></pre>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Gebruik <code>private</code> als echt niemand anders de variabele mag aanraken.</li>
+            <li>Gebruik <code>protected</code> als je kinderen (subclasses) de variabele moeten kunnen gebruiken.</li>
+            <li>Gebruik <strong>Wrapper Methods</strong> (public functions) om op een veilige manier data uit een protected variabele naar buiten te brengen.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

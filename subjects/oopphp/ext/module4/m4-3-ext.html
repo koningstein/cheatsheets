@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout met Bootstrap - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Layout met Bootstrap - Sticky Footer Navbar</h1>
+
+        <div class="info-box">
+            <h3>Wat is Bootstrap?</h3>
+            <p>Bootstrap is een populair front-end framework waarmee je snel professionele en responsive websites kunt bouwen. Het biedt:</p>
+            <ul>
+                <li><strong>Voorgedefinieerde CSS-classes</strong> voor typografie, knoppen, formulieren, tabellen, etc.</li>
+                <li><strong>Responsive grid systeem</strong> voor verschillende schermformaten</li>
+                <li><strong>JavaScript componenten</strong> zoals modals, dropdowns en carousels</li>
+                <li><strong>Consistente styling</strong> zonder zelf veel CSS te schrijven</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Sticky Footer Navbar</h3>
+        <p>De Sticky Footer Navbar is een veelgebruikt layout patroon waarbij:</p>
+        <ul>
+            <li>De <strong>navigatiebalk</strong> bovenaan blijft plakken tijdens scrollen</li>
+            <li>De <strong>footer</strong> altijd onderaan staat, ook bij weinig content</li>
+            <li>De <strong>main content</strong> zich tussen header en footer bevindt</li>
+        </ul>
+
+
+
+        <h3>Stap 1: Bootstrap bestanden lokaal opslaan</h3>
+
+        <p>Eerst maken we de benodigde mappenstructuur en downloaden we de Bootstrap bestanden:</p>
+
+        <h4>Mappenstructuur aanmaken</h4>
+        <pre><code class="language-plaintext">templates/
+├── css/
+│   ├── bootstrap.min.css
+│   └── sticky-footer-navbar.css
+└── js/
+    ├── color-modes.js
+    └── bootstrap.bundle.min.js</code></pre>
+
+        <div class="info-box">
+            <h3>Let op</h3>
+            <p>Ga naar de <a href="https://getbootstrap.com/docs/5.3/examples/sticky-footer-navbar/" target="_blank">Bootstrap Sticky Footer Navbar voorbeeld</a> en bekijk de broncode om de bestanden te kopiëren.</p>
+        </div>
+
+        <h3>Stap 2: Layout template maken</h3>
+
+        <p>We maken een <code>layout.tpl</code> bestand dat als basis dient voor alle pagina's. Deze layout bevat de HTML structuur, Bootstrap bestanden en een Smarty block voor de content.</p>
+
+        <h4>templates/layout.tpl</h4>
+        <pre><code class="language-php">&lt;!doctype html&gt;
+&lt;html lang="nl"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;title&gt;Blackjack Game&lt;/title&gt;
+
+    &lt;!-- Bootstrap CSS --&gt;
+    &lt;link href="./templates/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;link href="./templates/css/sticky-footer-navbar.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body class="d-flex flex-column h-100"&gt;
+
+    &lt;!-- Navigatie --&gt;
+    &lt;nav class="navbar navbar-expand-md navbar-dark bg-dark"&gt;
+        &lt;div class="container-fluid"&gt;
+            &lt;a class="navbar-brand" href="index.php"&gt;Blackjack&lt;/a&gt;
+            &lt;button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarCollapse"&gt;
+                &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+            &lt;/button&gt;
+            &lt;div class="collapse navbar-collapse" id="navbarCollapse"&gt;
+                &lt;ul class="navbar-nav me-auto mb-2 mb-md-0"&gt;
+                    &lt;li class="nav-item"&gt;
+                        &lt;a class="nav-link" href="index.php"&gt;Home&lt;/a&gt;
+                    &lt;/li&gt;
+                    &lt;li class="nav-item"&gt;
+                        &lt;a class="nav-link" href="index.php?action=newGame"&gt;Nieuw Spel&lt;/a&gt;
+                    &lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+
+    &lt;!-- Main content --&gt;
+    &lt;main class="flex-shrink-0"&gt;
+        &lt;div class="container"&gt;
+            {block name="content"}{/block}
+        &lt;/div&gt;
+    &lt;/main&gt;
+
+    &lt;!-- Footer --&gt;
+    &lt;footer class="footer mt-auto py-3 bg-body-tertiary"&gt;
+        &lt;div class="container"&gt;
+            &lt;span class="text-muted"&gt;Blackjack Game &amp;copy; 2025&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/footer&gt;
+
+    &lt;!-- Bootstrap JS --&gt;
+    &lt;script src="./templates/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Let op de volgende onderdelen:</h3>
+            <ul>
+                <li><code>d-flex flex-column h-100</code> op body zorgt dat de footer onderaan blijft</li>
+                <li><code>{block name="content"}{/block}</code> is de plek waar child templates hun content plaatsen</li>
+                <li>Lokale paden naar CSS en JS bestanden (let op: <strong>geen</strong> integrity en crossorigin attributen)</li>
+            </ul>
+        </div>
+
+        <h3>Stap 3: Template aanpassen om layout te gebruiken</h3>
+
+        <p>Nu passen we een bestaand template aan om de layout te gebruiken. We gebruiken <code>{extends}</code> om de layout te laden en <code>{block}</code> om de content te vullen.</p>
+
+        <h4>Voorbeeld 1: Game overzicht (templates/gameOverview.tpl)</h4>
+        <pre><code class="language-php">{extends file="layout.tpl"}
+
+{block name="content"}
+    &lt;h1 class="mt-5"&gt;Blackjack Game&lt;/h1&gt;
+
+    &lt;div class="row mt-4"&gt;
+        &lt;div class="col-md-6"&gt;
+            &lt;div class="card"&gt;
+                &lt;div class="card-header bg-danger text-white"&gt;
+                    &lt;h3&gt;Dealer&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;p&gt;&lt;strong&gt;Kaarten:&lt;/strong&gt; {$dealer-&gt;getCardsAsString()}&lt;/p&gt;
+                    &lt;p&gt;&lt;strong&gt;Score:&lt;/strong&gt; {$dealer-&gt;getScore()}&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="col-md-6"&gt;
+            &lt;div class="card"&gt;
+                &lt;div class="card-header bg-success text-white"&gt;
+                    &lt;h3&gt;Speler&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;p&gt;&lt;strong&gt;Kaarten:&lt;/strong&gt; {$player-&gt;getCardsAsString()}&lt;/p&gt;
+                    &lt;p&gt;&lt;strong&gt;Score:&lt;/strong&gt; {$player-&gt;getScore()}&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="alert alert-info mt-4" role="alert"&gt;
+        &lt;h4 class="alert-heading"&gt;Resultaat&lt;/h4&gt;
+        &lt;p&gt;{$gameResult}&lt;/p&gt;
+    &lt;/div&gt;
+{/block}</code></pre>
+
+        <div class="info-box">
+            <h3>Bootstrap componenten gebruikt:</h3>
+            <ul>
+                <li><code>.card</code> - Voor het weergeven van dealer en speler informatie</li>
+                <li><code>.card-header</code> en <code>.card-body</code> - Voor structuur binnen de card</li>
+                <li><code>.bg-danger</code> (rood) voor dealer, <code>.bg-success</code> (groen) voor speler</li>
+                <li><code>.row</code> en <code>.col-md-6</code> - Voor responsive grid layout (2 kolommen)</li>
+                <li><code>.alert</code> - Voor het tonen van het spelresultaat</li>
+                <li><code>.mt-4</code>, <code>.mt-5</code> - Margin-top utility classes voor spacing</li>
+            </ul>
+        </div>
+
+        <h4>Voorbeeld 2: Scorelijst (templates/scoreBoard.tpl)</h4>
+        <pre><code class="language-php">{extends file="layout.tpl"}
+
+{block name="content"}
+    &lt;h1 class="mt-5"&gt;Scorelijst&lt;/h1&gt;
+
+    &lt;table class="table table-striped table-hover mt-4"&gt;
+        &lt;thead class="table-dark"&gt;
+            &lt;tr&gt;
+                &lt;th&gt;#&lt;/th&gt;
+                &lt;th&gt;Speler&lt;/th&gt;
+                &lt;th&gt;Gewonnen&lt;/th&gt;
+                &lt;th&gt;Verloren&lt;/th&gt;
+                &lt;th&gt;Gelijk&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            {foreach $players as $index =&gt; $player}
+            &lt;tr&gt;
+                &lt;td&gt;{$index + 1}&lt;/td&gt;
+                &lt;td&gt;{$player-&gt;getName()}&lt;/td&gt;
+                &lt;td&gt;&lt;span class="badge bg-success"&gt;{$player-&gt;getWins()}&lt;/span&gt;&lt;/td&gt;
+                &lt;td&gt;&lt;span class="badge bg-danger"&gt;{$player-&gt;getLosses()}&lt;/span&gt;&lt;/td&gt;
+                &lt;td&gt;&lt;span class="badge bg-secondary"&gt;{$player-&gt;getDraws()}&lt;/span&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+            {/foreach}
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+    &lt;a href="index.php?action=newGame" class="btn btn-success"&gt;Nieuw Spel Starten&lt;/a&gt;
+{/block}</code></pre>
+
+        <div class="info-box">
+            <h3>Bootstrap componenten gebruikt:</h3>
+            <ul>
+                <li><code>.table</code>, <code>.table-striped</code>, <code>.table-hover</code> - Voor gestylede tabellen</li>
+                <li><code>.table-dark</code> - Donkere header</li>
+                <li><code>.badge</code> - Voor gekleurde score indicators</li>
+                <li><code>.btn</code>, <code>.btn-primary</code> - Voor knoppen</li>
+            </ul>
+        </div>
+
+        <h3>Stap 4: Index.php aanpassen</h3>
+
+        <p>De index.php hoeft niet aangepast te worden als je al Smarty hebt geïnitialiseerd. De templates gebruiken automatisch de layout door de <code>{extends}</code> directive.</p>
+
+        <pre><code class="language-php">&lt;?php
+require_once 'vendor/autoload.php';
+
+use Smarty\Smarty;
+
+// Smarty initialiseren
+$template = new Smarty();
+$template->setTemplateDir('./templates/');
+
+// Game logica
+$game = new BlackjackGame();
+$game->deal();
+$result = $game->determineWinner();
+
+// Gegevens toewijzen aan template
+$template->assign('dealer', $game->getDealer());
+$template->assign('player', $game->getPlayer());
+$template->assign('gameResult', $result);
+
+// Template weergeven (gebruikt automatisch layout.tpl)
+$template->display('gameOverview.tpl');</code></pre>
+
+        <h3>Veelgebruikte Bootstrap componenten</h3>
+
+
+        <h4>Cards</h4>
+        <pre><code class="language-php">&lt;div class="card"&gt;
+    &lt;div class="card-header"&gt;Titel&lt;/div&gt;
+    &lt;div class="card-body"&gt;
+        &lt;h5 class="card-title"&gt;Card titel&lt;/h5&gt;
+        &lt;p class="card-text"&gt;Card inhoud&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <h4>Buttons</h4>
+        <pre><code class="language-php">&lt;button class="btn btn-success"&gt;Succes (groen)&lt;/button&gt;
+&lt;button class="btn btn-warning"&gt;Waarschuwing (geel)&lt;/button&gt;
+&lt;button class="btn btn-danger"&gt;Gevaar (rood)&lt;/button&gt;
+&lt;button class="btn btn-primary"&gt;Primair (blauw)&lt;/button&gt;
+&lt;button class="btn btn-info"&gt;Info&lt;/button&gt;</code></pre>
+
+        <h4>Alerts</h4>
+        <pre><code class="language-php">&lt;div class="alert alert-success" role="alert"&gt;
+    Dit is een success bericht!
+&lt;/div&gt;
+&lt;div class="alert alert-danger" role="alert"&gt;
+    Dit is een error bericht!
+&lt;/div&gt;</code></pre>
+
+        <h4>Grid systeem</h4>
+        <pre><code class="language-php">&lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;Kolom 1 (50%)&lt;/div&gt;
+    &lt;div class="col-md-6"&gt;Kolom 2 (50%)&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="row"&gt;
+    &lt;div class="col-md-4"&gt;Kolom 1 (33%)&lt;/div&gt;
+    &lt;div class="col-md-4"&gt;Kolom 2 (33%)&lt;/div&gt;
+    &lt;div class="col-md-4"&gt;Kolom 3 (33%)&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <h4>Utility classes voor spacing</h4>
+        <pre><code class="language-php">&lt;!-- Margin --&gt;
+&lt;div class="mt-3"&gt;Margin top 3&lt;/div&gt;
+&lt;div class="mb-4"&gt;Margin bottom 4&lt;/div&gt;
+&lt;div class="my-5"&gt;Margin top en bottom 5&lt;/div&gt;
+
+&lt;!-- Padding --&gt;
+&lt;div class="pt-2"&gt;Padding top 2&lt;/div&gt;
+&lt;div class="pb-3"&gt;Padding bottom 3&lt;/div&gt;
+&lt;div class="p-4"&gt;Padding all sides 4&lt;/div&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Belangrijke punten:</h3>
+            <ul>
+                <li>Gebruik <strong>lokale bestanden</strong> in plaats van CDN voor Bootstrap</li>
+                <li>Verwijder <code>integrity</code> en <code>crossorigin</code> attributen bij lokale bestanden</li>
+                <li>Gebruik <code>{extends file="layout.tpl"}</code> aan het begin van elk child template</li>
+                <li>Plaats alle content binnen <code>{block name="content"}...{/block}</code></li>
+                <li>Bootstrap classes werken automatisch zonder extra configuratie</li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

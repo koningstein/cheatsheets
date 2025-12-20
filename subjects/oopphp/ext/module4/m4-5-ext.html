@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opvangen met $_POST - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Opvangen met $_POST</h1>
+
+        <div class="info-box">
+            <h3>Wat is $_POST?</h3>
+            <p>Als een gebruiker een formulier verstuurt met <code>method="POST"</code>, komen de gegevens beschikbaar in de <code>$_POST</code> superglobal array. Je kunt deze data valideren en gebruiken om objecten aan te maken.</p>
+
+            <p><strong>Voorbeeld:</strong></p>
+            <pre><code class="language-php">// HTML formulier
+&lt;input type="text" name="playerName"&gt;
+&lt;input type="number" name="chips"&gt;
+
+// In PHP beschikbaar als:
+$_POST['playerName']  // "John"
+$_POST['chips']       // "1000"</code></pre>
+        </div>
+
+
+
+        <h3>$_SERVER['REQUEST_METHOD']</h3>
+
+        <div class="info-box">
+            <p>Met <code>$_SERVER['REQUEST_METHOD']</code> kun je checken of de request een GET of POST is. Dit is handig om te bepalen of er formulierdata is verzonden.</p>
+        </div>
+
+        <pre><code class="language-php">if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Er is data verzonden via POST
+    // Verwerk de formulierdata
+}</code></pre>
+
+        <div class="info-box">
+            <p><strong>Mogelijke waarden:</strong></p>
+            <ul>
+                <li><code>'GET'</code> - Normale pagina aanvraag</li>
+                <li><code>'POST'</code> - Formulier is verzonden</li>
+            </ul>
+        </div>
+
+        <h3>Form action met $_GET parameter</h3>
+
+        <div class="info-box">
+            <p>Je kunt de form action instellen op een URL met een GET parameter. Dan komt de POST data binnen op dezelfde pagina waar het formulier staat.</p>
+        </div>
+
+        <pre><code class="language-php">// In het template
+&lt;form action="index.php?page=createPlayer" method="POST"&gt;
+    &lt;!-- Formulier velden --&gt;
+&lt;/form&gt;</code></pre>
+
+        <div class="info-box">
+            <p>Na het versturen:</p>
+            <ul>
+                <li><code>$_GET['page']</code> bevat 'createPlayer'</li>
+                <li><code>$_POST</code> bevat de formulierdata</li>
+                <li><code>$_SERVER['REQUEST_METHOD']</code> is 'POST'</li>
+            </ul>
+        </div>
+
+        <h3>Routing met GET en POST</h3>
+
+        <div class="info-box">
+            <p>Je gebruikt één if-elseif-else structuur voor zowel GET als POST requests. De volgorde is belangrijk:</p>
+        </div>
+
+
+
+        <pre><code class="language-php">$page = $_GET['page'] ?? 'home';
+
+if ($page === 'createPlayer' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    // GET request: toon het formulier
+    $template->display('createPlayerForm.tpl');
+
+} elseif ($page === 'createPlayer' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // POST request: verwerk de formulierdata
+
+} else {
+    // Andere pagina's
+    $template->display('gameOverview.tpl');
+}</code></pre>
+
+        <div class="info-box">
+            <p><strong>Waarom deze volgorde?</strong></p>
+            <ul>
+                <li>Eerst check je of het een GET is naar 'createPlayer' → toon formulier</li>
+                <li>Dan check je of het een POST is naar 'createPlayer' → verwerk data</li>
+                <li>Anders → toon andere pagina</li>
+            </ul>
+        </div>
+
+        <h3>Data valideren met !empty()</h3>
+
+        <div class="info-box">
+            <p>Voor je data gebruikt, moet je checken of de velden zijn ingevuld. Met <code>!empty()</code> check je of een variabele bestaat én een waarde heeft.</p>
+        </div>
+
+        <pre><code class="language-php">if (!empty($_POST['name']) && !empty($_POST['chips'])) {
+    // Beide velden zijn ingevuld
+    // Maak object aan
+} else {
+    // Een of beide velden zijn leeg
+    // Toon foutmelding
+}</code></pre>
+
+        <div class="info-box">
+            <p><strong>Verschil tussen functies:</strong></p>
+            <ul>
+                <li><code>isset()</code> - Checkt alleen of variabele bestaat (kan leeg zijn)</li>
+                <li><code>empty()</code> - Checkt of variabele leeg is (lege string, 0, null, false)</li>
+                <li><code>!empty()</code> - Checkt of variabele bestaat EN een waarde heeft</li>
+            </ul>
+        </div>
+
+        <h3>Type casting</h3>
+
+        <div class="info-box">
+            <p>Formulierdata komt altijd binnen als string. Als je constructor of methodes een <code>int</code> verwachten, moet je de waarde omzetten (casten).</p>
+        </div>
+
+        <pre><code class="language-php">// FOUT: blijft string
+$chips = $_POST['chips'];  // "1000" (string)
+
+// GOED: cast naar integer
+$chips = (int)$_POST['chips'];  // 1000 (integer)</code></pre>
+
+        <div class="info-box">
+            <p><strong>Verschillende casts:</strong></p>
+            <ul>
+                <li><code>(int)</code> - Cast naar integer (geheel getal)</li>
+                <li><code>(float)</code> - Cast naar float (decimaal getal)</li>
+                <li><code>(bool)</code> - Cast naar boolean (true/false)</li>
+                <li><code>(string)</code> - Cast naar string (tekst)</li>
+            </ul>
+        </div>
+
+        <h3>Foutmeldingen tonen</h3>
+
+        <div class="info-box">
+            <p>Als validatie faalt, kun je een foutmelding toewijzen aan het template en het formulier opnieuw tonen.</p>
+        </div>
+
+        <pre><code class="language-php">} else {
+    // Validatie mislukt
+    $template->assign('error', 'Please fill in all required fields.');
+    $template->display('createPlayerForm.tpl');
+}</code></pre>
+
+        <h4>In het template controleren op foutmelding</h4>
+        <pre><code class="language-php">{if isset($error)}
+    &lt;div class="alert alert-danger" role="alert"&gt;
+        {$error}
+    &lt;/div&gt;
+{/if}</code></pre>
+
+        <div class="info-box">
+            <p>De <code>{if isset($error)}</code> controleert of de variabele <code>$error</code> is toegewezen. Alleen dan wordt de foutmelding getoond.</p>
+        </div>
+
+        <h3>Object aanmaken met POST data</h3>
+
+        <div class="info-box">
+            <p>Na succesvolle validatie kun je de data gebruiken om een object aan te maken.</p>
+        </div>
+
+        <pre><code class="language-php">if (!empty($_POST['name']) && !empty($_POST['chips'])) {
+
+    // Data ophalen
+    $name = $_POST['name'];
+    $chips = (int)$_POST['chips'];
+
+    // Object aanmaken
+    $player = new Player($name, $chips);
+
+    // Object toewijzen aan template
+    $template->assign('player', $player);
+
+    // Bevestigingspagina tonen
+    $template->display('playerCreated.tpl');
+}</code></pre>
+
+        <h3>Uitgebreide validatie met foreach</h3>
+
+        <div class="info-box">
+            <p>Als je formulier veel velden heeft, kun je een loop gebruiken om alle velden te checken.</p>
+        </div>
+
+        <pre><code class="language-php">// Lijst met vereiste velden
+$requiredFields = ['name', 'chips', 'playerType'];
+$missingFields = [];
+
+// Check elk veld
+foreach ($requiredFields as $field) {
+    if (empty($_POST[$field])) {
+        $missingFields[] = ucfirst($field);
+    }
+}
+
+// Als er velden ontbreken
+if (!empty($missingFields)) {
+    $error = 'Please fill in: ' . implode(', ', $missingFields);
+    $template->assign('error', $error);
+    $template->display('createPlayerForm.tpl');
+} else {
+    // Alle velden zijn ingevuld
+    // Maak object aan
+}</code></pre>
+
+        <div class="info-box">
+            <h4>Gebruikte functies:</h4>
+            <ul>
+                <li><code>ucfirst()</code> - Maakt eerste letter hoofdletter (name → Name)</li>
+                <li><code>implode(', ', $array)</code> - Plakt array elementen samen met komma's</li>
+            </ul>
+        </div>
+
+        <h3>$_POST vs $_GET</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Eigenschap</th>
+                    <th>$_POST</th>
+                    <th>$_GET</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Zichtbaarheid</strong></td>
+                    <td>Onzichtbaar in URL</td>
+                    <td>Zichtbaar in URL</td>
+                </tr>
+                <tr>
+                    <td><strong>Gebruik</strong></td>
+                    <td>Formulieren, data wijzigen</td>
+                    <td>Navigatie, filters</td>
+                </tr>
+                <tr>
+                    <td><strong>Grootte</strong></td>
+                    <td>Geen limiet (praktisch)</td>
+                    <td>~2000 karakters limiet</td>
+                </tr>
+                <tr>
+                    <td><strong>Bookmark</strong></td>
+                    <td>Niet mogelijk</td>
+                    <td>Wel mogelijk</td>
+                </tr>
+                <tr>
+                    <td><strong>Veiligheid</strong></td>
+                    <td>Veiliger voor gevoelige data</td>
+                    <td>Minder veilig (zichtbaar)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box">
+            <h3>Belangrijke punten</h3>
+            <ul>
+                <li>Form action moet <code>index.php?page=createPlayer</code> zijn</li>
+                <li>Gebruik één if-elseif-else voor GET en POST requests</li>
+                <li>Check altijd <code>$_SERVER['REQUEST_METHOD']</code></li>
+                <li>Valideer met <code>!empty()</code> of velden zijn ingevuld</li>
+                <li>Cast numerieke waarden: <code>(int)$_POST['veld']</code></li>
+                <li>Gebruik <code>trim()</code> om spaties aan begin/eind te verwijderen</li>
+                <li>Toon foutmeldingen in het formulier met <code>{if isset($error)}</code></li>
+                <li>POST voor data wijzigen, GET voor navigatie</li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

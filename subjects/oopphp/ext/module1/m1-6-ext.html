@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getters (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Getters: De Presentatoren</h1>
+
+        <p>In de vorige les hebben we de <strong>Setter</strong> besproken. Dat was de poortwachter die controleerde wat er <em>in</em> het object kwam. Nu gaan we kijken naar de uitgang: hoe halen we informatie er weer <em>uit</em>?</p>
+        <p>Natuurlijk kun je direct <code>echo $card->suit;</code> doen. Maar vaak wil je de data nog even netjes maken voordat je het aan de gebruiker laat zien. Daarvoor gebruiken we een <strong>Getter</strong>.</p>
+
+        <h3>Wat is een Getter?</h3>
+        <p>Een getter is een methode (functie) die als doel heeft: informatie uit het object ophalen en teruggeven aan jou. De naam begint bijna altijd met <code>get</code>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Chef-kok</h3>
+            <p>Stel je voor dat je in een restaurant zit.</p>
+            <ul>
+                <li><strong>Zonder Getter (Direct):</strong> Je loopt de keuken in, pakt een rauwe aardappel en een stuk vlees uit de koelkast. Je hebt wel eten, maar het ziet er niet uit en het smaakt nergens naar.</li>
+                <li><strong>Met Getter (Via de Chef):</strong> Je vraagt aan de chef: "Mag ik het hoofdgerecht?". De chef pakt de ingrediënten, kookt ze, legt ze netjes op een bord met wat garnering en geeft het aan jou.</li>
+            </ul>
+            <p>De Getter is de chef. Hij pakt de ruwe data (de ingrediënten) en maakt er iets moois van voor de gebruiker.</p>
+        </div>
+
+
+
+        <h3>Waarom doen we dit?</h3>
+        <p>Waarom zou je moeilijk doen met een functie als je ook gewoon de variabele kunt pakken? Hier zijn drie goede redenen:</p>
+
+        <h4>1. Opmaak (Formatting)</h4>
+        <p>Stel dat we in onze database de kaartwaarde opslaan als kleine letters: "ace", "king", "queen". Maar op het scherm willen we een hoofdletter zien. De getter kan dit fixen zonder dat we de originele data hoeven aan te passen.</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $value; // Hierin zit "ace"
+
+    public function getValue()
+    {
+        // ucfirst() is een PHP functie die de eerste letter een hoofdletter maakt
+        return ucfirst($this->value);
+    }
+}</code></pre>
+
+        <h4>2. Data combineren (Derived Properties)</h4>
+        <p>Soms wil je informatie combineren. Bijvoorbeeld de volledige naam van de kaart ("Ace of Spades"). We hoeven hier geen aparte variabele voor te maken; de getter kan dit 'live' voor ons berekenen.</p>
+
+        <pre><code class="language-php">public function getFullName()
+{
+    // Plak de waardes aan elkaar met een stukje tekst ertussen
+    return $this->value . " of " . $this->suit;
+}</code></pre>
+
+        <h4>3. Toekomstige Bescherming</h4>
+        <p>Net als bij Setters, bereiden we ons voor op de toekomst. Als we straks properties <code>private</code> maken (verborgen), dan <strong>moet</strong> je wel een getter gebruiken om de waarde te kunnen zien. Het is goed om dit nu alvast te leren.</p>
+
+        <h3>Stap voor Stap: Getter en Setter samen</h3>
+        <p>Laten we nu het complete plaatje bouwen voor ons Blackjack spel. We willen een kaart waarbij we de kleur (suit) instellen via een setter, en ophalen via een getter.</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $suit; // De eigenschap (bijv. "Hearts")
+
+    // DE SETTER (Input)
+    // Controleert of de invoer geldig is
+    public function setSuit($newSuit)
+    {
+        $validSuits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+
+        // Als de suit NIET in het lijstje staat...
+        if (!in_array($newSuit, $validSuits)) {
+            return "Fout: Dit is geen geldige kaartkleur!";
+        }
+
+        // Als het wel goed is, slaan we het op
+        $this->suit = $newSuit;
+        return "Gelukt: Kleur is opgeslagen.";
+    }
+
+    // DE GETTER (Output)
+    // Geeft de waarde netjes terug, in HOOFDLETTERS (als voorbeeld)
+    public function getSuit()
+    {
+        // strtoupper maakt alles hoofdletters: HEARTS
+        return strtoupper($this->suit);
+    }
+}</code></pre>
+
+        <h3>De Code in Actie</h3>
+        <p>Laten we kijken wat er gebeurt als we dit gebruiken:</p>
+
+        <pre><code class="language-php">$myCard = new Card();
+
+// 1. We gebruiken de SETTER om data erin te stoppen
+echo $myCard->setSuit("Hearts");
+// Output: Gelukt: Kleur is opgeslagen.
+
+echo "&lt;br&gt;";
+
+// 2. We gebruiken de GETTER om data eruit te halen
+echo "De kaart is: " . $myCard->getSuit();
+// Output: De kaart is: HEARTS</code></pre>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <h4>1. Echo in plaats van Return</h4>
+        <p>Een veelgemaakte fout is om <code>echo</code> te gebruiken in een getter.</p>
+        <pre><code class="language-php">// FOUT:
+public function getValue() {
+    echo $this->value;
+}
+
+// GOED:
+public function getValue() {
+    return $this->value;
+}</code></pre>
+        <p><strong>Waarom?</strong> Als je <code>echo</code> gebruikt, wordt de tekst direct op het scherm geknald. Je kunt er dan niks meer mee doen (zoals opslaan in een database of in een HTML-titel zetten). Gebruik altijd <code>return</code>, dan bepaal je buiten de functie zelf wat je met de tekst doet.</p>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Getters</strong> halen data uit een object.</li>
+            <li>Ze geven je de kans om data te <strong>formatteren</strong> (mooier maken) of te <strong>combineren</strong>.</li>
+            <li>Gebruik altijd <code>return</code> in een getter, geen <code>echo</code>.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

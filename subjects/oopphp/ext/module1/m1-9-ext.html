@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Named Arguments (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Named Arguments: Duidelijke Labels</h1>
+
+        <p>We hebben nu gezien hoe je objecten maakt met de Constructor. Als je class maar twee eigenschappen heeft (Kleur en Waarde), is dat simpel. Maar wat als je class ingewikkelder wordt? Wat als je 5, 6 of 10 instellingen hebt?</p>
+        <p>Dan wordt het aanmaken van een object een grote puzzel. PHP 8.0 heeft hiervoor een oplossing: <strong>Named Arguments</strong>.</p>
+
+        <h3>Het probleem: De "Blinddoek" code</h3>
+        <p>Laten we kijken naar een voorbeeld zonder Named Arguments. Stel, we hebben een kaart die niet alleen een kleur en waarde heeft, maar ook:</p>
+        <ul>
+            <li>Ligt hij open of dicht? (<code>$faceUp</code>)</li>
+            <li>Is hij al uitgedeeld? (<code>$isDealt</code>)</li>
+            <li>Is het een joker? (<code>$isJoker</code>)</li>
+        </ul>
+
+        <p>Als je zo'n kaart maakt, ziet dat er zo uit:</p>
+        <pre><code class="language-php">$card = new Card("Harten", "Aas", true, false, false);</code></pre>
+
+        <p>Kijk naar die laatste drie waarden: <code>true, false, false</code>. Als jij deze code over drie maanden terugleest, weet jij dan nog wat die eerste <code>true</code> betekent? Waarschijnlijk niet. Je moet dan in de class gaan zoeken om het te snappen.</p>
+
+        <h3>De Oplossing: Labels plakken</h3>
+        <p>Met <strong>Named Arguments</strong> mag je de naam van de parameter erbij schrijven. Je plakt als het ware een labeltje op de waarde.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Formulier</h3>
+            <p>Stel je moet een formulier invullen.</p>
+            <ul>
+                <li><strong>Oude manier (Positional):</strong> Je krijgt een wit papier met vijf lege vakjes. Je moet zelf onthouden: "Eerste vakje is naam, tweede is adres, derde is leeftijd...". Eén foutje en alles schuift op.</li>
+                <li><strong>Nieuwe manier (Named):</strong> Bij elk vakje staat duidelijk: "Naam: ...", "Adres: ...". Je kunt ze niet meer per ongeluk verwisselen.</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Hoe werkt het?</h3>
+        <p>Je gebruikt de naam van de variabele uit je constructor, gevolgd door een dubbele punt <code>:</code>.</p>
+
+        <pre><code class="language-php">// De Constructor in de Class (met standaardwaardes)
+class Card
+{
+    public function __construct(
+        public $suit,
+        public $value,
+        public $faceUp = false,  // Standaard ligt een kaart dicht
+        public $isDealt = false  // Standaard zit hij in het deck
+    ) {}
+}
+
+// Het aanmaken met Named Arguments
+$myCard = new Card(
+    suit: "Harten",
+    value: "Aas",
+    faceUp: true,   // Duidelijk! Hij ligt open.
+    isDealt: true   // Duidelijk! Hij is gedeeld.
+);</code></pre>
+
+        <h3>Waarom is dit zo handig?</h3>
+
+        <h4>1. Volgorde maakt niet meer uit</h4>
+        <p>Omdat je er labels bij zet, hoef je niet meer de exacte volgorde te onthouden. PHP zoekt zelf de juiste plek.</p>
+        <pre><code class="language-php">// Dit mag gewoon!
+$myCard = new Card(
+    value: "Aas",
+    suit: "Harten"
+);</code></pre>
+
+        <h4>2. Dingen overslaan (Standaardwaardes)</h4>
+        <p>Dit is de grootste kracht. Stel dat je constructor 10 opties heeft, maar de meeste hebben een prima standaardwaarde (default value). Je wilt alleen de allerlaatste optie aanpassen.</p>
+
+        <p><strong>Zonder Named Arguments</strong> moet je alle tussenliggende waardes ook invullen, anders komt je laatste waarde op de verkeerde plek:</p>
+        <pre><code class="language-php">// Pff... ik moet die 'false' invullen, alleen maar om bij de laatste 'true' te komen
+$card = new Card("Harten", "Aas", false, true);</code></pre>
+
+        <p><strong>Met Named Arguments</strong> pak je alleen wat je nodig hebt:</p>
+        <pre><code class="language-php">// Ik sla 'faceUp' over, want de standaardwaarde (false) is prima.
+// Ik stel alleen 'isDealt' in.
+$card = new Card(
+    suit: "Harten",
+    value: "Aas",
+    isDealt: true
+);</code></pre>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <h4>1. Verkeerde naam gebruiken</h4>
+        <p>De naam vóór de dubbele punt <strong>moet precies overeenkomen</strong> met de variabele in de `__construct` functie.</p>
+        <pre><code class="language-php">// In Class: public $suit
+new Card(kleur: "Harten"); // FOUT! PHP kent 'kleur' niet, alleen 'suit'.</code></pre>
+
+        <h4>2. Mixen (Positional en Named)</h4>
+        <p>Je mag de oude en nieuwe manier mixen, maar er is één strenge regel: <strong>De oude manier (zonder naam) moet altijd eerst.</strong></p>
+        <pre><code class="language-php">// GOED: Eerst normaal, dan met naam
+new Card("Harten", "Aas", isDealt: true);
+
+// FOUT: Eerst met naam, dan normaal
+new Card(suit: "Harten", "Aas"); // PHP raakt in de war.</code></pre>
+
+        <h3>Stap voor Stap: Wanneer gebruik je dit?</h3>
+        <ol>
+            <li>Kijk naar je constructor. Heeft hij meer dan 3 parameters? -> <strong>Gebruik Named Arguments.</strong></li>
+            <li>Zitten er <code>true</code> of <code>false</code> waarden tussen? -> <strong>Gebruik Named Arguments</strong> (anders weet je later niet wat true betekent).</li>
+            <li>Wil je optionele instellingen overslaan? -> <strong>Gebruik Named Arguments.</strong></li>
+        </ol>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

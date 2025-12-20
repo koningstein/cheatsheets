@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstracte Classes - OOP PHP Module 6</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Abstracte Classes</h1>
+
+        <div class="info-box">
+            <h3>Het Probleem: Onvolledige Objecten</h3>
+            <p>Tot nu toe hebben we een basis class <code>Player</code> en specifieke classes zoals <code>Dealer</code> en <code>HumanPlayer</code>. Maar stel jezelf de vraag: slaat het ergens op om "gewoon" een Speler aan te maken?</p>
+            <p>Een generieke <code>Player</code> weet niet of hij moet wachten op input of zelf moet spelen. Het is een <strong>onvolledig concept</strong>. Toch staat PHP toe dat we dit doen:</p>
+            <pre><code class="language-php">$player = new Player(); // Dit mag, maar zou niet moeten kunnen!</code></pre>
+        </div>
+
+        <h3>De Oplossing: Abstract Class</h3>
+        <p>We kunnen voorkomen dat iemand direct een object maakt van een class door het keyword <code>abstract</code> toe te voegen. Een abstracte class dient alleen als <strong>blauwdruk</strong> voor andere classes.</p>
+
+
+
+        <pre><code class="language-php">abstract class Player
+{
+    protected array $hand = [];
+
+    public function addCard(Card $card) {
+        $this->hand[] = $card;
+    }
+}</code></pre>
+
+        <h3>Wat gebeurt er nu?</h3>
+        <p>Als je nu probeert om een instantie te maken van de abstracte class, grijpt PHP in:</p>
+
+        <pre><code class="language-php">// DIT GEEFT NU EEN FOUTMELDING:
+// Fatal error: Uncaught Error: Cannot instantiate abstract class Player
+$player = new Player();
+
+// DIT MAG NOG STEEDS:
+// HumanPlayer erft van Player en is NIET abstract (concreet)
+$human = new HumanPlayer("John");</code></pre>
+
+        <div class="info-box">
+            <h3>Wanneer gebruik je Abstract?</h3>
+            <p>Gebruik een abstracte class wanneer de ouder-class alleen bedoeld is om gedeelde code (zoals <code>$hand</code> en <code>addCard</code>) te bevatten, maar zelf nooit als object mag bestaan.</p>
+        </div>
+
+        <h3>Type Hinting met Abstract Classes</h3>
+        <p>Het mooie is dat je de abstracte class nog steeds kunt gebruiken als <strong>Type Hint</strong>. Je zegt hiermee: "Ik accepteer alles wat van Player afstamt".</p>
+
+        <pre><code class="language-php">class Game
+{
+    // Accepteert HumanPlayer én Dealer, want beide zijn Players
+    public function addParticipant(Player $participant)
+    {
+        $this->participants[] = $participant;
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Abstract Class:</strong> Een class waarvan je geen objecten kunt maken (<code>new Player()</code> mag niet).</li>
+                <li><strong>Doel:</strong> Dient als basis voor inheritance en dwingt structuur af.</li>
+                <li><strong>Concrete Class:</strong> Een class die niet abstract is (zoals <code>Dealer</code>) en waarvan je wel objecten mag maken.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

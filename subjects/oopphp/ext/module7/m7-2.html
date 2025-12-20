@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Properties (Mock Database) - OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Static Properties: De Mock Database</h1>
+
+        <div class="info-box">
+            <h3>Centrale Opslag</h3>
+            <p>Soms heb je data die voor de <strong>hele applicatie</strong> hetzelfde moet zijn. Denk aan de configuratie, of in ons geval: de producten in de winkel.</p>
+            <p>Als je een `new ChipShop()` zou maken in `index.php`, en een andere `new ChipShop()` in `Game.php`, zijn dat twee verschillende winkels. Dat wil je niet. Je wilt één centrale voorraad.</p>
+        </div>
+
+        <h3>Static Properties</h3>
+        <p>Een <code>static property</code> wordt gedeeld door alle instanties van de class. Het blijft bestaan zolang het script draait en is overal direct bereikbaar.</p>
+
+
+
+        <h3>Voorbeeld: De Chip Shop</h3>
+        <p>We bouwen een simpele winkel waar spelers fiches kunnen kopen. De lijst met beschikbare fiches slaan we statisch op. Dit fungeert als een simpele database (Mock Database).</p>
+
+        <pre><code class="language-php">class ChipShop
+{
+    // Static: Deze array is gedeeld en 'leeft' op class-niveau
+    private static array $stock = [];
+
+    // Initialisatie: Vul de winkel als hij nog leeg is
+    public static function initialize(): void
+    {
+        if (empty(self::$stock)) {
+            self::$stock = [
+                new Chip('Red', 10),
+                new Chip('Green', 25),
+                new Chip('Black', 100)
+            ];
+        }
+    }
+
+    // Getter: Haal de voorraad op
+    public static function getStock(): array
+    {
+        // Zorg altijd dat er data is voordat we returnen
+        self::initialize();
+        return self::$stock;
+    }
+}</code></pre>
+
+        <h3>Gebruik in de Applicatie</h3>
+        <p>In je controller (`index.php`) of templates kun je nu altijd bij de producten, zonder dat je een `Shop` object hoeft door te geven via parameters.</p>
+
+        <pre><code class="language-php">// index.php - De winkel pagina
+if ($page === 'shop') {
+    // Geen 'new ChipShop()' nodig!
+    // We vragen direct de data aan de Class.
+    $chips = ChipShop::getStock();
+
+    $smarty->assign('chips', $chips);
+    $smarty->display('shop.tpl');
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Wanneer gebruik je Static Properties?</h3>
+            <p>Static properties zijn krachtig, maar gevaarlijk (het lijkt op globale variabelen). Gebruik ze vooral voor:</p>
+            <ul>
+                <li><strong>Gedeelde Data:</strong> Zoals een lijst met beschikbare items of configuratie-instellingen.</li>
+                <li><strong>Caching:</strong> Dure berekeningen 1x uitvoeren en het resultaat bewaren.</li>
+                <li><strong>Tellers:</strong> Bijhouden hoeveel objecten er in totaal zijn gemaakt (bijv. <code>private static $count = 0;</code>).</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

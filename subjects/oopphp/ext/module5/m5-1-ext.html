@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introductie inheritance (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Introductie Inheritance</h1>
+
+        <p>Welkom in Module 5! Tot nu toe heb je classes gemaakt die op zichzelf stonden. Maar naarmate je Blackjack-spel groeit, loop je tegen een probleem aan.</p>
+        <p>Je hebt een speler (jijzelf) en een dealer (de bank). Ze lijken heel erg op elkaar:</p>
+        <ul>
+            <li>Ze hebben allebei kaarten in hun hand.</li>
+            <li>Ze hebben allebei een puntentotaal.</li>
+            <li>Ze kunnen allebei een kaart trekken.</li>
+        </ul>
+        <p>Maar... ze zijn <strong>niet</strong> hetzelfde. De dealer heeft geen geld (fiches) en speelt volgens vaste regels, terwijl jij zelf mag kiezen.</p>
+
+        <h3>Het Probleem: Hoe bouw je dit?</h3>
+        <p>Als beginner heb je vaak de neiging om één super-class te maken die alles kan. Je stopt zowel de Mens als de Dealer in één bestand dat <code>Player.php</code> heet.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Zwitsers Zakmes</h3>
+            <p>Stel je voor dat je één stuk gereedschap maakt voor alles. Een hamer, die ook een zaag is, en waar ook een schroevendraaier aan vast zit.</p>
+            <ul>
+                <li>Als je wilt timmeren, zit de zaag in de weg.</li>
+                <li>Het ding wordt zwaar, onhandig en gaat snel stuk.</li>
+            </ul>
+            <p>In programmeren noemen we zo'n class een <strong>God Class</strong>. Hij probeert God te spelen door alles tegelijk te zijn.</p>
+        </div>
+
+
+
+        <h3>Voorbeeld: De "God Class" (Hoe het NIET moet)</h3>
+        <p>Kijk eens naar de code hieronder. We proberen het gedrag van de Mens en de Dealer in één class te proppen met <code>if-else</code> statements.</p>
+
+        <pre><code class="language-php">class Player
+{
+    private string $role; // Is het 'human' of 'dealer'?
+
+    // Deze property is logisch voor de Mens, maar onzin voor de Dealer.
+    // De Dealer heeft namelijk geen eigen portemonnee.
+    private int $balance = 1000;
+
+    public function __construct(string $role)
+    {
+        $this->role = $role;
+    }
+
+    // Een gigantische functie met checks
+    public function playTurn(): void
+    {
+        if ($this->role === 'human') {
+            // Code voor de mens:
+            // Wacht op knopdruk, mag splitsen, mag verdubbelen...
+        }
+        elseif ($this->role === 'dealer') {
+            // Code voor de dealer:
+            // Moet verplicht kaarten pakken tot 17 punten.
+            // Mag NIET splitsen.
+        }
+    }
+
+    public function placeBet(int $amount): void
+    {
+        // Weer een check... want een dealer kan niet wedden!
+        if ($this->role === 'dealer') {
+             // We moeten een error geven, want deze functie slaat nergens op voor een dealer
+             echo "FOUT: De dealer zet geen geld in!";
+             return;
+        }
+        $this->balance -= $amount;
+    }
+}</code></pre>
+
+        <h3>Waarom is dit zo slecht?</h3>
+        <p>Misschien denk je: "Het werkt toch?". Maar kijk eens goed:</p>
+        <ol>
+            <li><strong>Vervuiling:</strong> De Dealer sleept een variabele <code>$balance</code> mee die hij nooit gebruikt. Dat is zonde van het geheugen en verwarrend.</li>
+            <li><strong>Spaghetti code:</strong> Je hele code staat vol met <code>if ($role === 'dealer')</code>. Als je later een derde rol toevoegt (bijvoorbeeld een toeschouwer), moet je <em>overal</em> je code aanpassen.</li>
+            <li><strong>Kwetsbaarheid:</strong> Als je iets aanpast aan de logica voor de Dealer, maak je per ongeluk misschien de code voor de Mens kapot.</li>
+        </ol>
+
+
+
+        <h3>De Oplossing: Inheritance (Overerving)</h3>
+        <p>In plaats van één rommelige class, gaan we werken met een <strong>basis</strong> en <strong>variaties</strong>. Dit heet Inheritance.</p>
+
+        <p>We maken één "Moeder Class" (de Basis) waar alles in zit wat ze gemeen hebben (kaarten hebben, punten tellen). Daarna maken we twee "Kinder Classes" die de unieke dingen doen.</p>
+
+
+
+        <h4>Hoe ziet dat eruit?</h4>
+        <p>We gaan dit in de volgende les bouwen, maar hier is het idee:</p>
+
+        <pre><code class="language-php">// 1. De Basis (Ouder)
+// Hierin stoppen we ALLES wat gedeeld wordt (kaarten, hand, punten tellen)
+class BasePlayer {
+    protected array $hand = [];
+}
+
+// 2. De Mens (Kind)
+// Deze "erft" alles van BasePlayer, maar voegt geld ($balance) toe.
+class Human extends BasePlayer {
+    private int $balance;
+}
+
+// 3. De Dealer (Kind)
+// Deze "erft" ook alles van BasePlayer, maar heeft zijn eigen spelregels.
+class Dealer extends BasePlayer {
+    // Heeft GEEN $balance, want dat staat niet in de basis!
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom doen we dit?</h3>
+            <ul>
+                <li><strong>Code Hergebruik (DRY):</strong> De logica voor "kaarten pakken" schrijf je maar één keer (in de basis). Zowel de Human als de Dealer kunnen dat meteen.</li>
+                <li><strong>Schoon:</strong> De Dealer heeft geen <code>$balance</code> property meer. Hij is precies wat hij moet zijn, niets meer en niets minder.</li>
+                <li><strong>Onderhoudbaar:</strong> Als je een foutje in de puntentelling oplost in de basis, is het meteen opgelost voor iedereen.</li>
+            </ul>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Prop niet te veel functionaliteit in één class (vermijd de "God Class").</li>
+            <li>Als classes op elkaar lijken, maar net iets anders zijn, gebruik je <strong>Inheritance</strong>.</li>
+            <li>Je maakt een algemene basis class en specifieke sub-classes.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoload met Namespaces (Uitgebreid) - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Namespaces: Orde in de Chaos</h1>
+
+        <p>In de vorige les (2-1) heb je een autoloader gemaakt die automatisch je bestanden inlaadt. Dat werkt perfect zolang je alles zelf schrijft. Maar wat gebeurt er als je project groter wordt of als je code van anderen gaat gebruiken?</p>
+
+        <h3>Het probleem: Dubbele Namen</h3>
+        <p>Stel je voor: jij hebt een prachtige class <code>Card</code> gemaakt voor je Blackjack spel (een speelkaart).
+            Maar, je wilt ook een betaalsysteem toevoegen aan je spel. Je downloadt een pakket code van het internet. En wat blijkt? In dat pakket zit óók een class die <code>Card</code> heet (een creditcard)!</p>
+
+        <p>PHP raakt nu in paniek. Hij ziet twee keer: <code>class Card</code>. Hij weet niet welke hij moet kiezen en geeft een fatale foutmelding. Je spel crasht.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Jan in de klas</h3>
+            <p>Stel dat de leraar roept: <em>"Jan, kom eens hier!"</em>.</p>
+            <ul>
+                <li>Als er maar één Jan in de klas zit, is er geen probleem.</li>
+                <li>Als er drie jongens zijn die Jan heten, ontstaat er verwarring. Wie wordt er bedoeld?</li>
+            </ul>
+            <p>De oplossing op school is simpel: we gebruiken achternamen. "Jan de Vries" of "Jan Jansen".</p>
+            <p>In PHP is de <strong>Namespace</strong> de achternaam van je class.</p>
+        </div>
+
+
+
+        <h3>Stap 1: Namespaces Declareren</h3>
+        <p>We gaan nu al onze bestanden een "achternaam" geven. Dit doen we door bovenaan <strong>elk</strong> class-bestand de regel <code>namespace Blackjack;</code> toe te voegen.</p>
+        <p>Dit vertelt PHP: "Deze class hoort bij de familie Blackjack".</p>
+
+        <h4>Card.php</h4>
+        <pre><code class="language-php">&lt;?php
+namespace Blackjack; // &lt;-- De achternaam
+
+class Card
+{
+    // ... inhoud van de class ...
+}
+?&gt;</code></pre>
+
+        <h4>Deck.php</h4>
+        <pre><code class="language-php">&lt;?php
+namespace Blackjack;
+
+class Deck
+{
+    // ... inhoud van de class ...
+}
+?&gt;</code></pre>
+
+        <h4>Player.php</h4>
+        <pre><code class="language-php">&lt;?php
+namespace Blackjack;
+
+class Player
+{
+    // ... inhoud van de class ...
+}
+?&gt;</code></pre>
+
+        <p>De officiële, volledige naam van je classes is nu veranderd. Ze heten nu:</p>
+        <ul>
+            <li><code>Blackjack\Card</code></li>
+            <li><code>Blackjack\Deck</code></li>
+            <li><code>Blackjack\Player</code></li>
+        </ul>
+
+        <h3>Stap 2: Namespaces gebruiken (Het 'use' keyword)</h3>
+        <p>Nu onze classes een nieuwe, lange naam hebben, moeten we ze ook op die manier aanroepen in ons spel. Je <em>zou</em> dit kunnen doen:</p>
+        <pre><code class="language-php">$kaart = new \Blackjack\Card("Harten", "Aas");</code></pre>
+        <p>Maar dat typt vervelend. Daarom gebruiken we het keyword <code>use</code> om de class te importeren.</p>
+
+        <pre><code class="language-php">// index.php
+&lt;?php
+require_once 'autoload.php';
+
+// Hier importeren we de classes met hun nieuwe achternaam
+use Blackjack\Card;
+use Blackjack\Deck;
+use Blackjack\Player;
+
+// Nu kunnen we gewoon de korte naam gebruiken, zoals we gewend waren
+$card = new Card("Harten", "Aas");
+$deck = new Deck();
+$player = new Player("Sjaak");
+
+echo "Spel gestart met " . $player->getName();</code></pre>
+
+        <h3>Stap 3: De Autoloader aanpassen</h3>
+        <p>Hier ontstaat een nieuw probleem. Jouw oude autoloader (uit les 2-1) zocht naar <code>$className . '.php'</code>.</p>
+        <p>Maar... de variabele <code>$className</code> bevat nu de <strong>volledige naam</strong>: <code>Blackjack\Card</code>.
+            <br>Als de autoloader daar <code>.php</code> achter plakt, zoekt hij naar het bestand: <code>Blackjack\Card.php</code>.</p>
+
+        <p>Omdat jouw bestand gewoon <code>Card.php</code> heet (en niet in een mapje zit dat Blackjack heet), kan PHP het niet vinden. We moeten de namespace (de achternaam) er dus afknippen in de autoloader.</p>
+
+
+
+        <h4>De nieuwe autoloader code</h4>
+        <p>We gaan de string <code>Blackjack\Card</code> in stukjes hakken om bij de echte bestandsnaam te komen.</p>
+
+        <pre><code class="language-php">// autoload.php
+&lt;?php
+spl_autoload_register(function($className) {
+    // $className is nu: "Blackjack\Card"
+
+    // STAP 1: Hak de naam in stukjes bij de backslash (\)
+    // Let op: In code moeten we \\ typen om één \ te bedoelen.
+    $parts = explode('\\', $className);
+
+    // $parts is nu een array: ['Blackjack', 'Card']
+
+    // STAP 2: Pak het laatste stukje (de echte bestandsnaam)
+    $file = end($parts);
+
+    // $file is nu: "Card"
+
+    // STAP 3: Plak er .php achter
+    $path = $file . '.php';
+
+    // STAP 4: Laden maar!
+    if (file_exists($path)) {
+        require_once $path;
+    }
+});</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom die dubbele backslash?</h3>
+            <p>Je ziet in de code <code>explode('\\', ...)</code> staan. Waarom twee keer?
+                <br>In PHP is de backslash een speciaal teken (bijvoorbeeld <code>\n</code> voor nieuwe regel). Om te zeggen "Ik bedoel een échte backslash", moet je hem 'escapen' door er nog eentje voor te zetten.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan?</h3>
+        <ul>
+            <li><strong>Namespace vergeten:</strong> Als je <code>Card.php</code> wel een namespace geeft, maar <code>Player.php</code> niet, raakt de autoloader in de war. Wees consequent.</li>
+            <li><strong>Verkeerde use:</strong> Als je <code>use Blackjack\Card;</code> vergeet in <code>index.php</code>, kent PHP de class niet.</li>
+        </ul>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Namespaces</strong> zijn als achternamen voor je classes om conflicten te voorkomen.</li>
+            <li>Je stelt ze in met <code>namespace Naam;</code> bovenaan <strong>elk</strong> bestand.</li>
+            <li>Je importeert ze met <code>use Volledige\Naam;</code> in je index.</li>
+            <li>De autoloader moet aangepast worden om de namespace te strippen (met <code>explode</code>).</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -20,240 +20,58 @@
     <main class="main-content">
         <h1>Code kwaliteit met PHPStan</h1>
 
-        <div class="info-box">
-            <h3>Wat is PHPStan?</h3>
-            <p>PHPStan is een statische code analyse tool die je code checkt op fouten zonder de code uit te voeren. Het vindt problemen zoals:</p>
-            <ul>
-                <li>Ontbrekende type hints</li>
-                <li>Verkeerde types (bijv. string ipv int)</li>
-                <li>Mogelijk null references</li>
-                <li>Onbestaande methodes of properties</li>
-                <li>Onbereikbare code</li>
-            </ul>
+        <p>PHPStan is een <strong>statische analyse tool</strong>. Het scant je code op fouten (zoals verkeerde types of vergeten checks) <em>zonder</em> de code uit te voeren.</p>
 
-            <p><strong>Voordelen:</strong></p>
-            <ul>
-                <li>Vindt fouten voordat je de code uitvoert</li>
-                <li>Betere code kwaliteit en minder bugs</li>
-                <li>Helpt je betere type hints te schrijven</li>
-                <li>Maakt refactoring veiliger</li>
-            </ul>
-        </div>
-
-
-
-        <h3>PHPStan installeren</h3>
-
-        <div class="info-box">
-            <p>Je installeert PHPStan via Composer als development dependency. Het <code>--dev</code> flag zorgt ervoor dat het alleen tijdens development wordt geïnstalleerd, niet in productie.</p>
-        </div>
-
+        <h3>1. Installatie & Configuratie</h3>
+        <p>Installeer PHPStan als 'dev-tool' (alleen voor tijdens het bouwen):</p>
         <pre><code class="language-bash">composer require --dev phpstan/phpstan</code></pre>
 
-        <p>Na installatie staat PHPStan in de <code>vendor/bin/</code> map en kun je het uitvoeren vanaf de command line.</p>
-
-        <h3>Configuratie bestand</h3>
-
-        <div class="info-box">
-            <p>PHPStan gebruikt een configuratie bestand (phpstan.neon) waarin je instelt welke mappen gescand moeten worden en hoe streng de checks zijn.</p>
-        </div>
-
-        <h4>phpstan.neon (in hoofdmap van project)</h4>
+        <p>Maak in je hoofdmap een bestand genaamd <code>phpstan.neon</code>:</p>
         <pre><code class="language-yaml">parameters:
-    level: 6
+    level: 6          # Wij adviseren level 6 voor goede type-checking
     paths:
-        - src</code></pre>
+        - src         # Welke map scannen?</code></pre>
 
-        <div class="info-box">
-            <h4>Parameters uitleg:</h4>
-            <ul>
-                <li><code>level</code> - Strengheid van de analyse (0-9)
-                    <ul>
-                        <li>Level 0: Meest basic (alleen grote fouten)</li>
-                        <li>Level 6: Goede balans (aanbevolen voor beginners)</li>
-                        <li>Level 9: Zeer streng (alle checks)</li>
-                    </ul>
-                </li>
-                <li><code>paths</code> - Welke mappen moeten worden gescand
-                    <ul>
-                        <li><code>- src</code> betekent: scan de src map</li>
-                        <li>Je kunt meerdere mappen toevoegen als lijst</li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-
-        <h3>PHPStan uitvoeren</h3>
-
-        <p>Je voert PHPStan uit vanaf de command line in de hoofdmap van je project:</p>
-
+        <h3>2. Uitvoeren</h3>
+        <p>Run de check via je terminal:</p>
         <pre><code class="language-bash">vendor/bin/phpstan analyse</code></pre>
 
-        <p>PHPStan scant nu alle bestanden in de <code>src</code> map en toont de gevonden problemen.</p>
-
-        <h3>Output lezen</h3>
-
-        <div class="info-box">
-            <p>PHPStan toont voor elk probleem:</p>
-            <ul>
-                <li>Het bestand waar het probleem zit</li>
-                <li>Het regelnummer</li>
-                <li>Een beschrijving van het probleem</li>
-            </ul>
-        </div>
-
-        <h4>Voorbeeld output:</h4>
-        <pre><code class="language-plaintext"> ------ -----------------------------------------------------------------
-  Line   src/Player.php
- ------ -----------------------------------------------------------------
-  15     Method Game\Player::getChips() has no return type specified.
-  23     Property Game\Player::$name has no type specified.
-  45     Call to method getName() on possibly null Game\Player.
- ------ -----------------------------------------------------------------</code></pre>
-
-        <div class="info-box">
-            <p><strong>Interpretatie:</strong></p>
-            <ul>
-                <li>Regel 15: Methode mist return type (<code>: int</code> toevoegen)</li>
-                <li>Regel 23: Property mist type (<code>private string $name</code>)</li>
-                <li>Regel 45: Mogelijk null object (check toevoegen met <code>if ($player !== null)</code>)</li>
-            </ul>
-        </div>
-
-        <h3>Veelvoorkomende problemen</h3>
-
-        <div class="info-box">
-            <h4>1. Ontbrekende return types</h4>
-            <pre><code class="language-php">// FOUT: geen return type
-public function getChips()
-{
-    return $this->chips;
-}
-
-// GOED: met return type
-public function getChips(): int
-{
-    return $this->chips;
-}</code></pre>
-
-            <h4>2. Ontbrekende property types</h4>
-            <pre><code class="language-php">// FOUT: geen property type
-private $name;
-
-// GOED: met property type
-private string $name;</code></pre>
-
-            <h4>3. Mogelijk null reference</h4>
-            <pre><code class="language-php">// FOUT: $player kan null zijn
-$player = $playerList->getPlayerByName($name);
-echo $player->getName(); // Error als $player null is!
-
-// GOED: check eerst op null
-$player = $playerList->getPlayerByName($name);
-if ($player !== null) {
-    echo $player->getName();
-}</code></pre>
-
-            <h4>4. Verkeerde parameter type</h4>
-            <pre><code class="language-php">// FOUT: geeft string, verwacht int
-public function setChips(int $chips): void
-{
-    $this->chips = $chips;
-}
-
-$player->setChips($_POST['chips']); // String!
-
-// GOED: cast naar int
-$player->setChips((int)$_POST['chips']);</code></pre>
-        </div>
-
-        <h3>Problemen oplossen</h3>
-
-        <div class="info-box">
-            <p>Begin met de makkelijkste problemen (ontbrekende type hints) en werk naar de complexere problemen (null checks, logic fouten).</p>
-
-            <p><strong>Strategie:</strong></p>
-            <ol>
-                <li>Run PHPStan en bekijk alle meldingen</li>
-                <li>Los eerst alle ontbrekende type hints op</li>
-                <li>Voeg null checks toe waar nodig</li>
-                <li>Fix type mismatches (casting)</li>
-                <li>Run PHPStan opnieuw en check of problemen zijn opgelost</li>
-                <li>Test je applicatie om te checken of het nog werkt</li>
-            </ol>
-        </div>
-
-        <h3>PHPStan levels</h3>
-
-
-
+        <h3>3. Veelvoorkomende Fouten</h3>
         <div class="table-wrapper">
             <table class="summary-table">
                 <thead>
                 <tr>
-                    <th>Level</th>
-                    <th>Checks</th>
-                    <th>Gebruik voor</th>
+                    <th style="width: 40%;">Foutmelding</th>
+                    <th>Betekenis & Oplossing</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td><strong>0</strong></td>
-                    <td>Basic errors (undefined variables)</td>
-                    <td>Legacy code met veel fouten</td>
+                    <td><code>Method has no return type specified</code></td>
+                    <td><strong>Je bent vergeten:</strong> <code>: int</code> of <code>: void</code> achter je functie te zetten.</td>
                 </tr>
                 <tr>
-                    <td><strong>3</strong></td>
-                    <td>Return types, unknown methods</td>
-                    <td>Oudere projecten</td>
+                    <td><code>Property has no type specified</code></td>
+                    <td><strong>Je bent vergeten:</strong> <code>private string $name</code> te typen (het type ontbreekt).</td>
                 </tr>
                 <tr>
-                    <td><strong>6</strong></td>
-                    <td>Missing type hints, null checks</td>
-                    <td>Nieuwe projecten (aanbevolen)</td>
-                </tr>
-                <tr>
-                    <td><strong>9</strong></td>
-                    <td>Alle checks, zeer streng</td>
-                    <td>Professionele projecten</td>
+                    <td><code>Call to method on possibly null</code></td>
+                    <td><strong>Gevaarlijk:</strong> Je probeert iets te doen met een object dat misschien niet bestaat.
+                        <br><em>Oplossing:</em> Voeg een check toe: <code>if ($speler !== null) { ... }</code></td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="info-box">
-            <p><strong>Tip:</strong> Start met level 6. Als dat te veel fouten geeft, begin dan met level 3 en werk omhoog.</p>
-        </div>
+        <h3>4. Levels</h3>
+        <p>Je kunt instellen hoe streng PHPStan is (0 t/m 9).</p>
+        <ul>
+            <li><strong>Level 0-3:</strong> Basis checks (bestaat deze functie wel?).</li>
+            <li><strong>Level 4-5:</strong> Type checks (stop je geen tekst in een getal?).</li>
+            <li><strong>Level 6:</strong> Controleert ook op ontbrekende typehints (Aanbevolen).</li>
+            <li><strong>Level 9:</strong> Extreem streng (ook gemengde types en 'strict' checks).</li>
+        </ul>
 
-        <h3>PHPStan in workflow</h3>
-
-
-
-        <div class="info-box">
-            <p>Maak het een gewoonte om PHPStan regelmatig te draaien:</p>
-            <ul>
-                <li>Na het toevoegen van nieuwe code</li>
-                <li>Voor het pushen naar Git</li>
-                <li>Na refactoring</li>
-                <li>Voor het testen van je applicatie</li>
-            </ul>
-
-            <p>Dit voorkomt dat bugs in productie komen en houdt je code kwaliteit hoog.</p>
-        </div>
-
-        <div class="info-box">
-            <h3>Belangrijke punten</h3>
-            <ul>
-                <li>PHPStan vindt fouten zonder code uit te voeren (statische analyse)</li>
-                <li>Installeer met <code>composer require --dev phpstan/phpstan</code></li>
-                <li>Maak <code>phpstan.neon</code> configuratie bestand in hoofdmap</li>
-                <li>Start met level 6 voor goede balans</li>
-                <li>Run met <code>vendor/bin/phpstan analyse</code></li>
-                <li>Los eerst makkelijke problemen op (type hints)</li>
-                <li>Test je applicatie na het fixen van problemen</li>
-                <li>Maak PHPStan onderdeel van je development workflow</li>
-            </ul>
-        </div>
     </main>
 
     <aside class="sidebar-right">

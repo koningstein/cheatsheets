@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulieren en OOP - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Formulieren en OOP</h1>
+
+        <div class="info-box">
+            <h3>Waarom formulieren in OOP?</h3>
+            <p>Formulieren zijn de brug tussen gebruikers en je objecten. In plaats van hardcoded objecten aan te maken, kunnen gebruikers via een formulier zelf gegevens invoeren die worden omgezet in objecten.</p>
+
+            <p><strong>Het proces:</strong></p>
+            <ol>
+                <li>Gebruiker vult formulier in (HTML)</li>
+                <li>Data wordt verstuurd naar de server (POST)</li>
+                <li>PHP vangt de data op ($_POST)</li>
+                <li>Data wordt gebruikt om een object te maken</li>
+                <li>Object wordt verder verwerkt in de applicatie</li>
+            </ol>
+        </div>
+
+
+
+        <h3>Smarty template met Bootstrap form</h3>
+
+        <div class="info-box">
+            <p>Je maakt een formulier in een Smarty template en gebruikt Bootstrap classes voor de styling. Het formulier gebruikt de layout.tpl als basis voor een consistente uitstraling.</p>
+        </div>
+
+
+
+        <h4>templates/createPlayerForm.tpl</h4>
+        <pre><code class="language-php">{extends file="layout.tpl"}
+
+{block name="content"}
+    &lt;h1 class="mt-5"&gt;Create New Player&lt;/h1&gt;
+
+    &lt;div class="row mt-4"&gt;
+        &lt;div class="col-md-6 offset-md-3"&gt;
+            &lt;div class="card"&gt;
+                &lt;div class="card-header bg-success text-white"&gt;
+                    &lt;h3&gt;Player Information&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;form action="index.php?page=createPlayer" method="POST"&gt;
+                        &lt;!-- Naam veld --&gt;
+                        &lt;div class="mb-3"&gt;
+                            &lt;label for="name" class="form-label"&gt;Player Name&lt;/label&gt;
+                            &lt;input type="text"
+                                   class="form-control"
+                                   id="name"
+                                   name="name"
+                                   required
+                                   placeholder="Enter player name"&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Starting chips --&gt;
+                        &lt;div class="mb-3"&gt;
+                            &lt;label for="chips" class="form-label"&gt;Starting Chips&lt;/label&gt;
+                            &lt;input type="number"
+                                   class="form-control"
+                                   id="chips"
+                                   name="chips"
+                                   min="100"
+                                   max="10000"
+                                   value="1000"
+                                   required&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Buttons --&gt;
+                        &lt;div class="d-grid gap-2"&gt;
+                            &lt;button type="submit" class="btn btn-success"&gt;
+                                Create Player
+                            &lt;/button&gt;
+                            &lt;a href="index.php" class="btn btn-secondary"&gt;Cancel&lt;/a&gt;
+                        &lt;/div&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+{/block}</code></pre>
+
+        <h3>Form attributes</h3>
+
+        <div class="info-box">
+            <h4>action="index.php?page=createPlayer"</h4>
+            <p>Bepaalt naar welke pagina de formulierdata wordt verstuurd. Door een GET parameter toe te voegen (<code>?page=createPlayer</code>) weet PHP naar welke pagina de POST data moet.</p>
+
+            <h4>method="POST"</h4>
+            <p>Bepaalt hoe de data verstuurd wordt:</p>
+            <ul>
+                <li><strong>POST</strong> - Data is onzichtbaar in URL, geschikt voor gevoelige data</li>
+                <li><strong>GET</strong> - Data zichtbaar in URL, geschikt voor zoekopdrachten</li>
+            </ul>
+
+            <h4>name attribute</h4>
+            <p>Het <code>name</code> attribute bepaalt de key waarmee je de data in PHP ophaalt via $_POST. Bijvoorbeeld:</p>
+            <pre><code class="language-php">&lt;input name="playerName"&gt;
+// In PHP: $_POST['playerName']</code></pre>
+
+            <h4>required</h4>
+            <p>HTML5 validatie die voorkomt dat het formulier verstuurd wordt zonder dit veld in te vullen. Dit is client-side validatie (in de browser), dus je moet altijd ook server-side valideren in PHP.</p>
+        </div>
+
+        <h3>Routing met $_GET['page']</h3>
+
+        <div class="info-box">
+            <p>Je gebruikt de <code>$_GET['page']</code> parameter om te bepalen welke pagina moet worden getoond. Met de null coalescing operator (<code>??</code>) geef je een standaardwaarde als de parameter niet bestaat.</p>
+        </div>
+
+
+
+        <pre><code class="language-php">// Bepaal welke pagina getoond moet worden
+$page = $_GET['page'] ?? 'home';
+
+// Routing
+if ($page === 'createPlayer') {
+    // Toon het formulier
+    $template->display('createPlayerForm.tpl');
+} else {
+    // Standaard home pagina
+    $template->display('gameOverview.tpl');
+}</code></pre>
+
+        <div class="info-box">
+            <h4>Null coalescing operator (??)</h4>
+            <p>De <code>??</code> operator checkt of de linker waarde bestaat:</p>
+            <ul>
+                <li>Als <code>$_GET['page']</code> bestaat → gebruik die waarde</li>
+                <li>Als het niet bestaat → gebruik 'home' als standaardwaarde</li>
+            </ul>
+
+            <p><strong>Vergelijking met oude methode:</strong></p>
+            <pre><code class="language-php">// Oude manier (langer)
+if (isset($_GET['page'])) {
+    $page = $_GET['page'];
+} else {
+    $page = 'home';
+}
+
+// Nieuwe manier (korter)
+$page = $_GET['page'] ?? 'home';</code></pre>
+        </div>
+
+        <div class="info-box">
+            <h3>Belangrijke punten</h3>
+            <ul>
+                <li>Gebruik <code>{extends file="layout.tpl"}</code> voor consistente layout</li>
+                <li><code>name</code> attributes zijn cruciaal - deze worden gebruikt in $_POST</li>
+                <li><code>required</code> attribute voorkomt lege submissions (client-side)</li>
+                <li>Form action moet GET parameter bevatten: <code>action="index.php?page=createPlayer"</code></li>
+                <li>Gebruik <code>$_GET['page']</code> voor routing tussen pagina's</li>
+                <li>Null coalescing operator (<code>??</code>) geeft veilige default waarden</li>
+                <li>Voor Bootstrap form styling, zie de <a href="https://getbootstrap.com/docs/5.3/forms/overview/" target="_blank">Bootstrap Forms documentatie</a></li>
+            </ul>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

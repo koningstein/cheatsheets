@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: De Familieboom Compleet</h1>
+
+        <p>Gefeliciteerd! Je hebt Module 5 afgerond. Dit was een belangrijke module, want we zijn afgestapt van het idee dat één bestand alles moet doen.</p>
+        <p>In plaats van één rommelige "God Class", hebben we geleerd hoe we een nette familieboom bouwen met <strong>Inheritance</strong> (Overerving). Laten we de belangrijkste lessen nog één keer op een rijtje zetten.</p>
+
+
+
+        <h3>1. De Basis: Ouders en Kinderen</h3>
+        <p>De kern van deze module was het sleutelwoord <code>extends</code>. Hiermee voorkom je dat je code dubbel schrijft (DRY - Don't Repeat Yourself).</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Begrip</th>
+                    <th>Wat doet het?</th>
+                    <th>In Blackjack taal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Parent Class</strong></td>
+                    <td>De basis. Bevat alles wat <em>gedeeld</em> wordt.</td>
+                    <td><code>Player</code> (heeft kaarten en score).</td>
+                </tr>
+                <tr>
+                    <td><strong>Child Class</strong></td>
+                    <td>De specialisatie. Erft alles van de Parent.</td>
+                    <td><code>Dealer</code> (is een Player, maar met regels).</td>
+                </tr>
+                <tr>
+                    <td><strong>extends</strong></td>
+                    <td>Legt de link tussen Ouder en Kind.</td>
+                    <td><code>class Dealer extends Player</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Veiligheid: Visibility Levels</h3>
+        <p>We hebben geleerd dat <code>private</code> soms té streng is (zelfs je kinderen mogen er niet bij). Daarom hebben we een nieuw niveau geïntroduceerd: <code>protected</code>.</p>
+        <p>Hieronder zie je precies wie waar bij mag. Dit schema is essentieel voor je toets en je projecten:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Visibility</th>
+                    <th>Eigen Class</th>
+                    <th>Child Class</th>
+                    <th>Buitenwereld</th>
+                    <th>Wanneer gebruiken?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>private</code></td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                    <td>❌ Nee</td>
+                    <td><strong>Unieke data</strong><br>Bijv. <code>$balance</code> (alleen HumanPlayer heeft geld).</td>
+                </tr>
+                <tr>
+                    <td><code>protected</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                    <td><strong>Gedeelde data</strong><br>Bijv. <code>$hand</code> (Dealer moet zijn eigen kaarten kunnen lezen).</td>
+                </tr>
+                <tr>
+                    <td><code>public</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td><strong>Interactie</strong><br>Bijv. <code>addCard()</code> (het spel moet kaarten kunnen uitdelen).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>3. De Startmotor: Constructors</h3>
+        <p>Dit was een belangrijk struikelblok. Als een Child class een eigen <code>__construct</code> heeft, wordt de Parent "vergeten".</p>
+
+        <div class="info-box">
+            <h3>De Regel</h3>
+            <p>Als je zelf een constructor schrijft in een Child class, ben je <strong>verplicht</strong> om <code>parent::__construct()</code> aan te roepen. Doe je dit niet? Dan wordt de basis (zoals de naam van de speler) nooit ingesteld en crasht je spel.</p>
+        </div>
+
+        <pre><code class="language-php">class HumanPlayer extends Player
+{
+    private int $balance;
+
+    public function __construct(string $name, int $balance)
+    {
+        // STAP 1: Bel eerst de aannemer voor de fundering (Parent)
+        parent::__construct($name);
+
+        // STAP 2: Doe daarna de inrichting (Child)
+        $this->balance = $balance;
+    }
+}</code></pre>
+
+        <h3>4. Eigenwijs Gedrag: Overriding</h3>
+        <p>Soms wil een kind iets anders doen dan zijn ouders. In code heet dit <strong>Overriding</strong>. Je maakt een functie met <em>dezelfde naam</em> als in de parent, maar met <em>andere code</em>.</p>
+
+        <p>In Blackjack is de <code>playTurn()</code> methode hier het perfecte voorbeeld van:</p>
+        <ul>
+            <li><strong>Player (Basis):</strong> Weet niet wat hij moet doen (of wacht op input).</li>
+            <li><strong>Dealer (Override):</strong> Heeft strikte regels (moet kaarten pakken tot 17).</li>
+        </ul>
+
+        <pre><code class="language-php">class Dealer extends Player
+{
+    // Override: Zelfde naam, ander plan!
+    public function playTurn(): void
+    {
+        while ($this->getScore() < 17) {
+            $this->addCard(new Card());
+        }
+    }
+}</code></pre>
+
+        <h3>5. De Grote Finale: Polymorfisme</h3>
+        <p>Dit dure woord betekent eigenlijk: <em>"Verschillende dingen op dezelfde manier behandelen"</em>.</p>
+        <p>Omdat zowel de <code>Dealer</code> als de <code>HumanPlayer</code> afstammen van <code>Player</code>, garandeer je dat ze allebei de functies <code>getScore()</code> en <code>playTurn()</code> hebben. Hierdoor kun je ze allemaal in één lijst stoppen en er doorheen lopen zonder te checken wie wat is.</p>
+
+
+
+        <pre><code class="language-php">$spelers = [
+    new HumanPlayer("Sjaak", 1000),
+    new Dealer("De Bank"),
+    new HumanPlayer("Henk", 500)
+];
+
+foreach ($spelers as $p) {
+    // Het maakt niet uit of $p een mens of dealer is.
+    // We weten zeker dat hij playTurn() kan!
+    $p->playTurn();
+}</code></pre>
+
+        <h3>Wat nu?</h3>
+        <p>Je hebt nu een stevige basis in Object Georiënteerd Programmeren. Je classes zijn georganiseerd, veilig en slim opgezet. In de volgende modules gaan we kijken hoe we deze data permanent kunnen opslaan in een database, en hoe we nog strengere afspraken kunnen maken met <strong>Interfaces</strong> en <strong>Abstract Classes</strong>.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

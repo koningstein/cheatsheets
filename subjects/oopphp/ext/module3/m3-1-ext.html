@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docblocks (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Docblocks: De Handleiding van je Code</h1>
+
+        <p>Je hebt vast wel eens code geschreven die je een maand later terugzag en dacht: <em>"Wat doet dit eigenlijk?"</em>. Of je werkt samen met een klasgenoot en snapt niets van zijn functies.</p>
+        <p>Om dit op te lossen, schrijven we <strong>Docblocks</strong>. Dit is meer dan gewoon commentaar; het is de officiële handleiding van je code.</p>
+
+        <h3>Wat is een Docblock?</h3>
+        <p>Een Docblock is een speciaal stukje tekst boven je class, functie of variabele. Het begint altijd met <code>/**</code> (twee sterretjes) en eindigt met <code>*/</code>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: IKEA Handleiding</h3>
+            <p>Stel je voor dat je een IKEA-kast koopt.</p>
+            <ul>
+                <li><strong>De code:</strong> Dat zijn de planken, schroeven en de hamer. Hiermee bouw je de kast.</li>
+                <li><strong>Het Docblock:</strong> Dat is het boekje met instructies. Er staat in: "Dit is kast BILLY", "Je hebt 12 schroeven nodig" (Input) en "Het resultaat is een boekenkast" (Output).</li>
+            </ul>
+            <p>Zonder handleiding kun je de kast misschien wel bouwen, maar het is veel moeilijker en je maakt sneller fouten.</p>
+        </div>
+
+        <h3>Waarom doen we dit? (De 'Magic')</h3>
+        <p>Misschien denk je: "Ik heb geen zin om commentaar te typen." Maar Docblocks doen iets magisch voor <strong>jou</strong>.</p>
+        <p>Programma's zoals VS Code of PhpStorm lezen deze blokken. Als jij daarna je functie wilt gebruiken, geeft het programma automatisch tips (autocomplete).</p>
+
+
+
+        <h3>Hoe ziet het eruit?</h3>
+        <p>Een Docblock bestaat uit drie onderdelen:</p>
+        <ol>
+            <li><strong>De Beschrijving:</strong> Wat doet deze functie?</li>
+            <li><strong>@param (Input):</strong> Wat moet erin?</li>
+            <li><strong>@return (Output):</strong> Wat komt eruit?</li>
+        </ol>
+
+        <h3>Stap voor Stap: Een voorbeeld in Blackjack</h3>
+        <p>Laten we kijken naar een functie in onze <code>Card</code> class die de naam van de kaart teruggeeft.</p>
+
+        <h4>Stap 1: De Class beschrijven</h4>
+        <p>Boven de class vertellen we kort wat dit bestand voorstelt.</p>
+
+        <pre><code class="language-php">/**
+ * Represents a playing card in a Blackjack game.
+ * This class holds the suit and value of a single card.
+ */
+class Card
+{
+    // ...
+}</code></pre>
+
+        <h4>Stap 2: De Methode beschrijven</h4>
+        <p>Nu kijken we naar een methode. Stel we hebben een functie <code>setSuit</code>. Zonder Docblock weet een andere programmeur misschien niet wat voor data hij moet meegeven. Is het een getal? Een tekst?</p>
+
+        <pre><code class="language-php">/**
+ * Sets the card's suit (Hearts, Spades, etc.)
+ *
+ * @param string $suit  The name of the suit (e.g. "Hearts")
+ * @return void         This method does not return anything
+ */
+public function setSuit(string $suit): void
+{
+    $this->suit = $suit;
+}</code></pre>
+
+        <h3>Uitleg van de termen</h3>
+        <ul>
+            <li><code>@param</code>: Dit is kort voor <strong>Parameter</strong>. Hier zeg je: "Ik verwacht een stukje <code>string</code> (tekst) en die variabele heet <code>$suit</code>."</li>
+            <li><code>@return</code>: Hier zeg je wat de functie teruggeeft.
+                <ul>
+                    <li>Geeft hij tekst terug? Gebruik <code>@return string</code>.</li>
+                    <li>Geeft hij een getal terug? Gebruik <code>@return int</code>.</li>
+                    <li>Doet hij alleen iets (zoals opslaan) en geeft hij niets terug? Gebruik <code>@return void</code> (leeg).</li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="info-box">
+            <h3>Pro Tip: De snelle manier</h3>
+            <p>Je hoeft dit bijna nooit helemaal zelf te typen!</p>
+            <p>Ga in je editor (VS Code) op de regel boven je functie staan. Typ <code>/**</code> en druk op <strong>Enter</strong>. De editor maakt het hele blok automatisch voor je aan! Jij hoeft alleen de tekst nog in te vullen.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan?</h3>
+        <p>Het gevaarlijkste aan commentaar is dat het <strong>verouderd</strong> raakt.</p>
+        <p>Stel, je verandert je code zodat de functie nu een getal (<code>int</code>) teruggeeft in plaats van tekst (<code>string</code>), maar je vergeet je Docblock aan te passen. Dan klopt de handleiding niet meer met de kast! Andere programmeurs raken dan in de war.</p>
+        <p><strong>Regel:</strong> Als je de code verandert, verander je ook direct het Docblock.</p>
+
+        <h3>Nog een voorbeeld: Kaartnaam ophalen</h3>
+        <p>Hier zie je een functie die wél iets teruggeeft.</p>
+
+        <pre><code class="language-php">/**
+ * Returns the full display name of the card.
+ * Example: "Ace of Spades"
+ *
+ * @return string The formatted name of the card
+ */
+public function getCardName(): string
+{
+    return $this->value . " of " . $this->suit;
+}</code></pre>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Gebruik <code>/**</code> om een Docblock te starten.</li>
+            <li>Het helpt <strong>jou</strong> omdat je editor dan betere tips kan geven.</li>
+            <li>Het helpt <strong>anderen</strong> om je code te begrijpen zonder alles te hoeven lezen.</li>
+            <li>Houd je commentaar altijd up-to-date!</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
