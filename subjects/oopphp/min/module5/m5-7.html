@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Method Overriding & Polymorfisme - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Method Overriding & Polymorfisme</h1>
+
+        <div class="info-box">
+            <h3>Gedrag Aanpassen</h3>
+            <p>Soms voldoet de methode van de Parent class niet helemaal voor de Child class. De <code>Dealer</code> moet bijvoorbeeld anders spelen dan een <code>HumanPlayer</code>.</p>
+            <p>In plaats van een nieuwe methode te verzinnen (zoals <code>playDealerTurn</code>), kunnen we de bestaande methode <strong>overschrijven</strong> (Overriding). We definiëren de methode opnieuw in de child class met <strong>dezelfde naam</strong>.</p>
+        </div>
+
+        <h3>Voorbeeld: playTurn()</h3>
+        <p>De <code>Player</code> class heeft een basisimplementatie, maar de <code>Dealer</code> doet iets totaal anders.</p>
+
+        <pre><code class="language-php">class Player {
+    public function playTurn() {
+        // Wacht op input van de gebruiker...
+        return "Waiting for input";
+    }
+}
+
+class Dealer extends Player {
+    // Override: Zelfde naam, ander gedrag
+    public function playTurn() {
+        // Dealer logica: Hit tot 17
+        while ($this->getScore() < 17) {
+            $this->addCard($deck->draw());
+        }
+        return "Dealer finished playing";
+    }
+}</code></pre>
+
+        <h3>Functionaliteit Uitbreiden met parent::</h3>
+        <p>Soms wil je de originele code niet <em>vervangen</em>, maar <em>uitbreiden</em>. Je wilt doen wat de ouder doet, plus een beetje extra.</p>
+        <p>Hiervoor gebruik je <code>parent::methodeNaam()</code>.</p>
+
+
+
+        <pre><code class="language-php">class Player {
+    public function getSummary(): string {
+        return "Score: " . $this->getScore();
+    }
+}
+
+class Cheater extends Player {
+    public function getSummary(): string {
+        // Roep eerst de ouder aan
+        $original = parent::getSummary();
+
+        // Plak er iets achteraan
+        return $original . " (I am cheating!)";
+    }
+}</code></pre>
+
+        <h3>Polymorfisme</h3>
+        <p>Dit is een duur woord voor een simpel concept: <strong>Verschillende objecten op dezelfde manier behandelen.</strong></p>
+
+        <div class="info-box">
+            <h3>Waarom is dit handig?</h3>
+            <p>Stel je hebt een array met spelers. Sommige zijn mens, sommige zijn dealer, sommige zijn valsspelers. Omdat ze allemaal <code>Player</code> zijn en allemaal de methode <code>playTurn()</code> hebben, hoeft de Game class niet te weten <em>wie</em> wat is.</p>
+        </div>
+
+        <pre><code class="language-php">$players = [
+    new HumanPlayer("John"),
+    new Dealer(),
+    new HumanPlayer("Jane")
+];
+
+foreach ($players as $player) {
+    // Polymorfisme in actie:
+    // We roepen playTurn() aan, maar de UITVOERING verschilt per object!
+    $player->playTurn();
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvattend</h3>
+            <ul>
+                <li><strong>Overriding:</strong> Een methode in de child class maken met dezelfde naam als in de parent.</li>
+                <li><strong>parent:::</strong> De originele methode van de parent aanroepen binnen de override.</li>
+                <li><strong>Polymorfisme:</strong> Code schrijven die werkt met de Parent class, maar die automatisch het juiste gedrag van de Child classes gebruikt.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

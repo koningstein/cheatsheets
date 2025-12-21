@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Datatypes - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Property Datatypes</h1>
+
+        <h3>Strict type properties (vanaf PHP 7.4)</h3>
+        <p>In PHP kun je een property (eigenschap van een object) nu direct een type geven. Dit zorgt ervoor dat de property altijd een waarde van dat type bevat. Hierdoor wordt je code betrouwbaarder.</p>
+
+        <div class="info-box">
+            <h3>Datatypes bij properties</h3>
+            <p>Je kunt alle basis types gebruiken, plus arrays en andere classes:</p>
+            <pre><code class="language-php">class Card
+{
+    // Moet altijd een string zijn
+    public string $suit;
+
+    // Moet altijd een integer zijn
+    public int $value;
+
+    // Optioneel: mag een string of null zijn
+    public ?string $image = null;
+
+    // Moet altijd een boolean zijn
+    public bool $faceUp = false;
+}</code></pre>
+        </div>
+
+        <h3>Het voordeel van strict types</h3>
+        <p>Zonder type declaratie zou een property in PHP elk type kunnen aannemen (een string kan ineens een integer worden). Met een gedefinieerd type:</p>
+        <ul>
+            <li><strong>Kwaliteit is zeker:</strong> Je weet zeker dat de data in het object het juiste type heeft.</li>
+            <li><strong>Fouten worden snel gevonden:</strong> PHP geeft direct een <code>TypeError</code> (foutmelding) als je de property een verkeerde waarde geeft.</li>
+        </ul>
+
+        <pre><code class="language-php">class Player
+{
+    public int $score;
+}
+
+$player = new Player();
+$player->score = 21; // OK
+
+// Dit veroorzaakt een fatale fout (TypeError) in PHP
+// $player->score = "blackjack"; </code></pre>
+
+        <h3>Nullable Properties</h3>
+        <p>Net als bij parameter type hints kun je een vraagteken (<code>?</code>) voor het type zetten. Dit betekent dat de property het opgegeven type moet zijn, of <code>null</code> mag zijn.</p>
+
+        <pre><code class="language-php">class Game
+{
+    // Start met null, maar krijgt een waarde tijdens het spel
+    public ?int $roundNumber = null;
+
+    // Moet altijd een string zijn
+    public string $gameType;
+
+    public function __construct(string $gameType)
+    {
+        $this->gameType = $gameType;
+    }
+}</code></pre>
+
+        <h3>Readonly Properties (vanaf PHP 8.1)</h3>
+        <p>Met het trefwoord <code>readonly</code> kun je een property definiëren die slechts één keer ingesteld mag worden (meestal in de constructor of via een <a href="../module1/m1-8.html">promoted property</a>). Daarna is de waarde niet meer te wijzigen.</p>
+
+        <div class="info-box">
+            <h3>Let op!</h3>
+            <p>Readonly properties moeten direct een waarde krijgen bij het aanmaken (of in de constructor). Je kunt readonly niet combineren met een standaardwaarde:</p>
+            <pre><code class="language-php">class Card
+{
+    // ✅ Correct: waarde wordt in constructor gezet
+    public readonly string $suit;
+
+    // ❌ Fout: readonly mag geen standaardwaarde hebben
+    public readonly string $value = "Ace";
+
+    public function __construct(string $suit)
+    {
+        $this->suit = $suit;
+        // Na deze toewijzing kan $suit niet meer worden gewijzigd
+    }
+}</code></pre>
+        </div>
+
+        <h3>Wanneer readonly gebruiken?</h3>
+        <p>Gebruik <code>readonly</code> voor waarden die na het aanmaken van het object niet meer mogen veranderen:</p>
+        <ul>
+            <li>ID's of unieke identificatienummers</li>
+            <li>Aanmaakdatums (created_at)</li>
+            <li>Configuratiewaarden die vast moeten staan</li>
+        </ul>
+
+        <pre><code class="language-php">class Game
+{
+    public readonly int $gameId;
+    public readonly string $startedAt;
+
+    public function __construct(int $gameId)
+    {
+        $this->gameId = $gameId;
+        $this->startedAt = date('Y-m-d H:i:s');
+    }
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout met Bootstrap - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Layout met Bootstrap</h1>
+
+        <p>We gebruiken <strong>Bootstrap</strong> voor de opmaak en <strong>Smarty Inheritance</strong> om een vaste layout (zoals een menu en footer) te maken die op elke pagina terugkomt.</p>
+
+        <h3>1. Bestanden & Mappen</h3>
+        <p>Download de Bootstrap bestanden en zet ze in je project:</p>
+        <pre><code class="language-text">templates/
+├── css/
+│   ├── bootstrap.min.css
+│   └── sticky-footer-navbar.css
+├── js/
+│   └── bootstrap.bundle.min.js
+└── layout.tpl   (Je basis bestand)</code></pre>
+
+        <h3>2. De Basis (layout.tpl)</h3>
+        <p>Dit bestand bevat de HTML die op <strong>elke pagina</strong> hetzelfde is (head, menu, footer). Op de plek waar de inhoud moet komen, gebruik je een <code>block</code>.</p>
+
+        <pre><code class="language-html">&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;!-- Bootstrap CSS koppelen --&gt;
+    &lt;link href="templates/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body class="d-flex flex-column h-100"&gt;
+
+    &lt;!-- Hier komt je Menu --&gt;
+    &lt;nav&gt;...&lt;/nav&gt;
+
+    &lt;!-- HIER komt de wisselende inhoud --&gt;
+    &lt;main class="container"&gt;
+        {block name="content"}{/block}
+    &lt;/main&gt;
+
+    &lt;!-- Hier komt je Footer --&gt;
+    &lt;footer&gt;...&lt;/footer&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h3>3. De Pagina (game.tpl)</h3>
+        <p>In je losse pagina's gebruik je <code>extends</code> om de basis te laden. Alles wat je in het block zet, wordt in de layout "geïnjecteerd".</p>
+
+        <pre><code class="language-html">{extends file="layout.tpl"}
+
+{block name="content"}
+    &lt;h1&gt;Mijn Blackjack Spel&lt;/h1&gt;
+
+    &lt;div class="alert alert-success"&gt;
+        Welkom {$speler->getName()}!
+    &lt;/div&gt;
+{/block}</code></pre>
+
+        <h3>4. Bootstrap Cheat Sheet</h3>
+        <p>Veelgebruikte classes om je spel snel mooi te maken:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 30%;">Doel</th>
+                    <th>Classes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Kleuren</strong></td>
+                    <td>
+                        <code>bg-success</code> (Groen)<br>
+                        <code>bg-danger</code> (Rood)<br>
+                        <code>bg-primary</code> (Blauw)<br>
+                        <code>bg-dark</code> (Zwart)
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Ruimte (Spacing)</strong></td>
+                    <td>
+                        <code>mt-3</code> (Margin Top)<br>
+                        <code>mb-3</code> (Margin Bottom)<br>
+                        <code>p-3</code> (Padding rondom)
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Componenten</strong></td>
+                    <td>
+                        <code>btn btn-primary</code> (Knop)<br>
+                        <code>alert alert-info</code> (Melding)<br>
+                        <code>card</code> (Kader met rand)
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Indeling (Grid)</strong></td>
+                    <td>
+                        <code>row</code> (Rij)<br>
+                        <code>col-6</code> (Halve breedte)
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docblocks - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Docblocks</h1>
+
+        <h3>Wat zijn docblocks?</h3>
+        <p>Docblocks zijn speciale opmerkingen in je code die uitleggen wat een class of methode doet. Ze helpen andere programmeurs (en jouzelf later!) om de code te begrijpen. Ook krijg je betere hulp van je programma (zoals autocomplete).</p>
+
+
+
+        <div class="info-box">
+            <h3>Waarom docblocks gebruiken?</h3>
+            <ul>
+                <li><strong>Betere uitleg van je code:</strong> Andere programmeurs (en jijzelf over een paar maanden) snappen meteen wat de code doet</li>
+                <li><strong>Hulp van je programma:</strong> Je programma kan betere tips geven en fouten vinden</li>
+                <li><strong>Professioneler:</strong> Het is een standaard in de PHP community</li>
+            </ul>
+        </div>
+
+        <h3>Class docblock</h3>
+        <p>Gebruik een class docblock om uit te leggen wat de class doet. Hier zie je een voorbeeld bij de <code>Card</code> class:</p>
+
+        <pre><code class="language-php">/**
+ * Represents a playing card in a Blackjack game
+ */
+class Card
+{
+    // class implementation
+}</code></pre>
+
+        <h3>Method docblock</h3>
+        <p>Een method docblock legt uit wat de methode doet en wat er terugkomt. Hier zie je een voorbeeld van een methode zonder parameters:</p>
+
+        <pre><code class="language-php">/**
+ * Returns the full name of the card
+ * @return string The full card name
+ */
+public function getCardName(): string
+{
+    return $this->value . " of " . $this->suit;
+}</code></pre>
+
+        <h3>Docblock met parameters</h3>
+        <p>Gebruik de <code>@param</code> tag om het <strong>type</strong> en de <strong>uitleg</strong> van een parameter op te schrijven. Hier zie je een voorbeeld bij de <code>setSuit</code> methode:</p>
+
+        <pre><code class="language-php">/**
+ * Sets the card's suit
+ * @param string $suit The suit to set
+ * @return void
+ */
+public function setSuit(string $suit): void
+{
+    $this->suit = $suit;
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Tip</h3>
+            <p>Voeg altijd docblocks toe aan:</p>
+            <ul>
+                <li>Elke class</li>
+                <li>Alle public en protected methods</li>
+                <li>Complexe private methods</li>
+            </ul>
+            <p>Je programma kan vaak automatisch een docblock maken - typ <code>/**</code> en druk op Enter boven een method!</p>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

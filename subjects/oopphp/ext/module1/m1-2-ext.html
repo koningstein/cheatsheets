@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Object: Van Plan naar Realiteit</h1>
+
+        <p>In het vorige hoofdstuk hebben we de <strong>Class</strong> gemaakt. Dat was onze bouwtekening. Maar aan een tekening alleen heb je niet zoveel: je kunt er niet mee kaarten. Nu gaan we die tekening gebruiken om echte dingen te maken. Die dingen noemen we <strong>Objecten</strong>.</p>
+
+        <h3>Wat is het verschil?</h3>
+        <p>Dit is het belangrijkste concept van OOP (Object Oriented Programming). Als je dit snapt, snap je de basis.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Fabriek</h3>
+            <p>Denk terug aan de architect. Hij heeft één tekening (de <strong>Class</strong>). Die tekening gaat naar de fabriek.</p>
+            <ul>
+                <li>De fabriek gebruikt die ene tekening om 1.000 huizen te bouwen.</li>
+                <li>Elk huis is een <strong>Object</strong>.</li>
+                <li>Als ik mijn huis verf, verandert de kleur van jouw huis niet. Ze zijn <strong>onafhankelijk</strong>.</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Objecten in Blackjack</h3>
+        <p>In ons kaartspel hebben we de <code>Card</code> class gemaakt. Dat is het idee van een kaart. Nu gaan we echte kaarten maken.</p>
+
+        <p>Stel dat we een spel starten. De dealer deelt twee kaarten uit aan jou:</p>
+        <ol>
+            <li>Een Harten Aas.</li>
+            <li>Een Schoppen Koning.</li>
+        </ol>
+        <p>Dit zijn twee losse <strong>Objecten</strong>, gemaakt van dezelfde <code>Card</code> class.</p>
+
+        <h3>Stap voor Stap: Een Object maken</h3>
+        <p>Om van een class een object te maken, gebruiken we een speciaal woord in PHP: <code>new</code>.</p>
+        <p>Het commando <code>new</code> zegt eigenlijk tegen PHP: <em>"Kijk naar de bouwtekening en bouw een nieuw exemplaar voor mij in het geheugen."</em></p>
+
+        <pre><code class="language-php">&lt;?php
+
+// 1. Eerst moet PHP de bouwtekening kennen
+require 'Card.php';
+
+// 2. Nu maken we een nieuw object (een kaart)
+$myCard = new Card();
+
+// 3. We kunnen er nog eentje maken!
+$dealerCard = new Card();</code></pre>
+
+        <div class="info-box">
+            <h3>Wat gebeurt hier?</h3>
+            <p>We hebben nu twee variabelen: <code>$myCard</code> en <code>$dealerCard</code>. Ze lijken op elkaar omdat ze van dezelfde class komen, maar het zijn twee totaal verschillende dingen in het geheugen van de computer.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+        <p>Bij het maken van objecten zien we vaak dezelfde vergissingen:</p>
+
+        <h4>1. De haakjes vergeten</h4>
+        <p>Achter de naam van de class horen ronde haakjes <code>()</code>. Soms werkt het zonder, maar het is slechte code.</p>
+        <pre><code class="language-php">$fout = new Card;   // Niet netjes!
+$goed = new Card(); // Zo hoort het.</code></pre>
+
+        <h4>2. Denken dat alles hetzelfde is</h4>
+        <p>Beginners denken soms dat als je iets verandert aan <code>$myCard</code>, dat <code>$dealerCard</code> dan ook verandert. Dat is niet zo! Elk object staat op zichzelf.</p>
+
+        <h3>Hoe bekijk ik mijn Object?</h3>
+        <p>Vroeger gebruikte je misschien <code>echo</code> om een variabele op het scherm te tonen. Bij objecten werkt dat niet.</p>
+
+        <pre><code class="language-php">// DIT GEEFT EEN FOUTMELDING:
+echo $myCard;
+// Fout: "Object of class Card could not be converted to string"</code></pre>
+
+        <p><strong>Waarom?</strong> Een object is te complex. Het is geen simpele tekst, maar een verzameling van gegevens. Om in een object te kijken, gebruiken we <code>var_dump()</code>.</p>
+
+        <p>Om het leesbaar te maken, zetten we er HTML <code>&lt;pre&gt;</code> tags omheen. Dit zorgt ervoor dat de tekst netjes wordt opgemaakt.</p>
+
+        <pre><code class="language-php">echo "&lt;pre&gt;";
+var_dump($myCard);
+echo "&lt;/pre&gt;";</code></pre>
+
+        <p>Je ziet dan op je scherm iets als:</p>
+        <pre><code class="language-text">object(Card)#1 (0) {
+}</code></pre>
+        <p>Dit betekent: "Dit is een object van het type Card, het is object nummer 1, en het is nog leeg."</p>
+
+        <h3>Samenvatting: Waarom doen we dit?</h3>
+        <p>Misschien denk je: "Waarom al die moeite met Classes en Objecten?"</p>
+        <p>Stel dat je een Blackjack spel maakt met 52 kaarten en 4 spelers.</p>
+        <ul>
+            <li><strong>Zonder OOP:</strong> Je moet honderden losse variabelen maken (`$kaart1_kleur`, `$kaart1_waarde`, `$speler1_naam`, etc.). Het wordt een chaos.</li>
+            <li><strong>Met OOP:</strong> Je schrijft 1x de code voor <code>Card</code> en 1x de code voor <code>Player</code>. Daarna maak je met <code>new</code> razendsnel 52 kaarten en 4 spelers aan. Het is netter, sneller en minder foutgevoelig.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

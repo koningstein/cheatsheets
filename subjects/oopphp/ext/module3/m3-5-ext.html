@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Properties (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Private Properties: De Kluis</h1>
+
+        <p>Tot nu toe hebben we bijna overal <code>public</code> voor gezet. Dat is makkelijk, want dan kun je overal bij. Maar in het echte leven is niet alles openbaar. Je pincode, je dagboek of de inhoud van je portemonnee zijn privé.</p>
+        <p>In programmeren is dat net zo. Soms wil je data beschermen zodat niemand er per ongeluk (of expres) mee kan rommelen. Daarvoor gebruiken we <code>private</code>.</p>
+
+        <h3>Public vs. Private</h3>
+        <p>Dit noemen we de <strong>Zichtbaarheid</strong> (Visibility) van je code.</p>
+        <ul>
+            <li><strong>Public (Openbaar):</strong> Iedereen mag de waarde zien én veranderen. De voordeur staat wagenwijd open.</li>
+            <li><strong>Private (Privé):</strong> Alleen de class zélf mag bij de data. De deur zit op slot en alleen de class heeft de sleutel.</li>
+        </ul>
+
+
+
+        <h3>Het Probleem: Valsspelen in Blackjack</h3>
+        <p>Stel je voor dat we de score van een speler bijhouden. Als we dit <code>public</code> maken, kan iedereen de score aanpassen. Een programmeur kan (per ongeluk) een fout maken, of een hacker kan valsspelen.</p>
+
+        <pre><code class="language-php">class Player
+{
+    public int $score = 0;
+}
+
+$player = new Player();
+// Omdat het public is, mag dit gewoon:
+$player->score = 1000; // Valsspelen!
+$player->score = -50;  // Fout! Een score kan niet negatief zijn.</code></pre>
+
+        <p>Dit willen we voorkomen. We willen controle hebben over wat er met de score gebeurt.</p>
+
+        <h3>De Oplossing: Encapsulatie (Inkapseling)</h3>
+        <p>We gaan de data beschermen door de property <code>private</code> te maken. Dit noemen we met een duur woord <strong>Encapsulatie</strong>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Auto</h3>
+            <p>Denk aan een auto. De motor is het belangrijkste onderdeel.</p>
+            <ul>
+                <li>Je kunt de motor niet zomaar aanraken tijdens het rijden (hij is <strong>private</strong> / afgeschermd).</li>
+                <li>Je gebruikt pedalen en een stuur om de auto te besturen (de <strong>public</strong> methodes).</li>
+            </ul>
+            <p>Als je direct aan de motor zou kunnen sleutelen tijdens het rijden, zou de auto stuk gaan. Door de motorkap dicht te laten (private), blijft de auto veilig werken.</p>
+        </div>
+
+        <h3>Hoe gebruik je Private Properties?</h3>
+        <p>Als je een property <code>private</code> maakt, kan niemand er meer bij. Als je het probeert, krijg je een error.</p>
+
+        <pre><code class="language-php">class Player
+{
+    private int $score = 0; // Nu met 'private'
+}
+
+$player = new Player();
+// echo $player->score;
+// FOUTMELDING: Fatal Error: Cannot access private property</code></pre>
+
+        <p>Maar wacht... als niemand erbij kan, hebben we er toch niks aan?
+            <br>Klopt! Daarom maken we speciale "deurtjes" om op een veilige manier naar binnen te gaan: <strong>Getters</strong> en <strong>Setters</strong>.</p>
+
+        <h3>De Poortwachters: Getters en Setters</h3>
+        <p>Omdat de property op slot zit, maken we twee methodes die wél <code>public</code> zijn. Zij hebben de sleutel van de kluis.</p>
+
+        <h4>1. De Setter (De Bewaker)</h4>
+        <p>Met de setter kunnen we de waarde veranderen. Het grote voordeel is dat we hier <strong>regels</strong> (validatie) kunnen toevoegen.</p>
+
+        <pre><code class="language-php">public function setScore(int $newScore): void
+{
+    // REGEL 1: Score mag niet negatief zijn
+    if ($newScore < 0) {
+        echo "Fout: Score mag niet negatief zijn!";
+        return; // Stop de functie
+    }
+
+    // REGEL 2: Score mag niet hoger zijn dan 21 (in dit voorbeeld)
+    if ($newScore > 21) {
+        $newScore = 21;
+    }
+
+    // Als alles klopt, passen we de private variabele aan
+    $this->score = $newScore;
+}</code></pre>
+
+        <h4>2. De Getter (De Etalage)</h4>
+        <p>Met de getter kunnen we de waarde bekijken. We mogen alleen kijken, niet aanraken.</p>
+
+        <pre><code class="language-php">public function getScore(): int
+{
+    return $this->score;
+}</code></pre>
+
+        <h3>Het complete plaatje</h3>
+        <p>Hier zie je hoe het veilig werkt:</p>
+
+        <pre><code class="language-php">$player = new Player();
+
+// 1. Proberen vals te spelen (Foute waarde)
+$player->setScore(-100);
+// Output: Fout: Score mag niet negatief zijn!
+// (De score is nog steeds 0)
+
+// 2. Geldige score instellen
+$player->setScore(10);
+
+// 3. Score bekijken
+echo "De score is: " . $player->getScore();
+// Output: De score is: 10</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom doen we dit?</h3>
+            <p>Misschien lijkt het veel extra werk om voor elke property getters en setters te maken. Maar dit is dé manier om professionele code te schrijven.</p>
+            <ul>
+                <li>Je beschermt je data tegen fouten.</li>
+                <li>Je kunt later makkelijk regels toevoegen in de setter, zonder dat je de rest van je code hoeft aan te passen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

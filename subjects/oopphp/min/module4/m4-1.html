@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting Debuggen - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Debuggen met Xdebug</h1>
+
+        <p>Debuggen is het pauzeren van je code om de huidige status (variabelen) te inspecteren. Dit is efficiënter dan werken met <code>var_dump()</code>.</p>
+
+        <h3>1. Installatie & Configuratie</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 30%;">Onderdeel</th>
+                    <th>Actie</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>WampServer</strong></td>
+                    <td>Zet vinkje bij: <strong>PHP → PHP Extensions → xdebug</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>php.ini</strong></td>
+                    <td>Zorg dat er staat: <code>xdebug.mode = debug</code><br>(Herstart WampServer na wijzigen!)</td>
+                </tr>
+                <tr>
+                    <td><strong>Browser</strong></td>
+                    <td>Installeer <strong>Xdebug Helper</strong> plugin en zet deze op 'Debug' (groen).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Debuggen starten</h3>
+        <ol>
+            <li><strong>Breakpoint:</strong> Klik in PHPStorm in de marge naast een regelnummer (rode bol). Hier stopt de code.</li>
+            <li><strong>Luisteren:</strong> Klik in PHPStorm op het telefoon-icoon (rechtsboven). Deze moet <strong>groen</strong> zijn.</li>
+            <li><strong>Starten:</strong> Ververs de pagina in je browser. PHPStorm springt nu naar voren.</li>
+        </ol>
+
+        <h3>3. Navigatie (Sneltoetsen)</h3>
+        <p>Gebruik deze toetsen om door je code te lopen als deze gepauzeerd is:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Toets</th>
+                    <th>Naam</th>
+                    <th>Wat doet het?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>F8</strong></td>
+                    <td>Step Over</td>
+                    <td>Voer de regel uit en ga naar de volgende. (Slaat details van methodes over).</td>
+                </tr>
+                <tr>
+                    <td><strong>F7</strong></td>
+                    <td>Step Into</td>
+                    <td>Ga <strong>in</strong> de methode die op deze regel wordt aangeroepen.</td>
+                </tr>
+                <tr>
+                    <td><strong>F9</strong></td>
+                    <td>Resume</td>
+                    <td>Haal de pauze eraf en ga door tot het volgende breakpoint.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>4. Variabelen Inspecteren</h3>
+        <p>In het tabblad <strong>Variables</strong> (onderin PHPStorm) zie je de actuele waarden.</p>
+        <div class="info-box">
+            <ul>
+                <li>Klap pijltjes (<code>></code>) open om de inhoud van objecten en arrays te bekijken.</li>
+                <li>Je ziet hier de <em>huidige</em> waarde op het moment van pauzeren.</li>
+            </ul>
+        </div>
+
+        <h3>Veelvoorkomende problemen</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Probleem</th>
+                    <th>Oplossing</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>PHPStorm reageert niet</td>
+                    <td>Controleer of het telefoon-icoon groen is én of de browser-plugin op 'Debug' staat.</td>
+                </tr>
+                <tr>
+                    <td>Wamp instellingen werken niet</td>
+                    <td>Heb je "Restart All Services" gedaan na het aanpassen van php.ini?</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

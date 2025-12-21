@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoload Configureren (Uitgebreid) - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Autoload Configureren: De Grote Verhuizing</h1>
+
+        <p>We hebben Composer geïnstalleerd en ingesteld. Nu is het tijd om onze bestanden netjes op te ruimen en onze code aan te passen aan de nieuwe structuur.</p>
+
+        <h3>Stap 1: Bestanden Verplaatsen</h3>
+        <p>In de vorige les hebben we een mapje <code>src/</code> aangemaakt. Composer verwacht dat al jouw zelfgeschreven classes daar staan. Nu staan je bestanden waarschijnlijk nog los in de hoofdmap.</p>
+        <p>Verplaats <code>Card.php</code>, <code>Deck.php</code> en <code>Player.php</code> naar de map <code>src/</code>.</p>
+
+
+
+        <pre><code class="language-bash">blackjack-project/
+├── src/               <-- Hier woont jouw code nu
+│   ├── Card.php
+│   ├── Deck.php
+│   └── Player.php
+├── vendor/            <-- Hier woont de code van Composer (niet aankomen!)
+│   └── autoload.php
+├── index.php          <-- Dit bestand blijft buiten staan (de voordeur)
+├── composer.json
+└── .gitignore</code></pre>
+
+        <h3>Stap 2: Van Constructor naar Bulk Setters</h3>
+        <p>Hier maken we een belangrijke wijziging in onze strategie. In Module 1 leerden we dat de <strong>Constructor</strong> geweldig is om objecten te vullen. Toch gaan we dat nu anders doen.</p>
+        <p>We stappen over op <strong>Bulk Setters</strong>.</p>
+
+        <div class="info-box">
+            <h3>Waarom deze verandering?</h3>
+            <p>Een Constructor heeft één nadeel: hij is "stil".</p>
+            <ul>
+                <li><strong>Constructor:</strong> Als je een kaart aanmaakt met foutieve data, kan de constructor alleen crashen of stoppen. Hij kan geen tekstbericht (string) teruggeven zoals "Fout: ongeldige kleur".</li>
+                <li><strong>Setters:</strong> Een functie kan wél antwoord geven. Je kunt vragen: "Stel de kleur in", en de functie kan antwoorden: "Dat is gelukt" of "Dat mag niet".</li>
+            </ul>
+        </div>
+
+        <h4>Wat is een Bulk Setter?</h4>
+        <p>Een Bulk Setter is één grote functie die alle losse setters aanroept. Het is de manager die taken verdeelt.</p>
+
+
+
+        <h3>Voorbeeld: De Nieuwe Card Class</h3>
+        <p>Hieronder zie je hoe we de <code>Card</code> class ombouwen. Let op: de properties zijn <code>private</code> (alleen toegankelijk voor de class zelf) en we gebruiken namespaces.</p>
+
+        <pre><code class="language-php">// Bestand: src/Card.php
+&lt;?php
+namespace Blackjack; // De achternaam van de class
+
+class Card
+{
+    // Properties zijn privé (veilig opgeborgen)
+    private string $suit;
+    private string $value;
+    private string $image;
+
+    // --- DE KLEINE SETTERS (De werknemers) ---
+
+    public function setSuit(string $suit): string
+    {
+        $validSuits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+
+        // Validatie: mag deze kleur wel?
+        if (!in_array($suit, $validSuits)) {
+            return "Error: Ongeldige kleur gekozen.";
+        }
+
+        $this->suit = $suit;
+        return "Kleur ingesteld op " . $suit . ".";
+    }
+
+    public function setValue(string $value): string
+    {
+        $this->value = $value;
+        return "Waarde ingesteld op " . $value . ".";
+    }
+
+    public function setImage(string $image): string
+    {
+        $this->image = $image;
+        return "Afbeelding ingesteld.";
+    }
+
+    // --- DE BULK SETTER (De Manager) ---
+
+    // Deze functie roept alle bovenstaande functies aan
+    public function setCard(string $suit, string $value, string $image): string
+    {
+        $messages = []; // Een lijstje om alle antwoorden te bewaren
+
+        // Roep de losse setters aan en bewaar hun antwoord
+        $messages[] = $this->setSuit($suit);
+        $messages[] = $this->setValue($value);
+        $messages[] = $this->setImage($image);
+
+        // Plak alle antwoorden achter elkaar en geef ze terug
+        return implode(' ', $messages);
+    }
+
+    // Een getter om de naam te tonen
+    public function getCardName(): string
+    {
+        return $this->value . " of " . $this->suit;
+    }
+}
+?&gt;</code></pre>
+
+        <h3>Stap 3: Het Gebruik in index.php</h3>
+        <p>Omdat we geen constructor meer gebruiken, maken we het object eerst "leeg" aan. Daarna vullen we het met de Bulk Setter.</p>
+
+        <pre><code class="language-php">// index.php
+&lt;?php
+// 1. Laad de autoloader van Composer
+require_once 'vendor/autoload.php';
+
+// 2. Vertel welke classes je gaat gebruiken
+use Blackjack\Card;
+use Blackjack\Player;
+
+// 3. Maak een LEGE kaart aan (geen data tussen haakjes!)
+$card = new Card();
+
+// 4. Vul de kaart en vang het bericht op
+$resultaat = $card->setCard("Hearts", "Ace", "ace.png");
+
+// 5. Laat zien wat er gebeurd is
+echo $resultaat;
+// Output: "Kleur ingesteld op Hearts. Waarde ingesteld op Ace. Afbeelding ingesteld."
+
+// 6. Check of het echt gelukt is
+echo $card->getCardName();
+// Output: Ace of Hearts
+?&gt;</code></pre>
+
+        <h3>Stap 4: PSR-4 (Hoe weet Composer waar alles staat?)</h3>
+        <p>In je <code>composer.json</code> bestand staat een stukje configuratie dat er zo uitziet:</p>
+
+        <pre><code class="language-json">"autoload": {
+    "psr-4": {
+        "Blackjack\\": "src/"
+    }
+}</code></pre>
+
+        <p>Dit is eigenlijk een simpele afspraak, net als een telefoonboek:</p>
+        <ul>
+            <li><strong>De sleutel "Blackjack\":</strong> Dit is de Namespace (de achternaam) die we boven onze bestanden zetten.</li>
+            <li><strong>De waarde "src/":</strong> Dit is de map waar Composer moet gaan zoeken.</li>
+        </ul>
+        <p>Dus als jij vraagt om <code>new Blackjack\Card()</code>, denkt Composer: <em>"Oké, Blackjack zit in src... dus ik zoek naar src/Card.php"</em>.</p>
+
+        <h3>Stap 5: De Dump-Autoload (Resetten)</h3>
+        <p>Soms pas je iets aan, maar lijkt je code het niet te snappen. Je krijgt foutmeldingen dat classes niet gevonden worden.</p>
+        <p>Dit komt omdat Composer slim probeert te zijn en lijsten bewaart (cache) om sneller te werken. Als jij bestanden verplaatst of hernoemt, is die lijst verouderd.</p>
+
+        <p>De oplossing is het "reset"-commando in je terminal:</p>
+
+        <pre><code class="language-bash">composer dump-autoload</code></pre>
+
+        <div class="info-box">
+            <h3>Wanneer moet ik dit typen?</h3>
+            <ul>
+                <li>Als je een nieuwe Class hebt aangemaakt.</li>
+                <li>Als je bestanden hebt verplaatst naar een andere map.</li>
+                <li>Als je de namespace bovenaan een bestand hebt veranderd.</li>
+            </ul>
+            <p>Bij twijfel: voer het commando gewoon uit. Het kan geen kwaad!</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

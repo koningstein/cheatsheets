@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code kwaliteit met PHPStan - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Code kwaliteit met PHPStan</h1>
+
+        <p>PHPStan is een <strong>statische analyse tool</strong>. Het scant je code op fouten (zoals verkeerde types of vergeten checks) <em>zonder</em> de code uit te voeren.</p>
+
+        <h3>1. Installatie & Configuratie</h3>
+        <p>Installeer PHPStan als 'dev-tool' (alleen voor tijdens het bouwen):</p>
+        <pre><code class="language-bash">composer require --dev phpstan/phpstan</code></pre>
+
+        <p>Maak in je hoofdmap een bestand genaamd <code>phpstan.neon</code>:</p>
+        <pre><code class="language-yaml">parameters:
+    level: 6          # Wij adviseren level 6 voor goede type-checking
+    paths:
+        - src         # Welke map scannen?</code></pre>
+
+        <h3>2. Uitvoeren</h3>
+        <p>Run de check via je terminal:</p>
+        <pre><code class="language-bash">vendor/bin/phpstan analyse</code></pre>
+
+        <h3>3. Veelvoorkomende Fouten</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 40%;">Foutmelding</th>
+                    <th>Betekenis & Oplossing</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Method has no return type specified</code></td>
+                    <td><strong>Je bent vergeten:</strong> <code>: int</code> of <code>: void</code> achter je functie te zetten.</td>
+                </tr>
+                <tr>
+                    <td><code>Property has no type specified</code></td>
+                    <td><strong>Je bent vergeten:</strong> <code>private string $name</code> te typen (het type ontbreekt).</td>
+                </tr>
+                <tr>
+                    <td><code>Call to method on possibly null</code></td>
+                    <td><strong>Gevaarlijk:</strong> Je probeert iets te doen met een object dat misschien niet bestaat.
+                        <br><em>Oplossing:</em> Voeg een check toe: <code>if ($speler !== null) { ... }</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>4. Levels</h3>
+        <p>Je kunt instellen hoe streng PHPStan is (0 t/m 9).</p>
+        <ul>
+            <li><strong>Level 0-3:</strong> Basis checks (bestaat deze functie wel?).</li>
+            <li><strong>Level 4-5:</strong> Type checks (stop je geen tekst in een getal?).</li>
+            <li><strong>Level 6:</strong> Controleert ook op ontbrekende typehints (Aanbevolen).</li>
+            <li><strong>Level 9:</strong> Extreem streng (ook gemengde types en 'strict' checks).</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

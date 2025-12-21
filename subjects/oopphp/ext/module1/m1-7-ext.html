@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructor (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Constructor: De Startmotor</h1>
+
+        <p>We hebben tot nu toe objecten gemaakt met <code>new Card()</code>. Daarna moesten we handmatig, regel voor regel, de eigenschappen invullen. Dat ziet er zo uit:</p>
+
+        <pre><code class="language-php">$kaart = new Card();
+$kaart->suit = "Harten";  // Regel 1
+$kaart->value = "Aas";    // Regel 2
+$kaart->points = 11;      // Regel 3</code></pre>
+
+        <p>Dit werkt, maar het is gevaarlijk. Wat als je regel 2 vergeet? Dan heb je een kaart die wel een kleur heeft, maar geen waarde. Een "lege" kaart is nutteloos in Blackjack.</p>
+        <p>Om dit op te lossen, gebruiken we de <strong>Constructor</strong>.</p>
+
+        <h3>Wat is een Constructor?</h3>
+        <p>De constructor is een speciale methode die <strong>automatisch</strong> wordt uitgevoerd op het moment dat je <code>new</code> typt. Het is de ideale plek om je object direct "startklaar" te maken.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Een broodje bestellen</h3>
+            <p>Stel je bestelt een broodje gezond.</p>
+            <ul>
+                <li><strong>Zonder Constructor:</strong> De bakker geeft je een kaal broodje. Daarna moet je apart roepen: "Mag er kaas op?", en daarna "Mag er ham op?", en daarna "Mag er sla op?". Als je vergeet om "kaas" te roepen, heb je een saai broodje.</li>
+                <li><strong>Met Constructor:</strong> Je zegt: "Doe mij een broodje gezond". De bakker maakt het broodje direct compleet met alles erop en eraan. Je krijgt het pas als het helemaal klaar is.</li>
+            </ul>
+        </div>
+
+        <h3>Hoe werkt het in PHP? (__construct)</h3>
+        <p>In PHP heeft de constructor een hele specifieke naam: <code>__construct</code>.</p>
+        <p>Let goed op: dit zijn <strong>twee underscores</strong> (laaggestreepjes) achter elkaar! Dit noemen we een "Magic Method" (Magische Methode), omdat PHP hem zelf aanroept.</p>
+
+
+
+        <h3>Stap voor Stap: De Code</h3>
+        <p>Laten we onze <code>Card</code> class ombouwen zodat we verplicht zijn om een kleur en waarde op te geven.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // 1. De eigenschappen (leeg)
+    public $suit;
+    public $value;
+
+    // 2. De Constructor
+    // Tussen de haakjes (...) zetten we wat we NODIG hebben om een kaart te maken.
+    public function __construct($incomingSuit, $incomingValue)
+    {
+        // 3. We stoppen de binnenkomende data in de eigenschappen van het object
+        $this->suit = $incomingSuit;
+        $this->value = $incomingValue;
+    }
+}</code></pre>
+
+        <h3>Het gebruik van de Constructor</h3>
+        <p>Nu we de constructor hebben toegevoegd, <strong>moeten</strong> we waarden meegeven als we een nieuwe kaart maken. Doe je dat niet, dan geeft PHP een foutmelding.</p>
+
+        <pre><code class="language-php">// DIT MAG NIET MEER:
+// $card = new Card();
+// Foutmelding: "Too few arguments to function Card::__construct()"
+
+// DIT MOET NU:
+$myCard = new Card("Harten", "Aas");
+
+echo $myCard->suit; // Output: Harten</code></pre>
+
+        <h3>De verwarring: $this->x = $x</h3>
+        <p>Professionele programmeurs gebruiken vaak dezelfde namen voor de parameters als voor de properties. Dat ziet er zo uit:</p>
+
+        <pre><code class="language-php">public function __construct($suit, $value)
+{
+    $this->suit = $suit;
+    $this->value = $value;
+}</code></pre>
+
+        <p>Dit vinden beginners vaak verwarrend. <em>"Waarom staat er twee keer suit?"</em></p>
+        <ul>
+            <li><code>$this->suit</code> (Links): Dit is de <strong>Kluis</strong>. De plek in het object waar de data voor altijd bewaard blijft.</li>
+            <li><code>$suit</code> (Rechts): Dit is de <strong>Rugzak</strong>. De tijdelijke waarde die je meekrijgt bij het aanmaken.</li>
+        </ul>
+        <p>De regel betekent dus: <em>"Haal de waarde uit de rugzak, en stop hem in de kluis."</em></p>
+
+        <h3>Waarom doen we dit?</h3>
+        <ul>
+            <li><strong>Veiligheid:</strong> Je weet zeker dat een object altijd compleet is. Je kunt geen kaart meer hebben zonder kleur.</li>
+            <li><strong>Minder typen:</strong> Je hoeft niet meer 3 regels code te schrijven om één kaart te vullen. Het kan nu in 1 regel.</li>
+            <li><strong>Leesbaarheid:</strong> Iemand die jouw code leest, ziet bij <code>new Card("Harten", "Aas")</code> meteen wat voor kaart het is.</li>
+        </ul>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <h4>1. De naam fout typen</h4>
+        <p>Het is <code>__construct</code> met <strong>twee</strong> laaggestreepjes. Als je <code>_construct</code> (met één streepje) typt, ziet PHP het als een gewone functie en wordt hij niet automatisch uitgevoerd.</p>
+
+        <h4>2. De volgorde vergeten</h4>
+        <p>Als je constructor zegt: <code>__construct($suit, $value)</code>, dan moet je bij het aanmaken ook die volgorde aanhouden.</p>
+        <pre><code class="language-php">$card = new Card("Aas", "Harten"); // Oeps! Nu is de Kleur "Aas" en de Waarde "Harten".</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

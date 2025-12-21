@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Static & Mock Databases</h1>
+
+        <p>In Module 7 heb je geleerd om buiten de grenzen van individuele objecten te werken. Met het <strong>static</strong> keyword kun je data en functionaliteit delen over de hele applicatie, zonder dat je specifieke objecten hoeft aan te maken.</p>
+
+        <h3>Static vs. Non-Static</h3>
+        <p>Het belangrijkste concept is het verschil tussen de instantie (het object) en de blauwdruk (de class).</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Kenmerk</th>
+                    <th>Object (Non-Static)</th>
+                    <th>Class (Static)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Keyword</strong></td>
+                    <td>(geen)</td>
+                    <td><code>static</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Verwijzing intern</strong></td>
+                    <td><code>$this-></code></td>
+                    <td><code>self::</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Verwijzing extern</strong></td>
+                    <td><code>$object->methode()</code></td>
+                    <td><code>ClassNaam::methode()</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Doel</strong></td>
+                    <td>Data van één specifiek ding (mijn hand, mijn score).</td>
+                    <td>Gedeelde data (de spelregels, de winkelvoorraad).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>1. Static Methods (Hulpfuncties)</h3>
+        <p>Gebruik static methods voor functionaliteit die altijd waar is, ongeacht de situatie. Vaak wordt dit gebruikt voor validatie of berekeningen.</p>
+
+        <pre><code class="language-php">class Card {
+    // Statische lijst met regels
+    private static array $suits = ['Hearts', 'Diamonds', 'Spades', 'Clubs'];
+
+    // Statische validatie: Je hebt geen kaart-object nodig om dit te vragen
+    public static function isValidSuit(string $suit): bool {
+        return in_array($suit, self::$suits);
+    }
+}
+
+// Aanroep:
+if (Card::isValidSuit('Hearts')) { ... }</code></pre>
+
+        <h3>2. Static Properties (Mock Database)</h3>
+        <p>Gebruik static properties om data centraal op te slaan. Dit is ideaal voor een "winkel" of configuratie, omdat je wilt dat elke speler dezelfde voorraad ziet.</p>
+
+
+
+        <pre><code class="language-php">class ChipShop {
+    // Deze array bestaat maar 1 keer in het geheugen
+    private static array $stock = [];
+
+    public static function getStock(): array {
+        // Vul de array als hij leeg is (Lazy Loading)
+        if (empty(self::$stock)) {
+            self::$stock = [new Chip('Red', 10), new Chip('Blue', 50)];
+        }
+        return self::$stock;
+    }
+}</code></pre>
+
+        <h3>3. De Transactie</h3>
+        <p>De kracht van OOP komt naar voren wanneer je statische data combineert met objecten. Een transactie verplaatst data van de statische bron naar een specifiek object.</p>
+
+        <pre><code class="language-php">// Controller Logic (index.php)
+$chip = ChipShop::getChipById(1); // Haal uit Static
+$player = $_SESSION['player'];    // Haal Object op
+
+if ($player->canAfford($chip->getPrice())) {
+    $player->pay($chip->getPrice()); // Pas Object aan
+    $player->addChip($chip);         // Verplaats data
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

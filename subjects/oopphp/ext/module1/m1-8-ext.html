@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructor Promoted Properties (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Promoted Properties: Minder Typen</h1>
+
+        <p>In de vorige les over de <strong>Constructor</strong> heb je gezien hoe handig het is om een object direct bij het maken te vullen. Maar misschien viel je iets op: je moet best veel typen.</p>
+        <p>Programmeurs zijn van nature een beetje lui (op een goede manier!). Als we drie keer hetzelfde moeten typen, zoeken we naar een snellere manier. Sinds PHP 8.0 bestaat die manier: <strong>Constructor Promoted Properties</strong>.</p>
+
+        <h3>Het probleem: Dubbel werk</h3>
+        <p>Laten we kijken naar de "oude" manier (zoals het was vóór PHP 8). Kijk eens hoe vaak we de woorden <code>suit</code> en <code>value</code> moeten typen om het werkend te krijgen.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // 1. Eerst hier de properties aanmaken
+    public $suit;
+    public $value;
+
+    // 2. Dan hier de parameters noemen
+    public function __construct($suit, $value)
+    {
+        // 3. En dan hier de waarden overzetten
+        $this->suit = $suit;
+        $this->value = $value;
+    }
+}</code></pre>
+
+        <p>Zie je dat? Je schrijft eigenlijk drie keer hetzelfde. Dat voelt als tijdverspilling.</p>
+
+        <h3>De Oplossing: Alles in één keer</h3>
+        <p>Met <strong>Constructor Promoted Properties</strong> mag je stap 1, 2 en 3 combineren. Je doet alles direct tussen de haakjes van de constructor.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Inschrijfformulier</h3>
+            <ul>
+                <li><strong>Oude manier:</strong> Je moet je naam invullen op het formulier, dan je naam uitspreken bij de balie, en dan schrijft de receptionist je naam nog eens over in het systeem.</li>
+                <li><strong>Nieuwe manier:</strong> Je geeft je ID-kaart af. De receptionist scant hem en alles staat direct goed in het systeem.</li>
+            </ul>
+        </div>
+
+        <h3>Hoe ziet dat eruit?</h3>
+        <p>Hier is dezelfde <code>Card</code> class, maar dan op de nieuwe, snelle manier:</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Let op: Geen properties meer bovenaan!
+    // De constructor doet nu alles.
+
+    public function __construct(
+        public $suit,  // &lt;-- Het woord 'public' staat nu HIER
+        public $value
+    ) {
+        // De body van de functie is leeg!
+        // PHP regelt de rest op de achtergrond.
+    }
+}</code></pre>
+
+        <h3>Het grote verschil: Het woordje 'public'</h3>
+        <p>Het geheim zit hem in het woord <code>public</code> (of private/protected) <strong>binnen de haakjes</strong>.</p>
+        <ul>
+            <li><code>__construct($suit)</code>: Dit is een normale parameter. PHP doet er niks speciaals mee.</li>
+            <li><code>__construct(public $suit)</code>: Dit is de "magic switch". PHP denkt nu: <em>"Hé, je zet er 'public' voor. Dan wil je vast dat ik automatisch een property aanmaak én de waarde erin stop."</em></li>
+        </ul>
+
+        <h3>Stap voor Stap: Een Player Class</h3>
+        <p>Laten we een voorbeeld maken met een speler in Blackjack.</p>
+
+        <pre><code class="language-php">&lt;?php
+
+class Player
+{
+    // We gebruiken de nieuwe schrijfwijze
+    public function __construct(
+        public $name,
+        public $balance = 100 // Je kunt zelfs standaardwaardes gebruiken!
+    ) {}
+
+    public function showStats()
+    {
+        // We kunnen de properties gewoon gebruiken met $this
+        echo "{$this->name} heeft €{$this->balance},-";
+    }
+}
+
+// Het aanmaken werkt precies hetzelfde als eerst
+$player1 = new Player("Sjaak", 500);
+$player1->showStats();
+// Output: Sjaak heeft €500,-</code></pre>
+
+        <h3>Wanneer gebruik je dit NIET?</h3>
+        <p>Deze korte schrijfwijze is fantastisch voor simpele data-objecten. Maar soms is de oude manier beter.</p>
+        <p>Stel dat je <strong>validatie</strong> nodig hebt (zoals we leerden bij de Setters). Als je wilt checken of de punten niet negatief zijn, kun je dat niet in één regel doen.</p>
+
+        <pre><code class="language-php">// Hier werkt Promoted Properties minder goed
+public function __construct(public $points)
+{
+    // Als we hier logica toevoegen, wordt het al snel rommelig
+    if ($this->points < 0) {
+        $this->points = 0;
+    }
+}</code></pre>
+        <p>In complexe gevallen kiezen programmeurs er vaak voor om de oude manier te gebruiken, of om vanuit de constructor een Setter aan te roepen.</p>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <h4>1. 'public' vergeten</h4>
+        <p>Dit is de meest gemaakte fout.</p>
+        <pre><code class="language-php">public function __construct($suit, $value) { }</code></pre>
+        <p>Omdat <code>public</code> ontbreekt, maakt PHP <strong>geen</strong> properties aan. De waarden <code>$suit</code> en <code>$value</code> bestaan alleen heel even tijdens het aanmaken en worden daarna direct weggegooid. Je object is dan leeg.</p>
+
+        <h4>2. Oude PHP versie</h4>
+        <p>Deze techniek werkt pas vanaf <strong>PHP 8.0</strong>. Als je op een hele oude server werkt (bijvoorbeeld bij een oud stagebedrijf), krijg je een foutmelding ("Syntax Error"). Check dus altijd je PHP versie.</p>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Promoted Properties</strong> besparen typwerk.</li>
+            <li>Je zet de visibility (<code>public</code>) <strong>in</strong> de haakjes van de constructor.</li>
+            <li>De "body" (de code tussen <code>{}</code>) van de constructor blijft vaak leeg.</li>
+            <li>Het werkt precies hetzelfde als de oude manier, het is alleen korter.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

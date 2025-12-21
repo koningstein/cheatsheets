@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Autoloading en Projectstructuur</h1>
+
+        <p>In Module 2 heb je geleerd hoe je <strong>classes automatisch laadt</strong> en hoe je je PHP project <strong>professioneel organiseert</strong> met namespaces en Composer.</p>
+
+        <h3>Autoloading Concepten</h3>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Concept</th>
+                    <th>Doel</th>
+                    <th>Syntaxis (Voorbeeld)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Simpele Autoload</td>
+                    <td>Classes automatisch laden zonder <code>require_once</code>.</td>
+                    <td><code>spl_autoload_register(function($class) {...})</code></td>
+                </tr>
+                <tr>
+                    <td>Namespaces</td>
+                    <td>Je code organiseren in logische groepen en naamconflicten voorkomen.</td>
+                    <td><code>namespace Blackjack;</code></td>
+                </tr>
+                <tr>
+                    <td>Use Statement</td>
+                    <td>Classes uit een namespace importeren.</td>
+                    <td><code>use Blackjack\Card;</code></td>
+                </tr>
+                <tr>
+                    <td>Composer</td>
+                    <td>Tool om packages te beheren en professionele autoloading (PSR-4) te gebruiken.</td>
+                    <td><code>composer init</code></td>
+                </tr>
+                <tr>
+                    <td>PSR-4</td>
+                    <td>Standaard die bepaalt hoe namespaces en mappen met elkaar overeenkomen.</td>
+                    <td><code>"Blackjack\\": "src/"</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Van Simpel naar Professioneel</h3>
+
+
+        <p>De evolutie van class loading in PHP projecten:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Methode</th>
+                    <th>Voordelen</th>
+                    <th>Nadelen</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Handmatig <code>require_once</code></td>
+                    <td>Simpel, directe controle</td>
+                    <td>Veel herhalende code, onoverzichtelijk bij veel classes</td>
+                </tr>
+                <tr>
+                    <td>Simpele autoloader</td>
+                    <td>Classes worden automatisch geladen, je schrijft minder code</td>
+                    <td>Geen ondersteuning voor namespaces, beperkte structuur</td>
+                </tr>
+                <tr>
+                    <td>Autoloader met namespaces</td>
+                    <td>Betere organisatie van je code, naamconflicten worden voorkomen</td>
+                    <td>Je moet je eigen autoloader onderhouden</td>
+                </tr>
+                <tr>
+                    <td>Composer met PSR-4</td>
+                    <td>Dit is de standaard in de PHP wereld, je kunt packages beheren, het is professioneel</td>
+                    <td>Extra dependency (maar altijd de voorkeur!)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box">
+            <h3>Best Practice</h3>
+            <p>Gebruik altijd <strong>Composer met PSR-4 autoloading</strong> in je projecten. Plaats je classes in de <code>src/</code> map, voeg <code>vendor/</code> toe aan <code>.gitignore</code>, en laad de autoloader met <code>require_once 'vendor/autoload.php';</code></p>
+        </div>
+
+        <h3>Projectstructuur met Composer</h3>
+
+
+        <pre><code class="language-php">blackjack-project/
+├── src/
+│   ├── Card.php         (namespace Blackjack;)
+│   ├── Deck.php         (namespace Blackjack;)
+│   └── Player.php       (namespace Blackjack;)
+├── vendor/
+│   └── autoload.php     (Composer autoloader)
+├── index.php            (require_once 'vendor/autoload.php';)
+├── composer.json        ("Blackjack\\": "src/")
+└── .gitignore           (vendor/)</code></pre>
+
+        <div class="info-box">
+            <h3>Bulk Setters vs Constructor</h3>
+            <p>Een constructor kan geen waarden teruggeven en kan dus geen berichten terugsturen. Bulk setters wel. Dit is handig voor debugging en validatie: <code>echo $card->setCard("Hearts", "Ace", "ace.png");</code></p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objecten als datatype - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Objecten als datatype</h1>
+
+        <h3>Wat betekent objecten als datatype?</h3>
+        <p>Je kunt objecten (instanties van classes) gebruiken als datatype voor properties en parameters. Dit maakt duidelijk hoe classes met elkaar verbonden zijn en zorgt voor veiligere code.</p>
+
+        <div class="info-box">
+            <h3>Waarom objecten als datatype?</h3>
+            <ul>
+                <li>Relaties duidelijk maken: Een <code>Deck</code> bevat <code>Card</code> objecten</li>
+                <li>Veiligheid: Je kunt alleen objecten van het juiste type toevoegen</li>
+                <li>Betere code organisatie: Logische groepering van functionaliteit</li>
+                <li>Hulp van je programma: Autocomplete werkt perfect</li>
+            </ul>
+        </div>
+
+        <h3>Object als parameter</h3>
+        <p>Gebruik de Classnaam als type hint. Dit zorgt ervoor dat je alleen een object van die specifieke class kunt doorgeven:</p>
+
+        <pre><code class="language-php">public function addCard(Card $card): void
+{
+    $this->cards[] = $card;
+}
+
+public function dealCard(Player $player): void
+{
+    $card = array_shift($this->cards);
+    $player->addCard($card);
+}</code></pre>
+
+        <h3>Object als property type</h3>
+        <p>Door een property een classnaam als type te geven, zorg je ervoor dat deze property alleen een object van die class kan bevatten:</p>
+
+
+
+        <pre><code class="language-php">class Game
+{
+    private Deck $deck;
+    private Player $player;
+    private Player $dealer;
+
+    public function __construct(Player $player, Player $dealer)
+    {
+        $this->player = $player;
+        $this->dealer = $dealer;
+        $this->deck = new Deck();
+    }
+}</code></pre>
+
+        <h3>Nullable object types</h3>
+        <p>Soms wil je dat een property een object kan bevatten, maar ook <code>null</code> mag zijn. Gebruik dan een vraagteken (<code>?</code>) voor de classnaam:</p>
+
+        <pre><code class="language-php">class Game
+{
+    private ?Player $winner = null;
+
+    public function setWinner(?Player $winner): void
+    {
+        $this->winner = $winner;
+    }
+
+    public function getWinner(): ?Player
+    {
+        return $this->winner;
+    }
+}
+
+// Gebruik:
+$game = new Game();
+$game->setWinner($player1); // OK - er is een winnaar
+$game->setWinner(null); // Ook OK - het spel is nog niet afgelopen</code></pre>
+
+        <h3>Array van objecten</h3>
+        <p>Je kunt in de code alleen <code>array</code> als type gebruiken. Maar met een Docblock maak je duidelijk dat de array alleen objecten van een bepaalde class bevat:</p>
+
+        <pre><code class="language-php">class Player
+{
+    private array $hand = []; // Array of Card objects
+
+    public function addCard(Card $card): void
+    {
+        $this->hand[] = $card;
+    }
+
+    /**
+     * @return Card[] Array of Card objects
+     */
+    public function getHand(): array
+    {
+        return $this->hand;
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Best practice</h3>
+            <p>Gebruik altijd object types in plaats van arrays met verschillende soorten inhoud. Dit maakt je code betrouwbaarder:</p>
+            <pre><code class="language-php">// ❌ Niet doen:
+private array $hand; // Wat zit er in deze array?
+
+// ✅ Wel doen (met docblock):
+private array $hand = [];
+
+/**
+ * @return Card[] Array of Card objects
+ */
+public function getHand(): array
+{
+    return $this->hand;
+}</code></pre>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

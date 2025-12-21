@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composer Installeren (Uitgebreid) - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Composer: De Manager van je Project</h1>
+
+        <p>In de vorige les heb je zelf een autoloader geschreven. Dat werkte prima, maar het was wel even puzzelen. In de professionele wereld schrijven we bijna nooit onze eigen autoloader. We gebruiken een tool die dat veel beter kan: <strong>Composer</strong>.</p>
+
+        <h3>Wat is Composer?</h3>
+        <p>Composer is de <strong>Dependency Manager</strong> voor PHP. Dat klinkt ingewikkeld, maar het valt mee.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Aannemer</h3>
+            <p>Stel, je bouwt een huis (je applicatie). Je kunt zelf alle spijkers smeden, het hout zagen en het cement mixen. Maar dat duurt eeuwen.</p>
+            <p>In plaats daarvan huur je een aannemer (Composer) in:</p>
+            <ul>
+                <li>Jij geeft hem een boodschappenlijstje: "Ik heb muren, een dak en ramen nodig."</li>
+                <li>De aannemer regelt dat alles wordt besteld en op de juiste plek wordt gelegd.</li>
+                <li>Jij hoeft alleen maar te zeggen: "Bouw het huis".</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Waarom gebruiken we dit?</h3>
+        <ol>
+            <li><strong>Gratis code (Libraries):</strong> Andere slimme programmeurs hebben al code geschreven voor moeilijke dingen (zoals inlogsystemen of complexe wiskunde). Met Composer kun je die code met één commando in jouw project laden.</li>
+            <li><strong>De beste Autoloader:</strong> Composer maakt automatisch een super snelle en foutloze autoloader voor jouw eigen classes.</li>
+        </ol>
+
+        <h3>Stap 1: Installatie controleren</h3>
+        <p>Voordat we beginnen, moeten we kijken of Composer op jouw computer staat. Open je terminal (of Command Prompt) en typ:</p>
+
+        <pre><code class="language-bash">composer --version</code></pre>
+
+        <p>Zie je een versienummer (bijv. <code>Composer version 2.5.5</code>)? Top! Dan kun je door naar de volgende stap.
+            <br>Zie je een foutmelding? Dan moet je het eerst even downloaden en installeren via <a href="https://getcomposer.org/" target="_blank">getcomposer.org</a>.</p>
+
+        <h3>Stap 2: Je project starten (Composer Init)</h3>
+        <p>We gaan nu tegen Composer zeggen: "Hé, ik begin een nieuw Blackjack project. Wil jij dit voor mij beheren?"</p>
+        <p>Dit doe je met het commando <code>composer init</code>. Composer gaat je dan een paar vragen stellen, als een soort intake-gesprek.</p>
+
+        <pre><code class="language-bash"># Ga naar je projectmap
+cd jouw/project/map
+
+# Start de intake
+composer init</code></pre>
+
+        <p>Je krijgt nu vragen op je scherm. Hier zijn de antwoorden die wij gebruiken voor ons spel:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Vraag</th>
+                    <th>Ons Antwoord</th>
+                    <th>Waarom?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Package name</td>
+                    <td><code>blackjack/game</code></td>
+                    <td>De naam van je project (vaak <code>jouwnaam/projectnaam</code>).</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td><code>Blackjack spel</code></td>
+                    <td>Korte omschrijving.</td>
+                </tr>
+                <tr>
+                    <td>Package Type</td>
+                    <td><code>project</code></td>
+                    <td>Wij maken een applicatie, geen losse tool.</td>
+                </tr>
+                <tr>
+                    <td>Define dependencies?</td>
+                    <td><code>no</code></td>
+                    <td>Doen we later wel.</td>
+                </tr>
+                <tr>
+                    <td>Add PSR-4 autoload mapping?</td>
+                    <td>(Druk op Enter)</td>
+                    <td><strong>Belangrijk!</strong> Hiermee vragen we om de autoloader.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Stap 3: Het composer.json bestand</h3>
+        <p>Na het beantwoorden van de vragen, heeft Composer een bestandje aangemaakt: <code>composer.json</code>.</p>
+        <p>Dit is jouw <strong>Boodschappenlijstje</strong>. Hierin staat precies hoe jouw project heet en waar jouw code staat.</p>
+
+        <pre><code class="language-json">{
+    "name": "blackjack/game",
+    "description": "Blackjack spel",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Blackjack\\": "src/"
+        }
+    },
+    "require": {}
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Let op: De mapping</h3>
+            <p>Kijk goed naar het stukje onder <code>"psr-4"</code>.
+                <br>Soms vult Composer daar iets geks in, zoals <code>"Blackjack\\Game\\"</code>.
+                <br>Verander dit naar: <code>"Blackjack\\": "src/"</code>.
+                <br>Dit betekent: <em>"Alle classes die beginnen met de namespace <strong>Blackjack</strong>, kun je vinden in de map <strong>src</strong>."</em></p>
+        </div>
+
+        <h3>Stap 4: De mapstructuur aanpassen</h3>
+        <p>Composer verwacht dat wij onze code netjes opruimen. In de vorige lessen stonden al onze bestanden (<code>Card.php</code>, <code>Player.php</code>) los in de hoofdmap. Dat wordt een rommeltje.</p>
+        <p>Maak een nieuwe map aan met de naam <code>src</code> (van <em>Source</em>, oftewel broncode). Sleep al je class-bestanden daarheen.</p>
+
+
+
+        <h3>Stap 5: De Autoloader genereren</h3>
+        <p>Nu alles op de juiste plek staat, moeten we Composer de opdracht geven om zijn werk te doen. Typ in de terminal:</p>
+
+        <pre><code class="language-bash">composer dump-autoload</code></pre>
+
+        <p>Dit commando zegt: "Composer, lees het boodschappenlijstje (json) en maak de autoloader voor mij."</p>
+
+        <p>Je ziet nu een nieuwe map verschijnen: <code>vendor</code>.
+            <br>In die map staat een bestand <code>autoload.php</code>. Dit is het enige bestand dat jij nog hoeft in te laden!</p>
+
+        <pre><code class="language-php">// index.php (buiten de src map)
+&lt;?php
+
+// We roepen de manager aan
+require_once 'vendor/autoload.php';
+
+use Blackjack\Card;
+
+// En alles werkt!
+$card = new Card("Harten", "Aas");</code></pre>
+
+        <h3>Stap 6: .gitignore (De Vendor map)</h3>
+        <p>De map <code>vendor</code> kan enorm groot worden als je externe pakketten gaat installeren. Die map willen we <strong>niet</strong> op GitHub hebben.</p>
+        <p>Waarom niet? Omdat iedereen die map zelf kan maken met jouw <code>composer.json</code> lijstje.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: IKEA</h3>
+            <p>Als jij een IKEA-kast naar een vriend stuurt, stuur je dan de gemonteerde kast (zwaar, groot)? Nee, je stuurt de handleiding (licht, klein). Je vriend kan daarmee zelf de kast in elkaar zetten.</p>
+            <ul>
+                <li><strong>composer.json:</strong> De handleiding.</li>
+                <li><strong>vendor/:</strong> De gemonteerde kast.</li>
+            </ul>
+        </div>
+
+        <p>Zorg dus dat je <code>vendor/</code> toevoegt aan je <code>.gitignore</code> bestand.</p>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Composer init:</strong> Maakt het boodschappenlijstje (<code>composer.json</code>).</li>
+            <li><strong>src map:</strong> Hier stop je jouw eigen classes in.</li>
+            <li><strong>vendor map:</strong> Hier stopt Composer alle code die hij regelt (inclusief de autoloader).</li>
+            <li><strong>dump-autoload:</strong> Het commando om alles te verversen.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

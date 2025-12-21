@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simpele Autoload - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Wat is autoloading?</h1>
+
+        <p>Autoloading zorgt ervoor dat PHP automatisch de juiste class-bestanden laadt wanneer je een class gebruikt. Je hoeft dan niet meer handmatig <code>require_once</code> te schrijven voor elke class.</p>
+
+        <h3>Het probleem zonder autoloading</h3>
+        <p>In een Blackjack-applicatie heb je misschien classes zoals Card, Deck en Player. Zonder autoloading moet je elke class handmatig includen:</p>
+
+        <pre><code class="language-php">// Zonder autoloading - veel herhalende code
+require_once 'Card.php';
+require_once 'Deck.php';
+require_once 'Player.php';
+
+$card = new Card();
+$deck = new Deck();
+$player = new Player();</code></pre>
+
+        <p>Dit wordt al snel onoverzichtelijk als je veel classes hebt!</p>
+
+        <h3>Simpele autoload met spl_autoload_register()</h3>
+        <p>Met <code>spl_autoload_register()</code> kun je een functie registreren. Deze functie wordt automatisch aangeroepen als PHP een class tegenkomt die nog niet is geladen.</p>
+
+        <pre><code class="language-php">// autoload.php
+&lt;?php
+spl_autoload_register(function($className) {
+    // Converteer class naam naar bestandsnaam
+    $file = $className . '.php';
+
+    // Controleer of bestand bestaat
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});
+?&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Hoe werkt het?</h3>
+            <ol>
+                <li>Je roept <code>spl_autoload_register()</code> aan met een functie</li>
+                <li>Als PHP een class tegenkomt die nog niet is geladen (zoals <code>new Card()</code>), wordt deze functie automatisch aangeroepen</li>
+                <li>De functie krijgt de naam van de class als parameter (<code>$className = "Card"</code>)</li>
+                <li>De functie zoekt het juiste bestand (<code>Card.php</code>) en laadt dit in</li>
+                <li>Nu kan PHP de class gebruiken</li>
+            </ol>
+        </div>
+
+        <h3>Gebruik in je applicatie</h3>
+
+        <pre><code class="language-php">// index.php
+&lt;?php
+require_once 'autoload.php';
+
+// Classes worden nu automatisch geladen!
+$card = new Card("Hearts", "Ace");
+$deck = new Deck();
+$player = new Player("John");
+?&gt;</code></pre>
+
+        <h3>Voordelen van autoloading</h3>
+        <ul>
+            <li><strong>Minder code:</strong> je hebt geen lange lijst met require_once statements meer nodig</li>
+            <li><strong>Automatisch:</strong> classes worden alleen geladen als je ze gebruikt (dit heet lazy loading)</li>
+            <li><strong>Makkelijker onderhoud:</strong> nieuwe classes worden automatisch gevonden</li>
+            <li><strong>Sneller:</strong> classes worden alleen geladen wanneer je ze nodig hebt</li>
+            <li><strong>Overzichtelijker:</strong> je code blijft netjes georganiseerd</li>
+        </ul>
+
+        <div class="info-box">
+            <h3>Tip</h3>
+            <p>Zorg ervoor dat je bestandsnamen exact overeenkomen met je class namen. <code>Card</code> class → <code>Card.php</code> bestand.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

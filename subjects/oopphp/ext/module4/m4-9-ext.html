@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting (Uitgebreid) - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Van Code naar Webapplicatie</h1>
+
+        <p>Gefeliciteerd! Je hebt Module 4 afgerond. Dit was een grote stap. Waar je eerst alleen losse PHP-scripts schreef, heb je nu geleerd hoe je een echte <strong>interactieve webapplicatie</strong> bouwt.</p>
+        <p>In deze module hebben we de brug geslagen tussen jouw OOP-code (de logica) en de gebruiker (de browser). Laten we de belangrijkste onderdelen nog één keer op een rijtje zetten.</p>
+
+        <h3>1. Debuggen: Het Licht aan doen</h3>
+        <p>We zijn gestopt met gokken (<code>var_dump</code>) en begonnen met kijken.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>De Analogie</th>
+                    <th>Wat doet het?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Xdebug</strong></td>
+                    <td>De Videocamera</td>
+                    <td>Hiermee pauzeer je de code terwijl hij draait. Je kunt variabelen bekijken, stap voor stap (F7/F8) door je code lopen en precies zien waar het fout gaat.</td>
+                </tr>
+                <tr>
+                    <td><strong>PHPStan</strong></td>
+                    <td>De Spellingscontrole</td>
+                    <td>Dit programma leest je code <em>voordat</em> je hem uitvoert. Hij waarschuwt je voor typefouten (bijv. tekst in een getal stoppen) of vergeten checks.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Smarty: De Chef en de Ober</h3>
+        <p>Om spaghetti-code te voorkomen, hebben we logica en presentatie gescheiden gehouden.</p>
+
+
+
+        <div class="info-box">
+            <h3>Hoe werkte het ook alweer?</h3>
+            <ul>
+                <li><strong>PHP (De Chef):</strong> Regelt het spel, schudt de kaarten, berekent de score.</li>
+                <li><strong>Smarty (De Ober):</strong> Krijgt de data van de chef en presenteert het netjes aan de klant (HTML).</li>
+            </ul>
+        </div>
+
+        <pre><code class="language-php">// 1. PHP: Data klaarzetten
+$player = new Player("Sjaak");
+$smarty->assign('speler', $player);
+
+// 2. PHP: Bord serveren
+$smarty->display('game.tpl');</code></pre>
+
+        <pre><code class="language-html">&lt;!-- 3. HTML (game.tpl): Data tonen --&gt;
+&lt;h1&gt;Welkom {$speler->getName()}!&lt;/h1&gt;</code></pre>
+
+        <h3>3. Superglobals: De Postbodes</h3>
+        <p>PHP-pagina's vergeten alles zodra ze klaar zijn. Om data te bewaren of te versturen, gebruiken we Superglobals.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Naam</th>
+                    <th>Type Transport</th>
+                    <th>Gebruik</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>$_GET</code></td>
+                    <td>De Ansichtkaart</td>
+                    <td>Data staat zichtbaar in de URL (<code>?page=home</code>). Gebruik dit voor navigatie en linkjes.</td>
+                </tr>
+                <tr>
+                    <td><code>$_POST</code></td>
+                    <td>De Enveloppe</td>
+                    <td>Data zit verstopt in het verzoek. Gebruik dit voor formulieren en gevoelige data (wachtwoorden, nieuwe spelers).</td>
+                </tr>
+                <tr>
+                    <td><code>$_SESSION</code></td>
+                    <td>Het Kluisje</td>
+                    <td>Data wordt op de server bewaard. Gebruik dit om te onthouden wie er is ingelogd of wat de spelstatus is over meerdere pagina's heen.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>4. De Ultieme Workflow</h3>
+        <p>Hieronder zie je hoe alles samenkomt in ons Blackjack spel. We checken eerst of er iets verstuurd is (POST), daarna beslissen we welke pagina we tonen (Routing).</p>
+
+        <pre><code class="language-php">&lt;?php
+// 1. Eerst classes laden en sessie starten
+require 'vendor/autoload.php';
+session_start();
+
+$page = $_GET['page'] ?? 'home';
+
+// --- DEEL 1: POST AFHANDELING (Acties) ---
+// Is er een formulier verstuurd op de 'create' pagina?
+if ($page === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // A. Validatie
+    if (empty($_POST['name'])) {
+        $error = "Naam is verplicht!";
+    } else {
+        // B. Object maken en opslaan in sessie
+        $player = new Player($_POST['name']);
+        $_SESSION['player'] = $player;
+
+        // C. Stuur door naar het spel
+        header('Location: index.php?page=game');
+        exit;
+    }
+}
+
+// --- DEEL 2: GET AFHANDELING (Pagina tonen) ---
+// De Verkeersregelaar (Switch)
+switch ($page) {
+    case 'create':
+        // Toon formulier (eventueel met error)
+        if (isset($error)) $smarty->assign('error', $error);
+        $smarty->display('create_player.tpl');
+        break;
+
+    case 'game':
+        // Haal speler uit sessie
+        $player = $_SESSION['player'] ?? null;
+        if ($player) {
+            $smarty->assign('p', $player);
+            $smarty->display('game.tpl');
+        } else {
+            // Geen speler? Terug naar start!
+            header('Location: index.php?page=create');
+        }
+        break;
+
+    default:
+        $smarty->display('home.tpl');
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Stap voor Stap uitgelegd</h3>
+            <ol>
+                <li><strong>Start:</strong> We laden de autoloader en starten de sessie (anders vergeten we de speler direct).</li>
+                <li><strong>Check POST:</strong> Heeft de gebruiker op "Start Spel" gedrukt? Zo ja, maak de speler en sla hem op in <code>$_SESSION</code>.</li>
+                <li><strong>Routing:</strong> Als er geen formulier is verstuurd, kijkt de switch welke pagina (template) getoond moet worden.</li>
+                <li><strong>Display:</strong> Smarty toont de HTML.</li>
+            </ol>
+        </div>
+
+        <h3>Wat nu?</h3>
+        <p>Je hebt nu een solide basis. Je kunt object georiënteerd programmeren, je code is netjes gescheiden en je kunt interactieve applicaties bouwen.</p>
+        <p>In de volgende modules ga je leren over <strong>Databases</strong>. Want op dit moment zijn we onze speler kwijt zodra we de browser afsluiten (sessie verloopt). Met een database kunnen we gegevens voor altijd bewaren!</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

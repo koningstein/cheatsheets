@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opvangen met $_POST - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Opvangen met $_POST</h1>
+
+        <p>Wanneer een formulier wordt verstuurd, moet je dit afhandelen in je code. We controleren eerst <strong>welke pagina</strong> wordt gevraagd, en daarbinnen of er <strong>data verstuurd</strong> is.</p>
+
+        <h3>1. De juiste structuur (Routing)</h3>
+        <p>Gebruik een <strong>genest</strong> if-statement. Check de methode direct in de if-lus.</p>
+
+        <pre><code class="language-php">$page = $_GET['page'] ?? 'home';
+
+// STAP 1: Welke pagina?
+if ($page === 'create') {
+
+    // STAP 2: Wat is de actie? (Direct checken)
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // A. Formulier is verstuurd -> Verwerken
+        // (Zie validatie hieronder)
+    }
+    else {
+        // B. Geen POST (dus GET) -> Toon leeg formulier
+        $template->display('form.tpl');
+    }
+}</code></pre>
+
+        <h3>2. Verwerking (Validatie & Casting)</h3>
+        <p>Voordat je de data gebruikt om een object te maken, moet je controleren en omzetten.</p>
+
+        <pre><code class="language-php">// Binnen het POST blok:
+
+// 1. Validatie: Is alles ingevuld?
+if (!empty($_POST['name']) && !empty($_POST['chips'])) {
+
+    // 2. Casting: Zet tekst om naar juiste type
+    // Formulier data is standaard altijd tekst (string)!
+    $name = (string)$_POST['name'];
+    $chips = (int)$_POST['chips'];
+
+    // 3. Actie: Maak het object
+    $player = new Player($name, $chips);
+
+    echo "Speler succesvol aangemaakt!";
+}
+else {
+    // Fout: Stuur error terug naar formulier
+    $template->assign('error', 'Vul alle velden in!');
+    $template->display('form.tpl');
+}</code></pre>
+
+        <h3>3. Belangrijke termen</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 30%;">Term</th>
+                    <th>Betekenis</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>$_SERVER['REQUEST_METHOD']</code></td>
+                    <td>Geeft aan of de aanvraag <code>'GET'</code> (kijken) of <code>'POST'</code> (versturen) is.</td>
+                </tr>
+                <tr>
+                    <td><code>(int)$var</code></td>
+                    <td><strong>Type Casting</strong>. Forceert een variabele om een getal (integer) te worden. Nodig omdat <code>$_POST</code> altijd strings bevat.</td>
+                </tr>
+                <tr>
+                    <td><code>!empty()</code></td>
+                    <td>Controleert of een variabele bestaat én niet leeg is (geen lege string of 0).</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

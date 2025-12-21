@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Object</h1>
+
+        <h3>Wat is een Object?</h3>
+        <p>Een object is een instantie van een class. Met instantie bedoelen we: een concreet voorbeeld. Als een class de blauwdruk is, dan is een object het echte ding dat je op basis van die blauwdruk maakt. Je kunt van één class meerdere verschillende objecten maken.</p>
+
+        <div class="info-box">
+            <h3>Vergelijking</h3>
+            <ul>
+                <li><strong>Class:</strong> De blauwdruk voor een kaart</li>
+                <li><strong>Object:</strong> Een echte kaart, zoals "Harten Aas" of "Schoppen Koning"</li>
+            </ul>
+        </div>
+
+        <h3>Een Object maken</h3>
+        <p>Je maakt een object met het woord <code>new</code>, gevolgd door de naam van de class en ronde haakjes <code>()</code>.</p>
+
+        <pre><code class="language-php">$cardAceHearts = new Card();
+$cardKingSpades = new Card();</code></pre>
+
+        <p>Beide objecten zijn gemaakt met de class <code>Card</code>, maar ze zijn compleet onafhankelijk van elkaar. Ze hebben allebei hun eigen gegevens.</p>
+
+        <h3>Objecten uitprinten</h3>
+        <p>Je kunt een object niet met <code>echo</code> weergeven. Gebruik <code>var_dump()</code> om te kijken wat er in een object zit:</p>
+
+        <pre><code class="language-php">var_dump($cardAceHearts);</code></pre>
+
+        <div class="info-box">
+            <h3>Tip</h3>
+            <p>Gebruik <code>&lt;pre&gt;</code> tags om de output van <code>var_dump()</code> netjes en overzichtelijk te zien.</p>
+        </div>
+
+        <h3>Waarom gebruik je Objecten?</h3>
+        <ul>
+            <li><strong>Flexibel:</strong> Je kunt zoveel objecten maken als je wilt van dezelfde class</li>
+            <li><strong>Overzichtelijk:</strong> Elk object heeft zijn eigen gegevens die niet door elkaar lopen</li>
+            <li><strong>Efficiënt:</strong> Je schrijft de class één keer en kunt er daarna oneindig veel objecten mee maken</li>
+        </ul>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

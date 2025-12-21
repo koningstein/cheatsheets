@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interne Logica: Protected Methods (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Protected methoden</h1>
+
+        <p>In de vorige lessen heb je geleerd hoe je variabelen (properties) beschermt met <code>protected</code>. Maar wist je dat je ditzelfde trucje ook kunt gebruiken voor functies (methods)?</p>
+        <p>Soms schrijf je ingewikkelde code die handig is voor de Parent én voor het Child, maar die de buitenwereld absoluut niet mag zien of gebruiken.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Geheime Sausje</h3>
+            <p>Stel je voor dat jouw familie een restaurant runt.</p>
+            <ul>
+                <li><strong>Public:</strong> De menukaart. Iedereen (klanten) mag hierop kijken en gerechten bestellen.</li>
+                <li><strong>Private:</strong> De dagboek van de chefkok. Alleen hij mag erin lezen.</li>
+                <li><strong>Protected:</strong> Het geheime recept voor de saus.</li>
+            </ul>
+            <p>De chefkok (Parent) kent het recept. Hij leert het aan zijn zoon (Child), zodat die het ook kan maken in de keuken. Maar... een klant in het restaurant mag <strong>niet</strong> zomaar de keuken inlopen om het recept te stelen. Het recept blijft "binnen de familie".</p>
+        </div>
+
+
+
+        <h3>Het Probleem: Complexe Rekenmodellen</h3>
+        <p>Laten we teruggaan naar Blackjack. Het berekenen van de score is best lastig. Een Boer, Vrouw en Heer zijn 10 punten. Een Aas is 1 of 11 punten, afhankelijk van wat beter uitkomt voor de speler.</p>
+
+        <p>We hebben twee uitdagingen:</p>
+        <ol>
+            <li><strong>Hergebruik:</strong> Zowel de <code>Player</code> als de <code>Dealer</code> moeten op precies dezelfde manier rekenen. We willen die code niet twee keer typen (DRY).</li>
+            <li><strong>Veiligheid:</strong> We willen niet dat iemand in <code>index.php</code> zomaar de rekenmachine kan gebruiken om vals te spelen of tussenstanden te manipuleren.</li>
+        </ol>
+
+        <h3>De Oplossing: Een Protected Method</h3>
+        <p>We maken een rekenfunctie in de Parent (<code>Player</code>). We maken deze <code>protected</code>.</p>
+
+        <h4>Stap 1: De Parent Class (Player)</h4>
+
+        <pre><code class="language-php">class Player
+{
+    protected array $hand = [];
+
+    // PROTECTED: Dit is het "familierecept".
+    // Alleen Player en Dealer mogen deze functie gebruiken.
+    protected function calculateHandValue(): int
+    {
+        $value = 0;
+        foreach ($this->hand as $card) {
+            // Hier komt complexe logica (Azen tellen, etc.)
+            // Voor nu houden we het simpel:
+            $value += $card->getValue();
+        }
+        return $value;
+    }
+
+    // PUBLIC: Dit is de "menukaart".
+    // De buitenwereld roept deze functie aan.
+    public function getScore(): int
+    {
+        // De Player gebruikt intern zijn eigen protected methode
+        return $this->calculateHandValue();
+    }
+}</code></pre>
+
+        <h3>Stap 2: Het Child (Dealer)</h3>
+        <p>De Dealer is een computer-tegenstander. Hij moet "nadenken". Hij moet weten hoeveel punten hij heeft om te beslissen: moet ik nog een kaart pakken of stoppen?</p>
+        <p>Omdat de rekenmethode <code>protected</code> is, mag de Dealer deze gewoon gebruiken!</p>
+
+        <pre><code class="language-php">class Dealer extends Player
+{
+    // De Dealer moet beslissen wat hij doet
+    public function decideMove(): string
+    {
+        // MAG DIT? Ja! Dealer is familie van Player.
+        // Hij gebruikt de interne rekenmachine om zijn strategie te bepalen.
+        $currentScore = $this->calculateHandValue();
+
+        // De regels van de Dealer: onder de 17 moet hij een kaart pakken (hit)
+        if ($currentScore < 17) {
+            return "hit";
+        }
+
+        // Anders stopt hij
+        return "stand";
+    }
+}</code></pre>
+
+        <h3>Stap 3: De Buitenwereld (index.php)</h3>
+        <p>Hier zie je waarom <code>protected</code> zo veilig is. Als we proberen de interne methode direct aan te roepen vanuit het spelbestand, gaat het mis.</p>
+
+        <pre><code class="language-php">// index.php
+$dealer = new Dealer();
+
+// Dit mag: Public method
+echo $dealer->decideMove();
+
+// DIT MAG NIET: Protected method
+// Fatal error: Call to protected method Player::calculateHandValue()
+echo $dealer->calculateHandValue();</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom is die Error goed?</h3>
+            <p>Het lijkt vervelend, een error, maar het beschermt je code. Je dwingt andere programmeurs (en jezelf) om de nette, publieke ingangen te gebruiken (zoals <code>getScore</code>). De interne "rommel" of ingewikkelde berekeningen blijven veilig verborgen onder de motorkap.</p>
+        </div>
+
+        <h3>Nog een voorbeeld: Is de speler af? (Bust)</h3>
+        <p>Laten we kijken naar de <code>HumanPlayer</code>. Ook hier is de interne protected methode handig.</p>
+        <p>Stel, we willen een methode <code>isBust()</code> maken. Deze geeft <code>true</code> terug als je meer dan 21 punten hebt. </p>
+
+        <pre><code class="language-php">class HumanPlayer extends Player
+{
+    // Deze methode is PUBLIC, dus index.php mag hem aanroepen
+    public function isBust(): bool
+    {
+        // We gebruiken de PROTECTED interne rekenmachine
+        $score = $this->calculateHandValue();
+
+        // Als score boven de 21 is, ben je af
+        if ($score > 21) {
+            return true;
+        }
+        return false;
+    }
+}</code></pre>
+
+        <p>Je ziet: de <code>HumanPlayer</code> weet niet <em>hoe</em> de punten berekend worden (dat staat in de Parent). Hij roept gewoon de interne hulplijn aan.</p>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li>Gebruik <strong>protected methods</strong> voor logica die gedeeld moet worden met Child classes, maar geheim moet blijven voor de buitenwereld.</li>
+                <li>Het voorkomt dubbele code (DRY).</li>
+                <li>Het houdt je classes veilig en georganiseerd (Encapsulation).</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

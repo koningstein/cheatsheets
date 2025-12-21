@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Method Overriding & Polymorfisme (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Method Overriding & Polymorfisme</h1>
+
+        <p>In de vorige lessen hebben we geleerd hoe een Child class (zoals <code>Dealer</code>) alles erft van de Parent class (<code>Player</code>). Meestal is dat fijn, maar soms is het gedrag van de ouder niet precies wat we willen.</p>
+        <p>Soms is het kind eigenwijs en wil het dingen <strong>anders</strong> doen.</p>
+
+        <h3>Deel 1: Method Overriding (Overschrijven)</h3>
+        <p>Stel je voor dat de <code>Player</code> class een methode <code>playTurn()</code> heeft. Voor een menselijke speler betekent dit: wachten op knoppen indrukken.</p>
+        <p>Maar... de Dealer is geen mens. De Dealer is een computer die strikte regels volgt. Hij mag niet wachten of kiezen. Hij <strong>moet</strong> kaarten pakken tot hij 17 punten heeft.</p>
+
+        <div class="info-box">
+            <h3>De Regel</h3>
+            <p>Als een Child class een methode maakt met <strong>precies dezelfde naam</strong> als de Parent, dan vervangt hij de oude methode. Dit noemen we <strong>Overriding</strong>.</p>
+        </div>
+
+
+
+        <h4>Voorbeeld: Dealer vs Speler</h4>
+
+        <pre><code class="language-php">class Player {
+    public function playTurn() {
+        return "Ik wacht op invoer van de speler...";
+    }
+}
+
+class Dealer extends Player {
+    // OVERRIDE: We gebruiken dezelfde naam, maar veranderen de inhoud!
+    public function playTurn() {
+        // De Dealer volgt zijn eigen regels (loop tot 17)
+        while ($this->getScore() < 17) {
+            $this->addCard($deck->draw());
+        }
+        return "Dealer is klaar met spelen.";
+    }
+}</code></pre>
+
+        <p>Als je nu <code>$dealer->playTurn()</code> aanroept, wordt de nieuwe code uitgevoerd. De oude code van <code>Player</code> wordt genegeerd.</p>
+
+        <h3>Deel 2: Functionaliteit Uitbreiden (parent::)</h3>
+        <p>Soms wil je de oude code niet weggooien, maar er iets aan toevoegen. Je wilt doen wat de ouder doet, <em>plus</em> een beetje extra.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Broodje Kaas</h3>
+            <p>Stel je vader (Parent) maakt een standaard broodje kaas. Jij (Child) wilt dat ook, maar jij doet er ook nog komkommer op.</p>
+            <ul>
+                <li><strong>Foute manier:</strong> Je pakt zelf brood, boter en kaas (dubbel werk) en doet er komkommer op.</li>
+                <li><strong>Goede manier:</strong> Je vraagt je vader: "Maak een broodje kaas voor me" (<code>parent::maakBroodje()</code>) en daarna leg je er zelf komkommer op.</li>
+            </ul>
+        </div>
+
+        <p>Met <code>parent::methodeNaam()</code> roep je de originele code van de ouder aan.</p>
+
+        <pre><code class="language-php">class Cheater extends Player {
+    public function getSummary(): string {
+        // Stap 1: Vraag de ouder om de standaard tekst
+        $originalText = parent::getSummary();
+
+        // Stap 2: Plak er je eigen tekst achteraan
+        return $originalText . " (LET OP: Ik speel vals!)";
+    }
+}</code></pre>
+
+        <h3>Deel 3: Polymorfisme (Veelvormigheid)</h3>
+        <p>Dit is een duur woord dat je veel punten oplevert bij Scrabble, maar het concept is eigenlijk heel simpel. </p>
+        <ul>
+            <li><strong>Poly</strong> = Veel</li>
+            <li><strong>Morf</strong> = Vorm</li>
+        </ul>
+        <p>Het betekent: <strong>Verschillende objecten op dezelfde manier behandelen.</strong></p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Universele Afstandsbediening</h3>
+            <p>Stel je hebt een universele afstandsbediening met een "POWER" knop.</p>
+            <ul>
+                <li>Richt je hem op de TV -> TV gaat aan.</li>
+                <li>Richt je hem op de Radio -> Radio gaat aan.</li>
+                <li>Richt je hem op de Lamp -> Lamp gaat aan.</li>
+            </ul>
+            <p>Jij doet telkens hetzelfde (op de knop drukken), maar het apparaat reageert op zijn eigen manier. Dat is Polymorfisme!</p>
+        </div>
+
+
+
+        <h4>Waarom is dit geweldig voor Blackjack?</h4>
+        <p>In ons spel hebben we een lijst met spelers. Sommige zijn mensen, sommige zijn dealers, sommige zijn valsspelers. Zonder polymorfisme zou je dit moeten doen:</p>
+
+        <pre><code class="language-php">// FOUTE MANIER: Onhandige checks
+foreach ($players as $p) {
+    if ($p instanceof Dealer) {
+        $p->playDealerTurn(); // Aparte naam verzonnen? Onhandig!
+    } elseif ($p instanceof Human) {
+        $p->playHumanTurn();
+    }
+}</code></pre>
+
+        <p>Dankzij Polymorfisme (en Overriding) heten alle methodes gewoon <code>playTurn()</code>. Het maakt ons niet uit <em>wie</em> het is, zolang ze maar een beurt kunnen spelen.</p>
+
+        <pre><code class="language-php">// GOEDE MANIER: Polymorfisme
+$players = [
+    new HumanPlayer("Sjaak"),
+    new Dealer(),
+    new Cheater("Boefje")
+];
+
+foreach ($players as $player) {
+    // We roepen op iedereen dezelfde methode aan.
+    // PHP kijkt ZELF welk type object het is en pakt de juiste methode.
+    // De Dealer gaat hitten tot 17, de Human wacht, de Cheater speelt vals.
+    $player->playTurn();
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Overriding:</strong> Een methode in de child class dezelfde naam geven als in de parent om het gedrag te vervangen.</li>
+                <li><strong>parent:::</strong> Gebruik dit binnen een override om de oude code óók uit te voeren (uitbreiden i.p.v. vervangen).</li>
+                <li><strong>Polymorfisme:</strong> Hierdoor kun je een lijst met verschillende objecten (Dealer, Human) allemaal in één loop behandelen, omdat ze dezelfde methodenamen hebben.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

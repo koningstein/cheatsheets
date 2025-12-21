@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Veilig Programmeren</h1>
+
+        <p>Gefeliciteerd met het afronden van Module 3! Waar Module 1 en 2 gingen over "dingen werkend krijgen", ging deze module over <strong>kwaliteit</strong> en <strong>veiligheid</strong>.</p>
+        <p>Je hebt geleerd om streng te zijn voor je code. Je laat niet zomaar alles toe, maar je werkt met duidelijke afspraken en beveiliging.</p>
+
+        <h3>1. Types: De Strenge Poortwachters</h3>
+        <p>PHP is van zichzelf heel flexibel (misschien wel té flexibel). In deze module hebben we geleerd om die flexibiliteit te beperken met <strong>Types</strong>. Dit voorkomt fouten.</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Onderdeel</th>
+                    <th>De Regel</th>
+                    <th>Voorbeeld</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Parameter Type</strong><br>(De Ingang)</td>
+                    <td>Ik accepteer alleen data van dit type.</td>
+                    <td><code>function addScore(int $points)</code><br><em>"Alleen getallen mogen naar binnen!"</em></td>
+                </tr>
+                <tr>
+                    <td><strong>Return Type</strong><br>(De Uitgang)</td>
+                    <td>Ik beloof dat ik dit type teruggeef.</td>
+                    <td><code>function getName(): string</code><br><em>"Ik geef altijd tekst terug."</em></td>
+                </tr>
+                <tr>
+                    <td><strong>Property Type</strong><br>(De Opslag)</td>
+                    <td>In deze variabele past alleen dit type.</td>
+                    <td><code>private int $score;</code><br><em>"Hier passen alleen getallen in."</em></td>
+                </tr>
+                <tr>
+                    <td><strong>Object Type</strong><br>(De Relatie)</td>
+                    <td>Ik wil geen tekst, maar een écht object.</td>
+                    <td><code>function addCard(Card $card)</code><br><em>"Geef mij een echt Kaart-object."</em></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Docblocks: De Handleiding</h3>
+        <p>Naast de harde code, hebben we ook geleerd om documentatie te schrijven. Docblocks (<code>/** ... */</code>) zijn berichtjes aan je collega's én aan je programma (zoals VS Code).</p>
+        <ul>
+            <li>Ze leggen uit <strong>wat</strong> de code doet.</li>
+            <li>Ze helpen bij arrays (<code>Card[]</code>) omdat PHP dat zelf nog niet zo goed kan aangeven.</li>
+        </ul>
+
+        <h3>3. Encapsulatie: De Kluis</h3>
+        <p>Het belangrijkste concept van deze module was <strong>Encapsulatie</strong> (Inkapseling). We stoppen de data in een kluis en doen de deur op slot.</p>
+
+
+
+        <div class="info-box">
+            <h3>Het Grote Verschil</h3>
+            <ul>
+                <li><strong>Zonder Encapsulatie (Public):</strong> Iedereen kan de score van de speler veranderen naar <code>-500</code> of <code>"Banaan"</code>. Je hebt geen controle.</li>
+                <li><strong>Met Encapsulatie (Private):</strong>
+                    <ul>
+                        <li>De data (property) is <strong>private</strong> (De kluis).</li>
+                        <li>Je wijzigt data via een <strong>Setter</strong> (De bewaker die checkt of het mag).</li>
+                        <li>Je leest data via een <strong>Getter</strong> (De etalage).</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <h3>Het Ultieme Voorbeeld</h3>
+        <p>Hieronder zie je een `Player` class waarin <strong>alles</strong> uit deze module samenkomt. Als je deze code snapt, ben je klaar voor de volgende module.</p>
+
+        <pre><code class="language-php">&lt;?php
+
+namespace Blackjack;
+
+/**
+ * Represents a player in the Blackjack game.
+ */
+class Player
+{
+    // 1. PROPERTY TYPES & VISIBILITY
+    // Private: Niemand mag hier direct bij.
+    // Type: Er mag alleen een getal (int) in.
+    private int $score = 0;
+
+    // Type: Er mag alleen een tekst (string) in.
+    private string $name;
+
+    // 2. CONSTRUCTOR MET TYPES
+    public function __construct(string $name)
+    {
+        $this->name = $name;
+    }
+
+    // 3. OBJECT ALS PARAMETER
+    // We willen een echte 'Card', geen tekst.
+    public function addPointsFromCard(Card $card): void
+    {
+        // We kunnen veilig methodes van Card aanroepen
+        $this->score += $card->getValue();
+    }
+
+    // 4. RETURN TYPES & GETTERS
+    // We beloven een integer terug te geven.
+    public function getScore(): int
+    {
+        return $this->score;
+    }
+
+    // 5. NULLABLE TYPES
+    // Soms is er nog geen winnaar, dus '?Player' (Player of null).
+    public function checkWinner(?Player $opponent): string
+    {
+        if ($opponent === null) {
+            return "Er is geen tegenstander.";
+        }
+        return "We spelen tegen " . $opponent->name; // (Eigenlijk via getter!)
+    }
+}</code></pre>
+
+        <h3>Wat nu?</h3>
+        <p>Je schrijft nu veilige, robuuste code. Fouten worden direct ontdekt door PHP omdat je streng bent op je types. Je data is veilig omdat je <code>private</code> gebruikt.</p>
+        <p>In de volgende module (Module 4) gaan we leren hoe we code kunnen <strong>hergebruiken</strong>. Stel je hebt een <code>Player</code> en een <code>Dealer</code>. Ze lijken heel erg op elkaar. Moeten we dan alles dubbel typen? Nee! We gaan aan de slag met <strong>Inheritance</strong> (Overerving).</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

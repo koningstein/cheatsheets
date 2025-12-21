@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulieren en OOP - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Formulieren en OOP</h1>
+
+        <p>Formulieren laten gebruikers data invoeren. In plaats van hardcoded objecten, gebruiken we deze data om flexibele objecten te maken.</p>
+
+        <h3>1. Het Formulier (Smarty Template)</h3>
+        <p>In een <code>.tpl</code> bestand maak je het formulier. Let op de attributen van de <code>&lt;form&gt;</code> en <code>&lt;input&gt;</code> tags.</p>
+
+        <pre><code class="language-html">&lt;!-- templates/form.tpl --&gt;
+{extends file="layout.tpl"}
+
+{block name="content"}
+    &lt;!-- action: Waar gaat de data heen? --&gt;
+    &lt;!-- method: Hoe? (POST voor data) --&gt;
+    &lt;form action="index.php?page=create" method="POST"&gt;
+
+        &lt;label&gt;Naam:&lt;/label&gt;
+        &lt;!-- name: Dit wordt de key in $_POST['name'] --&gt;
+        &lt;input type="text" name="name" class="form-control" required&gt;
+
+        &lt;button type="submit" class="btn btn-success"&gt;Opslaan&lt;/button&gt;
+    &lt;/form&gt;
+{/block}</code></pre>
+
+        <h3>2. Routing (De wegwijzer)</h3>
+        <p>We gebruiken één bestand (<code>index.php</code>) om alles te regelen. Met <code>$_GET['page']</code> bepalen we wat we laten zien.</p>
+
+        <pre><code class="language-php">// index.php
+
+// Kijk in de URL (?page=...) of er een pagina is gekozen.
+// Zo niet (??), gebruik standaard 'home'.
+$page = $_GET['page'] ?? 'home';
+
+// Routing Switch
+if ($page === 'create') {
+    // Toon formulier
+    $template->display('form.tpl');
+}
+elseif ($page === 'home') {
+    // Toon homepagina
+    $template->display('home.tpl');
+}</code></pre>
+
+        <h3>3. Belangrijke termen</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th style="width: 30%;">Term</th>
+                    <th>Betekenis</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>action="..."</code></td>
+                    <td>Bepaalt naar welke URL het formulier wordt gestuurd.</td>
+                </tr>
+                <tr>
+                    <td><code>method="POST"</code></td>
+                    <td>Verstuurt data op de achtergrond (veilig). Data komt in <code>$_POST</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>name="..."</code></td>
+                    <td>De naam van het veld. Cruciaal voor PHP: <code>&lt;input name="stad"&gt;</code> wordt <code>$_POST['stad']</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>??</code> (Null Coalescing)</td>
+                    <td>Korte manier om een standaardwaarde te geven als een variabele niet bestaat.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

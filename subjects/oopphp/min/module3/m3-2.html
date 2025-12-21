@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type hints & Return types - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Type hints & Return types</h1>
+
+        <h3>Wat zijn type hints?</h3>
+        <p>Type hints geven aan welk soort gegevens een parameter of return value moet hebben (bijvoorbeeld een getal of een tekst). Dit voorkomt fouten en maakt je code veiliger en duidelijker.</p>
+
+        <div class="info-box">
+            <h3>Waarom type hints gebruiken?</h3>
+            <ul>
+                <li><strong>Veiligheid:</strong> PHP controleert automatisch of het juiste type wordt meegegeven</li>
+                <li><strong>Duidelijkheid:</strong> Het is direct zichtbaar welk type verwacht wordt</li>
+                <li><strong>Minder bugs:</strong> Fouten worden eerder ontdekt</li>
+                <li><strong>Betere hulp van je programma:</strong> Autocomplete en het vinden van fouten werkt beter</li>
+            </ul>
+        </div>
+
+        <h3>Parameter type hints</h3>
+        <p>Plaats het verwachte datatype <strong>vóór</strong> de parameter in de methode. Dit zorgt ervoor dat alleen de juiste invoer wordt toegestaan:</p>
+
+
+
+        <pre><code class="language-php">public function setName(string $name): void
+{
+    $this->name = $name;
+}
+
+public function addPoints(int $points): void
+{
+    $this->score += $points;
+}</code></pre>
+
+        <h3>Return type hints</h3>
+        <p>Plaats het verwachte datatype <strong>na</strong> de parameters met een dubbele punt (<code>:</code>) ervoor. Dit zorgt ervoor dat de methode altijd het juiste type teruggeeft:</p>
+
+        <pre><code class="language-php">public function getName(): string
+{
+    return $this->name;
+}
+
+public function getScore(): int
+{
+    return $this->score;
+}</code></pre>
+
+        <h3>Nullable types</h3>
+        <p>Gebruik een vraagteken (<code>?</code>) voor het datatype om aan te geven dat de parameter of return value het opgegeven type óf <strong><code>null</code></strong> mag zijn:</p>
+
+        <pre><code class="language-php">public function setAvatar(?string $avatar): void
+{
+    $this->avatar = $avatar;
+}
+
+public function getWinner(): ?Player
+{
+    return $this->winner; // kan null zijn
+}</code></pre>
+
+        <h3>Void return type</h3>
+        <p>Gebruik <code>void</code> als return type als een methode <strong>geen waarde</strong> teruggeeft:</p>
+
+        <pre><code class="language-php">public function resetHand(): void
+{
+    $this->hand = [];
+    $this->score = 0;
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Veiligheid van types</h3>
+            <p>Als je een verkeerd type meegeeft, krijg je een <strong>TypeError</strong> (foutmelding):</p>
+            <pre><code class="language-php">$card = new Card();
+$card->setCard("Hearts", 5, "hearts_5.png"); // ❌ Fout!
+// Verwacht: setCard(string, int, string)
+// Gegeven: setCard(string, int, string) - maar parameter 2 moet string zijn!</code></pre>
+        </div>
+
+        <div class="info-box">
+            <h3>Best practice</h3>
+            <p>Gebruik altijd type hints voor:</p>
+            <ul>
+                <li>Alle methode parameters</li>
+                <li>Alle return types (behalve constructors)</li>
+                <li>Properties (zie volgende sectie)</li>
+            </ul>
+            <p>Dit maakt je code robuuster en voorkomt veel bugs!</p>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simpele Autoload (Uitgebreid) - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Simpele Autoload: De Slimme Assistent</h1>
+
+        <p>In Module 1 heb je geleerd hoe je classes maakt. Je hebt nu waarschijnlijk bestanden zoals <code>Card.php</code> en <code>Player.php</code>. Om die te gebruiken, moest je steeds dit doen:</p>
+        <pre><code class="language-php">require 'Card.php';
+require 'Player.php';</code></pre>
+        <p>Bij twee bestanden is dat prima. Maar een groot Blackjack-spel heeft misschien wel 20 of 50 bestanden. Wil je echt 50 regels code typen aan het begin van je script? En wat als je de naam van een bestand verandert?</p>
+        <p>Gelukkig is er een oplossing: <strong>Autoloading</strong>.</p>
+
+        <h3>Wat is het probleem? (De "Handmatige" manier)</h3>
+        <p>Stel je voor dat je elke class handmatig moet inladen. Dit levert twee problemen op:</p>
+        <ol>
+            <li><strong>Het is rommelig:</strong> Je bestand begint met een enorme lijst <code>require</code> regels.</li>
+            <li><strong>Het is traag:</strong> Je laadt misschien bestanden in die je helemaal niet nodig hebt voor die specifieke pagina.</li>
+        </ol>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Bibliotheek</h3>
+            <ul>
+                <li><strong>Zonder Autoload:</strong> Je loopt de bibliotheek binnen en pakt <em>alle</em> 10.000 boeken op. Je probeert ze allemaal tegelijk vast te houden, ook al wil je er maar ééntje lezen. Dat is zwaar en onhandig.</li>
+                <li><strong>Met Autoload:</strong> Je loopt naar de balie en zegt: "Ik zoek het boek 'Harry Potter'". De bibliothecaris loopt naar achteren, pakt <em>alleen</em> dat boek, en geeft het aan jou.</li>
+            </ul>
+        </div>
+
+        <h3>De Oplossing: spl_autoload_register()</h3>
+        <p>PHP heeft een ingebouwde functie met een lastige naam: <code>spl_autoload_register()</code>.</p>
+        <p>Je kunt deze functie zien als de bibliothecaris uit het voorbeeld hierboven. Je geeft hem een opdracht: <em>"Als ik een class nodig heb die je nog niet kent, ga hem dan automatisch zoeken."</em></p>
+
+
+
+        <h3>Stap voor Stap: Je eigen autoloader bouwen</h3>
+        <p>We gaan nu een bestand maken dat <code>autoload.php</code> heet. Dit bestand zorgt ervoor dat we nooit meer handmatig classes hoeven te laden.</p>
+
+        <h4>Stap 1: De functie maken</h4>
+        <p>We gebruiken een anonieme functie (een functie zonder naam) die precies één taak heeft: een bestandsnaam maken van een class-naam.</p>
+
+        <pre><code class="language-php">&lt;?php
+// autoload.php
+
+spl_autoload_register(function ($className) {
+    // Stel, PHP zoekt de class "Card".
+    // $className is nu dus "Card".
+
+    // We plakken er .php achter.
+    $path = $className . '.php';
+    // Nu is $path: "Card.php"
+
+    // We checken voor de zekerheid of het bestand echt bestaat
+    if (file_exists($path)) {
+        // Ja, het bestaat! Laad het in.
+        require_once $path;
+    }
+});</code></pre>
+
+        <h3>Hoe gebruik je dit in Blackjack?</h3>
+        <p>Nu we onze slimme assistent (de autoloader) hebben geschreven, hoeven we in ons hoofdprogramma (bijv. <code>index.php</code>) alleen nog maar de assistent aan te zetten.</p>
+
+        <pre><code class="language-php">// index.php
+
+// 1. We roepen één keer de autoloader aan
+require_once 'autoload.php';
+
+// 2. We gebruiken classes alsof ze er al zijn!
+// PHP ziet 'new Deck()'. Hij kent die class niet.
+// Hij roept de autoloader aan. Die zoekt 'Deck.php'. Gevonden!
+$deck = new Deck();
+
+// Hetzelfde gebeurt hier voor 'Player.php'
+$player = new Player("Sjaak");
+
+echo "Het spel kan beginnen!";</code></pre>
+
+        <h3>Waarom is dit zo handig? (Lazy Loading)</h3>
+        <p>Er is nog een groot voordeel dat <strong>Lazy Loading</strong> heet (lui laden). PHP laadt het bestand pas <strong>op het exacte moment</strong> dat je het nodig hebt.</p>
+        <p>Stel je hebt een bestand <code>WinnerRule.php</code> dat alleen nodig is als iemand wint. Als niemand wint tijdens het spel, wordt dat bestand <em>nooit</em> geladen. Dat maakt je applicatie sneller en lichter.</p>
+
+        <h3>Wat kan er fout gaan?</h3>
+
+        <h4>1. Hoofdletters en Kleine letters</h4>
+        <p>Dit is de meest gemaakte fout. In Windows maakt het vaak niet uit of je <code>card.php</code> of <code>Card.php</code> schrijft. Maar zodra je je website online zet (op een Linux server), maakt het wél uit.</p>
+        <div class="info-box warning">
+            <h3>De Gouden Regel</h3>
+            <p>Zorg dat de bestandsnaam <strong>precies</strong> hetzelfde is als de class naam.</p>
+            <ul>
+                <li>Class: <code>class BlackjackPlayer { }</code></li>
+                <li>Bestand: <code>BlackjackPlayer.php</code></li>
+            </ul>
+        </div>
+
+        <h4>2. Mappenstructuur</h4>
+        <p>De simpele autoloader die we hierboven hebben gemaakt, gaat ervan uit dat al je bestanden in <strong>dezelfde map</strong> staan. Als je je bestanden netjes in mapjes stopt (bijvoorbeeld een mapje <code>Models</code>), dan werkt deze simpele code niet meer. In de volgende lessen gaan we leren hoe we dat oplossen met 'Namespaces'.</p>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Autoloading</strong> voorkomt dat je eindeloze lijsten met <code>require</code> moet typen.</li>
+            <li><strong>spl_autoload_register</strong> is de functie die dit regelt.</li>
+            <li>Het werkt op basis van een afspraak: <strong>Classnaam = Bestandsnaam</strong>.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Class: De Blauwdruk</h1>
+
+        <p>Welkom in de wereld van Object Oriented Programming (OOP). Voordat we gaan programmeren, moeten we eerst het allerbelangrijkste onderdeel begrijpen: de <strong>Class</strong>.</p>
+
+        <h3>Wat is een Class precies?</h3>
+        <p>Je kunt een class zien als een <strong>blauwdruk</strong> of een <strong>bouwtekening</strong>. Het is nog niet het "ding" zelf, maar het is de beschrijving van hoe het ding eruit moet zien en wat het moet kunnen.</p>
+
+
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Architect</h3>
+            <p>Stel, je bent een architect. Je tekent een bouwplan voor een huis. Op dat plan staat:</p>
+            <ul>
+                <li>Het huis heeft 4 ramen.</li>
+                <li>Het huis heeft een rode voordeur.</li>
+                <li>In het huis kun je de lichten aan- en uitzetten.</li>
+            </ul>
+            <p>Dit bouwplan is jouw <strong>Class</strong>. Je kunt in dat plan niet wonen. Maar, met dat ene bouwplan kun je wel 100 echte huizen bouwen in een straat. Die echte huizen noemen we later <strong>Objecten</strong>.</p>
+        </div>
+
+        <h3>De Class in Blackjack</h3>
+        <p>Laten we dit vertalen naar ons kaartspel. In Blackjack hebben we heel veel kaarten nodig (Harten Aas, Schoppen Boer, Ruiten Tien, etc.).</p>
+        <p>Het zou heel veel werk zijn om voor elke kaart losse code te schrijven. In plaats daarvan maken we één blauwdruk: de <code>Card</code> class.</p>
+
+        <p>In deze class schrijven we op wat <em>elke</em> kaart heeft:</p>
+        <ul>
+            <li>Elke kaart heeft een <strong>Kleur</strong> (Suit), zoals Harten of Schoppen.</li>
+            <li>Elke kaart heeft een <strong>Waarde</strong> (Value), zoals Aas of 10.</li>
+        </ul>
+        <p>Dankzij deze ene class weet ons programma straks precies wat een kaart is.</p>
+
+        <h3>Hoe schrijf je een Class?</h3>
+        <p>In PHP is het maken van een class heel simpel. Je gebruikt het woord <code>class</code>, gevolgd door de naam. Daarna gebruik je accolades <code>{ }</code> om aan te geven waar de class begint en eindigt.</p>
+
+        <p>Hieronder zie je hoe we de blauwdruk voor een kaart maken:</p>
+
+        <pre><code class="language-php">&lt;?php
+
+class Card
+{
+    // Alles tussen deze accolades hoort bij de blauwdruk van de kaart.
+    // Hier is het nu nog leeg, maar later zetten we hier eigenschappen neer.
+}</code></pre>
+
+        <h3>Belangrijke regels (Best Practices)</h3>
+        <p>Programmeurs hebben afspraken gemaakt zodat iedereen elkaars code kan lezen. Als je je hier niet aan houdt, kan je programma vastlopen of krijg je foutmeldingen.</p>
+
+        <h4>1. De Naamgeving (PascalCase)</h4>
+        <p>Geef je class altijd een duidelijke, Engelse naam. We gebruiken hiervoor <strong>PascalCase</strong>. Dat betekent:</p>
+        <ul>
+            <li>De naam begint <strong>altijd</strong> met een Hoofdletter.</li>
+            <li>Als de naam uit meerdere woorden bestaat, begint elk nieuw woord ook met een Hoofdletter.</li>
+            <li>Gebruik geen spaties of underscores.</li>
+        </ul>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Goed (PascalCase)</th>
+                    <th>Fout</th>
+                    <th>Waarom?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>Card</code></td>
+                    <td><code>card</code></td>
+                    <td>Moet met een hoofdletter beginnen.</td>
+                </tr>
+                <tr>
+                    <td><code>BlackjackPlayer</code></td>
+                    <td><code>blackjack_player</code></td>
+                    <td>Geen underscores gebruiken in class namen.</td>
+                </tr>
+                <tr>
+                    <td><code>GameManager</code></td>
+                    <td><code>gamemanager</code></td>
+                    <td>Elk nieuw woord moet een hoofdletter hebben.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>2. De Bestandsnaam</h4>
+        <p>Dit is een regel waar veel beginners de fout in gaan. <strong>De naam van het bestand moet precies hetzelfde zijn als de naam van de class.</strong></p>
+        <p>Heb je een class die <code>BlackjackPlayer</code> heet? Dan <strong>moet</strong> je bestand <code>BlackjackPlayer.php</code> heten. Let hierbij heel goed op hoofdletters en kleine letters!</p>
+
+
+
+        <div class="info-box warning">
+            <h3>Waarom is dit zo streng?</h3>
+            <p>PHP heeft slimme technieken (zoals 'Autoloading') om bestanden automatisch te vinden. Als jij in je code vraagt om de <code>Card</code> class, gaat PHP zoeken naar <code>Card.php</code>. Als je bestand <code>card.php</code> (kleine letter) heet, kan PHP het soms niet vinden en crasht je spel.</p>
+        </div>
+
+        <h4>3. De Accolades (Structuur)</h4>
+        <p>Om je code netjes te houden, zetten we de openings-accolade <code>{</code> altijd op een <strong>nieuwe regel</strong>, direct onder de naam van de class.</p>
+
+        <pre><code class="language-php">// ZO HOORT HET NETJES:
+class Card
+{
+    // ...
+}
+
+// DIT DOEN WE LIEVER NIET (in PHP):
+class Card {
+   // ...
+}</code></pre>
+
+        <h3>Stap voor Stap: Je eerste Class</h3>
+        <p>Laten we samenvatten wat je moet doen om een class te maken voor onze Blackjack speler:</p>
+        <ol>
+            <li>Maak een nieuw bestand aan en noem het <code>Player.php</code> (Let op de hoofdletter P!).</li>
+            <li>Open het bestand en begin met <code>&lt;?php</code>.</li>
+            <li>Typ het woord <code>class</code> gevolgd door de naam <code>Player</code>.</li>
+            <li>Ga naar de volgende regel en typ <code>{</code>.</li>
+            <li>Ga een paar regels naar beneden en typ <code>}</code>.</li>
+        </ol>
+
+        <pre><code class="language-php">&lt;?php
+
+class Player
+{
+    // Nu heb je een geldige Player class!
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

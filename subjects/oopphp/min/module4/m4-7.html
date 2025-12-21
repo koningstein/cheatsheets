@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meerdere pagina's met $_GET - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Meerdere pagina's (Routing)</h1>
+
+        <p>Als je applicatie groter wordt, krijg je veel verschillende pagina's (create, view, edit, list). Een rits <code>if-elseif</code> statements wordt dan onleesbaar. Gebruik hiervoor een <code>switch</code>.</p>
+
+        <h3>1. De Switch Router</h3>
+        <p>Check de variabele <code>$page</code> en bepaal wat er moet gebeuren. Vergeet de <code>break;</code> niet!</p>
+
+        <pre><code class="language-php">$page = $_GET['page'] ?? 'home';
+
+switch ($page) {
+    case 'home':
+        $template->display('home.tpl');
+        break; // Stop hier
+
+    case 'create':
+        // Logica voor aanmaken...
+        $template->display('form.tpl');
+        break;
+
+    case 'list':
+        // Logica voor lijst...
+        $template->display('list.tpl');
+        break;
+
+    default:
+        // Als de pagina niet bestaat (404) of standaard
+        $template->display('home.tpl');
+        break;
+}</code></pre>
+
+        <h3>2. Extra parameters (Detail pagina)</h3>
+        <p>Soms heb je meer info nodig, bijvoorbeeld "Bekijk speler X". Je gebruikt het <code>&</code> teken in de URL om parameters toe te voegen.</p>
+        <p>URL: <code>index.php?page=view&name=Sjaak</code></p>
+
+        <pre><code class="language-php">switch ($page) {
+    case 'view':
+        // Haal de extra parameter op
+        $name = $_GET['name'] ?? null;
+
+        if ($name) {
+            // Zoek de speler en toon de pagina
+            $player = $list->getPlayerByName($name);
+            $template->assign('p', $player);
+            $template->display('detail.tpl');
+        }
+        break;
+}</code></pre>
+
+        <h3>3. Links maken in Smarty</h3>
+        <p>Zorg dat je HTML-links kloppen met je switch-cases.</p>
+
+        <pre><code class="language-html">&lt;!-- Simpele link --&gt;
+&lt;a href="index.php?page=create"&gt;Nieuwe Speler&lt;/a&gt;
+
+&lt;!-- Link met extra parameter (Dynamisch) --&gt;
+&lt;a href="index.php?page=view&name={$speler->getName()}"&gt;
+    Bekijk details
+&lt;/a&gt;</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li>Gebruik <code>switch($page)</code> voor overzichtelijke routing.</li>
+                <li>Gebruik <code>break;</code> na elke case om "doorvallen" te voorkomen.</li>
+                <li>Gebruik <code>default:</code> voor als de pagina niet bestaat.</li>
+                <li>Koppel parameters in de URL met <code>&</code> (bijv. <code>&id=5</code>).</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

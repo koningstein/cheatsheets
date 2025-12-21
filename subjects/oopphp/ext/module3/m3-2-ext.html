@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Hints & Return Types (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Type Hints: Streng zijn is goed</h1>
+
+        <p>PHP is van nature een heel "aardige" taal. Als jij de tekst <code>"5"</code> optelt bij het getal <code>10</code>, probeert PHP je te helpen en maakt er <code>15</code> van. Dat is lief, maar ook gevaarlijk. In grote projecten (zoals ons Blackjack spel) leidt dit vaak tot onzichtbare fouten en crashes.</p>
+        <p>Daarom gaan we in deze module <strong>streng</strong> zijn. We gaan precies aangeven wat voor soort data we verwachten. Dit noemen we <strong>Type Hinting</strong>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Vormenstoof</h3>
+            <p>Ken je dat speelgoed nog van vroeger? Een doos met gaten in verschillende vormen (vierkant, rondje, driehoek).</p>
+            <ul>
+                <li><strong>Zonder Type Hints:</strong> De doos is één groot gat. Je kunt er blokjes in gooien, maar ook je boterham of de afstandsbediening. Alles past, maar de binnenkant wordt een rommeltje.</li>
+                <li><strong>Met Type Hints:</strong> Het ronde gat accepteert <em>alleen</em> het ronde blokje. Als je probeert een vierkant blokje door het ronde gat te duwen, zegt het speelgoed: <strong>STOP! Dit past niet!</strong></li>
+            </ul>
+        </div>
+
+
+
+        <h3>Deel 1: De Ingang (Parameter Type Hints)</h3>
+        <p>Als we een methode (functie) schrijven, geven we vaak data mee (parameters). Met type hints dwingen we af wat voor data dat moet zijn.</p>
+        <p>Stel, we willen punten toevoegen aan een speler. Punten moeten altijd een getal zijn.</p>
+
+        <pre><code class="language-php">class Player
+{
+    public int $score = 0;
+
+    // Let op: 'int' staat VOOR de variabele $points
+    public function addPoints(int $points)
+    {
+        $this->score += $points;
+    }
+}</code></pre>
+
+        <p>Als iemand nu deze functie probeert te gebruiken met verkeerde data, grijpt PHP direct in:</p>
+        <pre><code class="language-php">$player = new Player();
+$player->addPoints(10);       // ✅ Goed: 10 is een getal (int)
+$player->addPoints("Banaan"); // ❌ FOUT: PHP geeft een 'Fatal Error' en stopt direct.</code></pre>
+
+        <h3>Deel 2: De Uitgang (Return Types)</h3>
+        <p>Net zoals we controleren wat er <em>in</em> gaat, kunnen we ook beloven wat er <em>uit</em> komt. Dit heet een <strong>Return Type</strong>. Je zet dit achter de functie, na een dubbele punt <code>:</code>.</p>
+
+        <pre><code class="language-php">class Player
+{
+    private string $name = "Sjaak";
+
+    // : string betekent: "Ik beloof dat ik tekst teruggeef"
+    public function getName(): string
+    {
+        return $this->name;
+    }
+}</code></pre>
+
+        <h3>Speciale Types</h3>
+
+        <h4>1. Void (Niks teruggeven)</h4>
+        <p>Soms doet een functie alleen maar iets (bijvoorbeeld iets opslaan) en geeft hij geen antwoord terug. Dan gebruiken we het type <code>void</code>. Dit betekent letterlijk "leegte".</p>
+
+        <pre><code class="language-php">// Deze functie reset de hand. Hij hoeft geen antwoord te geven.
+public function resetHand(): void
+{
+    $this->hand = [];
+}</code></pre>
+
+        <h4>2. Nullable (Het vraagteken ?)</h4>
+        <p>Soms weten we een waarde nog niet. Denk aan de winnaar van het spel.</p>
+        <ul>
+            <li>Aan het begin van het spel is er nog <strong>geen</strong> winnaar (<code>null</code>).</li>
+            <li>Aan het einde van het spel is er <strong>wel</strong> een winnaar (een <code>Player</code> object).</li>
+        </ul>
+        <p>Om aan te geven dat iets "of een Speler, of Niks" mag zijn, zetten we een vraagteken voor het type: <code>?Player</code>.</p>
+
+        <pre><code class="language-php">class Game
+{
+    private ?Player $winner; // Kan Player zijn, of null
+
+    public function getWinner(): ?Player
+    {
+        return $this->winner;
+    }
+}</code></pre>
+
+        <h3>Stap voor Stap: Een veilige Card Class</h3>
+        <p>Laten we alles samenvoegen in onze Card class. Kijk goed naar de types die we toevoegen.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Properties hebben ook types!
+    private string $suit;
+    private int $value; // Waarde is een getal
+
+    // Parameter types in de Setter
+    public function setCard(string $suit, int $value): void
+    {
+        $this->suit = $suit;
+        $this->value = $value;
+    }
+
+    // Return type in de Getter
+    public function getScore(): int
+    {
+        return $this->value;
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom doen we dit?</h3>
+            <p>Het lijkt extra typwerk, maar het bespaart je uren zoekwerk naar fouten:</p>
+            <ul>
+                <li><strong>Directe foutmelding:</strong> Als je per ongeluk tekst invoert waar een getal moet staan, zegt PHP dat <em>meteen</em>. Zonder types zou je programma misschien raar gaan rekenen met tekst, wat veel lastiger te vinden is.</li>
+                <li><strong>Slimme Editor:</strong> Omdat jij zegt wat voor type iets is, kan je editor (VS Code) je veel beter helpen met aanvullen (autocomplete).</li>
+            </ul>
+        </div>
+
+        <h3>Wat kan er fout gaan? (TypeError)</h3>
+        <p>Als je je niet aan je eigen regels houdt, krijg je een <strong>TypeError</strong>. Dit is een fatale fout: je programma stopt direct (crasht).</p>
+
+        <pre><code class="language-text">Fatal error: Uncaught TypeError: Argument 1 passed to addPoints() must be of the type int, string given...</code></pre>
+
+        <p>Schrik niet van deze foutmelding! Het is juist goed. Het betekent dat je beveiliging werkt en dat je een bug hebt voorkomen.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

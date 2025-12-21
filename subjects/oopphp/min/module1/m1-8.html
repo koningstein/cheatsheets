@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructor Promoted Properties - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Constructor Promoted Properties</h1>
+
+        <h3>Wat zijn Constructor Promoted Properties?</h3>
+        <p>Constructor Promoted Properties is een functie in PHP 8.0 die het maken van eigenschappen sneller maakt. Je kunt eigenschappen aanmaken én direct een waarde geven in één stap binnen de constructor.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Bij het maken van een Card class moet je normaal:</p>
+            <ul>
+                <li>Properties bovenaan de class declareren</li>
+                <li>Parameters in de constructor aanmaken</li>
+                <li>Elke property toewijzen met <code>$this->property = $parameter;</code></li>
+            </ul>
+            <p>Met Constructor Promoted Properties doe je dit alles in één keer!</p>
+        </div>
+
+        <h3>Zonder Constructor Promoted Properties</h3>
+        <p>De oude manier heeft drie aparte stappen nodig:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $suit;
+    public $value;
+    public $image;
+
+    public function __construct($suit, $value, $image)
+    {
+        $this->suit = $suit;
+        $this->value = $value;
+        $this->image = $image;
+    }
+}</code></pre>
+
+        <h3>Met Constructor Promoted Properties</h3>
+        <p>De nieuwe manier combineert alles in de constructor:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public function __construct(
+        public $suit,
+        public $value,
+        public $image
+    ) {
+        // Properties zijn automatisch gedeclareerd en toegewezen!
+    }
+}</code></pre>
+
+        <h3>Voordelen</h3>
+        <ul>
+            <li><strong>Kortere code:</strong> Je hoeft eigenschappen niet apart aan te maken</li>
+            <li><strong>Minder herhaling:</strong> Alles gebeurt op één plek</li>
+            <li><strong>Overzichtelijker:</strong> Je ziet meteen welke eigenschappen een class heeft</li>
+        </ul>
+
+        <div class="info-box">
+            <h3>Let op</h3>
+            <p>Constructor Promoted Properties werken alleen voor properties die direct kunnen worden toegewezen zonder validatie. Voor properties die validatie nodig hebben, gebruik je setters apart.</p>
+        </div>
+
+        <h3>Gebruik</h3>
+        <p>Het aanmaken van objecten blijft hetzelfde:</p>
+
+        <pre><code class="language-php">$card = new Card("Hearts", "Ace", "ace_hearts.png");</code></pre>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

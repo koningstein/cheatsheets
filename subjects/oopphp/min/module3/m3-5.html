@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Properties - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Private Properties</h1>
+
+        <h3>Wat is Visibility?</h3>
+        <p>Visibility (zichtbaarheid) is een concept in OOP dat bepaalt waar in de code de properties en methods van een class toegankelijk zijn. De twee belangrijkste niveaus zijn:</p>
+        <ul>
+            <li><code>public</code>: <strong>Overal toegankelijk</strong>.</li>
+            <li><code>private</code>: <strong>Alleen toegankelijk binnen de class zelf</strong> waar het gedefinieerd is.</li>
+        </ul>
+
+        <h3>De noodzaak van `private`</h3>
+        <p>Het gebruik van het trefwoord <code>private</code> voor properties is belangrijk voor <strong>Encapsulatie</strong>. Encapsulatie betekent dat de data van een object beschermd wordt tegen wijzigingen van buitenaf.</p>
+
+        <div class="info-box">
+            <h3>Bescherming van data</h3>
+            <p>Zonder `private` kan de `score` direct en onlogisch worden gewijzigd:</p>
+            <pre><code class="language-php">$player->score = -10; // Mogelijk bij public property</code></pre>
+            <p>Door `private` te gebruiken, is directe toegang verboden:</p>
+            <pre><code class="language-php">class Player
+{
+    private int $score = 0;
+    // Fout als je probeert aan te roepen: $player->score = 21;
+}</code></pre>
+        </div>
+
+        <h2>Getters en Setters</h2>
+
+        <h3>Getters (Lezen)</h3>
+        <p>Omdat je een <code>private</code> property niet direct kunt lezen van buitenaf, heb je een <strong>Getter</strong> methode nodig. Getters beginnen meestal met <code>get</code>.</p>
+
+        <pre><code class="language-php">public function getScore(): int
+{
+    return $this->score;
+}</code></pre>
+
+        <h3>Setters (Schrijven/Wijzigen)</h3>
+        <p>Om een <code>private</code> property gecontroleerd te wijzigen, gebruik je een <strong>Setter</strong> methode. Setters beginnen meestal met <code>set</code> en kunnen controleren of de ingevoerde waarde klopt.</p>
+
+        <pre><code class="language-php">public function setScore(int $newScore): void
+{
+    // Validatie en controle
+    if ($newScore < 0) {
+        $newScore = 0;
+    }
+    if ($newScore > 21) {
+        $newScore = 21; // Maximale score in Blackjack
+    }
+    $this->score = $newScore;
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Wanneer gebruik je Getters/Setters?</h3>
+            <p>Gebruik ze altijd voor private properties. Zelfs als een setter nu nog geen controle bevat, kun je deze later makkelijk toevoegen zonder de rest van de code aan te passen. Dit is het principe van <strong>Encapsulatie</strong>.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

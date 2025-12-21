@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smarty Template Engine - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Smarty Template Engine</h1>
+
+        <p>Smarty is een template engine die PHP-code (logica) scheidt van HTML (presentatie). Dit houdt je code overzichtelijk en veilig.</p>
+
+        <h3>1. Installatie & Structuur</h3>
+        <p>Installeer Smarty via Composer:</p>
+        <pre><code class="language-bash">composer require smarty/smarty</code></pre>
+
+        <p>Hanteer deze mappenstructuur:</p>
+        <pre><code class="language-text">project/
+├── templates/          # .tpl bestanden (HTML)
+├── templates_c/        # Cache (automatisch gevuld)
+├── src/                # PHP Classes
+└── index.php           # PHP Logica</code></pre>
+
+        <div class="info-box">
+            <h3>Belangrijk</h3>
+            <p>Voeg <code>templates_c/</code> toe aan je <strong>.gitignore</strong>. Deze map bevat tijdelijke bestanden.</p>
+        </div>
+
+        <h3>2. Configureren (index.php)</h3>
+        <pre><code class="language-php">require 'vendor/autoload.php';
+use Smarty\Smarty;
+
+// Smarty initialiseren
+$smarty = new Smarty();
+$smarty->setTemplateDir('templates');
+$smarty->setCompileDir('templates_c');
+
+// Data klaarzetten
+$player = new Player("Sjaak");
+$smarty->assign('speler', $player);
+$smarty->assign('score', 21);
+
+// Template tonen
+$smarty->display('game.tpl');</code></pre>
+
+        <h3>3. Syntax (.tpl)</h3>
+        <p>In de <code>templates</code> map maak je HTML-bestanden met <code>.tpl</code> extensie. Smarty gebruikt accolades <code>{}</code> voor logica.</p>
+
+        <h4>Variabelen tonen</h4>
+        <pre><code class="language-html">&lt;!-- Een variabele --&gt;
+&lt;p&gt;Score: {$score}&lt;/p&gt;
+
+&lt;!-- Een object methode --&gt;
+&lt;p&gt;Naam: {$speler->getName()}&lt;/p&gt;</code></pre>
+
+        <h4>Keuzes maken (If/Else)</h4>
+        <pre><code class="language-html">{if $score > 21}
+    &lt;p&gt;Helaas, je bent af (Bust)!&lt;/p&gt;
+{elseif $score == 21}
+    &lt;p&gt;Blackjack!&lt;/p&gt;
+{else}
+    &lt;p&gt;Wil je nog een kaart?&lt;/p&gt;
+{/if}</code></pre>
+
+        <h4>Lijsten doorlopen (Foreach)</h4>
+        <pre><code class="language-html">&lt;ul&gt;
+{foreach $cards as $card}
+    &lt;li&gt;{$card->getRank()} van {$card->getSuit()}&lt;/li&gt;
+{/foreach}
+&lt;/ul&gt;</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

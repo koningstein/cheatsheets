@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Je Eerste Stappen</h1>
+
+        <p>Gefeliciteerd! Je hebt Module 1 afgerond. Dit was misschien wel de belangrijkste module van de hele cursus. Je hebt namelijk een nieuwe manier van denken geleerd: <strong>Object Oriented Programming (OOP)</strong>.</p>
+        <p>In plaats van een lange lijst met losse commando's, denk je nu in "dingen" (objecten). Laten we alles nog één keer rustig op een rijtje zetten.</p>
+
+        <h3>1. Het Fundament: Class vs. Object</h3>
+        <p>Alles begint met het verschil tussen het idee en de werkelijkheid.</p>
+
+
+
+        <div class="info-box">
+            <h3>De Kern</h3>
+            <ul>
+                <li><strong>Class (De Blauwdruk):</strong> Dit is het bestand op je computer (bijv. <code>Card.php</code>). Hierin beschrijf je wat een kaart <em>is</em> en wat hij <em>kan</em>. Je hebt hier maar één bestand van.</li>
+                <li><strong>Object (Het Ding):</strong> Dit is het resultaat als je de code draait. Met <code>new Card()</code> maak je een levende kopie in het geheugen. Je kunt duizenden objecten maken van één class.</li>
+            </ul>
+        </div>
+
+        <h3>2. Eigenschappen en Acties</h3>
+        <p>Een object bestaat uit twee onderdelen:</p>
+        <ul>
+            <li><strong>Properties (Eigenschappen):</strong> De data. Voor een kaart zijn dit de kleur (`suit`) en de waarde (`value`).</li>
+            <li><strong>Methoden (Acties):</strong> De functies. Wat kan de kaart doen? Zichzelf tonen (`show()`) of omdraaien (`flip()`).</li>
+        </ul>
+
+        <h3>3. De Constructor: Een vliegende start</h3>
+        <p>Je hebt geleerd dat het onhandig is om een object "leeg" aan te maken en daarna regel voor regel te vullen. De <strong>Constructor</strong> (`__construct`) lost dit op. Het zorgt ervoor dat een object direct compleet is zodra het "geboren" wordt.</p>
+
+        <h3>4. Veiligheid: Getters en Setters</h3>
+        <p>Je hebt geleerd om niet zomaar iedereen toegang te geven tot je data.</p>
+        <ul>
+            <li><strong>Setters (De Poortwachter):</strong> Controleren de input. "Is dit wel een geldige waarde?"</li>
+            <li><strong>Getters (De Chef-kok):</strong> Maken de output netjes. "Ik zet de naam even in hoofdletters."</li>
+        </ul>
+
+        <h3>Het Grote Plaatje: Alles samen</h3>
+        <p>Hieronder zie je een compleet voorbeeld van een `Player` class voor Blackjack. Hierin komen <strong>alle</strong> onderwerpen uit deze module samen. Lees de comments goed door.</p>
+
+        <pre><code class="language-php">&lt;?php
+
+class Player
+{
+    // PROPERTIES: De eigenschappen van de speler
+    // We gebruiken 'Constructor Promoted Properties' (de korte manier)
+    public function __construct(
+        public $name,           // De naam (bijv. "Sjaak")
+        public $balance = 100   // Het saldo (standaard 100 euro)
+    ) {}
+
+    // METHODE: Een actie die de speler kan doen
+    // In dit geval: geld inzetten
+    public function bet($amount)
+    {
+        // $this verwijst naar het saldo van DEZE specifieke speler
+        if ($amount > $this->balance) {
+            return "Fout: Je hebt niet genoeg geld!";
+        }
+
+        // Pas het saldo aan
+        $this->balance = $this->balance - $amount;
+        return "Inzet van €$amount geplaatst. Nieuw saldo: €{$this->balance}";
+    }
+
+    // GETTER: Een veilige manier om het saldo te bekijken
+    public function getBalanceFormatted()
+    {
+        // We geven het netjes terug met een euroteken
+        return "€ " . number_format($this->balance, 2);
+    }
+}
+
+// 1. OBJECT AANMAKEN (Met Named Arguments voor duidelijkheid)
+$player1 = new Player(name: "Sjaak", balance: 500);
+
+// 2. METHODE GEBRUIKEN
+echo $player1->bet(50); // Output: Inzet van €50 geplaatst...
+
+// 3. GETTER GEBRUIKEN
+echo "Huidig saldo: " . $player1->getBalanceFormatted();</code></pre>
+
+
+
+        <h3>De valkuilen (Let hier op!)</h3>
+        <p>Tijdens het leren van OOP struikelen de meeste studenten over dezelfde dingen. Check deze lijst als je code niet werkt:</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>De Fout</th>
+                    <th>De Oplossing</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>$this->$naam</code></td>
+                    <td><strong>Fout!</strong> Te veel dollartekens. <br>Gebruik <code>$this->naam</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>new Card</code> (zonder haakjes)</td>
+                    <td>Gebruik altijd haakjes: <code>new Card()</code>.</td>
+                </tr>
+                <tr>
+                    <td>Bestand heet <code>card.php</code></td>
+                    <td>De bestandsnaam moet een hoofdletter hebben: <code>Card.php</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>public function _construct</code></td>
+                    <td>Vergeet het tweede liggende streepje niet: <code>__construct</code>.</td>
+                </tr>
+                <tr>
+                    <td><code>echo</code> in een getter</td>
+                    <td>Gebruik <code>return</code> in een getter, zodat je de data nog kunt gebruiken.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Wat nu?</h3>
+        <p>Je hebt nu een stevige basis. Je weet hoe je objecten maakt en gebruikt. In de volgende modules gaan we dieper. We gaan leren hoe classes met elkaar kunnen samenwerken (Inheritance) en hoe we de toegang nog strenger kunnen beveiligen (Private/Protected).</p>
+        <p>Maar voor nu: wees trots! Je programmeert nu Object Georiënteerd.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Methoden (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Private Methoden: De Hulpjes</h1>
+
+        <p>In de vorige les leerde je over <code>private</code> properties (de kluis). Je kunt data beschermen tegen de buitenwereld.</p>
+        <p>Maar wist je dat je ook <strong>methoden</strong> (functies) privé kunt maken? Dit klinkt misschien gek. Waarom zou je een functie maken die niemand mag gebruiken? Het antwoord is simpel: om je code op te ruimen en te organiseren.</p>
+
+        <h3>Wat is een Private Methode?</h3>
+        <p>Een private methode is een functie die <strong>alleen binnen zijn eigen class</strong> gebruikt mag worden. Je kunt hem niet aanroepen met <code>$game->doeIets()</code>, maar wel met <code>$this->doeIets()</code>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Restaurant</h3>
+            <p>Stel je voor dat je in een restaurant zit (de buitenwereld).</p>
+            <ul>
+                <li><strong>Public Methode (Het Menu):</strong> Jij roept tegen de ober: <code>bestelHamburger()</code>. Dit mag jij doen.</li>
+                <li><strong>Private Methoden (De Keuken):</strong> Om die burger te maken, moet de chef:
+                    <ul>
+                        <li><code>snijUien()</code></li>
+                        <li><code>bakVlees()</code></li>
+                        <li><code>roosterBroodje()</code></li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Jij als klant hoeft niet te roepen: "Snij uien!". Dat doet de chef zelf, als onderdeel van jouw bestelling. De actie "Snij uien" is intern (private).</p>
+        </div>
+
+
+
+        <h3>Waarom doen we dit? (Opruimen)</h3>
+        <p>Stel dat we een Blackjack spelronde programmeren. Dat is een flinke klus. Zonder private methoden krijg je één enorme functie waar niemand meer iets van snapt.</p>
+
+        <h4>Zonder Private Methoden (Chaos)</h4>
+        <pre><code class="language-php">class Game {
+    public function playRound() {
+        // ... 50 regels code om kaarten te schudden ...
+        // ... 20 regels code om kaarten uit te delen ...
+        // ... 30 regels code om punten te tellen ...
+        // ... 40 regels code om de winnaar te checken ...
+    }
+}</code></pre>
+
+        <h4>Met Private Methoden (Netjes)</h4>
+        <p>We knippen de grote klus op in kleine, logische stapjes. De publieke functie is nu eigenlijk een soort takenlijstje geworden.</p>
+
+        <pre><code class="language-php">class Game
+{
+    // Dit is de enige knop die de buitenwereld mag indrukken
+    public function playRound(Player $player, Player $dealer): string
+    {
+        // We roepen onze eigen hulpjes aan met $this
+        $this->dealInitialCards($player, $dealer);
+        $this->playerTurn($player);
+        $this->dealerTurn($dealer);
+
+        return $this->determineWinner($player, $dealer);
+    }
+
+    // --- HIERONDER STAAN DE INTERNE HULPJES ---
+
+    // Private: Mag alleen door Game zelf worden gebruikt
+    private function dealInitialCards(Player $player, Player $dealer): void
+    {
+        // Hier staat de ingewikkelde code voor het delen
+    }
+
+    private function playerTurn(Player $player): void
+    {
+        // De logica voor de speler
+    }
+
+    private function dealerTurn(Player $dealer): void
+    {
+        // De logica voor de dealer
+    }
+
+    private function determineWinner($player, $dealer): string
+    {
+        // Wie heeft er gewonnen?
+        return "De winnaar is...";
+    }
+}</code></pre>
+
+        <h3>Wat kan er fout gaan?</h3>
+        <p>Als je probeert om een hulp-functie van buitenaf aan te roepen, grijpt PHP in. Je mag de keuken niet in rennen!</p>
+
+        <pre><code class="language-php">$game = new Game();
+
+// ✅ Dit mag: De officiële startknop
+$game->playRound($player, $dealer);
+
+// ❌ Dit mag NIET: Je probeert direct de interne logica te starten
+// Foutmelding: Fatal Error: Call to private method Game::playerTurn()
+$game->playerTurn($player);</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom is dit handig voor onderhoud?</h3>
+            <p>Stel dat je de manier waarop kaarten worden gedeeld wilt veranderen. Je hoeft dan alleen de code in <code>dealInitialCards</code> aan te passen.</p>
+            <p>Omdat deze functie <code>private</code> is, weet je 100% zeker dat niemand anders in jouw programma deze functie gebruikt. Je kunt hem veilig aanpassen zonder dat de rest van je website stuk gaat.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Gebruik <code>private</code> methoden om grote taken in stukjes te hakken.</li>
+            <li>Het maakt je code leesbaar: de publieke functie vertelt <strong>wat</strong> er gebeurt, de private functies vertellen <strong>hoe</strong> het gebeurt.</li>
+            <li>Je roept ze aan met <code>$this->naamVanMethode()</code>.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

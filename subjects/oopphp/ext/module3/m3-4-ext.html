@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objecten als datatype (Uitgebreid) - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Objecten als Datatype: De Relatie</h1>
+
+        <p>Je weet nu hoe je simpele datatypes gebruikt, zoals <code>string</code> (tekst) en <code>int</code> (getallen). Maar in OOP werken we vooral met <strong>Objecten</strong>. Het mooie is: je kunt een Object óók als datatype gebruiken.</p>
+        <p>Hiermee verbind je verschillende classes met elkaar. Je zegt eigenlijk: "Deze functie werkt niet met een getal, en niet met tekst, maar alléén met een echte Kaart."</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Oplader</h3>
+            <p>Stel je hebt een iPhone. Je vraagt aan je vriend: "Mag ik je oplader lenen?"</p>
+            <ul>
+                <li><strong>Zonder Type (Los):</strong> Je vriend geeft je een broodrooster. Technisch gezien is dat "iets", maar jij hebt er niks aan. Je telefoon gaat kapot.</li>
+                <li><strong>Met Object Type (Strict):</strong> Jij vraagt specifiek om een <code>iPhoneCharger</code> object. Je vriend kan je nu alleen een iPhone-oplader geven. Een broodrooster past niet.</li>
+            </ul>
+        </div>
+
+
+
+        <h3>1. Objecten als Parameter (De Ingang)</h3>
+        <p>Laten we kijken naar onze speler (`Player`). Een speler moet een kaart aan zijn hand kunnen toevoegen. We willen zeker weten dat we hem een echte <code>Card</code> geven, en geen stukje tekst zoals <code>"Harten Aas"</code>.</p>
+
+        <p>Waarom? Omdat tekst geen methodes heeft. Je kunt op tekst geen <code>->getScore()</code> uitvoeren. Op een object wel.</p>
+
+        <pre><code class="language-php">class Player
+{
+    private array $hand = [];
+
+    // Let op: We typen 'Card' voor de variabele $card.
+    // Dit verplicht PHP om te checken of het wel echt een Card object is.
+    public function addCard(Card $card): void
+    {
+        // Omdat we zeker weten dat het een Card is,
+        // kunnen we veilig methodes van Card gebruiken.
+        $this->hand[] = $card;
+    }
+}</code></pre>
+
+        <h3>Wat gaat er mis als je dit niet doet?</h3>
+        <pre><code class="language-php">$player = new Player();
+
+// FOUT: Dit is gewoon tekst, geen Card object!
+// PHP geeft direct een Fatal Error: TypeError.
+$player->addCard("Harten Aas");
+
+// GOED: We maken eerst een object.
+$myCard = new Card("Hearts", "Ace");
+$player->addCard($myCard);</code></pre>
+
+        <h3>2. Objecten als Property (De Opslag)</h3>
+        <p>Soms bestaat een class uit andere classes. In Blackjack hebben we een <code>Game</code> (het spel). Een spel heeft spelers en een stapel kaarten (Deck) nodig.</p>
+        <p>We kunnen in de properties aangeven dat het spel uit deze objecten bestaat.</p>
+
+
+
+        <pre><code class="language-php">class Game
+{
+    // Deze variabele MAG alleen een Deck object bevatten
+    private Deck $deck;
+
+    // Deze variabele MAG alleen een Player object bevatten
+    private Player $player;
+
+    public function __construct(Player $player)
+    {
+        $this->player = $player;
+
+        // We maken hier een nieuw Deck object aan
+        $this->deck = new Deck();
+    }
+}</code></pre>
+
+        <h3>3. Nullable Objecten (Het vraagteken)</h3>
+        <p>Soms moet een object leeg kunnen zijn. Denk aan de winnaar van het spel.</p>
+        <ul>
+            <li>Bij de start is de winnaar nog onbekend (<code>null</code>).</li>
+            <li>Aan het einde is de winnaar een <code>Player</code> object.</li>
+        </ul>
+        <p>We gebruiken het vraagteken <code>?</code> om te zeggen: "Het is een Speler, of het is leeg".</p>
+
+        <pre><code class="language-php">class Game
+{
+    // Kan Player zijn, of null
+    private ?Player $winner = null;
+
+    public function setWinner(?Player $winner): void
+    {
+        $this->winner = $winner;
+    }
+}
+
+// Gebruik:
+$game = new Game();
+$game->setWinner(null); // Nog niemand gewonnen
+$game->setWinner($player1); // We hebben een winnaar!</code></pre>
+
+        <h3>4. Een Array van Objecten</h3>
+        <p>Hier loopt PHP een beetje achter op andere talen. Je kunt niet zeggen: <code>public Card[] $cards</code>. PHP kent alleen het type <code>array</code>.</p>
+        <p>Maar... in die array kan van alles zitten: getallen, teksten, en kaarten door elkaar. Dat willen we niet!</p>
+
+        <p>De oplossing? <strong>Docblocks!</strong> (Die heb je in de vorige les geleerd).</p>
+
+        <pre><code class="language-php">class Deck
+{
+    // Voor PHP is het gewoon een array.
+    // Voor JOU (en je editor) is het een lijst met Card objecten.
+
+    /** * @var Card[]
+     */
+    private array $cards = [];
+
+    public function addCard(Card $card): void
+    {
+        $this->cards[] = $card;
+    }
+
+    /**
+     * @return Card[]
+     */
+    public function getCards(): array
+    {
+        return $this->cards;
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom is dit handig?</h3>
+            <p>Als je in VS Code of PhpStorm werkt en je haalt deze array op, snapt de editor dankzij <code>@return Card[]</code> dat er kaarten in zitten. Als je er dan doorheen loopt (met een loop), krijg je automatisch tips voor methodes zoals <code>getSuit()</code> en <code>getValue()</code>.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Gebruik <strong>Classnamen</strong> als datatype om relaties te leggen.</li>
+            <li>Dit voorkomt fouten: je kunt geen tekst doorgeven als een object wordt verwacht.</li>
+            <li>Gebruik <code>?ClassName</code> als het object ook <code>null</code> mag zijn.</li>
+            <li>Gebruik Docblocks (<code>Card[]</code>) om aan te geven wat er in een array zit.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

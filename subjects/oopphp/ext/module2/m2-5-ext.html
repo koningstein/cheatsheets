@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting (Uitgebreid) - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Professioneel Werken</h1>
+
+        <p>Gefeliciteerd! Je hebt Module 2 afgerond. Waar Module 1 ging over "hoe schrijf ik code", ging deze module over "hoe organiseer ik mijn project".</p>
+        <p>Je bent overgestapt van de hobby-manier (alles los in één map) naar de professionele manier (mappenstructuur, namespaces en tools). Laten we de balans opmaken.</p>
+
+        <h3>1. De Evolutie van het Laden</h3>
+        <p>We hebben in deze module een flinke stap gemaakt in hoe we bestanden koppelen.</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Niveau</th>
+                    <th>De Methode</th>
+                    <th>Waarom was dit (niet) handig?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Amateur</strong></td>
+                    <td><code>require 'Card.php';</code><br><code>require 'Deck.php';</code></td>
+                    <td>
+                        ❌ <strong>Nadeel:</strong> Je moet elk bestand handmatig typen. Bij 50 bestanden word je gek. Verander je een naam? Dan crasht alles.
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Gevorderd</strong></td>
+                    <td><code>spl_autoload_register()</code></td>
+                    <td>
+                        ✅ <strong>Voordeel:</strong> PHP zoekt zelf de bestanden erbij.<br>
+                        ❌ <strong>Nadeel:</strong> Je moet zelf een ingewikkelde functie schrijven die rekening houdt met mapjes.
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Prof (Composer)</strong></td>
+                    <td><code>require 'vendor/autoload.php';</code></td>
+                    <td>
+                        ✅ <strong>Voordeel:</strong> De standaard in de wereld. Composer regelt alles. Het is snel, foutloos en werkt met namespaces.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Namespaces: Orde scheppen</h3>
+        <p>Omdat we professioneel werken, gebruiken we <strong>Namespaces</strong>. Dit zijn de "achternamen" van je classes.</p>
+
+        <div class="info-box">
+            <h3>De Kern</h3>
+            <ul>
+                <li><strong>Probleem:</strong> Jij hebt een class <code>Card</code>. Een gedownloade betaal-plugin heeft óók een class <code>Card</code>. PHP raakt in de war.</li>
+                <li><strong>Oplossing:</strong> Je geeft jouw class een achternaam: <code>Blackjack\Card</code>. De andere heet <code>Payment\Card</code>.</li>
+                <li><strong>Gevolg:</strong> Geen ruzie meer tussen bestanden.</li>
+            </ul>
+        </div>
+
+        <h3>3. Composer: De Projectmanager</h3>
+        <p>De grootste ster van deze module is <strong>Composer</strong>. Dit is niet zomaar een tooltje, het is de manager van je project.</p>
+
+
+
+        <ul>
+            <li><strong>composer.json:</strong> Het contract. Hierin staat: "Mijn project heet Blackjack, mijn code staat in de map <code>src/</code>".</li>
+            <li><strong>vendor map:</strong> Het magazijn. Hier stopt Composer alle spullen die hij nodig heeft (zoals de autoloader). Hier kom je zelf <strong>nooit</strong> aan.</li>
+            <li><strong>autoload.php:</strong> De sleutel. Door alleen dit ene bestand in te laden, heb je toegang tot alles.</li>
+        </ul>
+
+        <h3>4. De Nieuwe Mappenstructuur</h3>
+        <p>Je project ziet er nu heel anders uit dan in het begin. Alles heeft een vaste plek.</p>
+
+        <pre><code class="language-text">Mijn-Blackjack-Project/
+├── src/               <-- HIER woon jij. Al jouw classes (Card, Player) staan hier.
+├── vendor/            <-- HIER woont Composer. Blijf hier weg!
+├── index.php          <-- De voordeur. Hier start het spel.
+├── composer.json      <-- Het boodschappenlijstje.
+└── .gitignore         <-- De regel: "Zet de vendor-map niet op GitHub".</code></pre>
+
+        <h3>5. Waarom Bulk Setters?</h3>
+        <p>Een opvallende wijziging in deze module was dat we de <strong>Constructor</strong> hebben ingeruild voor <strong>Bulk Setters</strong> (zoals <code>setCard()</code>).</p>
+        <p><strong>Waarom deden we dat?</strong></p>
+        <ul>
+            <li>Een constructor (<code>new Card(...)</code>) kan niks "terugzeggen". Als je foute data invoert, crasht hij of blijft hij stil.</li>
+            <li>Een setter (<code>$card->setCard(...)</code>) kan antwoord geven (return). Hij kan zeggen: "Error: Foute kleur".</li>
+        </ul>
+        <p>Dit geeft ons meer controle en betere feedback tijdens het bouwen van de applicatie.</p>
+
+        <h3>De Finale Code</h3>
+        <p>Hieronder zie je hoe een modern <code>index.php</code> bestand eruitziet na deze module. Het is schoon, kort en krachtig.</p>
+
+        <pre><code class="language-php">&lt;?php
+// 1. We roepen de manager (Composer) aan.
+// Dit is de enige 'require' die je ooit nog nodig hebt.
+require_once 'vendor/autoload.php';
+
+// 2. We geven aan welke classes we willen gebruiken.
+// Dankzij Namespaces weet PHP precies welke bestanden hij moet pakken.
+use Blackjack\Card;
+use Blackjack\Player;
+
+// 3. We starten het spel
+echo "<h1>Welkom bij Blackjack!</h1>";
+
+// Nieuwe speler maken
+$player = new Player();
+// We gebruiken de Bulk Setter voor feedback
+echo $player->setPlayer("Sjaak") . "<br>";
+
+// Nieuwe kaart maken
+$card = new Card();
+echo $card->setCard("Hearts", "Ace", "ace.png");
+
+// 4. Resultaat tonen
+echo "<hr>";
+echo "Speler: " . $player->getName();
+echo " heeft kaart: " . $card->getCardName();
+?></code></pre>
+
+        <h3>Wat nu?</h3>
+        <p>Je project staat nu als een huis. De fundering is professioneel. In de volgende modules gaan we dit huis verder inrichten. We gaan leren over <strong>Inheritance</strong> (overerving), zodat we niet steeds dezelfde code hoeven te typen voor dingen die op elkaar lijken.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

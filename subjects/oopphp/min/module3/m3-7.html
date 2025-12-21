@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 3</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Types en Contracten</h1>
+
+        <p>Module 3 ging over het schrijven van <strong>betrouwbare</strong> en <strong>veilige</strong> code door types strikt te controleren en encapsulatie toe te passen.</p>
+
+        <h3>Types en Contracten</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Concept</th>
+                    <th>Doel</th>
+                    <th>Syntaxis (Voorbeeld)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Docblocks</td>
+                    <td>Uitleg van code, hulp voor je programma, extra type informatie (<code>@param</code>).</td>
+                    <td><code>/** @param string $name */</code></td>
+                </tr>
+                <tr>
+                    <td>Parameter Type Hint</td>
+                    <td>Zorgt ervoor dat alleen het juiste datatype bij de methode komt.</td>
+                    <td><code>function (string $name)</code></td>
+                </tr>
+                <tr>
+                    <td>Return Type Hint</td>
+                    <td>Zorgt ervoor dat de methode altijd het juiste datatype teruggeeft.</td>
+                    <td><code>function (...): int</code></td>
+                </tr>
+                <tr>
+                    <td>Property Datatype</td>
+                    <td>Zorgt ervoor dat de property altijd het juiste datatype heeft.</td>
+                    <td><code>private ?int $score = null;</code></td>
+                </tr>
+                <tr>
+                    <td>Objecten als Type</td>
+                    <td>Maakt duidelijk hoe classes met elkaar verbonden zijn.</td>
+                    <td><code>function (Deck $deck)</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Visibility en Encapsulatie</h3>
+
+        <p>Visibility bepaalt waar je properties en methods kunt gebruiken. <strong>Encapsulatie</strong> betekent dat je de data beschermt met <code>private</code> en toegang geeft via getters en setters.</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Visibility</th>
+                    <th>Toegang</th>
+                    <th>Gebruik (Voorbeeld)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>public</td>
+                    <td>Overal</td>
+                    <td>Methoden voor buitenaf: <code>public function getName()</code></td>
+                </tr>
+                <tr>
+                    <td>private</td>
+                    <td>Alleen binnen deze class</td>
+                    <td>Interne data: <code>private int $score</code></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-box">
+            <h3>Vuistregel</h3>
+            <p>Maak properties standaard <code>private</code>. Geef toegang via <strong>Getters</strong> (<code>get...</code>) en <strong>Setters</strong> (<code>set...</code>). Gebruik <code>private</code> methoden om ingewikkelde interne code op te splitsen en te verbergen.</p>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

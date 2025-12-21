@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objecten in $_SESSION - OOP PHP Module 4</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Objecten in $_SESSION</h1>
+
+        <p>Normaal gesproken wordt een PHP-object vernietigd zodra de pagina is geladen. Om objecten te onthouden (zoals een lijst met spelers), slaan we ze op in <code>$_SESSION</code>.</p>
+
+        <h3>1. De Gouden Regel (Volgorde)</h3>
+        <p>Omdat je objecten opslaat, moet PHP eerst weten hoe de Class eruitziet <strong>voordat</strong> hij de sessie opent. Doe je dit verkeerd, dan krijg je een foutmelding (<code>__PHP_Incomplete_Class</code>).</p>
+
+        <pre><code class="language-php">// 1. EERST de classes laden
+require 'vendor/autoload.php';
+use Blackjack\Game;
+
+// 2. DAARNA pas de sessie starten
+session_start();</code></pre>
+
+        <h3>2. Een Container Class maken</h3>
+        <p>Sla liever niet allemaal losse objecten op in de sessie. Maak één "Hoofd Class" (bijv. <code>Game</code> of <code>PlayerList</code>) die een array van objecten bevat.</p>
+
+        <pre><code class="language-php">class PlayerList
+{
+    // Hierin bewaren we alle spelers
+    private array $players = [];
+
+    public function addPlayer(Player $player)
+    {
+        $this->players[] = $player;
+    }
+
+    public function getPlayers(): array
+    {
+        return $this->players;
+    }
+}</code></pre>
+
+        <h3>3. De Workflow (index.php)</h3>
+        <p>In je hoofdbestand gebruik je altijd dit stappenplan:</p>
+
+        <pre><code class="language-php">// STAP A: Ophalen (of nieuw maken)
+// Bestaat de lijst al in de sessie? Haal hem op.
+// Zo niet (??), maak een nieuwe, lege lijst.
+$myList = $_SESSION['playerList'] ?? new PlayerList();
+
+// STAP B: Aanpassen
+// Bijvoorbeeld: nieuwe speler toevoegen uit formulier
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $p = new Player($_POST['name']);
+    $myList->addPlayer($p);
+}
+
+// STAP C: Opslaan
+// Zet de (gewijzigde) lijst terug in de sessie voor de volgende keer
+$_SESSION['playerList'] = $myList;</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Volgorde:</strong> Autoload &rarr; session_start().</li>
+                <li><strong>Opslaan:</strong> Stop objecten in een lijst/array in een class.</li>
+                <li><strong>Cyclus:</strong> Ophalen uit sessie &rarr; Wijzigen &rarr; Terugzetten in sessie.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructors & Inheritance (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Constructors & Inheritance</h1>
+
+        <p>We weten nu hoe classes van elkaar kunnen erven (Child en Parent). Maar er ontstaat een lastig probleem zodra we <strong>Constructors</strong> (<code>__construct</code>) gaan gebruiken bij overerving.</p>
+        <p>De vraag is namelijk: wie doet het voorbereidende werk bij het opstarten van een object?</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Een Huis Bouwen</h3>
+            <p>Zie het maken van een object als het bouwen van een huis.</p>
+            <ul>
+                <li><strong>De Parent (Aannemer):</strong> Zorgt voor de fundering, muren en het dak.</li>
+                <li><strong>Het Child (Interieurstylist):</strong> Zorgt voor de meubels, gordijnen en verf.</li>
+            </ul>
+            <p>Als jij de stylist (Child) inhuurt, ga je er vanuit dat hij <em>eerst</em> de aannemer (Parent) belt om het huis neer te zetten. Als hij dat vergeet, probeert hij gordijnen op te hangen in een leeg weiland. Dat gaat mis.</p>
+        </div>
+
+        <h3>Het Probleem: De "Vergeten" Ouder</h3>
+        <p>In PHP is er een strikte regel bij overerving:</p>
+        <p><strong>Als een Child class een eigen constructor heeft, wordt de constructor van de Parent NIET meer automatisch uitgevoerd.</strong></p>
+        <p>PHP denkt namelijk: "Jij hebt in het Child zelf een start-functie geschreven. Jij zult wel weten wat je doet, dus ik negeer de oude start-functie van de Parent."</p>
+
+
+
+        <h3>Voorbeeld: Waar het misgaat</h3>
+        <p>Laten we kijken naar ons Blackjack spel. We hebben twee eisen:</p>
+        <ul>
+            <li><strong>Player (Parent):</strong> Wil bij het opstarten de <code>$name</code> instellen.</li>
+            <li><strong>HumanPlayer (Child):</strong> Wil bij het opstarten het startgeld (<code>$balance</code>) instellen.</li>
+        </ul>
+
+        <pre><code class="language-php">// De Ouder (Player.php)
+class Player {
+    protected string $name;
+
+    public function __construct(string $name) {
+        // Dit is essentieel: De naam wordt opgeslagen!
+        $this->name = $name;
+    }
+}
+
+// Het Kind (HumanPlayer.php)
+class HumanPlayer extends Player {
+    private int $balance;
+
+    // We maken een EIGEN constructor...
+    public function __construct(int $startGeld) {
+        $this->balance = $startGeld;
+
+        // HELP! We zijn vergeten de constructor van Player aan te roepen.
+        // De variabele $this->name blijft dus leeg!
+    }
+}
+
+// Het resultaat in index.php:
+$sjaak = new HumanPlayer(1000);
+// FOUT! De naam is nooit ingesteld, want Player::__construct is nooit gedraaid.
+echo $sjaak->getName(); </code></pre>
+
+        <h3>De Oplossing: parent::__construct()</h3>
+        <p>Je moet als kind handmatig "de aannemer bellen". Je moet expliciet in je code zetten dat de ouder-constructor óók moet draaien. Dit doe je met de regel:</p>
+        <p><code>parent::__construct();</code></p>
+        <p>Meestal doe je dit op de <strong>allereerste regel</strong> van je functie, zodat de basis (fundering) staat voordat je verder gaat.</p>
+
+        <h3>Hoe werkt dat met parameters? (Het Doorgeefluik)</h3>
+        <p>Dit is het lastigste stukje. De <code>HumanPlayer</code> constructor moet nu <strong>alle</strong> informatie ontvangen die nodig is voor hemzelf én voor zijn ouder.</p>
+
+        <div class="info-box">
+            <h3>Het Doorgeefluik Diagram</h3>
+            <p>Zie de constructor van het Child als een trechter.</p>
+            <ol>
+                <li>Er komen 2 dingen binnen: <strong>Naam</strong> en <strong>Geld</strong>.</li>
+                <li>Het Child pakt het <strong>Geld</strong> en stopt het in zijn eigen zak (<code>$this->balance</code>).</li>
+                <li>Het Child pakt de <strong>Naam</strong> en geeft die door naar boven, naar de Parent (<code>parent::__construct</code>).</li>
+            </ol>
+        </div>
+
+
+
+        <p>Laten we dit in code zien:</p>
+
+        <pre><code class="language-php">class HumanPlayer extends Player {
+    private int $balance;
+
+    // Stap 1: Vraag om ALLE data (Naam voor papa, Geld voor mijzelf)
+    public function __construct(string $name, int $startGeld) {
+
+        // Stap 2: Geef de naam door aan de ouder
+        // Hier roepen we de constructor van Player aan
+        parent::__construct($name);
+
+        // Stap 3: Doe daarna je eigen ding (geld tellen)
+        $this->balance = $startGeld;
+    }
+}</code></pre>
+
+        <h3>Het Resultaat: Schone en Veilige Code</h3>
+        <p>Waarom doen we al deze moeite? Omdat we nu in één regel een complete, werkende speler kunnen maken die direct klaar is voor gebruik.</p>
+
+        <pre><code class="language-php">// Oude, rommelige manier (zonder goede constructors):
+$sjaak = new HumanPlayer();
+$sjaak->setName("Sjaak");      // Vergeet je dit? Dan crasht het spel later.
+$sjaak->setBalance(1000);      // Vergeet je dit? Dan is hij blut.
+
+// Nieuwe, veilige manier:
+// Je wordt GEDWONGEN om alles in te vullen. Je kunt het niet vergeten.
+$sjaak = new HumanPlayer("Sjaak", 1000);</code></pre>
+
+        <h3>Uitzondering: Wanneer hoeft het niet?</h3>
+        <p>Er is één situatie waarin je dit gedoe niet hebt. Als je in de Child class <strong>GEEN</strong> eigen constructor schrijft, dan gebruikt PHP automatisch die van de Parent.</p>
+        <p>Bijvoorbeeld bij de Dealer (die geen geld heeft):</p>
+
+        <pre><code class="language-php">class Dealer extends Player {
+    // Deze class heeft GEEN __construct functie.
+    // PHP kijkt dus automatisch naar de Parent.
+}
+
+// Dit werkt gewoon via de constructor van Player!
+$dealer = new Dealer("De Bank");</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Overschrijven:</strong> Als je in een Child class een <code>__construct</code> maakt, wordt die van de Parent genegeerd.</li>
+                <li><strong>Doorgeven:</strong> Gebruik <code>parent::__construct($data)</code> om de Parent zijn werk te laten doen.</li>
+                <li><strong>Compleet:</strong> Zorg dat de Child constructor alle parameters vraagt die nodig zijn voor <strong>zowel</strong> zichzelf als de ouder.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

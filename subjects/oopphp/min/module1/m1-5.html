@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setters - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Setters</h1>
+
+        <h3>Wat is een Setter?</h3>
+        <p>Een setter is een speciale methode die je gebruikt om de waarde van een property te veranderen. Het grote voordeel van setters is dat je kunt controleren of de waarde klopt voordat je deze opslaat.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Kaartspel</h3>
+            <p>Stel je voor: in een Blackjack-kaartspel wil je controleren of de punten van een kaart kloppen:</p>
+            <ul>
+                <li>Punten kunnen niet negatief zijn</li>
+                <li>Punten kunnen niet hoger zijn dan 11 (Aas = 11, Plaatjes = 10)</li>
+                <li>Met een setter kun je deze controles uitvoeren voordat je de waarde opslaat</li>
+            </ul>
+        </div>
+
+        <h3>Waarom Setters gebruiken?</h3>
+        <ul>
+            <li><strong>Validatie:</strong> Je kunt controleren of de waarde klopt voordat je deze opslaat</li>
+            <li><strong>Veiligheid:</strong> Je voorkomt dat verkeerde gegevens worden opgeslagen</li>
+            <li><strong>Terugkoppeling:</strong> Je kunt een bericht teruggeven of het gelukt is of niet</li>
+        </ul>
+
+        <h3>Een Setter maken</h3>
+        <p>Een setter begint meestal met het woord <code>set</code>, gevolgd door de naam van de property:</p>
+
+        <pre><code class="language-php">class Card
+{
+    public $points;
+
+    public function setPoints($points)
+    {
+        if ($points < 0) {
+            return "Error: Points cannot be negative";
+        }
+
+        if ($points > 11) {
+            return "Error: Points cannot exceed 11";
+        }
+
+        $this->points = $points;
+        return "Points set successfully to " . $points;
+    }
+}</code></pre>
+
+        <h3>Een Setter gebruiken</h3>
+        <p>Je roept een setter aan zoals elke andere methode, en je kunt het resultaat opvangen in een variabele:</p>
+
+        <pre><code class="language-php">$card = new Card();
+$result = $card->setPoints(10);
+echo $result;  // Output: Points set successfully to 10
+
+$result = $card->setPoints(-5);
+echo $result;  // Output: Error: Points cannot be negative</code></pre>
+
+        <div class="info-box">
+            <h3>Tip</h3>
+            <p>Laat setters altijd een bericht teruggeven, zodat je weet of het instellen van de waarde gelukt is of niet.</p>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties (Uitgebreid) - OOP PHP Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Properties: De Eigenschappen</h1>
+
+        <p>We hebben nu een <strong>Class</strong> (de blauwdruk) en een <strong>Object</strong> (het huis). Maar een kaal huis is saai. Een huis heeft eigenschappen: een kleur, een adres, en een aantal kamers.</p>
+        <p>In OOP noemen we deze eigenschappen <strong>Properties</strong>. Het zijn de gegevens die bij een object horen.</p>
+
+        <h3>Wat zijn Properties precies?</h3>
+        <p>Eigenlijk ken je dit concept al. Een property is niets anders dan een <strong>variabele</strong>, maar dan eentje die <em>in</em> een object zit.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Paspoort</h3>
+            <p>Denk aan een paspoort. Elk paspoort ziet er qua indeling (Class) hetzelfde uit. Maar de <strong>inhoud</strong> verschilt per persoon.</p>
+            <ul>
+                <li>Naam: "Jan Jansen"</li>
+                <li>Geboortedatum: "01-01-2000"</li>
+                <li>Lengte: "1.80m"</li>
+            </ul>
+            <p>Deze invulvelden (Naam, Datum, Lengte) zijn de <strong>Properties</strong>.</p>
+        </div>
+
+        <h3>Properties in Blackjack</h3>
+        <p>Laten we kijken naar onze speelkaart. Wat maakt een kaart uniek? Wat moeten we onthouden van één kaart?</p>
+        <p>Voor onze <code>Card</code> class hebben we de volgende eigenschappen nodig:</p>
+        <ul>
+            <li><strong>suit (Kleur):</strong> Is het Harten, Schoppen, Ruiten of Klaver?</li>
+            <li><strong>value (Waarde):</strong> Is het een Aas, een Koning, of een 7?</li>
+            <li><strong>points (Punten):</strong> Hoeveel is deze kaart waard in het spel? (Bijv. 10 punten).</li>
+        </ul>
+
+
+
+        <h3>Hoe maak je een Property?</h3>
+        <p>Je maakt properties aan in je Class bestand. Je zet ze bovenaan, direct na de opening <code>{</code>.</p>
+        <p>We gebruiken het woord <code>public</code>. Dit betekent: "Iedereen mag deze eigenschap zien en aanpassen".</p>
+
+        <pre><code class="language-php">class Card
+{
+    // Hier definiëren we de lege velden (de properties)
+    public $suit;
+    public $value;
+    public $points;
+}</code></pre>
+
+        <h3>Waarden geven en uitlezen</h3>
+        <p>Nu we de velden hebben gemaakt in de blauwdruk, kunnen we ze gaan invullen bij onze objecten. Hiervoor gebruiken we een speciaal teken: het pijltje <code>-></code>.</p>
+
+        <h4>Het pijltje (->)</h4>
+        <p>Je kunt dit pijltje lezen als: <em>"Ga naar binnen bij dit object, en pak..."</em>.</p>
+
+
+
+        <p>Hieronder maken we twee verschillende kaarten aan:</p>
+
+        <pre><code class="language-php">&lt;?php
+
+// 1. Maak een Harten Aas
+$card1 = new Card();
+$card1->suit = "Hearts"; // Vul 'Hearts' in bij suit
+$card1->value = "Ace";
+$card1->points = 11;
+
+// 2. Maak een Schoppen Tien
+$card2 = new Card();
+$card2->suit = "Spades";
+$card2->value = "10";
+$card2->points = 10;
+
+// Laten we ze eens bekijken
+echo "Kaart 1 is een " . $card1->suit . " " . $card1->value;
+// Output: Kaart 1 is een Hearts Ace</code></pre>
+
+        <div class="info-box">
+            <h3>Belangrijk: Onafhankelijkheid</h3>
+            <p>Kijk goed naar de code hierboven. We hebben <code>$card1</code> en <code>$card2</code>. Als ik de <code>suit</code> van kaart 1 verander, blijft kaart 2 gewoon zoals hij was. Elk object heeft zijn eigen set properties.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+        <p>Bij properties zien we vaak verwarring over het dollarteken <code>$</code>.</p>
+
+        <h4>1. De dubbele dollarteken fout</h4>
+        <p>Wanneer je een property <strong>aanmaakt</strong> in de class, gebruik je een <code>$</code>.
+            <br>Wanneer je een property <strong>gebruikt</strong> met een pijltje, gebruik je <strong>GEEN</strong> <code>$</code>.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Actie</th>
+                    <th>Code</th>
+                    <th>Correct?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Aanmaken (in Class)</td>
+                    <td><code>public $suit;</code></td>
+                    <td>✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Gebruiken (bij Object)</td>
+                    <td><code>$card->suit = "Hearts";</code></td>
+                    <td>✅ Ja</td>
+                </tr>
+                <tr>
+                    <td>Gebruiken (Fout!)</td>
+                    <td><code>$card->$suit = "Hearts";</code></td>
+                    <td>❌ Nee (teveel dollars)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Waarom doen we dit?</h3>
+        <p>Misschien denk je: "Ik kan dit toch ook met een array doen?"</p>
+        <pre><code class="language-php">$kaartArray = ['Hearts', 'Ace', 11];</code></pre>
+        <p>Dat kan, maar het is onhandig. Je moet onthouden dat nummer 0 de kleur is en nummer 1 de waarde. Bij een object zeg je gewoon <code>$card->suit</code>. Dat is veel duidelijker te lezen, zeker als je spel groter en complexer wordt.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

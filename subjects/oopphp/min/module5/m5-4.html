@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected properties & Wrapper Methods - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Protected properties & Wrapper Methods</h1>
+
+        <div class="info-box">
+            <h3>Het Probleem met Private</h3>
+            <p>Tot nu toe gebruikten we altijd <code>private</code> voor properties. Dit is veilig, maar heeft een nadeel bij overerving: <strong>Child classes kunnen niet bij private properties van de Parent.</strong></p>
+        </div>
+
+        <h3>Voorbeeld: Dealer kan niet bij zijn kaarten</h3>
+        <p>Stel, de <code>Player</code> class heeft de kaarten (`$hand`) als private ingesteld. Als de <code>Dealer</code> class (die erft van Player) probeert te kijken of hij een Aas heeft, geeft PHP een foutmelding.</p>
+
+        <pre><code class="language-php">class Player {
+    private array $hand = []; // Alleen Player mag hierbij!
+}
+
+class Dealer extends Player {
+    public function hasAce() {
+        // FOUT! Dealer mag niet bij private $hand van Player
+        foreach ($this->hand as $card) { ... }
+    }
+}</code></pre>
+
+        <h3>De Oplossing: Protected</h3>
+        <p>Om dit op te lossen, introduceren we een nieuw visibility niveau: <code>protected</code>.</p>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Visibility</th>
+                    <th>Zichtbaar voor Parent?</th>
+                    <th>Zichtbaar voor Child?</th>
+                    <th>Zichtbaar voor Buitenwereld?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>public</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                </tr>
+                <tr>
+                    <td><code>protected</code></td>
+                    <td>✅ Ja</td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                </tr>
+                <tr>
+                    <td><code>private</code></td>
+                    <td>✅ Ja</td>
+                    <td>❌ Nee</td>
+                    <td>❌ Nee</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>Door de property <code>protected</code> te maken, delen we hem met de kinderen, maar houden we hem verborgen voor de rest van de applicatie .</p>
+
+        <pre><code class="language-php">class Player {
+    protected array $hand = []; // Nu mag Dealer er ook bij!
+}</code></pre>
+
+        <h3>Wrapper Methods</h3>
+        <p>Soms wil je data uit de parent class combineren met extra logica in de child class. Dit doe je vaak met **Wrapper Methods** .</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Tijdelijke Bonussen</h3>
+            <p>Stel dat een speler tijdelijke stats heeft (bijvoorbeeld een aanvalsbonus). De Parent class heeft de basiswaarde, maar we willen het <strong>totaal</strong> weten.</p>
+        </div>
+
+        <pre><code class="language-php">class Character {
+    protected int $attack = 10;
+    protected int $tempBonus = 0; [cite_start]// Protected zodat child erbij kan [cite: 129]
+
+    [cite_start]// Wrapper methode: combineert basis + bonus [cite: 133, 134]
+    public function getTotalAttack(): int {
+        return $this->attack + $this->tempBonus;
+    }
+}
+
+class Warrior extends Character {
+    public function activateRage() {
+        $this->tempBonus = 5; [cite_start]// Child past protected property aan [cite: 149]
+    }
+}</code></pre>
+
+        <p>De buitenwereld roept simpelweg <code>$warrior->getTotalAttack()</code> aan en krijgt het juiste getal, zonder te weten hoe de berekening intern werkt .</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

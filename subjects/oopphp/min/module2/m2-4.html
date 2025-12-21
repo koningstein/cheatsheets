@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoload configureren - OOP PHP Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Autoload configureren</h1>
+
+        <p>Verplaats alle class bestanden naar de src/ directory:</p>
+
+        <pre><code class="language-bash">blackjack-project/
+├── src/
+│   ├── Card.php
+│   ├── Deck.php
+│   └── Player.php
+├── vendor/
+│   └── autoload.php
+├── index.php
+├── composer.json
+└── .gitignore</code></pre>
+
+        <h3>Van constructor naar bulk setters</h3>
+        <p>In plaats van promoted properties in de constructor, gaan we werken met bulk setters. Dit geeft meer flexibiliteit. Bulk setters roepen meerdere individuele setters aan en verzamelen alle berichten:</p>
+        <p><strong>Waarom geen constructor?</strong>
+            Een constructor kan geen waarden teruggeven. Daarom kun je geen berichten terugsturen naar de code die het object aanmaakt.</p>
+
+        <h3>Voorbeeld: Card class met bulk setter</h3>
+
+        <pre><code class="language-php">// src/Card.php
+&lt;?php
+namespace Blackjack;
+
+class Card
+{
+    private string $suit;
+    private string $value;
+    private string $image;
+
+    // Individuele setters
+    public function setSuit(string $suit): string
+    {
+        $validSuits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+        if (!in_array($suit, $validSuits)) {
+            return "Error: Invalid suit";
+        }
+        $this->suit = $suit;
+        return "Suit set to " . $suit;
+    }
+
+    public function setValue(string $value): string
+    {
+        $this->value = $value;
+        return "Value set to " . $value;
+    }
+
+    public function setImage(string $image): string
+    {
+        $this->image = $image;
+        return "Image set to " . $image;
+    }
+
+    // Bulk setter
+    public function setCard(string $suit, string $value, string $image): string
+    {
+        $messages = [];
+        $messages[] = $this->setSuit($suit);
+        $messages[] = $this->setValue($value);
+        $messages[] = $this->setImage($image);
+
+        return implode(' ', $messages);
+    }
+
+    // Getters
+    public function getCardName(): string
+    {
+        return $this->value . " of " . $this->suit;
+    }
+}
+?&gt;</code></pre>
+
+        <h3>Gebruik in index.php</h3>
+
+        <pre><code class="language-php">// index.php
+&lt;?php
+require_once 'vendor/autoload.php';
+
+use Blackjack\Card;
+use Blackjack\Deck;
+use Blackjack\Player;
+
+// Maak lege objecten
+$card = new Card();
+$player = new Player();
+
+// Gebruik bulk setters en toon berichten
+echo $card->setCard("Hearts", "Ace", "ace_hearts.png") . "&lt;br&gt;";
+echo $player->setPlayer("John") . "&lt;br&gt;";
+
+// Test functionaliteit
+echo "&lt;h2&gt;Card Info&lt;/h2&gt;";
+echo "Card: " . $card->getCardName() . "&lt;br&gt;";
+
+echo "&lt;h2&gt;Player Info&lt;/h2&gt;";
+echo "Player: " . $player->getName() . "&lt;br&gt;";
+?&gt;</code></pre>
+
+        <h3>PSR-4 Autoloading</h3>
+        <p>PSR-4 is een standaard die bepaalt hoe namespaces en bestandslocaties met elkaar overeenkomen:</p>
+
+        <pre><code class="language-json">// In composer.json:
+"autoload": {
+    "psr-4": {
+        "Blackjack\\": "src/"
+    }
+}
+
+// Betekent:
+// Namespace "Blackjack"        → Directory "src/"
+// Class "Blackjack\Card"       → Bestand "src/Card.php"
+// Class "Blackjack\Deck"       → Bestand "src/Deck.php"
+// Class "Blackjack\Player"     → Bestand "src/Player.php"</code></pre>
+
+        <h3>Wanneer composer dump-autoload uitvoeren?</h3>
+        <p>Voer dit commando uit als je:</p>
+        <ul>
+            <li>Nieuwe classes toevoegt aan de src/ map</li>
+            <li>De composer.json aanpast (bijvoorbeeld de autoload configuratie)</li>
+            <li>De namespace structuur wijzigt</li>
+            <li>Classes verplaatst of een nieuwe naam geeft</li>
+        </ul>
+
+        <pre><code class="language-bash"># Terminal
+composer dump-autoload</code></pre>
+
+        <div class="info-box">
+            <h3>Tip</h3>
+            <p>Als je Composer packages installeert of update met <code>composer install</code> of <code>composer update</code>, wordt de autoloader automatisch opnieuw aangemaakt. Dan hoef je <code>dump-autoload</code> niet handmatig uit te voeren.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inheritance Basis (Extends) (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Inheritance: Parent en Child</h1>
+
+        <p>In de vorige les zagen we dat we code duplicatie (kopiëren-plakken) absoluut willen voorkomen. We willen de code voor kaarten en scores maar op één plek schrijven.</p>
+        <p>De oplossing heet <strong>Inheritance</strong> (Overerving). Dit betekent dat een nieuwe class code mag "lenen" of "erven" van een bestaande class.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Een Familie</h3>
+            <p>In PHP gebruiken we termen uit de familie om dit uit te leggen. Dit is niet toevallig, want het werkt precies zoals in de natuur.</p>
+            <ul>
+                <li><strong>De Parent (Ouder):</strong> De basis. Deze class heeft bepaalde eigenschappen (in code: methods en properties).</li>
+                <li><strong>Het Child (Kind):</strong> De nieuwe class. Deze "erft" automatisch alle eigenschappen van de ouder bij het aanmaken.</li>
+            </ul>
+            <p>Stel je voor dat je ouder (Parent) heel goed kan rekenen. Jij (Child) erft dat talent. Je hoeft niet zelf opnieuw te leren rekenen; je kunt het gewoon omdat je het hebt geërfd.</p>
+        </div>
+
+
+
+        <div class="info-box warning">
+            <h3>Andere namen, zelfde concept</h3>
+            <p>Als je online zoekt of in andere programmeertalen (zoals Java of C#) werkt, zie je soms andere namen voor precies hetzelfde concept:</p>
+            <ul>
+                <li><strong>Parent Class</strong> wordt ook wel <strong>Super Class</strong> of <strong>Base Class</strong> genoemd.</li>
+                <li><strong>Child Class</strong> wordt ook wel <strong>Sub Class</strong> of <strong>Derived Class</strong> genoemd.</li>
+            </ul>
+            <p>In PHP gebruiken we meestal <strong>Parent</strong> en <strong>Child</strong>, omdat PHP letterlijk een keyword <code>parent::</code> heeft.</p>
+        </div>
+
+        <h3>Stap 1: De Parent maken (Player.php)</h3>
+        <p>We beginnen met de basis. Hierin zetten we <strong>alleen</strong> de dingen die <em>iedereen</em> in het spel nodig heeft. Zowel de mens als de dealer heeft kaarten nodig, dus dat zetten we in de Parent.</p>
+
+        <pre><code class="language-php">// Player.php (De Parent)
+class Player
+{
+    // 'protected' betekent: privé voor de buitenwereld,
+    // maar mijn Children (Dealer/Human) mogen dit wel gebruiken.
+    protected array $hand = [];
+
+    public function addCard(Card $card)
+    {
+        $this->hand[] = $card;
+    }
+
+    public function getScore(): int
+    {
+        // ... code om punten te tellen ...
+        return 21;
+    }
+}</code></pre>
+
+        <h3>Stap 2: Het Child maken (Dealer.php)</h3>
+        <p>Nu gaan we de <code>Dealer</code> maken. In plaats van alle code opnieuw te typen, zeggen we tegen PHP: "De Dealer is een kind van Player".</p>
+        <p>Dit doen we met het keyword <strong>extends</strong>.</p>
+
+        <pre><code class="language-php">// Dealer.php (Het Child)
+require_once 'Player.php';
+
+// Met 'extends' erft de Dealer alles van Player
+class Dealer extends Player
+{
+    // Kijk! Deze class is helemaal leeg!
+    // Toch kan hij kaarten pakken en scores tellen,
+    // want dat heeft hij van zijn Parent gekregen.
+}</code></pre>
+
+        <h3>Stap 3: Het bewijs</h3>
+        <p>Laten we testen of het werkt. We maken een nieuwe Dealer aan en kijken of hij kaarten kan aannemen.</p>
+
+        <pre><code class="language-php">$myDealer = new Dealer();
+
+// De methode addCard staat niet in Dealer.php...
+// Maar omdat hij 'extends Player' heeft, werkt het toch!
+$myDealer->addCard(new Card('Harten', 'Aas'));
+
+echo $myDealer->getScore(); // Werkt ook!</code></pre>
+
+        <div class="info-box">
+            <h3>De "Is een..." test</h3>
+            <p>Twijfel je of je Inheritance moet gebruiken? Doe de test. Inheritance mag je alleen gebruiken als je de zin "Child <strong>is een</strong> Parent" kloppend kunt maken.</p>
+            <ul>
+                <li>Een Dealer <strong>is een</strong> Player? -> <strong>JA</strong> (Goed gebruik van extends)</li>
+                <li>Een Auto <strong>is een</strong> Wiel? -> <strong>NEE</strong> (Fout! Een auto <em>heeft</em> een wiel, maar <em>is</em> er geen. Gebruik hier geen extends.)</li>
+            </ul>
+        </div>
+
+        <h3>Stap 4: Het Child uitbreiden (HumanPlayer)</h3>
+        <p>Kinderen zijn vaak meer dan alleen een kopie van hun ouders. Ze leren nieuwe dingen erbij. Dat geldt ook voor classes.</p>
+        <p>De <code>HumanPlayer</code> erft alles van <code>Player</code> (kaarten, score), maar voegt daar iets aan toe: <strong>Geld</strong>.</p>
+
+        <pre><code class="language-php">// HumanPlayer.php (Een ander Child)
+class HumanPlayer extends Player
+{
+    // 1. Hij erft $hand, addCard() en getScore() automatisch van de Parent
+
+    // 2. Hij voegt zijn eigen unieke eigenschappen toe
+    private int $balance = 1000;
+
+    public function placeBet(int $amount)
+    {
+        $this->balance -= $amount;
+    }
+}</code></pre>
+
+        <p>Nu heb je het beste van twee werelden:</p>
+        <ul>
+            <li><code>Dealer</code> heeft <strong>geen</strong> geld (want dat staat niet in de Parent).</li>
+            <li><code>HumanPlayer</code> heeft <strong>wel</strong> geld (want dat heeft hij zelf toegevoegd).</li>
+            <li>Beide kunnen kaarten pakken (want dat hebben ze geërfd).</li>
+        </ul>
+
+        <h3>Samenvatting</h3>
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Betekenis</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>extends</strong></td>
+                    <td>Het PHP keyword waarmee je aangeeft wie de Parent is.</td>
+                </tr>
+                <tr>
+                    <td><strong>Parent Class</strong></td>
+                    <td>De basis (ook wel Super Class). Hier zet je de gedeelde code.</td>
+                </tr>
+                <tr>
+                    <td><strong>Child Class</strong></td>
+                    <td>De erfgenaam (ook wel Sub Class). Deze neemt alles over en voegt specifieke dingen toe.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

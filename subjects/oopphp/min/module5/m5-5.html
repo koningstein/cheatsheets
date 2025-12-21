@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interne Logica: Protected Methods - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Interne Logica: Protected Methods</h1>
+
+        <div class="info-box">
+            <h3>Waarom Protected Methoden?</h3>
+            <p>Soms heb je ingewikkelde logica die door zowel de Parent als de Child classes gebruikt moet worden, maar die <strong>niet</strong> bedoeld is voor de buitenwereld (zoals <code>index.php</code>).</p>
+            <ul>
+                <li><strong>Private:</strong> Child classes kunnen er niet bij (te strikt).</li>
+                <li><strong>Public:</strong> Iedereen kan het aanroepen (te los, onveilig).</li>
+                <li><strong>Protected:</strong> Precies goed: alleen familie mag het gebruiken.</li>
+            </ul>
+        </div>
+
+
+
+        <h3>Voorbeeld: Score Berekening</h3>
+        <p>Stel dat het berekenen van de score in Blackjack ingewikkeld is (rekening houden met Azen die 1 of 11 kunnen zijn). Zowel de <code>Player</code> als de <code>Dealer</code> moeten dit doen.</p>
+
+        <p>We maken een <code>protected</code> hulpmethode in de Parent class:</p>
+
+        <pre><code class="language-php">class Player
+{
+    protected array $hand = [];
+
+    // Protected: Alleen voor intern gebruik door Player en Dealer
+    protected function calculateHandValue(): int
+    {
+        $value = 0;
+        $aces = 0;
+        foreach ($this->hand as $card) {
+            // ... complexe logica ...
+        }
+        return $value;
+    }
+
+    // Public: Dit is wat de buitenwereld gebruikt
+    public function getScore(): int
+    {
+        // We roepen intern de protected methode aan
+        return $this->calculateHandValue();
+    }
+}</code></pre>
+
+        <h3>Hergebruik in Child Classes</h3>
+        <p>Nu kan de <code>Dealer</code> deze complexe logica hergebruiken, of zelfs uitbreiden, zonder dat hij de code opnieuw hoeft te schrijven.</p>
+
+        <pre><code class="language-php">class Dealer extends Player
+{
+    public function decideMove(): string
+    {
+        // De Dealer mag de protected methode gewoon gebruiken!
+        // Hij gebruikt dit om te beslissen of hij nog een kaart moet pakken.
+        $currentScore = $this->calculateHandValue();
+
+        if ($currentScore < 17) {
+            return "hit";
+        }
+        return "stand";
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Veiligheid voorop</h3>
+            <p>Als je in <code>index.php</code> probeert om <code>$dealer->calculateHandValue()</code> direct aan te roepen, krijg je een <strong>Fatal Error</strong>. En dat is goed! Je dwingt de programmeur om de nette publieke methodes (zoals <code>getScore</code>) te gebruiken, terwijl de Dealer intern wel bij de rekenmachine kan.</p>
+        </div>
+
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

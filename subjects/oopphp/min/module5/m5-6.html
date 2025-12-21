@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructors & Inheritance - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Constructors & Inheritance</h1>
+
+        <div class="info-box">
+            <h3>Het Constructor Probleem</h3>
+            <p>Stel, de <code>Player</code> class heeft een constructor die de inventory en equipment array klaarzet. Als je nu in de <code>Warrior</code> class óók een constructor maakt (bijvoorbeeld om specifieke stats in te stellen), ontstaat er een probleem.</p>
+            <p><strong>PHP overschrijft de parent constructor.</strong> De constructor van <code>Player</code> wordt <strong>niet</strong> meer automatisch uitgevoerd!</p>
+        </div>
+
+
+
+        <h3>Voorbeeld: Foute situatie</h3>
+        <p>Hier gaat het mis. Omdat <code>Warrior</code> een eigen constructor heeft, wordt de code in <code>Player</code> (die de inventory initialiseert) overgeslagen. Dit leidt vaak tot fatale foutmeldingen zoals "Call to a member function on null".</p>
+
+        <pre><code class="language-php">class Player {
+    protected Inventory $inventory;
+
+    public function __construct(string $name) {
+        $this->name = $name;
+        $this->inventory = new Inventory(); // Dit wordt overgeslagen!
+    }
+}
+
+class Warrior extends Player {
+    private int $rage;
+
+    public function __construct(string $name, int $rage) {
+        // We vergeten de ouder aan te roepen!
+        $this->name = $name;
+        $this->rage = $rage;
+    }
+}
+
+$warrior = new Warrior("Conan", 100);
+$warrior->getInventory()->addItem($sword); // ERROR! Inventory is null.</code></pre>
+
+        <h3>De Oplossing: parent::__construct()</h3>
+        <p>Om dit op te lossen, moet je in de child constructor expliciet de parent constructor aanroepen. Dit doe je meestal direct op de eerste regel.</p>
+
+        <pre><code class="language-php">class Warrior extends Player {
+    public function __construct(string $name, int $rage) {
+        // Stap 1: Roep ALTIJD eerst de ouder aan met de juiste parameters
+        parent::__construct($name);
+
+        // Stap 2: Doe daarna je eigen unieke initialisatie
+        $this->rage = $rage;
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Parameters doorgeven</h3>
+            <p>Merk op dat de constructor van de <code>Warrior</code> alle benodigde data accepteert (zowel de naam voor de ouder, als de rage voor zichzelf). De naam geven we netjes door aan <code>parent::__construct($name)</code>.</p>
+        </div>
+
+        <h3>Code Opschonen</h3>
+        <p>Door constructors slim te gebruiken, kun je je code in <code>index.php</code> enorm opschonen. In plaats van een object aan te maken en daarna regel voor regel eigenschappen in te stellen, doe je alles in één keer:</p>
+
+        <pre><code class="language-php">// Oude, rommelige manier:
+$warrior = new Warrior();
+$warrior->setName("Conan");
+$warrior->setRage(100);
+$warrior->setStats($stats);
+
+// Nieuwe, schone manier met constructor:
+$warrior = new Warrior("Conan", 100, $stats);</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvattend</h3>
+            <ul>
+                <li>Als een Child class <strong>geen</strong> constructor heeft, wordt automatisch die van de Parent gebruikt.</li>
+                <li>Als een Child class <strong>wel</strong> een constructor heeft, wordt die van de Parent <strong>niet</strong> automatisch gebruikt.</li>
+                <li>Gebruik <code>parent::__construct()</code> om de initialisatie van de ouder (zoals inventory aanmaken) te garanderen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

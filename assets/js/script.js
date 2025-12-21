@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         includeElements.forEach(el => {
             const filePath = el.getAttribute("data-include");
-            // Basic path resolving logic for includes
             const lastSlashIndex = filePath.lastIndexOf("/");
             const basePath = lastSlashIndex !== -1 ? filePath.substring(0, lastSlashIndex + 1) : "";
 
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = content;
 
-                    // Fix relative links in included HTML
                     const links = tempDiv.querySelectorAll('a, img, link, script');
                     links.forEach(link => {
                         if (link.hasAttribute('href')) {
@@ -63,39 +61,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const context = getCurrentContext();
         const rootPath = getRootPath();
 
+        // Data ophalen
         fetch(rootPath + 'data/navigation.json')
             .then(response => {
-                if (!response.ok) throw new Error("Kon navigation.json niet vinden");
+                if (!response.ok) throw new Error(`Kon navigation.json niet vinden op: ${response.url}`);
                 return response.json();
             })
             .then(data => {
-                // UI Bouwen als we context hebben (dus in een vak zitten)
+                // UI Bouwen als we context hebben
                 if (context.isFound && data[context.subject]) {
                     const subjectData = data[context.subject][context.mode];
+
                     if (subjectData) {
                         initHeaderAndFooter(subjectData.title);
                         buildSidebarMenu(subjectData.menu);
-                        // Geef data mee voor de slimme toggle check
                         initViewToggle(context, data);
+                    } else {
+                        console.warn('Geen data gevonden voor modus:', context.mode);
                     }
                 } else {
-                    // --- FALLBACK VOOR HOMEPAGE (Geen context) ---
+                    // Fallback voor homepage
                     const headerTitle = document.getElementById('header-title');
                     const footerTitle = document.getElementById('footer-title');
                     const toggleBtn = document.getElementById('view-toggle');
 
-                    // Zet algemene titels
                     if (headerTitle) headerTitle.textContent = "Software Development";
                     if (footerTitle) footerTitle.textContent = "Software Development";
-
-                    // Verberg knoppen die niet nodig zijn op de homepagina
                     if (toggleBtn) toggleBtn.style.display = 'none';
-
-                    // Verberg eventueel de breadcrumb separator op de homepage
-                    const separator = document.querySelector('.brand-separator');
-                    const homeIcon = document.querySelector('.brand-home');
-                    if(separator) separator.style.display = 'none';
-                    if(homeIcon) homeIcon.style.display = 'none';
                 }
             })
             .catch(err => console.error('Menu laden mislukt:', err))
@@ -104,11 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 initColorLogic();
                 initSidebarInteractions();
                 initTOC();
-                initLogoLink(rootPath);
+                initLogoLinks(rootPath); // Aangepaste functie aanroep
             });
     }
 
-    // Bepaal in welk vak/modus we zitten op basis van URL
     function getCurrentContext() {
         const path = window.location.pathname;
         const parts = path.split('/');
@@ -116,15 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (subjectsIndex !== -1 && parts.length > subjectsIndex + 2) {
             return {
-                subject: parts[subjectsIndex + 1], // bijv. "laravel12"
-                mode: parts[subjectsIndex + 2],    // bijv. "min" of "ext"
+                subject: parts[subjectsIndex + 1],
+                mode: parts[subjectsIndex + 2],
                 isFound: true
             };
         }
         return { isFound: false, subject: '', mode: 'min' };
     }
 
-    // Bepaal pad naar de root van de site
     function getRootPath() {
         const path = window.location.pathname;
         const parts = path.split('/');
@@ -144,18 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (footerTitle) footerTitle.textContent = title + " Cheatsheet";
     }
 
-    // --- SIDEBAR GENERATOR ---
     function buildSidebarMenu(menuItems) {
         const navContainer = document.getElementById('dynamic-nav');
         if (!navContainer) return;
         navContainer.innerHTML = '';
 
-        // FIX VOOR LINKS: Als we in een submap zitten, moeten we teruglinken
         const path = window.location.pathname;
         const isInModuleSubfolder = path.includes('/module');
         const linkPrefix = isInModuleSubfolder ? "../" : "";
-
-        // Helper om (Ext) uit de label te halen voor weergave
         const cleanLabel = (lbl) => lbl ? lbl.replace(' (Ext)', '') : '';
 
         menuItems.forEach(group => {
@@ -175,14 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const hasSubItems = group.items.some(item => item.items && item.items.length > 0);
 
             if (hasSubItems) {
-                // Accordion stijl
                 group.items.forEach(module => {
                     const moduleContainer = document.createElement('div');
                     moduleContainer.className = 'nav-item-container';
 
                     const button = document.createElement('button');
                     button.className = 'nav-toggle';
-                    // Span voor tekst links, svg rechts
                     button.innerHTML = `<span>${cleanLabel(module.label)}</span><svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>`;
                     moduleContainer.appendChild(button);
 
@@ -204,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     groupDiv.appendChild(moduleContainer);
                 });
             } else {
-                // Simpele lijst
                 ul.style.display = 'block';
                 ul.style.paddingLeft = '0';
                 group.items.forEach(link => {
@@ -237,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initSidebarInteractions() {
-        // Openklappen actief item
         const currentLink = document.querySelector(".sidebar-nav a.current");
         if (currentLink) {
             const submenu = currentLink.closest(".submenu");
@@ -250,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        // Toggle clicks
         document.querySelectorAll('.nav-toggle').forEach(toggle => {
             toggle.onclick = () => {
                 const container = toggle.closest('.nav-item-container');
@@ -259,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (sub) sub.style.display = container.classList.contains('active') ? 'block' : 'none';
             };
         });
-        // Mobile menu
         const menuBtn = document.getElementById('menu-toggle');
         const sidebarLeft = document.querySelector('.sidebar-left');
         const closeBtn = document.getElementById('close-sidebar');
@@ -274,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- VIEW TOGGLE: JSON BASED CHECK ---
     function initViewToggle(context, fullData) {
         const toggleBtn = document.getElementById('view-toggle');
         if (!toggleBtn || !context.isFound) return;
@@ -285,15 +264,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleBtn.onclick = (e) => {
             e.preventDefault();
-
-            // 1. Basispad bepalen
             const currentPath = window.location.pathname;
             const splitKey = '/' + context.mode + '/';
             const parts = currentPath.split(splitKey);
             const basePath = parts[0];
             let relativePath = parts[1];
 
-            // 2. Bestandsnaam transformeren (m1-1.html <-> m1-1-ext.html)
             if (context.mode === 'min') {
                 if (!relativePath.includes('index.html')) {
                     relativePath = relativePath.replace('.html', '-ext.html');
@@ -302,11 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 relativePath = relativePath.replace('-ext.html', '.html');
             }
 
-            // 3. Check in de JSON of deze pagina bestaat in de target navigatie
             const targetMenu = fullData[context.subject][targetMode].menu;
             const exists = isUrlInMenu(targetMenu, relativePath);
 
-            // 4. Navigeren
             if (exists) {
                 window.location.href = basePath + '/' + targetMode + '/' + relativePath;
             } else {
@@ -316,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Recursieve functie om URL te zoeken in menu structuur
     function isUrlInMenu(menuItems, urlToFind) {
         if (!menuItems) return false;
         for (const item of menuItems) {
@@ -328,34 +301,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 
-    // --- HEADER LOGICA (BREADCRUMB STIJL) ---
-    function initLogoLink(rootPath) {
-        // 1. De Root Link (Het huisje / Logo)
+    // --- FIX VOOR HEADER LINKS ---
+    function initLogoLinks(rootPath) {
+        // 1. Het Huisje (Root Link) -> Gaat naar de homepage van de hele site
         const rootLink = document.getElementById('root-link');
-        if (rootLink) {
-            // Verwijst altijd naar de hoofd-index
-            rootLink.href = rootPath + "index.html";
+        const logoLink = document.getElementById('logo-link'); // fallback naam
+
+        const targetHomeLink = rootLink || logoLink;
+        if (targetHomeLink) {
+            targetHomeLink.href = rootPath + "index.html";
         }
 
-        // 2. De Subject Link (De tekst/titel)
+        // 2. De Vak Titel (Subject Link) -> Gaat naar de index van het vak (bijv. oopphp/min/index.html)
         const subjectLink = document.getElementById('subject-link');
         if (subjectLink) {
-            const path = window.location.pathname;
-
-            if (path.includes('/module')) {
-                // In een module: ga 1 map omhoog (naar min/ext index)
+            // Als we in een module zitten, moeten we 1 map omhoog naar de vak-index
+            if (window.location.pathname.includes('/module')) {
                 subjectLink.href = "../index.html";
-            } else if (path.includes('subjects')) {
-                // Al op subject index: reload
-                subjectLink.href = "index.html";
             } else {
-                // Op homepage: reload
+                // Anders zitten we al op de index (of homepage), dus herladen of naar index.html
                 subjectLink.href = "index.html";
             }
         }
     }
 
-    // --- THEMA & KLEUR LOGICA ---
     function initThemeLogic() {
         const themeBtn = document.getElementById('theme-toggle');
         let savedTheme = localStorage.getItem('theme') || 'light';
@@ -402,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = `🎨 ${label}`;
     }
 
-    // --- TOC ---
     function initTOC() {
         const content = document.querySelector('.main-content');
         const sidebarRight = document.querySelector('.sidebar-right');

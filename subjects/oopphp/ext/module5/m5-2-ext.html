@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splitsen van class (Uitgebreid) - OOP PHP Module 5</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Splisten van class</h1>
+
+        <p>In de vorige les zagen we dat de <code>Player</code> class veel te groot en rommelig werd (de "God Class"). De logische volgende stap lijkt simpel: we hakken de class in tweeën!</p>
+        <p>We maken twee nieuwe bestanden:</p>
+        <ul>
+            <li><code>HumanPlayer.php</code> (voor jou, de speler)</li>
+            <li><code>Dealer.php</code> (voor de bank)</li>
+        </ul>
+
+        <h3>De Naïeve Oplossing</h3>
+        <p>Vaak beginnen studenten door de code van de oude <code>Player</code> class te kopiëren en in beide nieuwe bestanden te plakken. Daarna verwijderen ze wat niet nodig is (bijvoorbeeld: de Dealer heeft geen geld, dus <code>$balance</code> halen we weg bij de Dealer).</p>
+
+
+
+        <p>Dit lijkt een goed idee, want de rommelige <code>if-else</code> statements zijn nu weg. Maar kijk eens goed naar het resultaat hieronder.</p>
+
+        <h3>Zoek de Verschillen</h3>
+        <p>Vergelijk de twee classes. Zie je hoeveel code er dubbel is?</p>
+
+        <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4>HumanPlayer.php</h4>
+                <pre><code class="language-php">class HumanPlayer
+{
+    private array $hand = [];
+    private int $balance = 1000; // Uniek voor Human
+
+    // Deze functie is gekopieerd...
+    public function addCard(Card $card) {
+        $this->hand[] = $card;
+    }
+
+    // Deze functie is OOK gekopieerd...
+    public function getScore() {
+        // Complexe berekening voor Blackjack
+        // Azen tellen als 1 of 11...
+    }
+}</code></pre>
+            </div>
+            <div style="flex: 1; min-width: 300px;">
+                <h4>Dealer.php</h4>
+                <pre><code class="language-php">class Dealer
+{
+    private array $hand = [];
+    // Geen balance (dit is het verschil)
+
+    // ...maar dit is precies hetzelfde!
+    public function addCard(Card $card) {
+        $this->hand[] = $card;
+    }
+
+    // ...en dit ook!
+    public function getScore() {
+        // Complexe berekening voor Blackjack
+        // Azen tellen als 1 of 11...
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h3>Waarom is dit een probleem?</h3>
+        <p>Je hebt nu te maken met <strong>Code Duplicatie</strong>. De logica voor het vasthouden van kaarten (<code>addCard</code>) en het berekenen van de score (<code>getScore</code>) staat nu op <strong>twee plekken</strong>.</p>
+
+        <div class="info-box">
+            <h3>Scenario: De Bug in de Aas</h3>
+            <p>Stel je voor dat er een fout zit in je score-berekening. Een Aas wordt per ongeluk altijd als 11 geteld, waardoor je heel snel 'af' (boven de 21) bent.</p>
+            <ol>
+                <li>Je ontdekt de fout tijdens het testen.</li>
+                <li>Je opent <code>HumanPlayer.php</code> en fixt de fout.</li>
+                <li>Je bent blij en sluit je laptop.</li>
+            </ol>
+            <p><strong>Wat is er mis?</strong> Je bent vergeten om <code>Dealer.php</code> ook aan te passen! De dealer rekent nu nog steeds verkeerd. Je hebt nu twee versies van de waarheid in je spel. Dit is een garantie voor problemen.</p>
+        </div>
+
+
+
+        <h3>De Regel: DRY (Don't Repeat Yourself)</h3>
+        <p>In de programmeerwereld is er een heilige regel: <strong>DRY</strong>. Dit staat voor <em>Don't Repeat Yourself</em> (Herhaal Jezelf Niet).</p>
+        <p>Code mag eigenlijk maar op één plek bestaan. Als je functionaliteit moet aanpassen (zoals de regels van Blackjack), wil je dat op één centrale plek doen.</p>
+
+        <div class="info-box">
+            <h3>Analogie: De Menukaart</h3>
+            <p>Stel je hebt een restaurant. Je hebt een menukaart voor de lunch en een menukaart voor het diner.</p>
+            <ul>
+                <li>Op beide kaarten staat "Coca Cola - €3,00".</li>
+                <li>De prijs van Cola gaat omhoog naar €3,50.</li>
+                <li>Je past de lunchkaart aan, maar vergeet de dinerkaart.</li>
+            </ul>
+            <p>Nu worden klanten boos omdat ze 's avonds een andere prijs zien. Als je gewoon één lijstje met "Dranken" had waar beide kaarten naar verwezen, had je dit probleem niet.</p>
+        </div>
+
+        <h3>De Oplossing: Inheritance</h3>
+        <p>We moeten een manier vinden om de dubbele code (kaarten en score) op één plek te zetten, en de unieke code (geld voor de speler) apart te houden.</p>
+        <p>Precies daarvoor is <strong>Inheritance</strong> (Overerving) uitgevonden. In de volgende stap gaan we dit toepassen met het <code>extends</code> keyword.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
