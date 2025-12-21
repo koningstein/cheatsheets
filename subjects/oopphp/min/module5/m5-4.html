@@ -28,21 +28,22 @@
         <h3>Voorbeeld: Dealer kan niet bij zijn kaarten</h3>
         <p>Stel, de <code>Player</code> class heeft de kaarten (`$hand`) als private ingesteld. Als de <code>Dealer</code> class (die erft van Player) probeert te kijken of hij een Aas heeft, geeft PHP een foutmelding.</p>
 
+
+
         <pre><code class="language-php">class Player {
     private array $hand = []; // Alleen Player mag hierbij!
-}
+}</code></pre>
 
-class Dealer extends Player {
+        <pre><code class="language-php">class Dealer extends Player {
     public function hasAce() {
         // FOUT! Dealer mag niet bij private $hand van Player
-        foreach ($this->hand as $card) { ... }
+        // foreach ($this->hand as $card) { ... }
+        return false;
     }
 }</code></pre>
 
         <h3>De Oplossing: Protected</h3>
         <p>Om dit op te lossen, introduceren we een nieuw visibility niveau: <code>protected</code>.</p>
-
-
 
         <div class="table-wrapper">
             <table class="summary-table">
@@ -77,37 +78,50 @@ class Dealer extends Player {
             </table>
         </div>
 
-        <p>Door de property <code>protected</code> te maken, delen we hem met de kinderen, maar houden we hem verborgen voor de rest van de applicatie .</p>
+        <p>Door de property <code>protected</code> te maken, delen we hem met de kinderen, maar houden we hem verborgen voor de rest van de applicatie.</p>
 
         <pre><code class="language-php">class Player {
     protected array $hand = []; // Nu mag Dealer er ook bij!
 }</code></pre>
 
         <h3>Wrapper Methods</h3>
-        <p>Soms wil je data uit de parent class combineren met extra logica in de child class. Dit doe je vaak met **Wrapper Methods** .</p>
+        <p>Soms wil je data uit de parent class combineren met extra logica in de child class. Dit doe je vaak met **Wrapper Methods**.</p>
 
         <div class="info-box">
             <h3>Voorbeeld: Tijdelijke Bonussen</h3>
             <p>Stel dat een speler tijdelijke stats heeft (bijvoorbeeld een aanvalsbonus). De Parent class heeft de basiswaarde, maar we willen het <strong>totaal</strong> weten.</p>
         </div>
 
+
+
         <pre><code class="language-php">class Character {
     protected int $attack = 10;
-    protected int $tempBonus = 0; [cite_start]// Protected zodat child erbij kan [cite: 129]
+    protected int $tempBonus = 0; // Protected zodat child erbij kan
 
-    [cite_start]// Wrapper methode: combineert basis + bonus [cite: 133, 134]
+    // Wrapper methode: combineert basis + bonus
+    // Deze methode RETURNED de waarde alleen
     public function getTotalAttack(): int {
         return $this->attack + $this->tempBonus;
     }
-}
+}</code></pre>
 
-class Warrior extends Character {
+        <pre><code class="language-php">class Warrior extends Character {
     public function activateRage() {
-        $this->tempBonus = 5; [cite_start]// Child past protected property aan [cite: 149]
+        // Child past protected property aan
+        $this->tempBonus = 5;
     }
 }</code></pre>
 
-        <p>De buitenwereld roept simpelweg <code>$warrior->getTotalAttack()</code> aan en krijgt het juiste getal, zonder te weten hoe de berekening intern werkt .</p>
+        <p>De buitenwereld roept simpelweg de wrapper methode aan en krijgt het juiste getal, zonder te weten hoe de berekening intern werkt.</p>
+
+        <pre><code class="language-php">// index.php (Het gebruik)
+$warrior = new Warrior();
+
+// Activeer de bonus
+$warrior->activateRage();
+
+// Vraag het totaal op (echo gebeurt hier pas)
+echo "Totale aanvalskracht: " . $warrior->getTotalAttack();</code></pre>
 
     </main>
 

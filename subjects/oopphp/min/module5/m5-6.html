@@ -26,37 +26,49 @@
             <p><strong>PHP overschrijft de parent constructor.</strong> De constructor van <code>Player</code> wordt <strong>niet</strong> meer automatisch uitgevoerd!</p>
         </div>
 
-
-
         <h3>Voorbeeld: Foute situatie</h3>
         <p>Hier gaat het mis. Omdat <code>Warrior</code> een eigen constructor heeft, wordt de code in <code>Player</code> (die de inventory initialiseert) overgeslagen. Dit leidt vaak tot fatale foutmeldingen zoals "Call to a member function on null".</p>
 
+
+
         <pre><code class="language-php">class Player {
-    protected Inventory $inventory;
+    protected $inventory;
+    protected $name;
 
     public function __construct(string $name) {
         $this->name = $name;
-        $this->inventory = new Inventory(); // Dit wordt overgeslagen!
+        // Dit is cruciale setup code
+        $this->inventory = new Inventory();
     }
-}
 
-class Warrior extends Player {
+    public function getInventory() {
+        return $this->inventory;
+    }
+}</code></pre>
+
+        <pre><code class="language-php">class Warrior extends Player {
     private int $rage;
 
     public function __construct(string $name, int $rage) {
-        // We vergeten de ouder aan te roepen!
+        // FOUT: We vergeten de ouder aan te roepen!
+        // De constructor van Player wordt nu genegeerd.
         $this->name = $name;
         $this->rage = $rage;
     }
-}
+}</code></pre>
 
+        <pre><code class="language-php">// index.php (Gebruik)
 $warrior = new Warrior("Conan", 100);
-$warrior->getInventory()->addItem($sword); // ERROR! Inventory is null.</code></pre>
+
+// ERROR! Inventory is null omdat Player::__construct nooit draaide.
+// $warrior->getInventory()->addItem($sword);</code></pre>
 
         <h3>De Oplossing: parent::__construct()</h3>
         <p>Om dit op te lossen, moet je in de child constructor expliciet de parent constructor aanroepen. Dit doe je meestal direct op de eerste regel.</p>
 
         <pre><code class="language-php">class Warrior extends Player {
+    private int $rage;
+
     public function __construct(string $name, int $rage) {
         // Stap 1: Roep ALTIJD eerst de ouder aan met de juiste parameters
         parent::__construct($name);
@@ -74,14 +86,16 @@ $warrior->getInventory()->addItem($sword); // ERROR! Inventory is null.</code></
         <h3>Code Opschonen</h3>
         <p>Door constructors slim te gebruiken, kun je je code in <code>index.php</code> enorm opschonen. In plaats van een object aan te maken en daarna regel voor regel eigenschappen in te stellen, doe je alles in één keer:</p>
 
-        <pre><code class="language-php">// Oude, rommelige manier:
-$warrior = new Warrior();
-$warrior->setName("Conan");
-$warrior->setRage(100);
-$warrior->setStats($stats);
+        <pre><code class="language-php">// index.php
+
+// Oude, rommelige manier:
+// $warrior = new Warrior();
+// $warrior->setName("Conan");
+// $warrior->setRage(100);
+// $warrior->setStats($stats);
 
 // Nieuwe, schone manier met constructor:
-$warrior = new Warrior("Conan", 100, $stats);</code></pre>
+$warrior = new Warrior("Conan", 100);</code></pre>
 
         <div class="info-box">
             <h3>Samenvattend</h3>

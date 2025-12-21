@@ -36,21 +36,30 @@
         <h3>Object als parameter</h3>
         <p>Gebruik de Classnaam als type hint. Dit zorgt ervoor dat je alleen een object van die specifieke class kunt doorgeven:</p>
 
-        <pre><code class="language-php">public function addCard(Card $card): void
+        <pre><code class="language-php">class Deck
 {
-    $this->cards[] = $card;
-}
+    private array $cards = [];
 
-public function dealCard(Player $player): void
+    public function addCard(Card $card): void
+    {
+        $this->cards[] = $card;
+    }
+}</code></pre>
+
+        <pre><code class="language-php">class Dealer
 {
-    $card = array_shift($this->cards);
-    $player->addCard($card);
+    private array $cards = [];
+
+    public function dealCard(Player $player): void
+    {
+        $card = array_shift($this->cards);
+        // De player class verwacht hier verplicht een Card object
+        $player->addCard($card);
+    }
 }</code></pre>
 
         <h3>Object als property type</h3>
         <p>Door een property een classnaam als type te geven, zorg je ervoor dat deze property alleen een object van die class kan bevatten:</p>
-
-
 
         <pre><code class="language-php">class Game
 {
@@ -82,15 +91,17 @@ public function dealCard(Player $player): void
     {
         return $this->winner;
     }
-}
+}</code></pre>
 
-// Gebruik:
+        <pre><code class="language-php">// Gebruik (index.php):
 $game = new Game();
 $game->setWinner($player1); // OK - er is een winnaar
 $game->setWinner(null); // Ook OK - het spel is nog niet afgelopen</code></pre>
 
         <h3>Array van objecten</h3>
         <p>Je kunt in de code alleen <code>array</code> als type gebruiken. Maar met een Docblock maak je duidelijk dat de array alleen objecten van een bepaalde class bevat:</p>
+
+
 
         <pre><code class="language-php">class Player
 {

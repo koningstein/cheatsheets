@@ -29,20 +29,21 @@
         <h3>Voorbeeld: playTurn()</h3>
         <p>De <code>Player</code> class heeft een basisimplementatie, maar de <code>Dealer</code> doet iets totaal anders.</p>
 
+
+
         <pre><code class="language-php">class Player {
-    public function playTurn() {
+    public function playTurn(): string {
         // Wacht op input van de gebruiker...
         return "Waiting for input";
     }
-}
+}</code></pre>
 
-class Dealer extends Player {
+        <pre><code class="language-php">class Dealer extends Player {
     // Override: Zelfde naam, ander gedrag
-    public function playTurn() {
-        // Dealer logica: Hit tot 17
-        while ($this->getScore() < 17) {
-            $this->addCard($deck->draw());
-        }
+    public function playTurn(): string {
+        // Dealer logica: Hit tot 17 (pseudo-code)
+        // while ($this->getScore() < 17) { ... }
+
         return "Dealer finished playing";
     }
 }</code></pre>
@@ -51,20 +52,18 @@ class Dealer extends Player {
         <p>Soms wil je de originele code niet <em>vervangen</em>, maar <em>uitbreiden</em>. Je wilt doen wat de ouder doet, plus een beetje extra.</p>
         <p>Hiervoor gebruik je <code>parent::methodeNaam()</code>.</p>
 
-
-
         <pre><code class="language-php">class Player {
     public function getSummary(): string {
         return "Score: " . $this->getScore();
     }
-}
+}</code></pre>
 
-class Cheater extends Player {
+        <pre><code class="language-php">class Cheater extends Player {
     public function getSummary(): string {
-        // Roep eerst de ouder aan
+        // Roep eerst de ouder aan (hergebruik)
         $original = parent::getSummary();
 
-        // Plak er iets achteraan
+        // Plak er iets achteraan (uitbreiden)
         return $original . " (I am cheating!)";
     }
 }</code></pre>
@@ -77,7 +76,11 @@ class Cheater extends Player {
             <p>Stel je hebt een array met spelers. Sommige zijn mens, sommige zijn dealer, sommige zijn valsspelers. Omdat ze allemaal <code>Player</code> zijn en allemaal de methode <code>playTurn()</code> hebben, hoeft de Game class niet te weten <em>wie</em> wat is.</p>
         </div>
 
-        <pre><code class="language-php">$players = [
+
+
+        <pre><code class="language-php">// index.php
+
+$players = [
     new HumanPlayer("John"),
     new Dealer(),
     new HumanPlayer("Jane")
@@ -86,7 +89,9 @@ class Cheater extends Player {
 foreach ($players as $player) {
     // Polymorfisme in actie:
     // We roepen playTurn() aan, maar de UITVOERING verschilt per object!
-    $player->playTurn();
+    // De echo staat hier, niet in de methode.
+    echo $player->playTurn();
+    echo "&lt;br&gt;";
 }</code></pre>
 
         <div class="info-box">

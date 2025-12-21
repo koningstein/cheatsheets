@@ -27,14 +27,14 @@
             <h3>Voorbeeld: Kaartspel</h3>
             <p>Een <code>Card</code> class kan bijvoorbeeld deze methoden hebben:</p>
             <ul>
-                <li><strong>display():</strong> Toont de informatie van de kaart</li>
+                <li><strong>getDescription():</strong> Geeft de naam van de kaart terug (bijv. "Harten Koning")</li>
                 <li><strong>flip():</strong> Draait de kaart om (van open naar dicht of andersom)</li>
                 <li><strong>getValue():</strong> Geeft de waarde van de kaart terug</li>
             </ul>
         </div>
 
         <h3>Methoden toevoegen</h3>
-        <p>Je maakt een methode binnen een class op dezelfde manier als een functie, maar dan binnen de curly brackets van de class:</p>
+        <p>Je maakt een methode binnen een class op dezelfde manier als een functie, maar dan binnen de curly brackets van de class. Let op: we gebruiken <code>return</code> om de waarde terug te geven, we printen het niet direct af.</p>
 
         <pre><code class="language-php">class Card
 {
@@ -42,29 +42,35 @@
     public $value;
     public $points;
 
-    public function display()
+    public function getDescription()
     {
-        echo "This is the " . $this->value . " of " . $this->suit;
+        // We geven de tekst terug met return
+        return "This is the " . $this->value . " of " . $this->suit;
     }
 }</code></pre>
 
         <p>Je kunt ook de kortere schrijfwijze gebruiken met curly brackets binnen een string:</p>
 
-        <pre><code class="language-php">public function display()
-{
-    echo "This is the {$this->value} of {$this->suit}";
-}</code></pre>
+        <pre><code class="language-php">    public function getDescription()
+    {
+        return "This is the {$this->value} of {$this->suit}";
+    }</code></pre>
 
         <h3>Het $this keyword</h3>
         <p>Het keyword <code>$this</code> verwijst naar het huidige object. Je gebruikt <code>$this</code> om <strong>binnen een methode</strong> toegang te krijgen tot de properties van het object.</p>
 
         <h3>Methoden aanroepen</h3>
-        <p>Buiten de class roep je een methode aan met de pijl-operator <code>-&gt;</code>:</p>
+        <p>Buiten de class roep je een methode aan met de pijl-operator <code>-&gt;</code>. Omdat de methode een waarde <code>return</code>t, moeten we deze zelf nog <code>echo</code>'en als we het willen zien.</p>
 
-        <pre><code class="language-php">$card = new Card();
+        <pre><code class="language-php">// index.php
+
+$card = new Card();
 $card->suit = "Hearts";
 $card->value = "King";
-$card->display();  // Output: This is the King of Hearts</code></pre>
+
+// We roepen de methode aan en printen het resultaat
+echo $card->getDescription();
+// Output: This is the King of Hearts</code></pre>
 
         <div class="info-box">
             <h3>Let op</h3>
