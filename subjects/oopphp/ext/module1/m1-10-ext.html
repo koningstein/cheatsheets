@@ -20,13 +20,11 @@
     <main class="main-content">
         <h1>Samenvatting: Je Eerste Stappen</h1>
 
-        <p>Gefeliciteerd! Je hebt Module 1 afgerond. Dit was misschien wel de belangrijkste module van de hele cursus. Je hebt namelijk een nieuwe manier van denken geleerd: <strong>Object Oriented Programming (OOP)</strong>.</p>
-        <p>In plaats van een lange lijst met losse commando's, denk je nu in "dingen" (objecten). Laten we alles nog één keer rustig op een rijtje zetten.</p>
+        <p>Gefeliciteerd! Je hebt Module 1 afgerond. Dit was misschien wel de belangrijkste module van de hele cursus. Je hebt namelijk een compleet nieuwe manier van denken geleerd: <strong>Object Oriented Programming (OOP)</strong>.</p>
+        <p>In plaats van een lange lijst met losse commando's (zoals in beginners-PHP), denk je nu in "dingen" (objecten). Voordat we verder gaan, zetten we alles nog één keer rustig op een rijtje.</p>
 
         <h3>1. Het Fundament: Class vs. Object</h3>
-        <p>Alles begint met het verschil tussen het idee en de werkelijkheid.</p>
-
-
+        <p>Dit is het allerbelangrijkste concept. Als je dit snapt, snap je de helft van OOP.</p>
 
         <div class="info-box">
             <h3>De Kern</h3>
@@ -36,10 +34,12 @@
             </ul>
         </div>
 
+
+
         <h3>2. Eigenschappen en Acties</h3>
         <p>Een object bestaat uit twee onderdelen:</p>
         <ul>
-            <li><strong>Properties (Eigenschappen):</strong> De data. Voor een kaart zijn dit de kleur (`suit`) en de waarde (`value`).</li>
+            <li><strong>Properties (Eigenschappen):</strong> De data. Voor een kaart zijn dit de kleur (`suit`) en de waarde (`value`). Dit zijn eigenlijk variabelen in een class.</li>
             <li><strong>Methoden (Acties):</strong> De functies. Wat kan de kaart doen? Zichzelf tonen (`show()`) of omdraaien (`flip()`).</li>
         </ul>
 
@@ -47,15 +47,16 @@
         <p>Je hebt geleerd dat het onhandig is om een object "leeg" aan te maken en daarna regel voor regel te vullen. De <strong>Constructor</strong> (`__construct`) lost dit op. Het zorgt ervoor dat een object direct compleet is zodra het "geboren" wordt.</p>
 
         <h3>4. Veiligheid: Getters en Setters</h3>
-        <p>Je hebt geleerd om niet zomaar iedereen toegang te geven tot je data.</p>
+        <p>Je hebt geleerd om niet zomaar iedereen toegang te geven tot je data (Encapsulation).</p>
         <ul>
-            <li><strong>Setters (De Poortwachter):</strong> Controleren de input. "Is dit wel een geldige waarde?"</li>
-            <li><strong>Getters (De Chef-kok):</strong> Maken de output netjes. "Ik zet de naam even in hoofdletters."</li>
+            <li><strong>Setters (De Poortwachter):</strong> Controleren de input. "Is dit wel een geldige waarde?" voordat je het opslaat.</li>
+            <li><strong>Getters (De Chef-kok):</strong> Maken de output netjes. "Ik formatteer het saldo even met een euroteken voordat ik het teruggeef."</li>
         </ul>
 
         <h3>Het Grote Plaatje: Alles samen</h3>
-        <p>Hieronder zie je een compleet voorbeeld van een `Player` class voor Blackjack. Hierin komen <strong>alle</strong> onderwerpen uit deze module samen. Lees de comments goed door.</p>
+        <p>Hieronder zie je een compleet voorbeeld van een `Player` class voor Blackjack. Hierin komen <strong>alle</strong> onderwerpen uit deze module samen.</p>
 
+        <h4>De Class (Player.php)</h4>
         <pre><code class="language-php">&lt;?php
 
 class Player
@@ -73,11 +74,13 @@ class Player
     {
         // $this verwijst naar het saldo van DEZE specifieke speler
         if ($amount > $this->balance) {
+            // We gebruiken RETURN, geen echo!
             return "Fout: Je hebt niet genoeg geld!";
         }
 
         // Pas het saldo aan
         $this->balance = $this->balance - $amount;
+
         return "Inzet van €$amount geplaatst. Nieuw saldo: €{$this->balance}";
     }
 
@@ -87,18 +90,22 @@ class Player
         // We geven het netjes terug met een euroteken
         return "€ " . number_format($this->balance, 2);
     }
-}
+}</code></pre>
 
-// 1. OBJECT AANMAKEN (Met Named Arguments voor duidelijkheid)
+        <h4>Het Gebruik (index.php)</h4>
+        <pre><code class="language-php">// 1. OBJECT AANMAKEN (De blauwdruk wordt een huis)
+// We gebruiken Named Arguments voor duidelijkheid
 $player1 = new Player(name: "Sjaak", balance: 500);
 
 // 2. METHODE GEBRUIKEN
-echo $player1->bet(50); // Output: Inzet van €50 geplaatst...
+// De class geeft tekst terug (return), wij tonen het (echo)
+echo $player1->bet(50);
+// Output: Inzet van €50 geplaatst...
+
+echo "&lt;br&gt;";
 
 // 3. GETTER GEBRUIKEN
 echo "Huidig saldo: " . $player1->getBalanceFormatted();</code></pre>
-
-
 
         <h3>De valkuilen (Let hier op!)</h3>
         <p>Tijdens het leren van OOP struikelen de meeste studenten over dezelfde dingen. Check deze lijst als je code niet werkt:</p>
@@ -114,23 +121,23 @@ echo "Huidig saldo: " . $player1->getBalanceFormatted();</code></pre>
                 <tbody>
                 <tr>
                     <td><code>$this->$naam</code></td>
-                    <td><strong>Fout!</strong> Te veel dollartekens. <br>Gebruik <code>$this->naam</code>.</td>
+                    <td><strong>Fout!</strong> Te veel dollartekens. <br>Gebruik <code>$this->naam</code> (zonder $ bij de property).</td>
                 </tr>
                 <tr>
-                    <td><code>new Card</code> (zonder haakjes)</td>
+                    <td><code>new Card</code></td>
                     <td>Gebruik altijd haakjes: <code>new Card()</code>.</td>
                 </tr>
                 <tr>
                     <td>Bestand heet <code>card.php</code></td>
-                    <td>De bestandsnaam moet een hoofdletter hebben: <code>Card.php</code>.</td>
+                    <td>De bestandsnaam moet beginnen met een Hoofdletter: <code>Card.php</code>.</td>
                 </tr>
                 <tr>
                     <td><code>public function _construct</code></td>
-                    <td>Vergeet het tweede liggende streepje niet: <code>__construct</code>.</td>
+                    <td>Vergeet het tweede liggende streepje niet: <code>__construct</code> (twee keer underscore).</td>
                 </tr>
                 <tr>
-                    <td><code>echo</code> in een getter</td>
-                    <td>Gebruik <code>return</code> in een getter, zodat je de data nog kunt gebruiken.</td>
+                    <td><code>echo</code> in een methode</td>
+                    <td>Gebruik <code>return</code> in een methode, zodat je de data nog kunt gebruiken in de rest van je code.</td>
                 </tr>
                 </tbody>
             </table>

@@ -20,124 +20,115 @@
     <main class="main-content">
         <h1>Methoden: De Acties</h1>
 
-        <p>In de vorige lessen hebben we geleerd over de <strong>Class</strong> (de blauwdruk) en de <strong>Properties</strong> (de eigenschappen). We weten nu <em>wat</em> een object is (bijvoorbeeld: een Harten Aas). Maar een object dat alleen maar bestaat en niks doet, is saai.</p>
-        <p>We willen dat onze kaarten iets kunnen <em>doen</em>. Ze moeten zichzelf kunnen laten zien, omdraaien, of hun waarde doorgeven. Hiervoor gebruiken we <strong>Methoden</strong>.</p>
+        <p>In de vorige lessen hebben we geleerd over de <strong>Class</strong> (de blauwdruk) en de <strong>Properties</strong> (de eigenschappen). We weten nu <em>wat</em> een object is (bijvoorbeeld: een Harten Aas, rood van kleur).</p>
+        <p>Maar... een object dat alleen maar "bestaat" en niks doet, is saai. In een spel willen we actie. Kaarten moeten geschud worden, spelers moeten kaarten pakken en de dealer moet punten tellen.</p>
+        <p>Hiervoor gebruiken we <strong>Methoden</strong>.</p>
 
         <h3>Wat is een Methode?</h3>
-        <p>Een methode is eigenlijk heel simpel: het is een <strong>functie</strong>, maar dan eentje die in een class zit.</p>
+        <p>Een methode is eigenlijk heel simpel: het is een <strong>functie</strong>, maar dan eentje die in een class zit. Het definieert het <strong>gedrag</strong> van een object.</p>
 
         <div class="info-box">
             <h3>De Vergelijking: Werkwoorden</h3>
-            <p>Als je OOP vergelijkt met taal, dan ziet het er zo uit:</p>
+            <p>Als je programmeren vergelijkt met taal, dan ziet het er zo uit:</p>
             <ul>
-                <li><strong>Class:</strong> Het zelfstandig naamwoord (De Kaart).</li>
-                <li><strong>Property:</strong> Het bijvoeglijk naamwoord (De <em>Rode</em> Kaart).</li>
-                <li><strong>Method:</strong> Het werkwoord (De Kaart <em>toont</em> zichzelf).</li>
+                <li><strong>Class:</strong> Het zelfstandig naamwoord (De <strong>Kaart</strong>).</li>
+                <li><strong>Property:</strong> Het bijvoeglijk naamwoord (De <strong>Rode</strong> Kaart).</li>
+                <li><strong>Method:</strong> Het werkwoord (De Kaart <strong>toont</strong> zichzelf).</li>
             </ul>
         </div>
 
-        <h3>Methoden in Blackjack</h3>
-        <p>Wat moet een kaart in ons spel kunnen doen? Laten we kijken naar de acties:</p>
-        <ul>
-            <li><strong>show():</strong> Print de naam van de kaart netjes op het scherm (bijv. "Harten Aas").</li>
-            <li><strong>getValue():</strong> Vertelt de dealer hoeveel punten de kaart waard is (bijv. 11 punten).</li>
-        </ul>
+        <h3>Deel 1: De Class (De Blauwdruk)</h3>
+        <p>We gaan een methode toevoegen aan onze <code>Card</code> class. We willen dat de kaart ons kan vertellen hoe hij heet.</p>
+        <p>We noemen deze functie <code>getDescription</code> (krijg omschrijving). Let op: we gebruiken hier <code>return</code> en geen <code>echo</code>. De kaart <em>geeft</em> de tekst aan ons, hij schreeuwt het niet zelf naar het scherm.</p>
 
-        <h3>Hoe maak je een Methode?</h3>
-        <p>Je maakt een methode in je Class bestand. Dit doe je met het woord <code>function</code>. Omdat we willen dat iedereen deze actie kan uitvoeren, zetten we er <code>public</code> voor.</p>
+        <p>Maar hoe weet de kaart zijn eigen naam? Hoe weet hij of hij een Aas of een Boer is?</p>
+
+        <div class="info-box">
+            <h3>Het geheim van $this</h3>
+            <p>Stel je voor dat jij en ik allebei een kaart vasthouden.
+                <br>Als ik zeg: "Ik ben de Harten Aas", dan heb ik het over <strong>mezelf</strong>.
+                <br>Als jij zegt: "Ik ben de Schoppen Boer", dan heb jij het over <strong>jezelf</strong>.</p>
+            <p>In PHP is <code>$this</code> het woordje voor "mezelf".<br>
+                Met <code>$this->suit</code> zegt het object: <em>"Pak de suit die in MIJN eigenschappenlijst staat."</em></p>
+        </div>
+
+
+
+        <p>Hier is de code voor de Class:</p>
 
         <pre><code class="language-php">class Card
 {
-    // Eerst de eigenschappen (Properties)
+    // De Eigenschappen (Wat BEN ik?)
     public $suit;
     public $value;
 
-    // Dan de acties (Methoden)
-    public function show()
+    // De Methode (Wat DOE ik?)
+    public function getDescription()
     {
-        // Hier komt de code die iets doet
-        echo "Ik ben een kaart!";
+        // We gebruiken $this om bij onze eigen data te komen.
+        // We plakken de tekst aan elkaar en RETURNEN het resultaat.
+
+        return "Ik ben de " . $this->value . " van " . $this->suit;
     }
 }</code></pre>
 
-        <h3>Het grote geheim: $this</h3>
-        <p>Nu komt het lastigste, maar belangrijkste onderdeel van deze module. Stel je voor dat de methode <code>show()</code> moet zeggen welke kaart het is.</p>
-        <p>Je hebt misschien de neiging om dit te doen:</p>
-        <pre><code class="language-php">echo "Ik ben " . $suit; // FOUT! PHP kent $suit hier niet.</code></pre>
+        <h3>Deel 2: Het Gebruik (index.php)</h3>
+        <p>Nu we de blauwdruk hebben aangepast, kunnen alle kaarten die we maken dit kunstje uitvoeren. We roepen de methode aan met het pijltje <code>-></code> gevolgd door de naam van de methode én ronde haakjes <code>()</code>.</p>
+        <p>Omdat de methode een tekst <em>teruggeeft</em> (return), moeten we die tekst zelf nog even op het scherm zetten met <code>echo</code>.</p>
 
-        <p>Waarom werkt dit niet? Omdat PHP niet weet <em>welke</em> suit je bedoelt. Bedoel je de suit van deze kaart? Of van die andere kaart op tafel?</p>
-        <p>Om duidelijk te maken dat we de eigenschap van <strong>dit specifieke object</strong> bedoelen, gebruiken we het woord <code>$this</code>.</p>
-
-
-
-        <div class="info-box">
-            <h3>Uitleg: $this</h3>
-            <p><code>$this</code> betekent letterlijk: <strong>"Ikzelf"</strong>.</p>
-            <p>Als je in de code schrijft: <code>$this->suit</code>, dan zegt het object: <em>"Pak de suit die in MIJN eigenschappenlijst staat."</em></p>
-        </div>
-
-        <h3>Stap voor Stap: Een werkende Card Class</h3>
-        <p>Laten we een complete class maken die zijn eigen naam kan uitprinten.</p>
-
-        <pre><code class="language-php">&lt;?php
-
-class Card
-{
-    public $suit;
-    public $value;
-
-    // De methode om de kaart te tonen
-    public function show()
-    {
-        // Gebruik $this om bij je eigen data te komen
-        // Let op de accolades {} in de string, dat is een handig trucje
-        echo "Ik ben de {$this->value} van {$this->suit}.&lt;br&gt;";
-    }
-}</code></pre>
-
-        <h3>De Methode gebruiken (Aanroepen)</h3>
-        <p>Nu we de methode hebben gemaakt in de blauwdruk, kunnen onze objecten deze actie uitvoeren. Dit doen we weer met het pijltje <code>-&gt;</code>, maar nu <strong>met ronde haakjes ()</strong> erachter.</p>
-
-        <pre><code class="language-php">// 1. Maak twee kaarten aan (Objecten)
+        <pre><code class="language-php">// 1. Maak de eerste kaart (Object aanmaken)
 $card1 = new Card();
 $card1->suit = "Harten";
 $card1->value = "Aas";
 
+// 2. Maak de tweede kaart
 $card2 = new Card();
 $card2->suit = "Schoppen";
 $card2->value = "Boer";
 
-// 2. Laat de kaarten hun actie uitvoeren
-$card1->show();
-// Output: "Ik ben de Aas van Harten."
-// ($this wees hier naar card1)
+// 3. Roep de methode aan
+// $card1 gebruikt ZIJN eigen suit en value omdat we $this gebruikten.
+echo $card1->getDescription();
+// Output: "Ik ben de Aas van Harten"
 
-$card2->show();
-// Output: "Ik ben de Boer van Schoppen."
-// ($this wees hier naar card2)</code></pre>
+echo "&lt;br&gt;";
+
+// $card2 doet hetzelfde trucje met ZIJN eigen data.
+echo $card2->getDescription();
+// Output: "Ik ben de Boer van Schoppen"</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom Return en geen Echo?</h3>
+            <p>Waarom zetten we de <code>echo</code> niet gewoon in de functie? Dat lijkt makkelijker.</p>
+            <p>Stel je voor dat je deze kaart later in een app wilt gebruiken, of in een e-mail wilt versturen. Dan wil je de tekst hebben (return) om hem op te slaan, niet direct op het scherm knallen (echo). Door <code>return</code> te gebruiken is je code veel flexibeler.</p>
+        </div>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 
-        <h4>1. De haakjes vergeten</h4>
-        <p>Een methode is een functie. Een functie heeft altijd haakjes nodig om te starten.</p>
-        <pre><code class="language-php">$card1->show;   // FOUT: PHP denkt dat je een property zoekt die 'show' heet.
-$card1->show(); // GOED: Voer de functie uit.</code></pre>
+        <div class="info-box warning">
+            <h3>⚠️ Vergeet de haakjes niet!</h3>
+            <p>Een methode is een functie. Een functie heeft altijd haakjes nodig om te starten, ook als ze leeg zijn.</p>
+            <ul>
+                <li>❌ <code>echo $card1->getDescription;</code> (PHP zoekt naar een variabele, die bestaat niet)</li>
+                <li>✅ <code>echo $card1->getDescription();</code> (Voer de functie uit)</li>
+            </ul>
+        </div>
 
-        <h4>2. $this vergeten</h4>
-        <p>Als je binnen een methode een variabele gebruikt zonder <code>$this-></code>, denkt PHP dat het een tijdelijke variabele is die alleen in die functie bestaat.</p>
-
-        <h4>3. De dubbele dollar bij $this</h4>
-        <p>Dit is de meest gemaakte fout:</p>
-        <pre><code class="language-php">$this->$suit; // FOUT!
-$this->suit;  // GOED!</code></pre>
-        <p>Je zegt: Het object (<code>$this</code>) -> wijs naar de eigenschap (<code>suit</code>). De naam van de eigenschap heeft geen dollarteken nodig.</p>
+        <div class="info-box warning">
+            <h3>⚠️ De dubbele dollar</h3>
+            <p>Bij <code>$this</code> gebruik je geen dollarteken voor de eigenschap.</p>
+            <ul>
+                <li>❌ <code>$this->$suit;</code> (Fout)</li>
+                <li>✅ <code>$this->suit;</code> (Goed)</li>
+            </ul>
+        </div>
 
         <h3>Samenvatting</h3>
         <ul>
-            <li><strong>Methoden</strong> zijn de acties van een object (werkwoorden).</li>
-            <li>Je maakt ze met <code>public function naam() { }</code>.</li>
-            <li>Binnen de methode gebruik je <strong><code>$this-></code></strong> om bij de eigenschappen van het object te komen.</li>
-            <li>Je roept ze aan met <code>->naam()</code> (vergeet de haakjes niet!).</li>
+            <li><strong>Methoden</strong> zijn functies binnen een class. Ze bepalen het gedrag.</li>
+            <li>Gebruik <strong><code>$this-></code></strong> binnen een methode om bij de eigenschappen van <em>dat specifieke object</em> te komen.</li>
+            <li>Gebruik <strong><code>return</code></strong> om een waarde terug te geven, zodat je er buiten de class mee kunt doen wat je wilt (zoals echoën).</li>
+            <li>Je roept een methode aan met <code>->naam()</code>.</li>
         </ul>
 
     </main>

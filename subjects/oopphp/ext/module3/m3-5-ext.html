@@ -20,27 +20,31 @@
     <main class="main-content">
         <h1>Private Properties: De Kluis</h1>
 
-        <p>Tot nu toe hebben we bijna overal <code>public</code> voor gezet. Dat is makkelijk, want dan kun je overal bij. Maar in het echte leven is niet alles openbaar. Je pincode, je dagboek of de inhoud van je portemonnee zijn privé.</p>
-        <p>In programmeren is dat net zo. Soms wil je data beschermen zodat niemand er per ongeluk (of expres) mee kan rommelen. Daarvoor gebruiken we <code>private</code>.</p>
+        <p>In de vorige modules hebben we eigenschappen (properties) altijd <code>public</code> gemaakt. Dat is lekker makkelijk, want dan kun je er vanuit je hele applicatie bij. Maar in het echte leven is niet alles openbaar. Je pincode, je dagboek of de inhoud van je kluis zijn privé.</p>
+        <p>In programmeren is dat net zo. Soms wil je data beschermen zodat niemand er per ongeluk (of expres) mee kan rommelen. Daarvoor gebruiken we het woord <code>private</code>.</p>
 
         <h3>Public vs. Private</h3>
         <p>Dit noemen we de <strong>Zichtbaarheid</strong> (Visibility) van je code.</p>
         <ul>
             <li><strong>Public (Openbaar):</strong> Iedereen mag de waarde zien én veranderen. De voordeur staat wagenwijd open.</li>
-            <li><strong>Private (Privé):</strong> Alleen de class zélf mag bij de data. De deur zit op slot en alleen de class heeft de sleutel.</li>
+            <li><strong>Private (Privé):</strong> Alleen de class zélf mag bij de data. De deur zit op slot en alleen het object zelf heeft de sleutel.</li>
         </ul>
 
 
 
         <h3>Het Probleem: Valsspelen in Blackjack</h3>
-        <p>Stel je voor dat we de score van een speler bijhouden. Als we dit <code>public</code> maken, kan iedereen de score aanpassen. Een programmeur kan (per ongeluk) een fout maken, of een hacker kan valsspelen.</p>
+        <p>Stel je voor dat we de score van een speler bijhouden in een simpele class. Als we dit <code>public</code> maken, kan iedereen de score aanpassen. Een onhandige programmeur kan per ongeluk een typefout maken, of een hacker kan valsspelen.</p>
 
+        <h4>De onveilige situatie (Public)</h4>
         <pre><code class="language-php">class Player
 {
+    // Iedereen mag hierbij... gevaarlijk!
     public int $score = 0;
-}
+}</code></pre>
 
+        <pre><code class="language-php">// index.php
 $player = new Player();
+
 // Omdat het public is, mag dit gewoon:
 $player->score = 1000; // Valsspelen!
 $player->score = -50;  // Fout! Een score kan niet negatief zijn.</code></pre>
@@ -54,83 +58,106 @@ $player->score = -50;  // Fout! Een score kan niet negatief zijn.</code></pre>
             <h3>De Vergelijking: De Auto</h3>
             <p>Denk aan een auto. De motor is het belangrijkste onderdeel.</p>
             <ul>
-                <li>Je kunt de motor niet zomaar aanraken tijdens het rijden (hij is <strong>private</strong> / afgeschermd).</li>
+                <li>Je kunt de motor niet zomaar aanraken tijdens het rijden (hij is <strong>private</strong> / afgeschermd onder de motorkap).</li>
                 <li>Je gebruikt pedalen en een stuur om de auto te besturen (de <strong>public</strong> methodes).</li>
             </ul>
-            <p>Als je direct aan de motor zou kunnen sleutelen tijdens het rijden, zou de auto stuk gaan. Door de motorkap dicht te laten (private), blijft de auto veilig werken.</p>
+            <p>Als je direct benzine in de cilinders zou gieten tijdens het rijden, gaat de auto stuk. Door de motorkap dicht te laten (private) en alleen de pedalen te gebruiken (public), blijft de auto veilig werken.</p>
         </div>
 
-        <h3>Hoe gebruik je Private Properties?</h3>
-        <p>Als je een property <code>private</code> maakt, kan niemand er meer bij. Als je het probeert, krijg je een error.</p>
 
-        <pre><code class="language-php">class Player
-{
-    private int $score = 0; // Nu met 'private'
-}
-
-$player = new Player();
-// echo $player->score;
-// FOUTMELDING: Fatal Error: Cannot access private property</code></pre>
-
-        <p>Maar wacht... als niemand erbij kan, hebben we er toch niks aan?
-            <br>Klopt! Daarom maken we speciale "deurtjes" om op een veilige manier naar binnen te gaan: <strong>Getters</strong> en <strong>Setters</strong>.</p>
 
         <h3>De Poortwachters: Getters en Setters</h3>
-        <p>Omdat de property op slot zit, maken we twee methodes die wél <code>public</code> zijn. Zij hebben de sleutel van de kluis.</p>
+        <p>Als we een variabele <code>private</code> maken, kan niemand er meer bij. Ook wijzelf niet in <code>index.php</code>. Dat is te streng.</p>
+        <p>Daarom bouwen we twee speciale methodes die wél <code>public</code> zijn. Zij fungeren als de beveiliging:</p>
+        <ol>
+            <li><strong>De Setter (De Bewaker):</strong> Hiermee kun je de waarde aanpassen, maar alleen als je je aan de regels houdt.</li>
+            <li><strong>De Getter (De Etalage):</strong> Hiermee kun je de waarde bekijken, maar niet aanraken.</li>
+        </ol>
 
-        <h4>1. De Setter (De Bewaker)</h4>
-        <p>Met de setter kunnen we de waarde veranderen. Het grote voordeel is dat we hier <strong>regels</strong> (validatie) kunnen toevoegen.</p>
+        <h3>Stap voor Stap: De Veilige Player Class</h3>
+        <p>Hieronder zie je hoe we de Class opbouwen. Let op: de methodes geven nu antwoord (`return`) in plaats van dat ze zelf schreeuwen (`echo`).</p>
 
-        <pre><code class="language-php">public function setScore(int $newScore): void
+        <h4>De Class (Player.php)</h4>
+        <pre><code class="language-php">&lt;?php
+
+class Player
 {
-    // REGEL 1: Score mag niet negatief zijn
-    if ($newScore < 0) {
-        echo "Fout: Score mag niet negatief zijn!";
-        return; // Stop de functie
+    // 1. We zetten de score op slot (Private)
+    private int $score = 0;
+
+    // 2. De Getter: Alleen kijken, niet aankomen
+    public function getScore(): int
+    {
+        return $this->score;
     }
 
-    // REGEL 2: Score mag niet hoger zijn dan 21 (in dit voorbeeld)
-    if ($newScore > 21) {
-        $newScore = 21;
+    // 3. De Setter: De strenge bewaker
+    public function setScore(int $newScore): string
+    {
+        // REGEL 1: Score mag niet negatief zijn
+        if ($newScore < 0) {
+            return "FOUT: Score mag niet negatief zijn!";
+        }
+
+        // REGEL 2: Score mag niet belachelijk hoog zijn
+        if ($newScore > 30) {
+            return "FOUT: Dat is wel erg veel punten voor Blackjack...";
+        }
+
+        // Als alles klopt, passen we de private variabele aan
+        $this->score = $newScore;
+
+        return "SUCCES: Score is aangepast naar $newScore.";
     }
-
-    // Als alles klopt, passen we de private variabele aan
-    $this->score = $newScore;
 }</code></pre>
 
-        <h4>2. De Getter (De Etalage)</h4>
-        <p>Met de getter kunnen we de waarde bekijken. We mogen alleen kijken, niet aanraken.</p>
+        <h3>Het Gebruik (index.php)</h3>
+        <p>Nu gaan we de class gebruiken. Je zult zien dat we niet meer direct bij <code>$score</code> kunnen, maar alles via de functies moeten doen.</p>
 
-        <pre><code class="language-php">public function getScore(): int
-{
-    return $this->score;
-}</code></pre>
+        <h4>Het Gebruik (index.php)</h4>
+        <pre><code class="language-php">// We maken de speler
+$player = new Player();
 
-        <h3>Het complete plaatje</h3>
-        <p>Hier zie je hoe het veilig werkt:</p>
+// POGING 1: Direct aanpassen (Dit werkt niet meer!)
+// $player->score = 100;
+// Resultaat: Fatal Error: Cannot access private property
 
-        <pre><code class="language-php">$player = new Player();
 
-// 1. Proberen vals te spelen (Foute waarde)
-$player->setScore(-100);
-// Output: Fout: Score mag niet negatief zijn!
-// (De score is nog steeds 0)
+// POGING 2: Via de Setter (Foute waarde)
+// De class voert de check uit en geeft een foutmelding terug
+$resultaat = $player->setScore(-50);
+echo $resultaat;
+// Output: "FOUT: Score mag niet negatief zijn!"
 
-// 2. Geldige score instellen
-$player->setScore(10);
+echo "&lt;br&gt;";
 
-// 3. Score bekijken
-echo "De score is: " . $player->getScore();
-// Output: De score is: 10</code></pre>
+
+// POGING 3: Via de Setter (Goede waarde)
+$resultaat = $player->setScore(21);
+echo $resultaat;
+// Output: "SUCCES: Score is aangepast naar 21."
+
+echo "&lt;br&gt;";
+
+
+// POGING 4: De score bekijken
+// We gebruiken de getter om de waarde op te halen
+echo "Huidige score: " . $player->getScore();
+// Output: "Huidige score: 21"</code></pre>
 
         <div class="info-box">
-            <h3>Waarom doen we dit?</h3>
-            <p>Misschien lijkt het veel extra werk om voor elke property getters en setters te maken. Maar dit is dé manier om professionele code te schrijven.</p>
-            <ul>
-                <li>Je beschermt je data tegen fouten.</li>
-                <li>Je kunt later makkelijk regels toevoegen in de setter, zonder dat je de rest van je code hoeft aan te passen.</li>
-            </ul>
+            <h3>Waarom Return en geen Echo?</h3>
+            <p>Je ziet dat de <code>setScore</code> functie een tekst teruggeeft met <code>return</code>. Waarom doen we geen <code>echo</code> in de class?</p>
+            <p>Stel dat je dit spel later ombouwt naar een mobiele app. Dan wil je geen tekst op het scherm printen, maar misschien een rode pop-up tonen. Door de tekst te <strong>returnen</strong>, mag de programmeur in <code>index.php</code> zelf bepalen of hij het echo't, in een logbestand zet, of in een rode balk toont. Dat maakt je class veel flexibeler.</p>
         </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Private:</strong> Beschermt variabelen tegen directe toegang. Alleen de Class zelf mag erbij.</li>
+            <li><strong>Encapsulatie:</strong> Het principe van data verbergen en beschermen (zoals een motorkap).</li>
+            <li><strong>Setter:</strong> Een publieke functie om data veilig aan te passen (met regels/validatie).</li>
+            <li><strong>Getter:</strong> Een publieke functie om data veilig uit te lezen.</li>
+        </ul>
 
     </main>
 
