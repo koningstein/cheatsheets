@@ -308,5 +308,233 @@
         "menu": []
       }
     }
+  },
+  "oopphp": {
+    "min": {
+      "title": "OOP PHP (Basis)",
+      "menu": [
+        {
+          "title": "Opdrachten",
+          "items": [
+            {
+              "label": "Module 1: OOP Basis",
+              "url": "#",
+              "items": [
+                { "label": "Class", "url": "module1/m1-1.html" },
+                { "label": "Object", "url": "module1/m1-2.html" },
+                { "label": "Properties", "url": "module1/m1-3.html" },
+                { "label": "Methoden", "url": "module1/m1-4.html" },
+                { "label": "Setters", "url": "module1/m1-5.html" },
+                { "label": "Getters", "url": "module1/m1-6.html" },
+                { "label": "Constructor", "url": "module1/m1-7.html" },
+                { "label": "Constructor promoted properties", "url": "module1/m1-8.html" },
+                { "label": "Named arguments", "url": "module1/m1-9.html" },
+                { "label": "Samenvatting", "url": "module1/m1-10.html" }
+              ]
+            },
+            {
+              "label": "Module 2: Autoloading en projectstructuur",
+              "url": "#",
+              "items": [
+                { "label": "Simpele autoload", "url": "module2/m2-1.html" },
+                { "label": "Autoload met namespaces", "url": "module2/m2-2.html" },
+                { "label": "Composer installeren", "url": "module2/m2-3.html" },
+                { "label": "Autoload configureren", "url": "module2/m2-4.html" },
+                { "label": "Samenvatting", "url": "module2/m2-5.html" }
+              ]
+            },
+            {
+              "label": "Module 3: Types, visibility en relaties",
+              "url": "#",
+              "items": [
+                { "label": "Docblocks", "url": "module3/m3-1.html" },
+                { "label": "Type hints & return types", "url": "module3/m3-2.html" },
+                { "label": "Property datatypes", "url": "module3/m3-3.html" },
+                { "label": "Objecten als datatype", "url": "module3/m3-4.html" },
+                { "label": "Private properties", "url": "module3/m3-5.html" },
+                { "label": "Private methoden", "url": "module3/m3-6.html" },
+                { "label": "Samenvatting", "url": "module3/m3-7.html" }
+              ]
+            },
+            {
+              "label": "Module 4: Debuggen, layout en interactie",
+              "url": "#",
+              "items": [
+                { "label": "Debuggen", "url": "module4/m4-1.html" },
+                { "label": "Smarty integratie", "url": "module4/m4-2.html" },
+                { "label": "Layout met bootstrap", "url": "module4/m4-3.html" },
+                { "label": "Formulieren en oop", "url": "module4/m4-4.html" },
+                { "label": "Opvangen met $_POST", "url": "module4/m4-5.html" },
+                { "label": "Objecten bewaren in $_SESSION", "url": "module4/m4-6.html" },
+                { "label": "Meerdere pagina's met $_GET", "url": "module4/m4-7.html" },
+                { "label": "Code kwaliteit met Phpstan", "url": "module4/m4-8.html" },
+                { "label": "Samenvatting", "url": "module4/m4-9.html" }
+              ]
+            },
+            {
+              "label": "Module 5: Overerving",
+              "url": "#",
+              "items": [
+                { "label": "Introductie inheritance", "url": "module5/m5-1.html" },
+                { "label": "Splitsen van class", "url": "module5/m5-2.html" },
+                { "label": "Toepassen inheritance", "url": "module5/m5-3.html" },
+                { "label": "Protected properties & wrappers", "url": "module5/m5-4.html" },
+                { "label": "Protected methoden", "url": "module5/m5-5.html" },
+                { "label": "Constructor & inheritance", "url": "module5/m5-6.html" },
+                { "label": "Override van parent methode", "url": "module5/m5-7.html" },
+                { "label": "Samenvatting", "url": "module5/m5-8.html" }
+              ]
+            },
+            {
+              "label": "Module 6: Abstract",
+              "url": "#",
+              "items": [
+                { "label": "Abstracte class", "url": "module6/m6-1.html" },
+                { "label": "Abstracte methode", "url": "module6/m6-2.html" },
+                { "label": "Verwerken van abstract", "url": "module6/m6-3.html" },
+                { "label": "Samenvatting", "url": "module6/m6-4.html" }
+              ]
+            },
+            {
+              "label": "Module 7: Static",
+              "url": "#",
+              "items": [
+                { "label": "Static methoden", "url": "module7/m7-1.html" },
+                { "label": "Static properties", "url": "module7/m7-2.html" },
+                { "label": "Static gebruiken", "url": "module7/m7-3.html" },
+                { "label": "Samenvatting", "url": "module7/m7-4.html" }
+              ]
+            },
+            {
+              "label": "Module 8: Database",
+              "url": "#",
+              "items": [
+                { "label": "Database interface", "url": "module8/m8-1.html" },
+                { "label": "Mysql class & connectie", "url": "module8/m8-2.html" },
+                { "label": "Insert", "url": "module8/m8-3.html" },
+                { "label": "Simpele select", "url": "module8/m8-4.html" },
+                { "label": "Where clausule", "url": "module8/m8-5.html" },
+                { "label": "Update", "url": "module8/m8-6.html" },
+                { "label": "Delete", "url": "module8/m8-7.html" },
+                { "label": "Samenvatting", "url": "module8/m8-8.html" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ext": {
+      "title": "OOP PHP (Extended)",
+      "menu": [
+        {
+          "title": "Opdrachten",
+          "items": [
+            {
+              "label": "Module 1: OOP Basis",
+              "url": "#",
+              "items": [
+                { "label": "Class", "url": "module1/m1-1-ext.html" },
+                { "label": "Object", "url": "module1/m1-2-ext.html" },
+                { "label": "Properties", "url": "module1/m1-3-ext.html" },
+                { "label": "Methoden", "url": "module1/m1-4-ext.html" },
+                { "label": "Setters", "url": "module1/m1-5-ext.html" },
+                { "label": "Getters", "url": "module1/m1-6-ext.html" },
+                { "label": "Constructor", "url": "module1/m1-7-ext.html" },
+                { "label": "Constructor promoted properties", "url": "module1/m1-8-ext.html" },
+                { "label": "Named arguments", "url": "module1/m1-9-ext.html" },
+                { "label": "Samenvatting", "url": "module1/m1-10-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 2: Autoloading en projectstructuur",
+              "url": "#",
+              "items": [
+                { "label": "Simpele autoload", "url": "module2/m2-1-ext.html" },
+                { "label": "Autoload met namespaces", "url": "module2/m2-2-ext.html" },
+                { "label": "Composer installeren", "url": "module2/m2-3-ext.html" },
+                { "label": "Autoload configureren", "url": "module2/m2-4-ext.html" },
+                { "label": "Samenvatting", "url": "module2/m2-5-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 3: Types, visibility en relaties",
+              "url": "#",
+              "items": [
+                { "label": "Docblocks", "url": "module3/m3-1-ext.html" },
+                { "label": "Type hints & return types", "url": "module3/m3-2-ext.html" },
+                { "label": "Property datatypes", "url": "module3/m3-3-ext.html" },
+                { "label": "Objecten als datatype", "url": "module3/m3-4-ext.html" },
+                { "label": "Private properties", "url": "module3/m3-5-ext.html" },
+                { "label": "Private methoden", "url": "module3/m3-6-ext.html" },
+                { "label": "Samenvatting", "url": "module3/m3-7-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 4: Debuggen, layout en interactie",
+              "url": "#",
+              "items": [
+                { "label": "Debuggen", "url": "module4/m4-1-ext.html" },
+                { "label": "Smarty integratie", "url": "module4/m4-2-ext.html" },
+                { "label": "Layout met bootstrap", "url": "module4/m4-3-ext.html" },
+                { "label": "Formulieren en oop", "url": "module4/m4-4-ext.html" },
+                { "label": "Opvangen met $_POST", "url": "module4/m4-5-ext.html" },
+                { "label": "Objecten bewaren in $_SESSION", "url": "module4/m4-6-ext.html" },
+                { "label": "Meerdere pagina's met $_GET", "url": "module4/m4-7-ext.html" },
+                { "label": "Code kwaliteit met Phpstan", "url": "module4/m4-8-ext.html" },
+                { "label": "Samenvatting", "url": "module4/m4-9-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 5: Overerving",
+              "url": "#",
+              "items": [
+                { "label": "Introductie inheritance", "url": "module5/m5-1-ext.html" },
+                { "label": "Splitsen van class", "url": "module5/m5-2-ext.html" },
+                { "label": "Toepassen inheritance", "url": "module5/m5-3-ext.html" },
+                { "label": "Protected properties & wrappers", "url": "module5/m5-4-ext.html" },
+                { "label": "Protected methoden", "url": "module5/m5-5-ext.html" },
+                { "label": "Constructor & inheritance", "url": "module5/m5-6-ext.html" },
+                { "label": "Override van parent methode", "url": "module5/m5-7-ext.html" },
+                { "label": "Samenvatting", "url": "module5/m5-8-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 6: Abstract",
+              "url": "#",
+              "items": [
+                { "label": "Abstracte class", "url": "module6/m6-1-ext.html" },
+                { "label": "Abstracte methode", "url": "module6/m6-2-ext.html" },
+                { "label": "Verwerken van abstract", "url": "module6/m6-3-ext.html" },
+                { "label": "Samenvatting", "url": "module6/m6-4-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 7: Static",
+              "url": "#",
+              "items": [
+                { "label": "Static methoden", "url": "module7/m7-1-ext.html" },
+                { "label": "Static properties", "url": "module7/m7-2-ext.html" },
+                { "label": "Static gebruiken", "url": "module7/m7-3-ext.html" },
+                { "label": "Samenvatting", "url": "module7/m7-4-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 8: Database",
+              "url": "#",
+              "items": [
+                { "label": "Database interface", "url": "module8/m8-1-ext.html" },
+                { "label": "Mysql class & connectie", "url": "module8/m8-2-ext.html" },
+                { "label": "Insert", "url": "module8/m8-3-ext.html" },
+                { "label": "Simpele select", "url": "module8/m8-4-ext.html" },
+                { "label": "Where clausule", "url": "module8/m8-5-ext.html" },
+                { "label": "Update", "url": "module8/m8-6-ext.html" },
+                { "label": "Delete", "url": "module8/m8-7-ext.html" },
+                { "label": "Samenvatting", "url": "module8/m8-8-ext.html" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
   }
 }

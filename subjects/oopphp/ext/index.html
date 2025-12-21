@@ -1,10 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="blue">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startpagina - OOP PHP Extended</title>
+
+    <script src="../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../assets/css/style.css">
 </head>
 <body>
 
+<div data-include="../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+
+        <div class="hero-section">
+            <h1>Object Oriented PHP Curriculum</h1>
+            <p>Welkom bij de Basic Editie. De fundamenten van Object Georiënteerd Programmeren in PHP.</p>
+        </div>
+
+        <h2 class="section-title">
+            Lesmodules
+        </h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">De basisconcepten stap voor stap uitgelegd.</p>
+
+        <div class="curriculum-grid">
+            <a href="module1/m1-1.html" class="card">
+                <span class="card-badge">Module 1</span>
+                <h3>OOP Basis</h3>
+                <p>De fundamenten: Classes, Objects, Properties, Methods en de Constructor.</p>
+            </a>
+
+            <a href="module2/m2-1.html" class="card">
+                <span class="card-badge">Module 2</span>
+                <h3>Autoloading & Structuur</h3>
+                <p>Professionele structuur met Namespaces, Autoloading en Composer installatie.</p>
+            </a>
+
+            <a href="module3/m3-1.html" class="card">
+                <span class="card-badge">Module 3</span>
+                <h3>Types, Visibility & Relaties</h3>
+                <p>Datatypes (hints), Encapsulation (private) en documentatie met Docblocks.</p>
+            </a>
+
+            <a href="module4/m4-1.html" class="card">
+                <span class="card-badge">Module 4</span>
+                <h3>Debuggen & Interactie</h3>
+                <p>Formulieren verwerken (POST/GET), Sessies, Bootstrap layout en tools zoals Phpstan.</p>
+            </a>
+
+            <a href="module5/m5-1.html" class="card">
+                <span class="card-badge">Module 5</span>
+                <h3>Overerving</h3>
+                <p>Code hergebruik via Inheritance, Protected visibility en method overriding.</p>
+            </a>
+
+            <a href="module6/m6-1.html" class="card">
+                <span class="card-badge">Module 6</span>
+                <h3>Abstract</h3>
+                <p>Het afdwingen van structuren met Abstracte classes en methoden.</p>
+            </a>
+
+            <a href="module7/m7-1.html" class="card">
+                <span class="card-badge">Module 7</span>
+                <h3>Static</h3>
+                <p>Methoden en properties aanroepen zonder een object te instantieren.</p>
+            </a>
+
+            <a href="module8/m8-1.html" class="card">
+                <span class="card-badge">Module 8</span>
+                <h3>Database</h3>
+                <p>Object georiënteerde interactie met MySQL: Connectie, Insert, Update, Delete en Select.</p>
+            </a>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+    </aside>
+</div>
+
+<div data-include="../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../assets/js/script.js"></script>
 </body>
 </html>
