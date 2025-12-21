@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstracte Classes (Uitgebreid) - OOP PHP Module 6</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Abstracte Classes: De Blauwdruk</h1>
+
+        <p>Welkom in Module 6! In de vorige module hebben we Inheritance (overerving) geleerd. We hebben een basis class <code>Player</code> (Ouder) en specifieke classes zoals <code>Dealer</code> en <code>HumanPlayer</code> (Kinderen).</p>
+        <p>Dit werkt prima, maar er zit een logisch foutje in ons ontwerp. Het is namelijk technisch mogelijk om een "halve" speler aan te maken. En dat willen we voorkomen.</p>
+
+        <h3>Het Probleem: Spoken in je code</h3>
+        <p>Stel je voor dat je per ongeluk de volgende code schrijft:</p>
+
+        <pre><code class="language-php">// We maken een 'algemene' speler aan
+$ghost = new Player("Spookje");
+
+// We vragen hem om een beurt te spelen...
+$ghost->playTurn();</code></pre>
+
+        <p><strong>Wat gebeurt er nu?</strong> Helemaal niets. De class <code>Player</code> weet namelijk niet of hij moet wachten op input (zoals een mens) of dat hij tot 17 punten moet hitten (zoals een dealer). Het is een lege huls.</p>
+        <p>Toch staat PHP toe dat je <code>new Player()</code> doet. Dit levert een "dom" object op dat niks kan, maar wel geheugen inneemt en bugs kan veroorzaken.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Paspop</h3>
+            <p>Zie de <code>Player</code> class als een <strong>Paspop</strong> in een kledingwinkel.</p>
+            <ul>
+                <li>Het heeft de vorm van een mens.</li>
+                <li>Het kan kleren dragen.</li>
+                <li>Maar... <strong>het leeft niet.</strong> Het kan niet lopen of praten.</li>
+            </ul>
+            <p>Je kunt geen paspop aannemen als medewerker. Je hebt een <strong>echt mens</strong> nodig (HumanPlayer). De paspop dient alleen als model (basis) voor de kleding.</p>
+        </div>
+
+
+
+        <h3>De Oplossing: Abstract Class</h3>
+        <p>We moeten tegen PHP zeggen: <em>"De Player class is een concept (een paspop). Je mag deze code gebruiken om van te erven, maar je mag er NOOIT een levend object van maken."</em></p>
+        <p>Dit doen we door het keyword <strong>abstract</strong> voor de class te zetten.</p>
+
+        <pre><code class="language-php">// Let op het woordje 'abstract'
+abstract class Player
+{
+    protected array $hand = [];
+
+    // Gewone methodes werken nog steeds prima!
+    // Kinderen erven dit gewoon over.
+    public function addCard(Card $card) {
+        $this->hand[] = $card;
+    }
+}</code></pre>
+
+        <h3>Wat gebeurt er nu?</h3>
+        <p>Als je nu per ongeluk (of expres) probeert om een algemene speler te maken, grijpt PHP hard in. Je krijgt direct een <strong>Fatal Error</strong> en je script stopt.</p>
+
+        <pre><code class="language-php">// FOUT! Je mag geen concepten tot leven wekken.
+// Error: Cannot instantiate abstract class Player
+$p = new Player("Spookje");
+
+// GOED! HumanPlayer is een 'echte' class (Concreet), dus dit mag.
+$p = new HumanPlayer("Sjaak");</code></pre>
+
+        <div class="info-box">
+            <h3>Terminologie: Abstract vs Concreet</h3>
+            <p>Deze termen kom je overal tegen in OOP:</p>
+            <ul>
+                <li><strong>Abstract Class:</strong> Een blauwdruk of concept. Je mag er géén <code>new</code> op doen. Bedoeld om van te erven.</li>
+                <li><strong>Concrete Class:</strong> Een "afgemaakte" class (zoals Dealer). Je mag er wel <code>new</code> op doen.</li>
+            </ul>
+        </div>
+
+        <h3>Waarom is dit handig? (Type Hinting)</h3>
+        <p>Misschien denk je: <em>"Als ik er geen object van kan maken, is die class dan niet nutteloos?"</em></p>
+        <p>Nee! Het is juist super krachtig voor <strong>Type Hinting</strong>. Omdat <code>HumanPlayer</code> en <code>Dealer</code> allebei afstammen van <code>Player</code>, kun je de abstracte class nog steeds gebruiken als "Filter" in je functies.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Uitsmijter</h3>
+            <p>Stel je hebt een functie <code>addParticipant(Player $p)</code>. Dit is als een uitsmijter bij een club die zegt: "Ik laat alleen <strong>Spelers</strong> binnen."</p>
+            <p>De uitsmijter kijkt naar het paspoort:</p>
+            <ul>
+                <li>Komt er een <strong>HumanPlayer</strong>? -> "Jij bent familie van Player. Kom maar binnen."</li>
+                <li>Komt er een <strong>Dealer</strong>? -> "Jij bent ook familie van Player. Kom maar binnen."</li>
+                <li>Komt er een <strong>Hond</strong>? -> "Jij bent geen familie van Player. Wegwezen!"</li>
+            </ul>
+            <p>Het maakt niet uit dat "Player" zelf abstract is. Het gaat erom dat de objecten die binnenkomen <em>afstammen</em> van Player.</p>
+        </div>
+
+        <pre><code class="language-php">class BlackjackGame
+{
+    private array $players = [];
+
+    // Type Hint: We vragen om een 'Player'.
+    // Omdat Player abstract is, betekent dit: "Geef mij IETS dat van Player afstamt."
+    public function addParticipant(Player $participant)
+    {
+        $this->participants[] = $participant;
+    }
+}
+
+$game = new BlackjackGame();
+
+// DIT WERKT: Want HumanPlayer is een (soort) Player
+$game->addParticipant(new HumanPlayer("Sjaak"));
+
+// DIT WERKT OOK: Want Dealer is een (soort) Player
+$game->addParticipant(new Dealer());
+
+// DIT WERKT NIET: Want Hond heeft niks met Player te maken
+// $game->addParticipant(new Hond());</code></pre>
+
+        <h3>Samenvatting</h3>
+        <p>Met abstracte classes maken we onze code strenger en veiliger.</p>
+        <ul>
+            <li>Gebruik <code>abstract class</code> voor basis-classes die nooit zelfstandig gebruikt mogen worden.</li>
+            <li>Het voorkomt dat je per ongeluk onvolledige objecten ("spoken") aanmaakt met <code>new</code>.</li>
+            <li>Je kunt de abstracte class nog steeds gebruiken als Type Hint om verschillende soorten objecten te accepteren (Polymorfisme).</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

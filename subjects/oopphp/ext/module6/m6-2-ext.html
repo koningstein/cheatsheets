@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstracte Methoden (Uitgebreid) - OOP PHP Module 6</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Abstracte Methoden: Het Contract</h1>
+
+        <p>In de vorige les hebben we geleerd wat een <strong>Abstracte Class</strong> is: een blauwdruk waar je geen object van mag maken. Nu gaan we nog een stapje verder.</p>
+        <p>Soms wil je als Parent class (bijvoorbeeld <code>Player</code>) bepaalde regels afdwingen bij je kinderen. Je weet <em>dat</em> ze iets moeten doen, maar je weet nog niet precies <em>hoe</em> ze dat gaan doen.</p>
+
+        <h3>Het Probleem: Verschillend Gedrag</h3>
+        <p>Denk aan ons Blackjack spel. Elke speler moet op een gegeven moment een keuze maken: <strong>Hit</strong> (kaart pakken) of <strong>Stand</strong> (stoppen).</p>
+        <ul>
+            <li><strong>De Dealer:</strong> Kijkt naar zijn punten. Is het minder dan 17? Dan <em>moet</em> hij hitten.</li>
+            <li><strong>De HumanPlayer:</strong> Kijkt naar het scherm en klikt op een knopje.</li>
+        </ul>
+        <p>De actie is hetzelfde ("Maak een beslissing"), maar de uitvoering is totaal anders. We kunnen deze code dus niet in de Parent class schrijven, want die weet niet wie er speelt.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Vacature</h3>
+            <p>Stel je hebt een vacature voor een "Kok". In de vacature staat een harde eis:</p>
+            <p><strong>"Je moet een eitje kunnen bakken."</strong></p>
+            <p>De vacature (Abstracte Parent) zegt niet <em>hoe</em> je het moet doen. Gekookt? Gebakken? Roerei? Dat maakt niet uit. Maar als je solliciteert (Child Class), <strong>MOET</strong> je kunnen laten zien hoe jij een ei bereidt. Anders krijg je de baan niet.</p>
+        </div>
+
+
+
+        <h3>De Oplossing: Abstracte Methoden</h3>
+        <p>We schrijven een methode in de Parent class zonder inhoud (zonder body). Dit is het contract.</p>
+
+        <pre><code class="language-php">abstract class Player
+{
+    protected array $hand = [];
+
+    // Dit is een normale methode (met body)
+    // Iedereen pakt kaarten op dezelfde manier
+    public function addCard(Card $card) {
+        $this->hand[] = $card;
+    }
+
+    // DIT IS DE ABSTRACTE METHODE
+    // Het contract: "Iedereen die van mij erft, MOET deze functie bouwen."
+    // Let op: Er staan geen accolades {}, maar een puntkomma ;
+    abstract public function makeDecision(): string;
+}</code></pre>
+
+        <h3>De Verplichting (Implementatie)</h3>
+        <p>Zodra je nu een nieuwe class maakt die <code>extends Player</code> doet, gaat PHP controleren of je je aan het contract houdt.</p>
+        <p>Als je vergeet de functie te bouwen, krijg je een <strong>Fatal Error</strong>: <em>"Class Dealer contains 1 abstract method and must therefore be declared abstract or implement the remaining methods."</em></p>
+
+        <p>Laten we de Dealer bouwen (de sollicitant die het contract tekent):</p>
+
+        <pre><code class="language-php">class Dealer extends Player
+{
+    // Hier voldoen we aan het contract.
+    // We schrijven de code die ECHT iets doet.
+    public function makeDecision(): string
+    {
+        // De Dealer logica: simpel en automatisch
+        if ($this->getScore() < 17) {
+            return 'hit';
+        }
+        return 'stand';
+    }
+}</code></pre>
+
+        <p>En nu de HumanPlayer:</p>
+
+        <pre><code class="language-php">class HumanPlayer extends Player
+{
+    // Ook de HumanPlayer moet het contract nakomen
+    public function makeDecision(): string
+    {
+        // De Human logica: complexer (via formulier)
+        // We kijken wat er in de $_POST zit
+        if (isset($_POST['action'])) {
+            return $_POST['action']; // 'hit' of 'stand'
+        }
+        return 'stand';
+    }
+}</code></pre>
+
+        <h3>Waarom doen we dit? (Polymorfisme)</h3>
+        <p>Misschien denk je: <em>"Waarom typen we die lege functie in Player? Ik kan hem toch ook gewoon alleen in Dealer en HumanPlayer zetten?"</em></p>
+        <p>Het antwoord is <strong>garantie</strong>. Omdat het in de Parent staat, weet de rest van je applicatie <strong>100% zeker</strong> dat elke speler deze functie heeft.</p>
+
+        <div class="info-box">
+            <h3>De Universele Afstandsbediening</h3>
+            <p>Omdat we zeker weten dat elke <code>Player</code> een <code>makeDecision()</code> knop heeft, kan de Game class heel simpel blijven.</p>
+            <p>De Game class hoeft niet te vragen: "Ben jij een mens? Zo ja, klik knopje. Ben jij een dealer? Zo ja, reken uit."</p>
+            <p>Nee, de Game class roept gewoon: <strong>"MAAK BESLISSING!"</strong> en het object regelt het zelf.</p>
+        </div>
+
+
+
+        <pre><code class="language-php">class BlackjackGame
+{
+    public function playRound()
+    {
+        // $this->players is een lijst met Dealers én Humans door elkaar
+        foreach ($this->players as $player) {
+
+            // DIT is de kracht van abstracte methoden.
+            // We weten zeker dat makeDecision() bestaat.
+            // PHP kiest automatisch de juiste versie (Dealer of Human).
+            $action = $player->makeDecision();
+
+            if ($action === 'hit') {
+                $player->addCard($this->deck->draw());
+            }
+        }
+    }
+}</code></pre>
+
+        <h3>De Spelregels op een rij</h3>
+        <div class="info-box">
+            <ul>
+                <li>Abstracte methoden mogen <strong>alleen</strong> in een abstracte class staan.</li>
+                <li>Ze hebben <strong>geen body</strong> (geen code tussen <code>{ }</code>), maar eindigen met een <code>;</code>.</li>
+                <li>Elke Child class <strong>MOET</strong> deze methode implementeren (bouwen).</li>
+                <li>De naam, de parameters en het return type (bijv. <code>: string</code>) moeten precies hetzelfde zijn als in het contract.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

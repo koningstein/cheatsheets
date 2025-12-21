@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting (Uitgebreid) - OOP PHP Module 6</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting: Abstractie & Polymorfisme</h1>
+
+        <p>In deze module hebben we ons gericht op het afdwingen van <strong>structuur</strong> in je code. Waar we eerder keken naar hoe je classes maakt, keken we nu naar hoe je strenge regels opstelt voor die classes.</p>
+        <p>Hieronder lopen we de vier belangrijkste concepten in detail door: Abstracte Classes, Abstracte Methoden, Polymorfisme en de Data-flow.</p>
+
+        <h3>1. De Blauwdruk: Abstracte Classes</h3>
+        <p>We begonnen met het probleem dat je van sommige classes eigenlijk geen object zou moeten kunnen maken. Een algemene <code>Player</code> is onvolledig (hij weet niet of hij een mens of computer is), en toch kon je <code>new Player()</code> doen. Dat levert foutgevoelige "spook-objecten" op.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Concept</h3>
+            <p>Denk aan het woord <strong>"Voertuig"</strong>.</p>
+            <ul>
+                <li>Kun je naar de winkel gaan en "een Voertuig" kopen? <strong>Nee.</strong> Dat is te vaag.</li>
+                <li>Je koopt een <strong>Auto</strong> of een <strong>Fiets</strong>.</li>
+            </ul>
+            <p>"Voertuig" is een abstract concept (een categorie). Een Auto is een concreet ding waar je in kunt rijden.</p>
+        </div>
+
+
+
+        <p>Door het keyword <code>abstract</code> voor de class te zetten, verbieden we PHP om objecten van die class te maken.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Type Class</th>
+                    <th>Mag 'new' gebruiken?</th>
+                    <th>Doel</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Abstract</strong> (Player)</td>
+                    <td>❌ Nee (Fatal Error)</td>
+                    <td>Dient als basis en blauwdruk voor anderen. Bevat gedeelde code.</td>
+                </tr>
+                <tr>
+                    <td><strong>Concreet</strong> (Dealer)</td>
+                    <td>✅ Ja</td>
+                    <td>Dient als daadwerkelijk object in je spel.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Het Contract: Abstracte Methoden</h3>
+        <p>Alleen een abstracte class is niet genoeg. We wilden ook garanderen dat elke speler een beslissing kan nemen (Hitten of Passen). Dit deden we met een abstracte methode.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Vacature</h3>
+            <p>De abstracte class stelt een contract op: <em>"Iedereen die familie van mij wil zijn, MOET de functie <code>makeDecision()</code> bouwen."</em></p>
+            <p>De Parent zegt niet <strong>hoe</strong> je het moet doen, alleen <strong>dat</strong> je het moet doen. De Child class ondertekent dit contract door de code te schrijven. Doe je dit niet? Dan krijg je een Fatal Error en crasht je applicatie.</p>
+        </div>
+
+
+
+        <pre><code class="language-php">abstract class Player
+{
+    // HET CONTRACT (geen body, eindigt met ;)
+    abstract public function makeDecision(): string;
+}
+
+class Dealer extends Player
+{
+    // DE ONDERTEKENING (De daadwerkelijke code)
+    public function makeDecision(): string {
+        // De dealer volgt de regels
+        return ($this->getScore() < 17) ? 'hit' : 'stand';
+    }
+}</code></pre>
+
+        <h3>3. De Magie: Polymorfisme</h3>
+        <p>Dit is vaak het lastigste concept. Omdat we met abstracte classes en methoden hebben gegarandeerd dat elke speler op elkaar lijkt, kunnen we ze allemaal op dezelfde manier behandelen in onze code.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Universele Afstandsbediening</h3>
+            <p>Stel je hebt één afstandsbediening met een knop "SPEEL".</p>
+            <ul>
+                <li>Richt je hem op de <strong>Dealer</strong>? Die gaat rekenen en spelen.</li>
+                <li>Richt je hem op de <strong>Mens</strong>? Die kijkt naar zijn opgeslagen keuze.</li>
+            </ul>
+            <p>Jij drukt op dezelfde knop (<code>$player->makeDecision()</code>), maar het resultaat is anders per object. Dat is polymorfisme.</p>
+        </div>
+
+        <h3>4. De Verbinding: Van HTML naar PHP (Data Flow)</h3>
+        <p>Tot slot hebben we de gebruiker (jij) laten praten met het object. Dit proces verwarren veel studenten. Hoe komt die klik op de knop nou in mijn class terecht?</p>
+        <p>Dit werkt als een estafette waarbij een stokje (de data) wordt doorgegeven.</p>
+
+
+
+        <h4>Stap 1: De Start (HTML)</h4>
+        <p>De gebruiker kiest "Hit" in het formulier en klikt op verzenden.</p>
+        <pre><code class="language-html">&lt;form method="POST"&gt;
+    &lt;input type="hidden" name="action" value="hit"&gt;
+    &lt;button type="submit"&gt;Hit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+        <h4>Stap 2: Het Overnamepunt (PHP Controller)</h4>
+        <p>In <code>index.php</code> vangt PHP het formulier op via de superglobal <code>$_POST</code>.</p>
+        <pre><code class="language-php">$actie = $_POST['action']; // Hier zit nu "hit" in</code></pre>
+
+        <h4>Stap 3: Het Doorgeven (De Setter)</h4>
+        <p>Nu moeten we die string "hit" in het object krijgen. De controller zoekt de <code>HumanPlayer</code> en stopt het briefje in zijn zak via een <strong>setter</strong>.</p>
+        <pre><code class="language-php">// We roepen de setter aan
+$humanPlayer->setNextAction($actie); </code></pre>
+
+        <h4>Stap 4: De Finish (Het Object)</h4>
+        <p>Even later start het spel. De Game-class vraagt aan de speler: "Wat wil je doen?". De speler haalt het briefje uit zijn zak en geeft het antwoord.</p>
+        <pre><code class="language-php">// In HumanPlayer.php
+public function makeDecision(): string {
+    return $this->nextAction; // Geeft "hit" terug
+}</code></pre>
+
+        <h3>Conclusie</h3>
+        <p>Door deze stappen te volgen, heb je een scheiding gemaakt tussen:</p>
+        <ul>
+            <li><strong>De interface:</strong> (Het HTML formulier)</li>
+            <li><strong>De besturing:</strong> (index.php die de data doorgeeft)</li>
+            <li><strong>De logica:</strong> (De classes die het spel spelen)</li>
+        </ul>
+        <p>Dit maakt je code netjes, leesbaar en professioneel.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

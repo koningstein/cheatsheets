@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactie & Polymorfisme (Extra Uitgebreid) - OOP PHP Module 6</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Van Klik naar Code: De Grote Verbinding</h1>
+
+        <p>We hebben nu prachtige losse onderdelen gebouwd: een abstracte <code>Player</code>, een slimme <code>Dealer</code> en een <code>HumanPlayer</code>. Maar er ontbreekt nog één cruciaal onderdeel: <strong>De Gebruiker (Jij)</strong>.</p>
+        <p>Tot nu toe deed onze code alles automatisch. Nu gaan we zorgen dat jij via een webpagina (HTML) invloed kunt uitoefenen op het spel. Dit is vaak het moeilijkste stukje om te begrijpen, omdat de data "overspringt" van HTML naar PHP.</p>
+
+        <div class="info-box">
+            <h3>Het Probleem: De "Blinde" Game Loop</h3>
+            <p>Het spel (de <code>Game</code> class) is blind. Hij draait een rondje en vraagt aan elke speler: <em>"Wat wil je doen?"</em> (de methode <code>makeDecision</code>).</p>
+            <ul>
+                <li><strong>De Dealer:</strong> Antwoordt direct. Hij rekent razendsnel uit: "Ik heb 12 punten, dat is te weinig, dus ik wil een kaart."</li>
+                <li><strong>De Mens:</strong> Kan niet rekenen. Die is afhankelijk van jou. De Mens-class moet wachten tot jij op een knop klikt op je scherm.</li>
+            </ul>
+            <p>Hoe krijgen we die klik van jouw muis in het geheugen van de <code>HumanPlayer</code>?</p>
+        </div>
+
+        <h3>De Reis van de Data (Stap voor Stap)</h3>
+        <p>Laten we de reis volgen die de beslissing maakt. Stel jij wilt "Hitten" (een kaart pakken).</p>
+
+        <h4>Stap 1: De Bestelling (HTML Formulier)</h4>
+        <p>Alles begint in de browser. We tonen een formulier. Dit is als de menukaart in een restaurant.</p>
+
+
+
+        <pre><code class="language-html">&lt;!-- templates/game.tpl --&gt;
+&lt;!-- action="index.php": Stuur dit briefje naar de receptie --&gt;
+&lt;form method="POST" action="index.php"&gt;
+
+    &lt;h3&gt;Maak je keuze:&lt;/h3&gt;
+
+    &lt;select name="action" class="form-select"&gt;
+        &lt;option value="hit"&gt;Kaart pakken (Hit)&lt;/option&gt;
+        &lt;option value="stand"&gt;Stoppen (Stand)&lt;/option&gt;
+    &lt;/select&gt;
+
+    &lt;button type="submit"&gt;Bevestig&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+        <h4>Stap 2: De Postbode (index.php)</h4>
+        <p>Wanneer jij op "Bevestig" klikt, wordt het formulier verstuurd. PHP vangt dit op in <code>index.php</code> via de superglobal <code>$_POST</code>.</p>
+        <p>De code in <code>index.php</code> fungeert als de <strong>Controller</strong> (de regelaar). Hij ziet het briefje en denkt: "Hé, de gebruiker wil iets doen. Ik moet dit doorgeven aan de menselijke speler."</p>
+
+        <pre><code class="language-php">// index.php (De Regelaar)
+
+// 1. Check: Is er op de knop gedrukt?
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 2. Lees het briefje: Wat wil de gebruiker?
+    $keuze = $_POST['action']; // Bijv. "hit"
+
+    // 3. Zoek de menselijke speler in het spel
+    // (We gaan ervan uit dat we die kunnen vinden)
+    $human = $game->getHumanPlayer();
+
+    // 4. STOP HET BRIEFJE IN DE ZAK VAN DE SPELER (Setter)
+    // Dit is de cruciale stap! We slaan de keuze op IN het object.
+    $human->setNextAction($keuze);
+
+    // 5. Nu pas starten we de ronde
+    $game->playRound();
+}</code></pre>
+
+        <h4>Stap 3: Het Geheugen (HumanPlayer.php)</h4>
+        <p>Nu kijken we in de <code>HumanPlayer</code>. Hoe onthoudt hij wat er moet gebeuren?</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Marionet</h3>
+            <p>De <code>HumanPlayer</code> is als een marionet. Hij kan zelf niet denken. Hij wacht tot de touwtjes (de input) worden aangetrokken.</p>
+            <ul>
+                <li><strong>De Setter (<code>setNextAction</code>):</strong> Hiermee trekt <code>index.php</code> aan de touwtjes. "Hier is je instructie: je gaat straks Hitten."</li>
+                <li><strong>De Beslissing (<code>makeDecision</code>):</strong> Wanneer het spel vraagt "Wat doe je?", kijkt de marionet naar zijn instructie en zegt: "Ik ga Hitten!"</li>
+            </ul>
+        </div>
+
+        <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4>HumanPlayer.php (De Marionet)</h4>
+                <pre><code class="language-php">class HumanPlayer extends Player {
+    // Het geheugensteuntje
+    private string $savedAction;
+
+    // DE SETTER: Hier komt de data van buitenaf binnen
+    public function setNextAction(string $actie) {
+        $this->savedAction = $actie;
+    }
+
+    // HET CONTRACT: De verplichte methode
+    public function makeDecision(): string {
+        // Hij denkt niet na, hij leest zijn geheugensteuntje
+        return $this->savedAction;
+    }
+}</code></pre>
+            </div>
+            <div style="flex: 1; min-width: 300px;">
+                <h4>Dealer.php (De Robot)</h4>
+                <pre><code class="language-php">class Dealer extends Player {
+
+    // De dealer heeft GEEN setter nodig!
+    // Hij negeert de gebruiker (POST) volledig.
+
+    public function makeDecision(): string {
+        // De dealer gebruikt zijn eigen 'hersenen' (regels)
+        if ($this->getScore() < 17) {
+            return 'hit';
+        }
+        return 'stand';
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <h4>Stap 4: De Uitvoering (Polymorfisme)</h4>
+        <p>Dit is waar de magie gebeurt. De <code>Game</code> class roept de spelers aan. Let op: de Game class weet NIET dat er een formulier is ingevuld. Hij weet alleen dat spelers beslissingen kunnen nemen.</p>
+
+
+
+        <pre><code class="language-php">// Game.php
+public function playRound() {
+    // We lopen door de lijst met spelers (Mens en Dealer door elkaar)
+    foreach ($this->players as $player) {
+
+        // POLYMORFISME IN ACTIE:
+        // We roepen op iedereen dezelfde functie aan: makeDecision().
+
+        // 1. Bij HumanPlayer: Die geeft terug wat we net met de setter hebben ingesteld ("hit").
+        // 2. Bij Dealer: Die rekent het nu ter plekke uit.
+
+        $move = $player->makeDecision();
+
+        // Voer de actie uit
+        if ($move === 'hit') {
+            echo "Speler pakt een kaart!";
+            $player->addCard($this->deck->draw());
+        }
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting van de keten</h3>
+            <ol>
+                <li><strong>Gebruiker:</strong> Kiest "Hit" en klikt op knop.</li>
+                <li><strong>Browser:</strong> Stuurt <code>POST action="hit"</code> naar de server.</li>
+                <li><strong>Index.php:</strong> Vangt "hit" op en roept <code>$human->setNextAction("hit")</code> aan.</li>
+                <li><strong>HumanPlayer:</strong> Slaat "hit" op in een variabele.</li>
+                <li><strong>Game:</strong> Roept <code>$human->makeDecision()</code> aan.</li>
+                <li><strong>HumanPlayer:</strong> Geeft "hit" terug aan de Game.</li>
+                <li><strong>Game:</strong> Geeft de speler een kaart.</li>
+            </ol>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
