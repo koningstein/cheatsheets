@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactie & Polymorfisme (Extra Uitgebreid) - OOP PHP Module 6</title>
+    <title>Verwerken van abstract - OOP PHP Module 6</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Van Klik naar Code: De Grote Verbinding</h1>
+        <h1>Verwerken van abstract</h1>
 
         <p>We hebben nu prachtige losse onderdelen gebouwd: een abstracte <code>Player</code>, een slimme <code>Dealer</code> en een <code>HumanPlayer</code>. Maar er ontbreekt nog één cruciaal onderdeel: <strong>De Gebruiker (Jij)</strong>.</p>
         <p>Tot nu toe deed onze code alles automatisch. Nu gaan we zorgen dat jij via een webpagina (HTML) invloed kunt uitoefenen op het spel. Dit is vaak het moeilijkste stukje om te begrijpen, omdat de data "overspringt" van HTML naar PHP.</p>
@@ -38,8 +38,6 @@
 
         <h4>Stap 1: De Bestelling (HTML Formulier)</h4>
         <p>Alles begint in de browser. We tonen een formulier. Dit is als de menukaart in een restaurant.</p>
-
-
 
         <pre><code class="language-html">&lt;!-- templates/game.tpl --&gt;
 &lt;!-- action="index.php": Stuur dit briefje naar de receptie --&gt;
@@ -91,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </ul>
         </div>
 
+
+
         <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 300px;">
                 <h4>HumanPlayer.php (De Marionet)</h4>
@@ -130,10 +130,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <h4>Stap 4: De Uitvoering (Polymorfisme)</h4>
         <p>Dit is waar de magie gebeurt. De <code>Game</code> class roept de spelers aan. Let op: de Game class weet NIET dat er een formulier is ingevuld. Hij weet alleen dat spelers beslissingen kunnen nemen.</p>
-
-
+        <p>We gebruiken geen <code>echo</code> in de logica, maar slaan berichten op in een array (logboek) om ze later te tonen.</p>
 
         <pre><code class="language-php">// Game.php
+
+// Het logboek waarin we schrijven wat er gebeurt
+public array $gameLog = [];
+
 public function playRound() {
     // We lopen door de lijst met spelers (Mens en Dealer door elkaar)
     foreach ($this->players as $player) {
@@ -148,7 +151,9 @@ public function playRound() {
 
         // Voer de actie uit
         if ($move === 'hit') {
-            echo "Speler pakt een kaart!";
+            // Voeg bericht toe aan logboek (GEEN ECHO)
+            $this->gameLog[] = "Speler " . $player->getName() . " pakt een kaart!";
+
             $player->addCard($this->deck->draw());
         }
     }
@@ -163,7 +168,7 @@ public function playRound() {
                 <li><strong>HumanPlayer:</strong> Slaat "hit" op in een variabele.</li>
                 <li><strong>Game:</strong> Roept <code>$human->makeDecision()</code> aan.</li>
                 <li><strong>HumanPlayer:</strong> Geeft "hit" terug aan de Game.</li>
-                <li><strong>Game:</strong> Geeft de speler een kaart.</li>
+                <li><strong>Game:</strong> Voert de actie uit en schrijft in het logboek.</li>
             </ol>
         </div>
 

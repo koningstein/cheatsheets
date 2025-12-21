@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Properties (Mock Database) - OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Static Properties</h1>
+
+        <p>In de vorige les leerden we over statische methoden (hulpfuncties). Nu gaan we kijken naar statische eigenschappen (variabelen). Dit is een krachtig concept waarmee we data kunnen delen over onze hele applicatie, zonder dat we een echte database nodig hebben.</p>
+
+        <h3>Het Probleem: Versnipperde Data</h3>
+        <p>Stel je voor dat we een winkel (ChipShop) maken in ons spel. We willen hier fiches verkopen. Als we werken zoals we gewend zijn met normale objecten, gebeurt er iets geks:</p>
+
+        <pre><code class="language-php">// In index.php
+$shop1 = new ChipShop(); // Winkel 1
+$shop1->buyChip();       // Voorraad gaat omlaag
+
+// In Game.php
+$shop2 = new ChipShop(); // Winkel 2
+// HEY! Winkel 2 weet niet dat er bij Winkel 1 iets gekocht is.
+// De voorraad is hier weer helemaal vol.</code></pre>
+
+        <p>We hebben nu twee losse winkels die niks van elkaar weten. Dat willen we niet. We willen één centrale voorraad.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Notitieblokje vs. Schoolbord</h3>
+            <p><strong>Normale Property ($this):</strong>
+                <br>Dit is als een persoonlijk notitieblokje. Iedere leerling (Object) heeft zijn eigen blokje. Als Jantje een som maakt in zijn schrift, verschijnt die niet magisch in het schrift van Pietje.</p>
+
+            <p><strong>Static Property (self::):</strong>
+                <br>Dit is het centrale schoolbord voor in de klas. Er hangt er maar één. Als de leraar daar "Huiswerk: Pagina 4" op schrijft, geldt dat voor <strong>iedereen</strong>. Iedereen kijkt naar hetzelfde bord. Als iemand het uitveegt, is het voor iedereen weg.</p>
+        </div>
+
+
+
+        <h3>De Oplossing: Een Mock Database</h3>
+        <p>Omdat we nog geen echte database (zoals MySQL) gebruiken, willen we de producten van onze winkel ergens centraal opslaan in het geheugen van de server. Dit noemen we een <strong>Mock Database</strong> (een "nep" database om mee te oefenen).</p>
+        <p>We gebruiken hiervoor een <code>static property</code>.</p>
+
+        <h4>Stap 1: De Voorraad maken (Private & Static)</h4>
+        <p>We maken een class <code>ChipShop</code> met een statische lijst. We maken deze <code>private</code> voor de veiligheid.</p>
+
+        <pre><code class="language-php">class ChipShop
+{
+    // 'static' betekent: Deze lijst is van de Class zelf.
+    // 'private' betekent: Niemand buiten deze class mag er direct aan zitten.
+    private static array $stock = [];
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Waarom Private?</h3>
+            <p>Stel dat je dit <code>public</code> maakt. Dan kan iemand in <code>index.php</code> per ongeluk zeggen: <code>ChipShop::$stock = [];</code>. Oeps! De hele winkel is leeg voor iedereen. Door het private te maken, dwingen we programmeurs om onze functies te gebruiken.</p>
+        </div>
+
+        <h4>Stap 2: Lazy Loading (Initialisatie)</h4>
+        <p>De array is nu nog leeg. We moeten hem vullen. Maar... wanneer? We kunnen geen constructor gebruiken (<code>__construct</code>), want we maken geen objecten met <code>new</code>.</p>
+        <p>We maken een slimme functie die checkt of de winkel al gevuld is.</p>
+
+        <pre><code class="language-php">    // ... (in class ChipShop)
+
+    public static function initialize(): void
+    {
+        // DE CHECK: Is de winkel leeg?
+        if (empty(self::$stock)) {
+            // Ja, hij is leeg. Vul hem nu met nieuwe fiches.
+            self::$stock = [
+                new Chip('Red', 10),
+                new Chip('Green', 25),
+                new Chip('Black', 100)
+            ];
+        }
+        // Als hij NIET leeg is, doen we niks.
+        // Zo voorkomen we dat de voorraad steeds gereset wordt.
+    }</code></pre>
+
+        <h4>Stap 3: De Getter (Toegang verlenen)</h4>
+        <p>Nu maken we het loket waar de rest van de applicatie de producten kan ophalen.</p>
+
+        <pre><code class="language-php">    public static function getStock(): array
+    {
+        // 1. Zorg eerst dat de winkel bestaat (roep de functie van stap 2 aan)
+        self::initialize();
+
+        // 2. Geef de inhoud van het schoolbord terug
+        return self::$stock;
+    }</code></pre>
+
+        <h3>Het Resultaat: Overal toegang</h3>
+        <p>Het grote voordeel is nu dat we in ons hele project bij de producten kunnen, zonder dat we ingewikkeld hoeven te doen met objecten doorgeven. De <code>ChipShop</code> is overal "in de lucht".</p>
+
+        <pre><code class="language-php">// index.php
+
+// Je hoeft GEEN 'new ChipShop()' te doen.
+// We roepen direct de Class aan met de dubbele punt (::)
+
+$producten = ChipShop::getStock();
+
+foreach ($producten as $chip) {
+    echo "Fiche: " . $chip->color . " kost " . $chip->price;
+}</code></pre>
+
+
+
+        <h3>Wanneer gebruik je dit wel en niet?</h3>
+
+        <p>Static properties zijn krachtig, maar gevaarlijk. Het lijkt op een <strong>Global Variable</strong>.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Situatie</th>
+                    <th>Gebruik Static?</th>
+                    <th>Reden</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Winkelvoorraad</strong></td>
+                    <td>✅ JA</td>
+                    <td>Iedereen kijkt naar dezelfde producten.</td>
+                </tr>
+                <tr>
+                    <td><strong>Configuratie</strong></td>
+                    <td>✅ JA</td>
+                    <td>De taalinstelling ('NL') is voor de hele app gelijk.</td>
+                </tr>
+                <tr>
+                    <td><strong>Speler Levenspunten</strong></td>
+                    <td>❌ NEE</td>
+                    <td>Als speler 1 schade krijgt, mag speler 2 dat niet voelen! Dit moet in een object ($this).</td>
+                </tr>
+                <tr>
+                    <td><strong>Kaarten in Hand</strong></td>
+                    <td>❌ NEE</td>
+                    <td>Iedere speler heeft zijn eigen unieke hand.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

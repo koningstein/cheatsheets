@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protected & Wrappers (Uitgebreid) - OOP PHP Module 5</title>
+    <title>Protected & Wrappers - OOP PHP Module 5</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -20,20 +20,20 @@
     <main class="main-content">
         <h1>Protected properties & wrappers</h1>
 
-        <p>In de vorige les hebben we Inheritance (overerving) geleerd. We hebben een Parent (Player) en een Child (Dealer). Dit werkt geweldig, maar we lopen tegen een beveiligingsprobleem aan.</p>
+        <p>In de vorige les hebben we Inheritance (overerving) geleerd. We hebben nu een Ouder (<code>Player</code>) en een Kind (<code>Dealer</code>). Dit werkt geweldig voor het hergebruiken van code, maar we lopen tegen een beveiligingsprobleem aan.</p>
 
         <h3>Het Probleem met Private</h3>
-        <p>Tot nu toe hebben we geleerd: <em>"Maak properties altijd private."</em></p>
-        <p>Maar <code>private</code> is wel heel erg streng. Het betekent: "Alleen IK mag hierbij. Niemand anders."</p>
+        <p>Tot nu toe was de regel altijd: <em>"Maak properties altijd private."</em></p>
+        <p>Maar <code>private</code> is wel heel erg streng. Het betekent: "Alleen IK (dit bestand) mag hierbij. Niemand anders."</p>
 
         <div class="info-box">
             <h3>De Vergelijking: Het Dagboek</h3>
-            <p>Stel je voor dat de <code>Player</code> (de Ouder) een dagboek heeft. Hij heeft dit <code>private</code> gemaakt.</p>
+            <p>Stel je voor dat de Vader (<code>Player</code>) een dagboek heeft en dit <code>private</code> maakt.</p>
             <ul>
                 <li>Mag de buurman het lezen? <strong>Nee.</strong></li>
                 <li>Mag zijn eigen kind (de <code>Dealer</code>) het lezen? <strong>Nee!</strong></li>
             </ul>
-            <p>Bij <code>private</code> blijven de deuren zelfs gesloten voor je eigen kinderen.</p>
+            <p>Bij <code>private</code> blijven de deuren zelfs gesloten voor je eigen kinderen. Dat is onhandig, want de Dealer moet wel bij zijn eigen kaarten kunnen!</p>
         </div>
 
         <h3>Het gevolg in code</h3>
@@ -53,14 +53,14 @@ class Dealer extends Player {
 }</code></pre>
 
         <h3>De Oplossing: Protected</h3>
-        <p>We hebben een middenweg nodig. We willen dat de buitenwereld (index.php) er niet bij kan, maar de kinderen (Dealer) wel.</p>
+        <p>We hebben een middenweg nodig. We willen dat de buitenwereld (index.php) er nog steeds niet bij kan, maar de kinderen (Dealer) wel.</p>
         <p>Dit heet <strong>protected</strong>.</p>
 
         <div class="info-box">
             <h3>De Vergelijking: Het WiFi-wachtwoord</h3>
             <p>Denk aan het WiFi-wachtwoord van je huis.</p>
             <ul>
-                <li>Mag de buurman (Buitenwereld) het weten? <strong>Nee.</strong></li>
+                <li>Mag de buurman (Buitenwereld) het weten? <strong>Nee.</strong> (Private voor de buitenwereld)</li>
                 <li>Mag jij (Ouder) het weten? <strong>Ja.</strong></li>
                 <li>Mogen je kinderen (Child) het weten? <strong>Ja!</strong></li>
             </ul>
@@ -83,9 +83,7 @@ class Dealer extends Player {
 }</code></pre>
 
         <h3>Overzicht van Toegang (Visibility)</h3>
-        <p>Hier zie je de drie niveaus op een rij. Dit tabelletje moet je goed uit je hoofd leren.</p>
-
-
+        <p>Hier zie je de drie niveaus op een rij. Dit tabelletje is cruciaal om te onthouden.</p>
 
         <div class="table-wrapper">
             <table class="summary-table">
@@ -127,44 +125,56 @@ class Dealer extends Player {
         <p>Maar soms moet de buitenwereld wel <em>iets</em> weten. Bijvoorbeeld de totaalscore. Hiervoor gebruiken we een <strong>Wrapper Method</strong>.</p>
 
         <div class="info-box">
-            <h3>Nieuwe Vergelijking: De Bankmedewerker</h3>
+            <h3>De Vergelijking: De Bankmedewerker</h3>
             <p>Stel je voor dat de class een <strong>Bank</strong> is.</p>
             <ul>
                 <li>De kluis met goud is <code>protected</code> (alleen voor bankmedewerkers).</li>
                 <li>De klant (Buitenwereld) kan niet zomaar de kluis inlopen om geld te pakken.</li>
                 <li>De klant moet naar de baliemedewerker (een <strong>Public Wrapper Method</strong>) gaan.</li>
             </ul>
-            <p>De medewerker (de functie <code>geldOpnemen()</code>) doet eerst een check: "Heb je wel genoeg saldo?". Pas als dat klopt, haalt hij het geld uit de kluis en geeft het aan jou.</p>
+            <p>De medewerker (de functie <code>getScore()</code>) doet eerst een check en geeft je alleen het totaalbedrag, niet de toegang tot de kluis zelf.</p>
         </div>
 
 
 
         <h4>Voorbeeld: Score berekenen</h4>
-        <p>De hand is <code>protected</code>. Niemand mag de kaarten zien of aanraken. Maar we willen wel de score weten.</p>
+        <p>De hand is <code>protected</code>. Niemand mag de kaarten zien of aanraken. Maar we willen wel de score weten. Hier zie je hoe we dat veilig oplossen.</p>
 
+        <h4>De Class (Player.php)</h4>
         <pre><code class="language-php">class Player {
+    // PROTECTED: Alleen toegankelijk voor Player en Dealer
     protected array $hand = [];
 
-    // Deze methode is PUBLIC.
-    // Hij fungeert als het loket waar de buitenwereld informatie mag vragen.
+    // PUBLIC: Dit is de "baliemedewerker". Iedereen mag dit vragen.
     public function getScore(): int {
-        // Omdat deze functie IN de class staat, mag hij bij de protected $hand.
+        // Omdat deze functie ZELF in de familie zit,
+        // mag hij gewoon in de 'protected' hand kijken.
+
         $score = 0;
         foreach ($this->hand as $card) {
             $score += $card->getValue();
         }
+
+        // Hij geeft alleen het eindresultaat terug.
         return $score;
     }
-}
+}</code></pre>
 
-// In index.php:
-$player = new Player();
-// echo $player->hand; // FOUT! Mag niet (Klant mag niet in kluis).
-echo $player->getScore(); // GOED! Via de wrapper methode (Vraag het de medewerker).</code></pre>
+        <h4>Het Gebruik (index.php)</h4>
+        <pre><code class="language-php">$player = new Player();
+
+// FOUT: Dit mag niet!
+// echo $player->hand;
+// Resultaat: Fatal Error: Cannot access protected property
+
+// GOED: Via de wrapper methode
+// We vragen het netjes aan de medewerker.
+echo $player->getScore();
+// Resultaat: 15 (bijvoorbeeld)</code></pre>
 
         <h3>Samenvatting</h3>
         <ul>
-            <li>Gebruik <code>private</code> als echt niemand anders de variabele mag aanraken.</li>
+            <li>Gebruik <code>private</code> als echt niemand anders de variabele mag aanraken (ook kinderen niet).</li>
             <li>Gebruik <code>protected</code> als je kinderen (subclasses) de variabele moeten kunnen gebruiken.</li>
             <li>Gebruik <strong>Wrapper Methods</strong> (public functions) om op een veilige manier data uit een protected variabele naar buiten te brengen.</li>
         </ul>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Update</h1>
+
+        <p>We hebben nu geleerd hoe we data kunnen opslaan (Create) en ophalen (Read). Maar in een echte applicatie staat data nooit stil. Een speler wint geld, iemand verandert zijn wachtwoord, of past zijn profielnaam aan.</p>
+        <p>Hiervoor gebruiken we de <strong>U</strong> van CRUD: <strong>Update</strong>. Dit is een van de krachtigste, maar ook gevaarlijkste operaties in een database.</p>
+
+        <h3>Het Grote Gevaar: De Catastrofe</h3>
+        <p>Bij het updaten van data moet je ontzettend voorzichtig zijn. Eén klein foutje in je code kan desastreuze gevolgen hebben.</p>
+
+        <p>Kijk eens naar deze SQL-zin:</p>
+        <pre><code class="language-sql">UPDATE players SET balance = 1000;</code></pre>
+
+        <p>Zie je wat hier mist? Er staat wel <strong>WAT</strong> er moet gebeuren (saldo naar 1000), maar er staat niet <strong>WIE</strong> dat geld krijgt.</p>
+        <p>De database denkt dan: "Oké, je zegt niets over wie, dus dan geef ik <strong>IEDEREEN</strong> in de hele tabel 1000 punten." <br>
+            In één klap is de voortgang van al je spelers gewist en overschreven. Er is geen 'Undo' knop in een database. Weg is weg.</p>
+
+        <div class="info-box warning">
+            <h3>De Gouden Regel</h3>
+            <p>Een <code>UPDATE</code> commando mag <strong>NOOIT</strong> verstuurd worden zonder een <strong>WHERE</strong> clausule (het filter). Wij gaan onze PHP-code zo bouwen dat dit verplicht is. Geen ID? Dan geen update.</p>
+        </div>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Postbode</h3>
+            <p>Stel je stuurt een verhuisbericht naar de gemeente: <em>"Ik ben verhuisd. Mijn nieuwe adres is Dorpsstraat 1."</em></p>
+            <p>Als je vergeet je <strong>naam</strong> (je ID) op de brief te zetten, raakt de ambtenaar in de war. In het ergste geval denkt hij: "Dit geldt vast voor iedereen", en verandert hij het adres van <strong>alle inwoners</strong> van de stad naar Dorpsstraat 1.</p>
+            <ul>
+                <li><strong>SET:</strong> Het nieuwe adres (de nieuwe data).</li>
+                <li><strong>WHERE:</strong> Jouw naam (het filter/ID).</li>
+            </ul>
+        </div>
+
+        <h3>Deel 1: De Database Methode (De Techniek)</h3>
+        <p>We gaan nu de generieke functie schrijven in onze <code>MysqlDatabase</code> class. Deze moet voor elke tabel werken.</p>
+        <p>Omdat we data hebben voor de SET (nieuwe waarden) en data voor de WHERE (het ID), moeten we oppassen dat de namen van de placeholders niet botsen. Daarom gebruiken we prefixes.</p>
+
+        <pre><code class="language-php">// In MysqlDatabase.php
+
+public function update(string $table, array $data, array $conditions): int
+{
+    // STAP 1: De Veiligheidscheck (Cruciaal!)
+    // We weigeren pertinent om te werken als er geen ID is meegegeven.
+    if (empty($conditions['id'])) {
+        throw new Exception("Update vereist een ID voor veiligheid!");
+    }
+
+    // STAP 2: De SET-lijst bouwen
+    // We moeten een string maken die er zo uitziet: "name = :val_name, balance = :val_balance"
+    $setParts = [];
+
+    foreach (array_keys($data) as $column) {
+        // Waarom 'val_' ervoor?
+        // Stel dat je de kolom 'id' wilt updaten. Dan heet de placeholder :id.
+        // Maar... in de WHERE clausule (stap 6) gebruiken we OOK al :id.
+        // Dat geeft een botsing. Door 'val_' ervoor te zetten, houden we ze uniek.
+        $setParts[] = "$column = :val_$column";
+    }
+
+    $setString = implode(', ', $setParts);
+
+    // STAP 3: De Query samenstellen
+    // Resultaat: "UPDATE players SET balance = :val_balance WHERE id = :id"
+    $sql = "UPDATE $table SET $setString WHERE id = :id";
+
+    // STAP 4: Prepare
+    $stmt = $this->connection->prepare($sql);
+
+    // STAP 5: Bind de DATA (De nieuwe waarden)
+    foreach ($data as $column => $value) {
+        $stmt->bindValue(":val_$column", $value);
+    }
+
+    // STAP 6: Bind het ID (Het doelwit)
+    $stmt->bindValue(":id", $conditions['id']);
+
+    // STAP 7: Uitvoeren
+    $stmt->execute();
+
+    // rowCount() vertelt ons hoeveel rijen er daadwerkelijk zijn aangepast.
+    return $stmt->rowCount();
+}</code></pre>
+
+        <h3>Deel 2: Het Model (De Logica)</h3>
+        <p>In je <code>Player</code> class gebruik je deze techniek. Let op: deze methode doet géén echo's. Hij geeft alleen antwoord op de vraag: "Is het gelukt?" door een getal terug te geven.</p>
+
+        <pre><code class="language-php">// In Player.php
+
+class Player
+{
+    private int $id;       // Bijv. 5
+    private int $balance;  // Bijv. 200
+
+    // Deze functie slaat het huidige saldo op in de database
+    public function save(): int
+    {
+        $db = DatabaseManager::getConnection();
+
+        // We roepen de update functie aan en RETURNEN het resultaat
+        return $db->update(
+            'players',                     // 1. Welke tabel?
+            ['balance' => $this->balance], // 2. Wat is de nieuwe data? (SET)
+            ['id' => $this->id]            // 3. Wie is het? (WHERE)
+        );
+    }
+}</code></pre>
+
+        <h3>Deel 3: De Controller (Het Scherm)</h3>
+        <p>In <code>index.php</code> (of je controller) roepen we de methode aan. Hier bepalen we wat de gebruiker te zien krijgt.</p>
+
+        <pre><code class="language-php">// In index.php
+
+// 1. We hebben een speler object (bijv. uit de sessie of net aangemaakt)
+$player = new Player();
+// ... stel dat de speler net 50 punten heeft gewonnen ...
+
+// 2. We slaan het op
+// De methode save() geeft een getal terug (int).
+$aantalRijenAangepast = $player->save();
+
+// 3. We geven feedback aan de gebruiker
+if ($aantalRijenAangepast > 0) {
+    echo "Succes! Je nieuwe saldo is opgeslagen.";
+} else {
+    // Dit gebeurt als je probeert te updaten naar 200, terwijl het al 200 was.
+    // Of als het ID niet bestaat.
+    echo "Er is niets gewijzigd.";
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Veiligheid:</strong> Bouw een check in je database-class die een Update zonder ID verbiedt.</li>
+                <li><strong>Scheiding:</strong> De Database Class doet de techniek (SQL), de Player Class doet de logica (save), en index.php doet de weergave (echo).</li>
+                <li><strong>Prefixes:</strong> Gebruik <code>val_</code> voor placeholders in de SET-clausule om conflicten met de WHERE-clausule te voorkomen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

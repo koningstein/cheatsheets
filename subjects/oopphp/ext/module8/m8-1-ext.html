@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Interfaces (Uitgebreid) - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Database Interfaces</h1>
+
+        <p>Welkom in Module 8! In de vorige modules raakten we al onze data kwijt zodra we de pagina verversten. Dat gaan we nu oplossen. We gaan data permanent opslaan in een database.</p>
+        <p>Maar... voordat we direct MySQL-code gaan typen, moeten we even stilstaan bij het ontwerp. We willen onze code namelijk flexibel houden.</p>
+
+        <h3>Het Probleem: Te Vast Geplakt</h3>
+        <p>Stel je voor dat je jouw Blackjack-spel bouwt en overal in je code direct commando's schrijft voor <strong>MySQL</strong>.</p>
+        <p>Na een maand zegt je baas: <em>"We stappen over. MySQL is te traag, we gaan alles opslaan in tekstbestanden."</em></p>
+        <p>Dan heb je een enorm probleem. Je moet je hele spel openbreken en honderden regels code aanpassen. Je spel zit te "vast" aan MySQL geplakt.</p>
+
+        <div class="info-box">
+            <h3>Het Stopcontact-principe</h3>
+            <p>Om dit op te lossen, moeten we denken als een elektricien. Denk aan een lamp en een stopcontact.</p>
+            <ul>
+                <li>Jouw lamp (de <strong>Game</strong>) heeft elektriciteit nodig.</li>
+                <li>Het maakt de lamp niet uit <em>waar</em> die stroom vandaan komt (Windmolen? Kolencentrale? Zonnepaneel?).</li>
+                <li>Zolang er maar een stekker in het stopcontact past.</li>
+            </ul>
+            <p>Het <strong>stopcontact</strong> is de <strong>Interface</strong>. Het is een universeel aansluitpunt. De lamp praat tegen het stopcontact, niet direct tegen de energiecentrale.</p>
+        </div>
+
+
+
+        <h3>De Oplossing: Een Interface</h3>
+        <p>In PHP kunnen we zo'n stopcontact maken met het keyword <code>interface</code>. Een interface is eigenlijk een <strong>contract</strong> of een verlanglijstje.</p>
+        <p>Je schrijft erin: <em>"Ik heb een database nodig die de volgende dingen kan doen..."</em>. Je schrijft er <strong>niet</strong> in <em>hoe</em> dat moet gebeuren. Alleen <em>wat</em> er moet gebeuren.</p>
+
+        <h3>De CRUD Operaties</h3>
+        <p>Bij databases praten we vaak over <strong>CRUD</strong>. Dit zijn de vier basisdingen die je met data doet. In ons Blackjack spel ziet dat er zo uit:</p>
+        <ul>
+            <li><strong>C</strong>reate: Score opslaan na een potje.</li>
+            <li><strong>R</strong>ead: Highscores uitlezen.</li>
+            <li><strong>U</strong>pdate: De naam van een speler aanpassen.</li>
+            <li><strong>D</strong>elete: Een valsspeler verwijderen.</li>
+        </ul>
+
+        <p>Laten we dit contract vastleggen in code:</p>
+
+        <pre><code class="language-php">// Het bestand: Database.php
+
+interface Database
+{
+    // Let op: Interfaces hebben GEEN code-blokken (geen { ... }).
+    // Ze eindigen direct met een puntkomma ;
+    // Het zijn alleen de eisen (method signatures).
+
+    // Eis 1: Je moet iets kunnen opslaan
+    public function insert(string $table, array $data): int;
+
+    // Eis 2: Je moet iets kunnen ophalen
+    public function select(string $table, array $conditions = []): array;
+
+    // Eis 3: Je moet iets kunnen wijzigen
+    public function update(string $table, array $data, array $conditions): int;
+
+    // Eis 4: Je moet iets kunnen verwijderen
+    public function delete(string $table, array $conditions): int;
+}</code></pre>
+
+        <h3>Het Contract Ondertekenen (Implementatie)</h3>
+        <p>Nu we het contract (de interface) hebben, hebben we een "werknemer" nodig die het werk daadwerkelijk gaat doen. We maken een echte class aan die verbinding maakt met MySQL.</p>
+        <p>We gebruiken het keyword <code>implements</code>. Hiermee zeg je: <em>"Ik beloof plechtig dat ik alle functies uit de Database interface ga bouwen."</em></p>
+
+        <pre><code class="language-php">// Het bestand: MysqlDatabase.php
+
+// Hier staat: MysqlDatabase TEKENT HET CONTRACT van Database
+class MysqlDatabase implements Database
+{
+    // Omdat we het contract getekend hebben, MOETEN we de functie 'insert' bouwen.
+    // Doen we dat niet? Dan geeft PHP een Fatal Error.
+    public function insert(string $table, array $data): int
+    {
+        // Hier komt straks de ECHTE technische code.
+        // Bijvoorbeeld: "INSERT INTO $table ..."
+        // (De details hiervan leren we in de volgende les)
+
+        return 1; // Geeft ID van nieuwe regel terug
+    }
+
+    // Ook de andere verplichte functies moeten we bouwen:
+    public function select(string $table, array $conditions = []): array {
+        return ["Sjaak", "Henk"]; // Even neppe data teruggeven
+    }
+
+    public function update(string $table, array $data, array $conditions): int { return 1; }
+    public function delete(string $table, array $conditions): int { return 1; }
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Contractbreuk</h3>
+            <p>Als je <code>implements Database</code> opschrijft, maar je vergeet bijvoorbeeld de <code>delete</code> functie te maken, wordt PHP boos:</p>
+            <p><em>Fatal error: Class MysqlDatabase contains 1 abstract method and must therefore be declared abstract or implement the remaining methods.</em></p>
+            <p>Oftewel: Je hebt getekend, dus je moet leveren!</p>
+        </div>
+
+        <h3>Het Grote Voordeel</h3>
+        <p>Waarom doen we al deze moeite? Kijk eens hoe mooi onze Game-code nu wordt:</p>
+
+        <pre><code class="language-php">class Game {
+    private Database $db;
+
+    // Type Hinting: We vragen om 'Database'.
+    // Het maakt ons niet uit of het MySQL, TextFile of Firebase is.
+    // Zolang het maar een 'Database' is (het stopcontact).
+    public function __construct(Database $db) {
+        $this->db = $db;
+    }
+
+    public function saveScore(int $score) {
+        // Wij roepen gewoon 'insert' aan.
+        // De interface garandeert dat dit werkt.
+        $this->db->insert('scores', ['amount' => $score]);
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Interface:</strong> Het universele contract. Definieert <em>wat</em> er moet gebeuren, maar bevat geen code.</li>
+                <li><strong>Implements:</strong> De uitvoerder. De class die belooft het contract uit te voeren.</li>
+                <li><strong>CRUD:</strong> Create, Read, Update, Delete. De vier standaard database acties.</li>
+                <li><strong>Flexibiliteit:</strong> Door interfaces te gebruiken, kun je later makkelijk van database wisselen zonder je game te slopen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

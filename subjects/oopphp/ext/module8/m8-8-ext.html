@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting</h1>
+
+        <p>In de vorige modules was je al je scores en spelers kwijt zodra je de pagina ververste (F5). Dat komt omdat variabelen in het werkgeheugen (RAM) leven. In deze module hebben we geleerd hoe we data opslaan op de harde schijf via een database. Dit noemen we <strong>Persistentie</strong>.</p>
+
+        <h3>1. De Basis: CRUD</h3>
+        <p>Je hebt geleerd dat bijna elke applicatie ter wereld, of het nu Facebook, je bank-app of ons Blackjack spel is, draait om vier basis-acties. Dit noemen we <strong>CRUD</strong>.</p>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Actie</th>
+                    <th>Betekenis</th>
+                    <th>SQL Commando</th>
+                    <th>In Blackjack</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>C</strong>reate</td>
+                    <td>Aanmaken</td>
+                    <td><code>INSERT INTO</code></td>
+                    <td>Je hebt gewonnen! De score wordt opgeslagen in de database.</td>
+                </tr>
+                <tr>
+                    <td><strong>R</strong>ead</td>
+                    <td>Lezen</td>
+                    <td><code>SELECT</code></td>
+                    <td>Je opent de highscore-pagina en ziet de scores van gisteren.</td>
+                </tr>
+                <tr>
+                    <td><strong>U</strong>pdate</td>
+                    <td>Wijzigen</td>
+                    <td><code>UPDATE</code></td>
+                    <td>Je koopt fiches. Je saldo verandert van 100 naar 50.</td>
+                </tr>
+                <tr>
+                    <td><strong>D</strong>elete</td>
+                    <td>Verwijderen</td>
+                    <td><code>DELETE</code></td>
+                    <td>Een speler wordt betrapt op valsspelen en zijn account wordt gewist.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Veiligheid: Het allerbelangrijkste</h3>
+        <p>Als je één ding moet onthouden uit deze module, is het dit: <strong>Vertrouw nooit de gebruiker.</strong></p>
+        <p>Vroeger plakten programmeurs variabelen direct in hun SQL-zinnen. Dit leidde tot <strong>SQL Injection</strong>, waarbij hackers commando's konden uitvoeren op jouw database.</p>
+
+        <div class="info-box warning">
+            <h3>⚠️ De Gouden Regel</h3>
+            <p>Plak <strong>NOOIT</strong> variabelen in een SQL string.</p>
+            <ul>
+                <li>❌ <strong>Fout:</strong> <code>"SELECT * FROM users WHERE name = '$name'"</code></li>
+                <li>✅ <strong>Goed:</strong> <code>"SELECT * FROM users WHERE name = :name"</code></li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Paspoort</h3>
+            <p>We lossen dit op met <strong>Prepared Statements</strong>.
+                <br>Denk aan de douane. Als jij je naam roept ("Ik ben de koning!"), kan de beambte dat opschrijven. Maar als jij je paspoort geeft, scant hij dat. Alles wat in dat paspoort staat wordt gezien als <strong>platte tekst</strong>, nooit als een bevel. Zelfs als er "Verwijder database" in je paspoort staat, leest de database dat gewoon als een hele gekke naam.</p>
+        </div>
+
+
+
+        <h3>3. De Architectuur (Hoe we het gebouwd hebben)</h3>
+        <p>We hebben niet zomaar wat code in bestanden gegooid. We hebben een nette structuur opgezet die professionele programmeurs ook gebruiken.</p>
+
+        <ul>
+            <li><strong>De Interface (Het Contract):</strong>
+                <br>We hebben afgesproken <em>wat</em> een database moet kunnen (select, insert, update, delete). Dit maakt ons flexibel. Als we ooit van MySQL naar iets anders overstappen, hoeven we de rest van de game niet te veranderen.</li>
+
+            <li><strong>De Driver (De Tolk):</strong>
+                <br>We gebruikten <strong>PDO</strong>. Dit is de tolk die PHP vertaalt naar SQL-taal. We hebben deze verstopt in de <code>MysqlDatabase</code> class.</li>
+
+            <li><strong>De Manager (De Regelaar):</strong>
+                <br>We maakten een <code>DatabaseManager</code>. Waarom? Omdat verbinding maken tijd kost. De manager zorgt dat we maar één keer inloggen en die verbinding steeds hergebruiken.</li>
+        </ul>
+
+        <h3>4. Hydration: Van domme data naar slimme objecten</h3>
+        <p>Een database geeft "domme" rijen (arrays) terug. Onze applicatie werkt met "slimme" objecten (zoals <code>Score</code> of <code>Player</code>). De stap daartussenin heet <strong>Hydration</strong>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Vriesdroog Voedsel</h3>
+            <p>Data in de database is als een zakje instant-soep (compact, makkelijk te bewaren).
+                <br>Om het te gebruiken, moet je er water bij doen (Hydrateren).
+                <br>In PHP: Je pakt de data (array), stopt het in een <code>new Score()</code> object, en ineens "leeft" de data en kun je dingen doen als <code>$score->formatDate()</code>.</p>
+        </div>
+
+        <pre><code class="language-php">// 1. De Database geeft een array (Vriesdroog)
+$data = ['points' => 21, 'name' => 'John'];
+
+// 2. Wij Hydrateren het (Water erbij)
+$score = new Score();
+$score->setPoints($data['points']);
+$score->setName($data['name']);
+
+// 3. Nu is het een object dat leeft!
+echo $score->getWinnerMessage();</code></pre>
+
+        <h3>Checklist voor je Eindopdracht</h3>
+        <p>Ga je aan de slag met je eigen project? Loop deze punten na:</p>
+        <ul>
+            <li>✅ <strong>.env bestand:</strong> Staan je wachtwoorden veilig in een <code>.env</code> bestand (en niet in je code)?</li>
+            <li>✅ <strong>Prepared Statements:</strong> Gebruik je overal <code>prepare()</code> en <code>bindValue()</code>?</li>
+            <li>✅ <strong>Update/Delete beveiliging:</strong> Hebben je functies een check die eist dat er een ID wordt meegegeven?</li>
+            <li>✅ <strong>Generiek:</strong> Werkt je <code>insert</code> functie voor de tabel 'scores', maar ook voor 'players'?</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

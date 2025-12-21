@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samenvatting - OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Samenvatting</h1>
+
+        <p>In deze module hebben we een fundamentele stap gezet in Object Georiënteerd Programmeren. Tot nu toe leefde alles in zijn eigen bubbel (het object). In Module 7 hebben we geleerd hoe we die bubbels kunnen doorbreken.</p>
+        <p>Met het <strong>static</strong> keyword hebben we een manier gevonden om data en functies te delen met de hele applicatie, zonder dat we steeds nieuwe objecten hoeven aan te maken.</p>
+
+        <h3>1. Het Grote Verschil: Object vs. Class</h3>
+        <p>Om te begrijpen wat we gedaan hebben, moet je het verschil dromen tussen iets dat van <strong>mij</strong> is (het object) en iets dat van <strong>ons allemaal</strong> is (de class).</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Notitieblok vs. Schoolbord</h3>
+            <ul>
+                <li><strong>Het Object ($this):</strong> Denk aan je eigen notitieblok. Wat jij daarin schrijft (`$this->score`), is privé. Als jouw notitieblok vol is, koop je een nieuwe. Iedere leerling heeft zijn eigen blokje met zijn eigen cijfers.</li>
+                <li><strong>De Class (self::):</strong> Denk aan het schoolbord voorin de klas. Er is er maar één van. Wat de leraar daarop schrijft (`self::$regels`), is voor iedereen zichtbaar. Het blijft staan, ook als leerlingen het lokaal verlaten.</li>
+            </ul>
+        </div>
+
+
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Onderdeel</th>
+                    <th>Object (Mijn blokje)</th>
+                    <th>Class (Het schoolbord)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Keyword</strong></td>
+                    <td>(geen)</td>
+                    <td><code>static</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Levensduur</strong></td>
+                    <td>Tijdelijk (zolang variabele bestaat)</td>
+                    <td>Permanent (zolang script draait)</td>
+                </tr>
+                <tr>
+                    <td><strong>Interne code</strong></td>
+                    <td><code>$this-></code> (Ik)</td>
+                    <td><code>self::</code> (Wij)</td>
+                </tr>
+                <tr>
+                    <td><strong>Externe code</strong></td>
+                    <td><code>$player->methode()</code> (Pijltje)</td>
+                    <td><code>Player::methode()</code> (Dubbele punt)</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. Static Methods (De Gereedschapskist)</h3>
+        <p>Soms wil je een vraag stellen zonder dat je daar een heel object voor nodig hebt. Bijvoorbeeld: "Is 'Harten' een geldige kleur?".</p>
+        <p>Het is zonde van de computerkracht om een <code>new Card()</code> aan te maken, alleen maar om die vraag te stellen. Daarom gebruiken we <strong>static methods</strong>.</p>
+
+        <pre><code class="language-php">class Card {
+    // Een lijstje dat voor ALLE kaarten geldt (Het regelboekje)
+    private static array $suits = ['Hearts', 'Diamonds', 'Spades', 'Clubs'];
+
+    // We hoeven geen kaart vast te houden om dit te checken
+    public static function isValidSuit(string $suit): bool {
+        // BELANGRIJK: Hier bestaat geen $this!
+        // Er is geen "mijn kaart", er is alleen "de regels".
+        return in_array($suit, self::$suits);
+    }
+}</code></pre>
+
+        <p>Hoe gebruik je dit nu? Je roept het direct aan in je <strong>index.php</strong>, zonder <code>new</code> te gebruiken:</p>
+
+        <pre><code class="language-php">// Gebruik in index.php (Let op de dubbele punt ::)
+if (Card::isValidSuit('Hearts')) {
+    echo "Geldig!";
+}</code></pre>
+
+        <h3>3. Static Properties (De Mock Database)</h3>
+        <p>Omdat we nog geen echte database hebben, gebruiken we statische variabelen om onze "winkel" te simuleren. Dit noemen we een <strong>Mock Database</strong>.</p>
+
+        <div class="info-box">
+            <h3>Concept: Lazy Loading</h3>
+            <p>Je zag in de code een slim trucje: <code>if (empty(self::$stock))</code>. Waarom doen we dat?</p>
+            <p>Dit heet <strong>Lazy Loading</strong> (Lui laden). We vullen de winkel pas met producten op het moment dat de eerste klant binnenkomt.
+                <br>Als we dit niet zouden doen, en de klant vraagt 10x om de voorraad, zouden we 10x de lijst opnieuw aanmaken. Dat is zonde. Nu doen we het maar 1 keer.</p>
+        </div>
+
+        <pre><code class="language-php">class ChipShop {
+    // De voorraad in de automaat (gedeeld)
+    private static array $stock = [];
+
+    public static function getStock(): array {
+        // Lazy Loading: Vul hem pas als hij leeg is
+        if (empty(self::$stock)) {
+            self::$stock = [
+                new Chip('Red', 10),
+                new Chip('Blue', 50)
+            ];
+        }
+        return self::$stock;
+    }
+}</code></pre>
+
+        <h3>4. De Transactie (De Samenwerking)</h3>
+        <p>Het hoogtepunt van deze module was het koppelen van de twee werelden. Een transactie is eigenlijk niets meer dan data verplaatsen van de <strong>Static Wereld</strong> (de winkel) naar de <strong>Object Wereld</strong> (de speler).</p>
+
+
+
+        <p>Kijk goed naar de syntax verschillen in dit stukje code. Dit is de kern van Module 7:</p>
+
+        <pre><code class="language-php">// Controller Logic (index.php)
+
+// STAP 1: Haal het product uit de automaat (STATIC ::)
+// We spreken de Class aan.
+$chip = ChipShop::getChipById(1);
+
+// STAP 2: Haal de persoon erbij (OBJECT ->)
+// We spreken een instantie aan uit de sessie.
+$player = $_SESSION['player'];
+
+// STAP 3: De Check (OBJECT ->)
+// We vragen aan de speler: Heb JIJ genoeg geld?
+if ($player->canAfford($chip->getPrice())) {
+
+    // STAP 4: De Ruil (OBJECT ->)
+    // De speler past ZIJN eigen saldo en inventaris aan.
+    $player->pay($chip->getPrice());
+    $player->addChip($chip);
+
+    echo "Gekocht!";
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Wanneer gebruik je GEEN Static?</h3>
+            <p>Veel studenten vinden static makkelijk ("Geen gedoe met <code>new</code>!") en maken vervolgens alles static. Dat is fout.</p>
+            <p>Maak iets <strong>nooit</strong> static als het uniek is voor één gebruiker.</p>
+            <ul>
+                <li><strong>Saldo van een speler?</strong> -> NOOIT Static (anders heeft iedereen hetzelfde saldo).</li>
+                <li><strong>Naam van een speler?</strong> -> NOOIT Static.</li>
+                <li><strong>BTW percentage?</strong> -> JA, Static (geldt voor iedereen).</li>
+            </ul>
+        </div>
+
+        <h3>Wat nu?</h3>
+        <p>Je hebt nu een volledig werkend systeem met spelers, regels en een winkel. Maar... er is één nadeel aan onze Mock Database. Als je de server herstart, of je code aanpast, is de winkelvoorraad weer gereset.</p>
+        <p>In de volgende modules gaan we leren hoe we dit écht permanent kunnen maken door onze PHP code te koppelen aan een <strong>MySQL Database</strong>.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

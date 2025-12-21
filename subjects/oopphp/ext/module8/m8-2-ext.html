@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectie & Configuratie (Uitgebreid) - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Connectie & Configuratie</h1>
+
+        <p>In de vorige les hebben we het <strong>Contract</strong> (de Interface) opgesteld. We hebben beloofd dat we een database gaan bouwen die kan opslaan, lezen, updaten en verwijderen (CRUD).</p>
+        <p>Nu gaan we die belofte inlossen. We gaan de <code>MysqlDatabase</code> class bouwen. Maar voordat we data kunnen versturen, moeten we eerst de telefoonlijn naar de database openen. Dit is een precies werkje.</p>
+
+        <h3>1. De Tolk: PDO</h3>
+        <p>PHP kan niet zomaar rechtstreeks met elke database praten. Databases (zoals MySQL, PostgreSQL, SQLite) spreken allemaal net een ander dialect. Als PHP direct met MySQL zou praten, zou je hele code breken als je ooit besluit over te stappen naar een ander systeem.</p>
+        <p>Daarom gebruiken we een slimme tussenpersoon: <strong>PDO</strong> (PHP Data Objects).</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Wereldtolk</h3>
+            <p>Stel je voor dat jij (PHP) op reis gaat. Je wilt praten met iemand die Spaans spreekt (MySQL). Jij spreekt zelf geen Spaans.</p>
+            <p>Je neemt een tolk mee (PDO). Jij zegt tegen de tolk: <em>"Haal de data op"</em>. De tolk vertaalt dit perfect voor de Spanjaard. Als je morgen naar Italië gaat (PostgreSQL), neem je dezelfde tolk mee. Hij vertaalt jouw opdracht dan naar het Italiaans.</p>
+            <p><strong>Voordeel:</strong> Jij hoeft alleen maar te weten hoe je met de tolk praat. De rest regelt hij.</p>
+        </div>
+
+
+
+        <h3>2. Veiligheid Eerst: Het .env Bestand</h3>
+        <p>Om verbinding te maken heb je vier geheime sleutels nodig:</p>
+        <ol>
+            <li><strong>Host:</strong> Waar staat de server? (meestal <code>localhost</code>).</li>
+            <li><strong>Database:</strong> Hoe heet de bak met data? (<code>blackjack_db</code>).</li>
+            <li><strong>Username:</strong> Wie ben jij? (<code>root</code>).</li>
+            <li><strong>Password:</strong> Het wachtwoord.</li>
+        </ol>
+
+        <div class="info-box warning">
+            <h3>Het Grote Gevaar</h3>
+            <p>Zet deze gegevens <strong>NOOIT</strong> direct in je PHP-code! Waarom niet?</p>
+            <p>Als je jouw code deelt (bijvoorbeeld op GitHub), kan de hele wereld je wachtwoorden lezen. Hackers scannen GitHub continu op zoek naar deze foutjes. Binnen enkele minuten is je database gehackt.</p>
+        </div>
+
+        <h4>De Oplossing: Environment Variables</h4>
+        <p>We bewaren de sleutels in een apart bestand genaamd <code>.env</code>. Dit bestand zetten we in onze <code>.gitignore</code>, zodat het nooit naar GitHub wordt geüpload. Het blijft veilig op je eigen computer staan.</p>
+
+        <pre><code class="language-ini"># Dit is het .env bestand (Veilig in je map, niet op internet)
+DB_HOST=localhost
+DB_NAME=blackjack_db
+DB_USER=root
+DB_PASS=SuperGeheimWachtwoord123!</code></pre>
+
+        <h3>3. De Verbinding Maken (Stap voor Stap)</h3>
+        <p>Nu gaan we de code schrijven in onze <code>MysqlDatabase</code> class. Dit is het moment dat we de lijn openen. We gebruiken de gegevens uit het <code>.env</code> bestand (die PHP kan inlezen via <code>$_ENV</code>) om PDO te starten.</p>
+
+        <h4>Stap A: De DSN (Het Adres)</h4>
+        <p>PDO heeft een speciaal adres nodig om de database te vinden. Dit noemen we de DSN (Data Source Name). Het ziet er ingewikkeld uit, maar het is eigenlijk gewoon een adresregel:</p>
+        <p><code>mysql:host=localhost;dbname=blackjack_db;charset=utf8mb4</code></p>
+        <p>Het vertelt PDO: "Gebruik de MySQL driver, ga naar localhost, pak de blackjack database en praat in moderne tekens (utf8)."</p>
+
+        <h4>Stap B: Het Try-Catch Blok</h4>
+        <p>Verbinding maken is risicovol. De server kan down zijn, of het wachtwoord kan fout zijn. Als dat gebeurt, crasht PHP normaal gesproken met een lelijke foutmelding (waarin soms je wachtwoord zichtbaar is!).</p>
+        <p>Daarom gebruiken we <code>try { ... } catch { ... }</code>. We "proberen" het, en als het misgaat, "vangen" we de fout netjes op.</p>
+
+        <pre><code class="language-php">class MysqlDatabase implements Database
+{
+    // Hier bewaren we de actieve lijn met de database
+    private PDO $connection;
+
+    public function __construct()
+    {
+        // Stap 1: Haal de sleutels uit de kluis (.env)
+        $host = $_ENV['DB_HOST'];
+        $db   = $_ENV['DB_NAME'];
+        $user = $_ENV['DB_USER'];
+        $pass = $_ENV['DB_PASS'];
+
+        // Stap 2: Bouw het adres (DSN)
+        $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+
+        // Stap 3: Probeer te bellen (Try)
+        try {
+            // We maken een nieuw PDO object aan (de verbinding)
+            // Als dit lukt, zit de verbinding in $this->connection
+            $this->connection = new PDO($dsn, $user, $pass);
+
+            // OPTIE 1: Zet foutmeldingen AAN
+            // Als er iets misgaat in een query, willen we een harde foutmelding (Exception).
+            // Zo kunnen we bugs makkelijk vinden tijdens het bouwen.
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // OPTIE 2: Nette Arrays
+            // Standaard geeft PDO data dubbel terug (op nummer én op naam).
+            // Wij willen alleen de namen (bijv: ['score' => 21]). Dat is schoner.
+            $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+            // Als we hier zijn: SUCCESS! We zijn verbonden.
+
+        } catch (PDOException $e) {
+            // Stap 4: Vang fouten op (Catch)
+            // Als het mislukt, stopt het script hier.
+            // We tonen de foutmelding van PDO ($e->getMessage()) aan de programmeur.
+            die("Kan geen verbinding maken met de database: " . $e->getMessage());
+        }
+    }
+}</code></pre>
+
+        <h3>4. Efficiëntie: De Verbinding Hergebruiken</h3>
+        <p>Het maken van een verbinding kost tijd (milliseconden). Als je 10x een query doet in je spel, wil je niet 10x opnieuw inloggen bij de database. Je wilt één keer inloggen en die lijn open houden.</p>
+        <p>In de vorige module hebben we geleerd over <strong>Static</strong>. Dit is een perfect moment om dat te gebruiken. We maken een <strong>DatabaseManager</strong> om de verbinding centraal te bewaren.</p>
+
+
+
+        <pre><code class="language-php">// index.php (aan het begin van je script)
+
+// 1. Maak de verbinding (de constructor die we hierboven schreven wordt nu uitgevoerd)
+$db = new MysqlDatabase();
+
+// 2. Geef de verbinding aan de manager (Static)
+DatabaseManager::setConnection($db);
+
+// Later in het spel...
+// De Game class heeft de database nodig? Hij pakt gewoon de bestaande verbinding!
+$gameDb = DatabaseManager::getConnection();</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>PDO:</strong> De tolk die zorgt dat PHP met elke database kan praten.</li>
+                <li><strong>.env:</strong> Het bestand waar je wachtwoorden veilig opbergt (niet in de code!).</li>
+                <li><strong>DSN:</strong> De adresregel van je database (host, naam, tekenset).</li>
+                <li><strong>Try-Catch:</strong> Het vangnet voor als de verbinding mislukt, zodat je geen wachtwoorden lekt in foutmeldingen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

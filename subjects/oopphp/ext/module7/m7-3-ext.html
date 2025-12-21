@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static gebruiken - OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Static gebruiken</h1>
+
+        <p>In de vorige lessen hebben we twee losse werelden gebouwd. Nu is het tijd om ze aan elkaar te koppelen. Dit is vaak het lastigste stukje, omdat je moet schakelen tussen <strong>Static</strong> code en <strong>Object</strong> code.</p>
+
+        <div class="info-box">
+            <h3>De Spelers</h3>
+            <ol>
+                <li><strong>De Statische Wereld (ChipShop):</strong> De voorraadkast. Die staat er altijd, gevuld met fiches. Hij "leeft" niet, hij is er gewoon.</li>
+                <li><strong>De Object Wereld (HumanPlayer):</strong> De speler. Hij leeft wel. Hij heeft een portemonnee (`$balance`) die verandert en een eigen verzameling fiches.</li>
+                <li><strong>De Regelaar (Index.php):</strong> De code die bemiddelt tussen de kast en de speler.</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Snoepautomaat</h3>
+            <p>Zie de <code>ChipShop</code> als een snoepautomaat in de kantine.</p>
+            <ul>
+                <li>De automaat staat vastgeschroefd (Static). Hij loopt niet weg en heeft voor iedereen dezelfde producten.</li>
+                <li>Jij (het Object) loopt erheen.</li>
+                <li>Jij stopt geld in de automaat.</li>
+                <li>De automaat geeft een reep chocolade terug.</li>
+            </ul>
+            <p><strong>Resultaat:</strong> Jij wordt armer (saldo omlaag), maar je bezit meer (item erbij). De automaat blijft gewoon staan voor de volgende klant.</p>
+        </div>
+
+
+
+        <h3>Stap 1: De Bestelling (Input & Data)</h3>
+        <p>Alles begint wanneer de speler in de winkel op de knop "Koop Rood Fiche" klikt.
+            In het formulier wordt het ID van het fiche verstuurd (bijvoorbeeld: Rood is ID 1).</p>
+
+        <p>In <code>index.php</code> moeten we nu twee dingen verzamelen:</p>
+        <ol>
+            <li><strong>WAT</strong> wil je kopen? (Komt uit het formulier: <code>$_POST</code>).</li>
+            <li><strong>WIE</strong> wil het kopen? (Komt uit het geheugen: <code>$_SESSION</code>).</li>
+        </ol>
+
+        <pre><code class="language-php">// index.php - De Regelaar
+
+if ($action === 'buy_chip') {
+    // 1. Haal het ID op uit het formulier
+    $chipId = $_POST['chip_id'];
+
+    // 2. Haal de speler uit de sessie (daar hadden we hem bewaard)
+    // Let op: Dit is een Object (HumanPlayer)
+    $player = $_SESSION['human_player'];
+
+    // ... hierna gaan we de koop regelen ...
+}</code></pre>
+
+        <h3>Stap 2: Het Product zoeken (Static)</h3>
+        <p>De speler roept: "Ik wil nummer 1!". Nu moeten we in de automaat (de Static Shop) kijken wat nummer 1 eigenlijk is en wat het kost.</p>
+        <p>We hebben hiervoor geen <code>new ChipShop()</code> nodig. We vragen het direct aan de class (het model).</p>
+
+        <pre><code class="language-php">    // ... vervolg index.php ...
+
+    // We roepen de statische methode aan met ::
+    // De shop zoekt in zijn lijst en geeft het 'Chip' object terug.
+    // Als het niet bestaat, krijgen we 'null' terug.
+    $chipToBuy = ChipShop::getChipById($chipId);</code></pre>
+
+        <h3>Stap 3: De Check (Validatie & Veiligheid)</h3>
+        <p>Nu komt het belangrijkste moment. <strong>Mag</strong> deze transactie wel doorgaan?</p>
+
+        <div class="info-box warning">
+            <h3>Encapsulatie: Blijf van mijn geld af!</h3>
+            <p>Een veelgemaakte fout is om in <code>index.php</code> dit te doen:</p>
+            <pre><code class="language-php">// FOUT! Index.php mag niet zomaar in de portemonnee graaien!
+if ($player->balance >= 10) {
+    $player->balance -= 10;
+}</code></pre>
+            <p>In OOP geldt de regel: <strong>Tell, don't ask.</strong> Je moet het object <em>vragen</em> of hij het kan betalen. De portemonnee is privé (<code>private</code>).</p>
+        </div>
+
+        <p>We maken dus een nette methode in de <code>HumanPlayer</code> class:</p>
+
+        <pre><code class="language-php">// In HumanPlayer.php
+
+    // Helper functie om saldo te checken
+    public function canAfford(float $price): bool
+    {
+        // Is mijn saldo groter of gelijk aan de prijs?
+        return $this->balance >= $price;
+    }</code></pre>
+
+        <h3>Stap 4: De Daadwerkelijke Ruil (State Change)</h3>
+        <p>Als het antwoord "Ja" is, voeren we de ruil uit. Dit bestaat uit twee handelingen die de <strong>staat</strong> van het object veranderen:</p>
+        <ol>
+            <li>Geld afschrijven (<code>pay</code>).</li>
+            <li>Fiche toevoegen aan inventaris (<code>addChip</code>).</li>
+        </ol>
+
+
+
+        <pre><code class="language-php">// In HumanPlayer.php
+
+    public function pay(float $amount): void
+    {
+        // Veiligheid voorop: check het NOG een keer
+        if ($this->canAfford($amount)) {
+            $this->balance -= $amount; // Saldo omlaag
+        }
+    }
+
+    public function addChip(Chip $chip): void
+    {
+        // Fiche in de zak stoppen
+        $this->chips[] = $chip;
+    }</code></pre>
+
+        <h3>Stap 5: Alles samenbrengen (De Controller Logic)</h3>
+        <p>Nu plakken we alle stukjes aan elkaar in <code>index.php</code>. Hier bepalen we de <strong>Happy Path</strong> (alles gaat goed) en de <strong>Unhappy Path</strong> (fouten).</p>
+
+        <pre><code class="language-php">// index.php - De Transactie Code
+
+// 1. BESTAAT HET? (Checken in de Static Shop)
+if ($chipToBuy !== null) {
+
+    // 2. KAN JE HET BETALEN? (Vragen aan het Object)
+    if ($player->canAfford($chipToBuy->getPrice())) {
+
+        // --- HAPPY PATH (Alles is goed) ---
+
+        // 3. Voer de transactie uit
+        $player->pay($chipToBuy->getPrice()); // Betalen
+        $player->addChip($chipToBuy);         // Fiche aannemen
+
+        // 4. Feedback naar de gebruiker
+        // Erg belangrijk! Anders denkt de gebruiker dat er niks gebeurd is.
+        $message = "Gelukt! Je hebt een " . $chipToBuy->getColor() . " fiche gekocht.";
+
+    } else {
+        // --- UNHAPPY PATH (Te weinig geld) ---
+        $error = "Helaas, je hebt niet genoeg geld!";
+    }
+
+} else {
+    // --- UNHAPPY PATH (Product bestaat niet) ---
+    $error = "Dit fiche bestaat niet meer.";
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <p>Een transactie is een dans tussen drie partijen:</p>
+            <ul>
+                <li><strong>De Controller (index.php):</strong> De regelaar die de input opvangt en de checks uitvoert.</li>
+                <li><strong>De Static Class (ChipShop):</strong> De automaat die informatie geeft over producten (<code>::</code>).</li>
+                <li><strong>Het Object (HumanPlayer):</strong> De persoon die betaalt en spullen bewaart (<code>-></code>).</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

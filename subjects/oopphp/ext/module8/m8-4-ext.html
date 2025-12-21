@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simpele select - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Simpele select</h1>
+
+        <p>In de vorige les hebben we data opgeslagen (Create). Nu gaan we die data weer ophalen (Read). Dit lijkt simpel: <code>SELECT * FROM scores</code>. Maar in een grote applicatie is dat niet genoeg.</p>
+        <p>We willen onze database-klasse slim maken. We willen voorbereid zijn op de toekomst, waarin we data uit meerdere tabellen tegelijk halen (bijvoorbeeld: de score uit tabel A en de spelernaam uit tabel B).</p>
+
+        <h3>Het Probleem: Dubbele Namen</h3>
+        <p>Stel je hebt twee tabellen: <code>players</code> en <code>scores</code>. Allebei de tabellen hebben een kolom die <code>id</code> heet. Als je zomaar alles opvraagt, raakt PHP in de war: "Welk ID bedoel je nou?"</p>
+        <p>Daarom moeten we specifiek zijn. We moeten de database vertellen: "Ik wil de <code>id</code> van <code>players</code> en de <code>points</code> van <code>scores</code>."</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Achternamen</h3>
+            <p>Stel je zit in een klas met twee jongens die "Jan" heten. Als de leraar roept: "Jan, kom hier!", weten ze niet wie er bedoeld wordt.</p>
+            <p>De leraar moet specifiek zijn: "Jan Jansen" of "Jan de Vries".</p>
+            <p>In SQL doen we hetzelfde. We zetten de tabelnaam (de achternaam) voor de kolomnaam (de voornaam), gescheiden door een punt: <code>players.name</code> of <code>scores.points</code>.</p>
+        </div>
+
+        <h3>Stap 1: De Bestelling (De Array)</h3>
+        <p>We gaan onze `select` methode zo bouwen dat hij precies weet wat we willen hebben. We geven geen losse string mee, maar een gestructureerde array.</p>
+        <ul>
+            <li>De <strong>Key</strong> is de tabelnaam (De achternaam).</li>
+            <li>De <strong>Value</strong> is een lijstje met kolommen die we willen hebben (De voornamen).</li>
+        </ul>
+
+        <pre><code class="language-php">// De bestelling:
+$tablesAndColumns = [
+    'scores'  => ['*'],              // Uit 'scores' wil ik alles
+    'players' => ['name', 'avatar']  // Uit 'players' wil ik alleen de naam en avatar
+];
+
+// We sturen de bestelling naar onze database class
+$db->select($tablesAndColumns);</code></pre>
+
+        <h3>Stap 2: De Code Bouwen (Dynamische SQL)</h3>
+        <p>Nu gaan we de <code>select</code> functie schrijven in onze <code>MysqlDatabase</code> class. Deze functie moet de array hierboven omtoveren tot een geldige SQL-zin.</p>
+        <p>Het doel is om deze string te maken:<br>
+            <code>SELECT scores.*, players.name, players.avatar FROM scores, players</code></p>
+
+
+
+        <pre><code class="language-php">    // In MysqlDatabase.php
+
+    public function select(array $tableColumns, array $conditions = []): array
+    {
+        $selectedColumns = []; // Hier verzamelen we: "tabel.kolom"
+        $tableNames = [];      // Hier verzamelen we: "tabelnaam"
+
+        // STAP A: Loop door de bestelling heen
+        foreach ($tableColumns as $table => $columns) {
+
+            // Bewaar de tabelnaam voor later (voor achter de FROM)
+            $tableNames[] = $table;
+
+            // Nu kijken we naar de kolommen van DEZE tabel
+            foreach ($columns as $column) {
+                if ($column === '*') {
+                    // Als we alles willen: "tabelnaam.*"
+                    $selectedColumns[] = "$table.*";
+                } else {
+                    // Als we iets specifieks willen: "tabelnaam.kolomnaam"
+                    $selectedColumns[] = "$table.$column";
+                }
+            }
+        }
+
+        // STAP B: Plakken (Implode)
+        // Maak er één lange string van, gescheiden door komma's
+        $columnString = implode(', ', $selectedColumns); // "scores.*, players.name"
+        $tableString  = implode(', ', $tableNames);      // "scores, players"
+
+        // STAP C: De Query samenstellen
+        $sql = "SELECT $columnString FROM $tableString";
+
+        // Let op: We hebben nog geen WHERE.
+        // Als je dit nu uitvoert met meerdere tabellen krijg je heel veel data.
+        // Dat lossen we in een latere les op.
+
+        // STAP D: Uitvoeren
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+
+        // Geef de resultaten terug als een array
+        return $stmt->fetchAll();
+    }</code></pre>
+
+        <h3>Stap 3: Hydration (Leven inblazen)</h3>
+        <p>De database geeft ons nu een lijst met data terug. Maar... het zijn nog steeds "domme" arrays (associatieve arrays). Wij willen werken met slimme <strong>Objecten</strong> (zoals een <code>Score</code> object).</p>
+        <p>Het proces van het omzetten van een domme array naar een slim object noemen we <strong>Hydration</strong>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Vriesdroog Voedsel</h3>
+            <p>De data in de database is als <strong>vriesdroog voedsel</strong> (of een pakje instant soep). Het is compact, makkelijk te bewaren, maar je kunt er nog niet zoveel mee.</p>
+            <p>Om het te kunnen eten, moet je er water bij doen. Je moet het "hydrateren".</p>
+            <p>In PHP is de array de "droge" data. Door er een <code>new Score()</code> van te maken en de data erin te stoppen, blaas je er leven in. Het object kan methodes uitvoeren, berekeningen doen en zichzelf beschermen.</p>
+        </div>
+
+
+
+        <p>Laten we een lijst met scores ophalen en ze hydrateren:</p>
+
+        <pre><code class="language-php">class ScoreList
+{
+    // Hierin bewaren we straks de slimme objecten
+    private array $scores = [];
+
+    public function loadAll()
+    {
+        $db = DatabaseManager::getConnection();
+
+        // 1. Haal de 'droge' data op (Arrays)
+        $rows = $db->select(['scores' => ['*']]);
+
+        // 2. Loop door de resultaten
+        foreach ($rows as $row) {
+
+            // 3. HYDRATION: Maak een object aan
+            $scoreObject = new Score();
+
+            // Vul het object met de data uit de database
+            $scoreObject->setPoints($row['points']);
+            $scoreObject->setPlayerName($row['name']);
+            // ... enzovoorts ...
+
+            // 4. Bewaar het object in onze lijst
+            $this->scores[] = $scoreObject;
+        }
+    }
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Waarom niet gewoon arrays gebruiken?</h3>
+            <p>Met arrays heb je geen controle. Je kunt per ongeluk <code>$row['puntn']</code> typen (typfout) en PHP zegt niks. Bij objecten heb je methodes: <code>$score->getPoints()</code>. Als je dat fout typt, crasht je editor of PHP direct met een duidelijke foutmelding. Objecten zijn veiliger en slimmer.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>Select:</strong> We bouwen de query dynamisch op zodat we specifiek kunnen zijn (<code>tabel.kolom</code>).</li>
+            <li><strong>Implode:</strong> Een handige functie om arrays om te zetten naar een string met komma's.</li>
+            <li><strong>Hydration:</strong> Het proces van data omzetten van een ruwe database-array naar een krachtig PHP-object.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

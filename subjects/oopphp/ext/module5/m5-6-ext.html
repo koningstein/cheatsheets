@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constructors & Inheritance (Uitgebreid) - OOP PHP Module 5</title>
+    <title>Constructors & Inheritance - OOP PHP Module 5</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@
     <main class="main-content">
         <h1>Constructors & Inheritance</h1>
 
-        <p>We weten nu hoe classes van elkaar kunnen erven (Child en Parent). Maar er ontstaat een lastig probleem zodra we <strong>Constructors</strong> (<code>__construct</code>) gaan gebruiken bij overerving.</p>
-        <p>De vraag is namelijk: wie doet het voorbereidende werk bij het opstarten van een object?</p>
+        <p>We weten nu hoe classes van elkaar kunnen erven (Child en Parent). Een <code>Dealer</code> erft bijvoorbeeld van <code>Player</code>. Maar er ontstaat een lastig probleem zodra we <strong>Constructors</strong> (<code>__construct</code>) gaan gebruiken bij overerving.</p>
+        <p>De vraag is namelijk: wie doet het voorbereidende werk bij het opstarten van een object? De ouder of het kind?</p>
 
         <div class="info-box">
             <h3>De Vergelijking: Een Huis Bouwen</h3>
@@ -38,41 +38,46 @@
         <p><strong>Als een Child class een eigen constructor heeft, wordt de constructor van de Parent NIET meer automatisch uitgevoerd.</strong></p>
         <p>PHP denkt namelijk: "Jij hebt in het Child zelf een start-functie geschreven. Jij zult wel weten wat je doet, dus ik negeer de oude start-functie van de Parent."</p>
 
-
-
         <h3>Voorbeeld: Waar het misgaat</h3>
         <p>Laten we kijken naar ons Blackjack spel. We hebben twee eisen:</p>
         <ul>
-            <li><strong>Player (Parent):</strong> Wil bij het opstarten de <code>$name</code> instellen.</li>
-            <li><strong>HumanPlayer (Child):</strong> Wil bij het opstarten het startgeld (<code>$balance</code>) instellen.</li>
+            <li><strong>Player (De Aannemer):</strong> Wil bij het opstarten de <code>$name</code> instellen.</li>
+            <li><strong>HumanPlayer (De Stylist):</strong> Wil bij het opstarten het startgeld (<code>$balance</code>) instellen.</li>
         </ul>
 
-        <pre><code class="language-php">// De Ouder (Player.php)
-class Player {
+        <h4>1. De Ouder (Player.php)</h4>
+        <pre><code class="language-php">class Player {
     protected string $name;
 
+    // De taak van de ouder: De naam opslaan
     public function __construct(string $name) {
-        // Dit is essentieel: De naam wordt opgeslagen!
         $this->name = $name;
     }
-}
 
-// Het Kind (HumanPlayer.php)
-class HumanPlayer extends Player {
+    public function getName(): string {
+        return $this->name;
+    }
+}</code></pre>
+
+        <h4>2. Het Kind (HumanPlayer.php) - FOUTE VERSIE</h4>
+        <pre><code class="language-php">class HumanPlayer extends Player {
     private int $balance;
 
     // We maken een EIGEN constructor...
+    // Hierdoor wordt de constructor van Player OVERSCHREVEN.
     public function __construct(int $startGeld) {
         $this->balance = $startGeld;
 
-        // HELP! We zijn vergeten de constructor van Player aan te roepen.
-        // De variabele $this->name blijft dus leeg!
+        // HELP! We zijn vergeten de aannemer te bellen.
+        // De variabele $this->name wordt nooit ingesteld!
     }
-}
+}</code></pre>
 
-// Het resultaat in index.php:
-$sjaak = new HumanPlayer(1000);
-// FOUT! De naam is nooit ingesteld, want Player::__construct is nooit gedraaid.
+        <h4>3. Het Resultaat (index.php)</h4>
+        <pre><code class="language-php">$sjaak = new HumanPlayer(1000);
+
+// Dit geeft een foutmelding of een lege naam
+// Omdat Player::__construct nooit heeft gedraaid.
 echo $sjaak->getName(); </code></pre>
 
         <h3>De Oplossing: parent::__construct()</h3>
@@ -80,59 +85,68 @@ echo $sjaak->getName(); </code></pre>
         <p><code>parent::__construct();</code></p>
         <p>Meestal doe je dit op de <strong>allereerste regel</strong> van je functie, zodat de basis (fundering) staat voordat je verder gaat.</p>
 
-        <h3>Hoe werkt dat met parameters? (Het Doorgeefluik)</h3>
+        <h3>Het Doorgeefluik</h3>
         <p>Dit is het lastigste stukje. De <code>HumanPlayer</code> constructor moet nu <strong>alle</strong> informatie ontvangen die nodig is voor hemzelf én voor zijn ouder.</p>
 
         <div class="info-box">
-            <h3>Het Doorgeefluik Diagram</h3>
+            <h3>Stel je voor: De Trechter</h3>
             <p>Zie de constructor van het Child als een trechter.</p>
             <ol>
-                <li>Er komen 2 dingen binnen: <strong>Naam</strong> en <strong>Geld</strong>.</li>
-                <li>Het Child pakt het <strong>Geld</strong> en stopt het in zijn eigen zak (<code>$this->balance</code>).</li>
+                <li>Er komen 2 dingen binnen: <strong>Naam</strong> (voor papa) en <strong>Geld</strong> (voor mij).</li>
                 <li>Het Child pakt de <strong>Naam</strong> en geeft die door naar boven, naar de Parent (<code>parent::__construct</code>).</li>
+                <li>Het Child pakt het <strong>Geld</strong> en stopt het in zijn eigen zak (<code>$this->balance</code>).</li>
             </ol>
         </div>
 
 
 
-        <p>Laten we dit in code zien:</p>
+        <p>Laten we de code repareren:</p>
 
+        <h4>1. De Ouder (Player.php)</h4>
+        <p>Deze blijft precies hetzelfde. De ouder weet niks van het kind.</p>
+        <pre><code class="language-php">class Player {
+    protected string $name;
+
+    public function __construct(string $name) {
+        $this->name = $name;
+    }
+}</code></pre>
+
+        <h4>2. Het Kind (HumanPlayer.php) - GOEDE VERSIE</h4>
         <pre><code class="language-php">class HumanPlayer extends Player {
     private int $balance;
 
-    // Stap 1: Vraag om ALLE data (Naam voor papa, Geld voor mijzelf)
+    // STAP 1: Vraag om ALLE data (Naam voor papa, Geld voor mijzelf)
     public function __construct(string $name, int $startGeld) {
 
-        // Stap 2: Geef de naam door aan de ouder
-        // Hier roepen we de constructor van Player aan
+        // STAP 2: Geef de naam door aan de ouder (De aannemer bellen)
         parent::__construct($name);
 
-        // Stap 3: Doe daarna je eigen ding (geld tellen)
+        // STAP 3: Doe daarna je eigen ding (Geld tellen)
         $this->balance = $startGeld;
     }
 }</code></pre>
 
-        <h3>Het Resultaat: Schone en Veilige Code</h3>
-        <p>Waarom doen we al deze moeite? Omdat we nu in één regel een complete, werkende speler kunnen maken die direct klaar is voor gebruik.</p>
+        <h4>3. Het Resultaat (index.php)</h4>
+        <p>Nu kunnen we in één keer een complete speler maken.</p>
+        <pre><code class="language-php">// Nieuwe, veilige manier:
+// Je wordt GEDWONGEN om alles in te vullen.
+$sjaak = new HumanPlayer("Sjaak", 1000);
 
-        <pre><code class="language-php">// Oude, rommelige manier (zonder goede constructors):
-$sjaak = new HumanPlayer();
-$sjaak->setName("Sjaak");      // Vergeet je dit? Dan crasht het spel later.
-$sjaak->setBalance(1000);      // Vergeet je dit? Dan is hij blut.
-
-// Nieuwe, veilige manier:
-// Je wordt GEDWONGEN om alles in te vullen. Je kunt het niet vergeten.
-$sjaak = new HumanPlayer("Sjaak", 1000);</code></pre>
+// Nu werkt alles:
+// - De naam "Sjaak" zit in de Parent ($this->name)
+// - Het geld 1000 zit in het Child ($this->balance)</code></pre>
 
         <h3>Uitzondering: Wanneer hoeft het niet?</h3>
         <p>Er is één situatie waarin je dit gedoe niet hebt. Als je in de Child class <strong>GEEN</strong> eigen constructor schrijft, dan gebruikt PHP automatisch die van de Parent.</p>
-        <p>Bijvoorbeeld bij de Dealer (die geen geld heeft):</p>
+        <p>Bijvoorbeeld bij de Dealer. De dealer heeft geen geld, dus hij heeft geen eigen constructor nodig.</p>
 
         <pre><code class="language-php">class Dealer extends Player {
     // Deze class heeft GEEN __construct functie.
     // PHP kijkt dus automatisch naar de Parent.
-}
+}</code></pre>
 
+        <pre><code class="language-php">// index.php
 // Dit werkt gewoon via de constructor van Player!
 $dealer = new Dealer("De Bank");</code></pre>
 

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Delete</h1>
+
+        <p>We zijn aangekomen bij de laatste letter van CRUD: de <strong>D</strong> van <strong>Delete</strong>. Soms moet data gewoon weg. Een speler stopt met het spel, een score is vals gespeeld, of je wilt een oud account opruimen.</p>
+
+        <h3>Hard Delete vs. Soft Delete</h3>
+        <p>Voordat we gaan bouwen, moet je een belangrijke keuze maken. Wat betekent "verwijderen" eigenlijk in een database? Er zijn twee smaken:</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Versnipperaar vs. Het Archief</h3>
+            <ul>
+                <li><strong>Hard Delete (Echt weg):</strong> Je haalt het document door de papierversnipperaar. Het is weg, vernietigd en komt nooit meer terug. Dit is wat het SQL-commando <code>DELETE</code> doet.</li>
+                <li><strong>Soft Delete (Zacht weg):</strong> Je zet een stempel "VERWIJDERD" op het document en stopt het in een stoffige archiefdoos. De data is er stiekem nog wel (voor de administratie), maar je toont het niet meer aan de gebruiker. Dit is vaak veiliger.</li>
+            </ul>
+        </div>
+
+
+
+        <p>In deze les leren we de <strong>Hard Delete</strong>, omdat dit de standaard manier is om met de database te praten.</p>
+
+        <div class="info-box warning">
+            <h3>Het Gevaar: Alles wissen</h3>
+            <p>Net als bij de Update is het commando <code>DELETE FROM scores</code> levensgevaarlijk. Zonder <strong>WHERE</strong>-clausule gooit de database <strong>alle</strong> rijen uit de tabel weg. Er is geen prullenbak en geen 'Undo' knop.</p>
+        </div>
+
+        <h3>Deel 1: De Database Methode (De Techniek)</h3>
+        <p>We gaan de functie bouwen in onze <code>MysqlDatabase</code> class. We bouwen hier een strenge beveiliging in: als je geen ID meegeeft, weigeren we de opdracht.</p>
+
+        <pre><code class="language-php">// In MysqlDatabase.php
+
+public function delete(string $table, array $conditions): int
+{
+    // STAP 1: De Veiligheidscheck
+    // We eisen dat er een 'id' in de condities zit.
+    // Dit voorkomt dat we per ongeluk `delete('scores', [])` aanroepen en alles wissen.
+    if (empty($conditions['id'])) {
+        throw new Exception("Delete operatie vereist een ID!");
+    }
+
+    // STAP 2: Bouw de Query
+    // We hardcoden de WHERE clause op ID.
+    // Resultaat: "DELETE FROM scores WHERE id = :id"
+    $sql = "DELETE FROM $table WHERE id = :id";
+
+    // STAP 3: Prepare
+    $stmt = $this->connection->prepare($sql);
+
+    // STAP 4: Bind het ID
+    // We koppelen het ID veilig aan de placeholder
+    $stmt->bindValue(":id", $conditions['id']);
+
+    // STAP 5: Execute
+    $stmt->execute();
+
+    // Retourneer hoeveel rijen zijn verwijderd (meestal 1, soms 0 als het ID niet bestond)
+    return $stmt->rowCount();
+}</code></pre>
+
+        <h3>Deel 2: Het Model (De Logica)</h3>
+        <p>Nu voegen we functionaliteit toe aan ons <code>Score</code> object. Stel dat een score object zichzelf uit de database moet kunnen halen.</p>
+        <p>Let op: Ook hier geen <code>echo</code>! We geven alleen terug of het gelukt is.</p>
+
+        <pre><code class="language-php">// In Score.php
+
+class Score
+{
+    private int $id; // Het ID van deze score (bijv. 42)
+
+    // Deze functie verwijdert DIT object uit de database
+    public function remove(): bool
+    {
+        // Veiligheidscheck: Besta ik wel in de database?
+        if (empty($this->id)) {
+            return false;
+        }
+
+        $db = DatabaseManager::getConnection();
+
+        // Roep de delete methode aan
+        $aantalVerwijderd = $db->delete(
+            'scores',           // Tabel
+            ['id' => $this->id] // Conditie
+        );
+
+        // Als er 1 (of meer) rijen weg zijn, is het gelukt
+        if ($aantalVerwijderd > 0) {
+            // Zet mijn eigen ID op null, want ik besta niet meer in de DB
+            $this->id = null;
+            return true;
+        }
+
+        return false;
+    }
+}</code></pre>
+
+        <h3>Deel 3: De Controller (Het Gebruik)</h3>
+        <p>In <code>index.php</code> roepen we dit aan. Hier is het belangrijk dat we de gebruiker vertellen wat er gebeurd is.</p>
+
+        <pre><code class="language-php">// index.php
+
+// 1. We hebben een score die weg moet (bijv. ID 42)
+$score = new Score();
+$score->load(42); // (Stel dat we een load functie hebben)
+
+// 2. We vragen aan het model: Verwijder jezelf!
+// We gebruiken een try-catch voor het geval de database een fout geeft (zie waarschuwing hieronder)
+try {
+    $isGelukt = $score->remove();
+
+    // 3. Feedback geven
+    if ($isGelukt) {
+        echo "De score is definitief verwijderd.";
+    } else {
+        echo "Kon de score niet vinden of verwijderen.";
+    }
+
+} catch (Exception $e) {
+    echo "Fout! Kon niet verwijderen: " . $e->getMessage();
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Waarom mislukt het soms? (Foreign Keys)</h3>
+            <p>Soms krijg je een rode foutmelding van de database: <em>Integrity constraint violation</em>.</p>
+            <p><strong>De Vergelijking: De Familie</strong><br>
+                Stel je wilt "Vader" verwijderen uit de database. Maar... in de tabel "Kinderen" staan nog kinderen die naar die vader wijzen (Foreign Key). Als je de vader verwijdert, worden de kinderen "weesjes" (orphan data). De database verbiedt dit om de data netjes te houden.</p>
+            <p><strong>De Oplossing:</strong> Verwijder eerst de kinderen (scores), en daarna pas de vader (speler).</p>
+        </div>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>DELETE:</strong> Dit is permanent. Weg is weg.</li>
+                <li><strong>Veiligheid:</strong> Eis altijd een ID. Zonder ID wist SQL alles.</li>
+                <li><strong>Relaties:</strong> Je kunt geen data verwijderen die nog gekoppeld is aan andere tabellen (Foreign Keys).</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

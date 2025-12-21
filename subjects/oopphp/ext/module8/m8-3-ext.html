@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create (Insert) (Uitgebreid) - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Create: Data Opslaan</h1>
+
+        <p>In de vorige les hebben we de verbinding met de database gemaakt. De telefoonlijn ligt open. Nu is het tijd om de eerste boodschap te versturen: we gaan data opslaan (de <strong>C</strong>reate van CRUD).</p>
+        <p>In ons Blackjack spel willen we bijvoorbeeld de scores bijhouden. Als "John" 21 punten haalt, moet dat in de tabel <code>scores</code> komen te staan.</p>
+
+        <h3>Het Grote Gevaar: SQL Injection</h3>
+        <p>Voordat we de goede code schrijven, moeten we kijken naar hoe het <strong>niet</strong> moet. Vroeger plakten programmeurs variabelen direct in de SQL-zin. Dat ziet er zo uit:</p>
+        <pre><code class="language-php">// FOUTE MANIER (LEVENSGEVAARLIJK!)
+$naam = $_POST['naam']; // Stel de gebruiker vult in: ' OR '1'='1
+$sql = "INSERT INTO scores (name) VALUES ('" . $naam . "')";</code></pre>
+
+        <p>Als een hacker slim is, vult hij geen naam in, maar een stukje SQL-code. Omdat jij de tekst gewoon aan elkaar plakt, voert de database die code uit. Dit heet <strong>SQL Injection</strong>. Hiermee kunnen hackers je hele database wissen of wachtwoorden stelen.</p>
+
+
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Paspoort</h3>
+            <p>Stel je voor dat je bij de douane staat.</p>
+            <ul>
+                <li><strong>De Foute Manier:</strong> Je roept je naam naar de beambte. Als jij roept "Ik ben de Koning en ik mag doorlopen!", en de beambte schrijft dat blind op, dan heb je de regels gemanipuleerd.</li>
+                <li><strong>De Goede Manier (Prepared Statements):</strong> De beambte vraagt om je paspoort. Hij scant het. Alles wat in het paspoort staat, wordt gezien als <em>tekst</em> (data), niet als een bevel. Zelfs als er in je paspoort staat "Laat mij door", leest de beambte dat gewoon als een hele gekke naam.</li>
+            </ul>
+        </div>
+
+        <h3>De Oplossing: Prepared Statements</h3>
+        <p>Om dit op te lossen, gebruiken we in PDO **Prepared Statements**. We scheiden de code (SQL) van de data (de naam). Dit proces bestaat uit drie stappen:</p>
+
+        <ol>
+            <li><strong>Prepare (Voorbereiden):</strong> Je stuurt de query naar de database met <strong>placeholders</strong> (bijvoorbeeld <code>:name</code>) in plaats van de echte waarden. De database leert nu de structuur van de query.</li>
+            <li><strong>Bind (Koppelen):</strong> Je vertelt de database: "De placeholder <code>:name</code> hoort bij de waarde 'John'". PDO zorgt er nu voor dat 'John' 100% veilig wordt behandeld als tekst.</li>
+            <li><strong>Execute (Uitvoeren):</strong> De database voert de complete opdracht uit.</li>
+        </ol>
+
+
+
+        <h3>De 'Insert' Methode Bouwen</h3>
+        <p>We gaan nu een slimme functie maken in onze <code>MysqlDatabase</code> class. We willen niet voor elke tabel een aparte functie maken (`saveScore`, `saveUser`, `saveCard`). Dat is dubbel werk.</p>
+        <p>We maken één generieke <code>insert</code> functie die werkt voor <strong>elke</strong> tabel. De functie krijgt twee dingen binnen:</p>
+        <ol>
+            <li>De naam van de tabel (<code>string $table</code>).</li>
+            <li>De data die opgeslagen moet worden (<code>array $data</code>).</li>
+        </ol>
+
+        <pre><code class="language-php">    // In MysqlDatabase.php
+
+    public function insert(string $table, array $data): int
+    {
+        // STAP 1: De query dynamisch opbouwen
+        // Stel $data is: ['name' => 'John', 'points' => 21]
+
+        // We hebben de kolomnamen nodig: "name, points"
+        $columns = implode(', ', array_keys($data));
+
+        // We hebben placeholders nodig met dubbele punten: ":name, :points"
+        // We plakken voor elke key een dubbele punt.
+        $placeholders = ':' . implode(', :', array_keys($data));
+
+        // Nu bouwen we de SQL-zin (het skelet)
+        // Resultaat: "INSERT INTO scores (name, points) VALUES (:name, :points)"
+        $sql = "INSERT INTO $table ($columns) VALUES ($placeholders)";
+
+        // STAP 2: Prepare
+        // We sturen het skelet naar de database
+        $stmt = $this->connection->prepare($sql);
+
+        // STAP 3: Bind
+        // Nu moeten we de gaten invullen. We lopen door de array heen.
+        foreach ($data as $column => $value) {
+            // $column is 'name', $value is 'John'
+            // We koppelen :name aan 'John'
+            $stmt->bindValue(":$column", $value);
+        }
+
+        // STAP 4: Execute
+        // Voer de query uit
+        $stmt->execute();
+
+        // Bonus: Geef het ID terug van de rij die we net gemaakt hebben.
+        // Handig om te weten welk nummer de nieuwe score heeft gekregen.
+        return (int)$this->connection->lastInsertId();
+    }</code></pre>
+
+        <div class="info-box warning">
+            <h3>Let op: Implode</h3>
+            <p>De functie <code>implode</code> plakt array-onderdelen aan elkaar met een scheidingsteken. <br>
+                <code>['a', 'b']</code> wordt met <code>implode(', ', ...)</code> de string <code>"a, b"</code>.<br>
+                Dit is super handig om snel een lijstje met kolomnamen te maken voor je SQL.</p>
+        </div>
+
+        <h3>Toepassing in Blackjack</h3>
+        <p>Nu we de zware techniek in de database-class hebben gebouwd, is het gebruiken ervan heel simpel. We splitsen dit op in twee delen: het Model (de logica) en de Controller (het gebruik).</p>
+
+        <h4>Deel 1: Het Model (Score.php)</h4>
+        <p>Eerst maken we de class die verantwoordelijk is voor scores. Deze class praat met de database. <br>
+            Let op: Deze methode doet <strong>geen echo</strong>. Hij geeft alleen het resultaat (het ID) terug.</p>
+
+        <pre><code class="language-php">class Score
+{
+    // Deze functie slaat een score op en geeft het nieuwe ID terug
+    public function save(string $playerName, int $points): int
+    {
+        // 1. Haal de verbinding op (via de manager uit de vorige les)
+        $db = DatabaseManager::getConnection();
+
+        // 2. Maak de data klaar
+        // De keys ('name', 'points') moeten precies hetzelfde heten als in je database!
+        $dataToSave = [
+            'name'   => $playerName,
+            'points' => $points
+        ];
+
+        // 3. Roep de insert functie aan en RETURN het resultaat
+        return $db->insert('scores', $dataToSave);
+    }
+}</code></pre>
+
+        <h4>Deel 2: De Controller (index.php)</h4>
+        <p>In je controller (of index-bestand) gebruik je de class. Hier bepaal je wat er op het scherm komt te staan.</p>
+
+        <pre><code class="language-php">// index.php
+
+// 1. Maak een nieuw Score object aan
+$scoreModel = new Score();
+
+// 2. Roep de save functie aan
+// Stel dat speler 'John' net 21 punten heeft gehaald
+$newId = $scoreModel->save('John', 21);
+
+// 3. Toon het resultaat aan de gebruiker
+echo "Succes! De score is opgeslagen op regel nummer: $newId";</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li><strong>Nooit plakken:</strong> Plak variabelen nooit direct in een SQL string. Dat is vragen om problemen (SQL Injection).</li>
+                <li><strong>Placeholders:</strong> Gebruik <code>:naam</code> in je query om plek vrij te houden voor data.</li>
+                <li><strong>BindValue:</strong> Gebruik <code>bindValue()</code> om de echte data veilig in de placeholder te stoppen.</li>
+                <li><strong>Return vs Echo:</strong> Methoden in een class geven data terug (`return`). Het tonen (`echo`) doe je pas aan het einde in je hoofdbestand.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

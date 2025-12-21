@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where clausule - OOP PHP Module 8</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Where clausule</h1>
+
+        <p>In de vorige les hebben we geleerd hoe we data uit meerdere tabellen kunnen halen met <code>SELECT ... FROM tabel1, tabel2</code>. Dat was een goede eerste stap, maar we hebben nu een groot probleem gecreëerd.</p>
+
+        <h3>Het Probleem: De Chaos (Cartesian Product)</h3>
+        <p>Als je tegen een database zegt: "Geef mij alles van de tabel <strong>Scores</strong> én alles van de tabel <strong>Players</strong>", zonder erbij te vertellen wie bij wie hoort, raakt de database in de war.</p>
+        <p>Hij gaat dan <strong>elke</strong> score koppelen aan <strong>elke</strong> speler.
+            <br>Stel je hebt 100 scores en 10 spelers. Dan krijg je 100 x 10 = 1000 resultaten terug. De meeste daarvan zijn onzin (bijvoorbeeld de score van Piet gekoppeld aan de naam van Klaas).</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Sokkenmand</h3>
+            <p>Stel je hebt een mand met linker sokken (Scores) en een mand met rechter sokken (Spelers).</p>
+            <ul>
+                <li><strong>Zonder regels (Vorige les):</strong> Je pakt blind een linker sok en niet er willekeurig een rechter sok aan vast. Je krijgt een blauwe sok met een rode sok. Chaos.</li>
+                <li><strong>Met regels (WHERE):</strong> Je zegt: "Niet deze twee sokken aan elkaar, <strong>TENZIJ</strong> de kleur hetzelfde is."</li>
+            </ul>
+            <p>Die "TENZIJ" is de <strong>WHERE</strong> clausule in SQL.</p>
+        </div>
+
+        <h3>Het Doel: Een Slimme Select Functie</h3>
+        <p>We gaan onze <code>select</code> functie uitbreiden. Hij moet twee dingen kunnen:</p>
+        <ol>
+            <li><strong>Relaties leggen (Joins):</strong> "Koppel de score aan de speler WAAR het player_id gelijk is aan het id."</li>
+            <li><strong>Filteren:</strong> "Geef mij alleen de scores WAAR het aantal punten hoger is dan 100."</li>
+        </ol>
+
+
+
+        <h3>De Code Bouwen (Stap voor Stap)</h3>
+        <p>We voegen een tweede parameter toe aan onze functie: <code>$conditions</code>. Dit is een array met regels.</p>
+
+        <pre><code class="language-php">    // In MysqlDatabase.php
+
+    // We breiden de functie uit met $conditions
+    public function select(array $tableColumns, array $conditions = []): array
+    {
+        // --- DEEL 1: SELECT & FROM (Dit hadden we al) ---
+        // (Zie vorige les voor uitleg over dit stuk)
+        $selectedColumns = [];
+        $tableNames = [];
+
+        foreach ($tableColumns as $table => $columns) {
+            $tableNames[] = $table;
+            foreach ($columns as $column) {
+                if ($column === '*') {
+                    $selectedColumns[] = "$table.*";
+                } else {
+                    $selectedColumns[] = "$table.$column";
+                }
+            }
+        }
+
+        $columnString = implode(', ', $selectedColumns);
+        $tableString  = implode(', ', $tableNames);
+
+        // De basis query: "SELECT scores.points, players.name FROM scores, players"
+        $sql = "SELECT $columnString FROM $tableString";
+
+        // Hier gaan we de waarden bewaren die we veilig moeten binden
+        $params = [];
+
+        // --- DEEL 2: WHERE (Nieuw!) ---
+
+        // Alleen als er condities zijn opgegeven, doen we iets
+        if (!empty($conditions)) {
+            $whereParts = [];
+
+            // We loopen door de regels heen.
+            // Bijv: ['players.id' => 5]  OF  ['scores.player_id' => 'players.id']
+            foreach ($conditions as $column => $value) {
+
+                // STAP A: Welke operator? (=, <, >, LIKE)
+                // Als er een spatie in de key staat (bijv "points >"), pakken we niks.
+                // Anders is het standaard '='.
+                $operator = strpos($column, ' ') ? '' : '=';
+
+                // STAP B: Is het een JOIN of een FILTER? (Cruciaal!)
+                // Hier moeten we slim zijn.
+                // Als de $value een punt (.) bevat, is het waarschijnlijk een tabelnaam (players.id).
+                // Dat is een JOIN. Die mogen we NIET binden (want :players.id werkt niet).
+
+                if (is_string($value) && strpos($value, '.') !== false) {
+                    // SCENARIO 1: JOIN (Relatie)
+                    // We plakken de string direct in de SQL.
+                    // Resultaat: "scores.player_id = players.id"
+                    $whereParts[] = "$column $operator $value";
+                }
+                else {
+                    // SCENARIO 2: FILTER (Waarde)
+                    // Dit is gebruikersinput (bijv. ID 5 of naam "John").
+                    // Dit MOET veilig gebind worden om SQL Injection te voorkomen.
+
+                    // Maak een veilige placeholder naam (geen punten of spaties toegestaan)
+                    // players.id wordt players_id
+                    $safeCol = str_replace(['.', ' '], '_', $column);
+
+                    // We voegen een tellertje toe voor uniekheid: :players_id_0
+                    $paramName = ":" . $safeCol . "_" . count($params);
+
+                    // Voeg toe aan de query: "players.id = :players_id_0"
+                    $whereParts[] = "$column $operator $paramName";
+
+                    // Bewaar de waarde voor later in de $params array
+                    $params[$paramName] = $value;
+                }
+            }
+
+            // Plak alle regels aan elkaar met AND
+            // Resultaat: " WHERE scores.player_id = players.id AND players.id = :players_id_0"
+            $sql .= " WHERE " . implode(' AND ', $whereParts);
+        }
+
+        // --- DEEL 3: UITVOEREN ---
+        $stmt = $this->connection->prepare($sql);
+
+        // Hier geven we de $params array mee aan execute.
+        // PDO bindt nu automatisch alle values die we in Scenario 2 hebben verzameld.
+        $stmt->execute($params);
+
+        return $stmt->fetchAll();
+    }</code></pre>
+
+        <div class="info-box warning">
+            <h3>Waarom die ingewikkelde check op de punt (.)?</h3>
+            <p>In PDO Prepared Statements mag je alleen <strong>waarden</strong> binden (zoals <code>5</code>, <code>"Henk"</code>, <code>"2023-01-01"</code>). Je mag <strong>nooit</strong> kolomnamen of tabelnamen binden.</p>
+            <ul>
+                <li><code>WHERE id = :waarde</code> -> <strong>MAG WEL</strong> (waarde wordt 5).</li>
+                <li><code>WHERE id = :kolom</code> -> <strong>MAG NIET</strong> (kolom wordt de tekst "players.id", SQL snapt dat niet).</li>
+            </ul>
+            <p>Daarom checken we: zit er een punt in de waarde? Dan is het waarschijnlijk een kolomnaam en plakken we hem direct in de query string.</p>
+        </div>
+
+        <h3>3 Scenario's: Hoe gebruik je dit?</h3>
+        <p>Nu onze motor klaar is, gaan we erin rijden. Hier zijn drie voorbeelden van hoe je deze methode aanroept in je Blackjack game.</p>
+
+        <h4>Scenario 1: Een Join (Relatie leggen)</h4>
+        <p>Je wilt alle scores ophalen, maar in plaats van het saaie <code>player_id</code> wil je de echte naam van de speler zien.</p>
+        <pre><code class="language-php">$results = $db->select(
+    // 1. Wat wil je hebben? (Punten en Naam)
+    [
+        'scores' => ['points'],
+        'players' => ['name']
+    ],
+    // 2. De conditie (De Join)
+    // Omdat er een punt in de waarde zit ('players.id'), ziet onze functie dit als een JOIN.
+    [
+        'scores.player_id' => 'players.id'
+    ]
+);</code></pre>
+
+        <h4>Scenario 2: Specifiek Filteren</h4>
+        <p>Je wilt de gegevens van één specifieke speler (bijv. ID 5) ophalen.</p>
+        <pre><code class="language-php">$results = $db->select(
+    ['players' => ['*']], // Alles van players
+    // De waarde is 5 (geen punt).
+    // Onze functie ziet dit als FILTER en gebruikt bindValue. Veilig!
+    ['players.id' => 5]
+);</code></pre>
+
+        <h4>Scenario 3: Zoeken met Operators</h4>
+        <p>Je zoekt alle spelers waarvan de naam "King" bevat. Je gebruikt hiervoor de <code>LIKE</code> operator.</p>
+        <pre><code class="language-php">$results = $db->select(
+    ['players' => ['*']],
+    // We zetten de operator in de key.
+    // Onze functie ziet de spatie en snapt dat '=' niet nodig is.
+    ['players.name LIKE' => '%King%']
+);</code></pre>
+
+        <div class="info-box">
+            <h3>Samenvatting</h3>
+            <ul>
+                <li>De <code>WHERE</code> clausule is onmisbaar om relaties te leggen tussen tabellen.</li>
+                <li>Onze slimme functie herkent automatisch het verschil tussen een <strong>Join</strong> (tabel.kolom) en een <strong>Filter</strong> (waarde).</li>
+                <li>Filter-waarden worden altijd veilig gebind via Prepared Statements om SQL Injection te voorkomen.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

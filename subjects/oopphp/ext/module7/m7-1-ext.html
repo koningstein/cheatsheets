@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Methods (Validatie)- OOP PHP Module 7</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Static Methods</h1>
+
+        <p>Tot nu toe hebben we altijd gewerkt met <strong>Objecten</strong>. Je maakte eerst een nieuwe kaart aan (`new Card`) en daarna kon je vragen: "Wat is jouw kleur?" (`$card->getColor()`). Dat is logisch, want die kleur hoort bij <em>die specifieke kaart</em> die je in je hand hebt.</p>
+        <p>Maar... sommige dingen horen niet bij één specifiek kaartje, maar bij <strong>alle</strong> kaarten. Dingen die altijd waar zijn, ongeacht welke kaarten er op tafel liggen.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Spelregelboekje</h3>
+            <p>Stel je zit aan de Blackjack tafel.</p>
+            <ul>
+                <li><strong>Object ($this):</strong> De kaarten in je hand. Deze zijn uniek. Jij hebt een Ruiten Aas, de buurman heeft een Harten Boer.</li>
+                <li><strong>Static (self::):</strong> Het spelregelboekje op tafel. Hierin staat: "Er bestaan 4 kleuren: Harten, Ruiten, Klaver, Schoppen."</li>
+            </ul>
+            <p>Als jij wilt weten of "Ruiten" een geldige kleur is, kijk je niet in je hand. Je kijkt in het boekje. Het boekje bestaat al voordat er überhaupt kaarten gedeeld zijn.</p>
+        </div>
+
+
+
+        <h3>Het Probleem: Onnodig werk</h3>
+        <p>Stel, we bouwen een formulier waar een gebruiker zelf een kaart mag kiezen. We moeten controleren (valideren) of de gebruiker geen onzin invult (bijvoorbeeld kleur "Paars").</p>
+        <p>Zonder <code>static</code> zouden we dit moeten doen:</p>
+
+        <pre><code class="language-php">// DIT IS ONHANDIG:
+// We moeten een nep-kaart maken, alleen maar om een vraag te kunnen stellen.
+$tijdelijkeKaart = new Card("fake", "fake");
+
+if ($tijdelijkeKaart->isValidSuit("Paars")) {
+    // ...
+}</code></pre>
+
+        <p>Dit is zonde van de rekenkracht en geheugen. Waarom zou je een heel object bouwen, initialiseren en weer weggooien, puur om even in het regelboekje te kijken?</p>
+
+        <h3>De Oplossing: Het Static Keyword</h3>
+        <p>Met het keyword <code>static</code> maken we eigenschappen en methoden die bij de <strong>Class</strong> (de blauwdruk/het regelboekje) horen. Je kunt ze direct gebruiken zonder dat je <code>new</code> hoeft te typen.</p>
+
+        <div class="info-box">
+            <h3>Nog een Analogie: De Autofabriek</h3>
+            <ul>
+                <li><strong>De Class (Static):</strong> De fabriek zelf en de blauwdrukken aan de muur. De fabriek "weet" hoe een motor werkt.</li>
+                <li><strong>Het Object:</strong> De rode auto die de fabriek uitrolt.</li>
+            </ul>
+            <p>Je hoeft niet eerst een auto te bouwen om te vragen "Hoeveel wielen krijgt dit model?". Dat staat op de blauwdruk aan de muur (Static).</p>
+        </div>
+
+        <h3>De Code: Static in actie</h3>
+        <p>We gaan de <code>Card</code> class aanpassen. We verplaatsen de lijst met geldige kleuren naar het static niveau.</p>
+
+        <pre><code class="language-php">class Card
+{
+    // 1. Static Property
+    // Deze lijst hoort bij de Class, niet bij een los kaartje.
+    // 'private' betekent: mag alleen binnen deze class gelezen worden.
+    private static array $validSuits = ['Hearts', 'Diamonds', 'Spades', 'Clubs'];
+
+    // 2. Static Method
+    // Deze functie mag je aanroepen ZONDER kaart-object.
+    public static function isValidSuit(string $suit): bool
+    {
+        // LET OP! Hier kunnen we geen $this-> gebruiken.
+        // Waarom niet? Omdat er geen 'ik' (object) is.
+        // We gebruiken 'self::' om naar de eigen Class te wijzen.
+
+        return in_array($suit, self::$validSuits);
+    }
+}</code></pre>
+
+        <h3>Hoe roep je het aan? (De Dubbele Punt ::)</h3>
+        <p>Omdat we geen object variabele (<code>$card</code>) hebben, kunnen we het bekende pijltje (<code>-></code>) niet gebruiken. In plaats daarvan gebruiken we de naam van de class en een dubbele punt: <code>::</code>.</p>
+        <p>In de programmeerwereld noemen we dit de <em>Scope Resolution Operator</em> (Paamayim Nekudotayim), maar jij mag "Dubbele Punt" zeggen.</p>
+
+        <pre><code class="language-php">// index.php
+
+// Kijk, geen 'new Card()' nodig!
+// We roepen de Class direct aan bij zijn naam.
+if (Card::isValidSuit('Paars')) {
+    echo "Geldig!";
+} else {
+    echo "Fout: Paars bestaat niet in het kaartspel.";
+}</code></pre>
+
+        <div class="info-box warning">
+            <h3>Belangrijk: $this vs self::</h3>
+            <p>Dit is waar het vaak fout gaat op toetsen. Leer dit verschil goed:</p>
+            <div class="table-wrapper">
+                <table class="summary-table">
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Verwijst naar...</th>
+                        <th>Wanneer gebruiken?</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><code>$this-></code></td>
+                        <td><strong>Het Huidige Object</strong><br><em>"Mijn eigen unieke kaart"</em></td>
+                        <td>In normale methodes (als je data van 1 object nodig hebt).</td>
+                    </tr>
+                    <tr>
+                        <td><code>self::</code></td>
+                        <td><strong>De Huidige Class</strong><br><em>"De algemene regels aan de muur"</em></td>
+                        <td>In static methodes (als je algemene info nodig hebt).</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+        <h3>Veelgemaakte Fout</h3>
+        <p>In een static functie mag je <strong>nooit</strong> <code>$this</code> gebruiken. Waarom niet? Omdat een static functie bestaat zonder dat er een object is gemaakt.</p>
+
+        <pre><code class="language-php">class Card {
+    private string $color; // Normale property
+
+    public static function checkColor() {
+        // FATAL ERROR!
+        // Je vraagt: "Welke kleur heb IK?"
+        // Maar er is helemaal geen "IK" (geen object). Er is alleen de blauwdruk.
+        return $this->color;
+    }
+}</code></pre>
+
+        <h3>Wanneer gebruik je Static?</h3>
+        <p>Het lijkt handig om alles static te maken (lekker makkelijk aanroepen), maar doe dat niet! Gebruik het alleen voor <strong>hulpfuncties</strong> die universele waarheden bevatten.</p>
+        <ul>
+            <li><strong>Validatie:</strong> <code>Card::isValidSuit(...)</code> (Checken van input).</li>
+            <li><strong>Berekeningen:</strong> <code>Calculator::add(5, 5)</code> (5+5 is altijd 10).</li>
+            <li><strong>Converters:</strong> <code>Text::toUpper("hallo")</code> (Maakt tekst groot).</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
