@@ -26,10 +26,13 @@
         <h3>Het Probleem: Spoken in je code</h3>
         <p>Stel je voor dat je per ongeluk de volgende code schrijft:</p>
 
-        <pre><code class="language-php">// We maken een 'algemene' speler aan
+        <pre><code class="language-php">// index.php
+
+// We maken een 'algemene' speler aan
 $ghost = new Player("Spookje");
 
 // We vragen hem om een beurt te spelen...
+// Omdat Player een lege huls is, gebeurt er niets zinnigs.
 $ghost->playTurn();</code></pre>
 
         <p><strong>Wat gebeurt er nu?</strong> Helemaal niets. De class <code>Player</code> weet namelijk niet of hij moet wachten op input (zoals een mens) of dat hij tot 17 punten moet hitten (zoals een dealer). Het is een lege huls.</p>
@@ -52,7 +55,9 @@ $ghost->playTurn();</code></pre>
         <p>We moeten tegen PHP zeggen: <em>"De Player class is een concept (een paspop). Je mag deze code gebruiken om van te erven, maar je mag er NOOIT een levend object van maken."</em></p>
         <p>Dit doen we door het keyword <strong>abstract</strong> voor de class te zetten.</p>
 
-        <pre><code class="language-php">// Let op het woordje 'abstract'
+        <pre><code class="language-php">// Player.php
+
+// Let op het woordje 'abstract'
 abstract class Player
 {
     protected array $hand = [];
@@ -67,9 +72,11 @@ abstract class Player
         <h3>Wat gebeurt er nu?</h3>
         <p>Als je nu per ongeluk (of expres) probeert om een algemene speler te maken, grijpt PHP hard in. Je krijgt direct een <strong>Fatal Error</strong> en je script stopt.</p>
 
-        <pre><code class="language-php">// FOUT! Je mag geen concepten tot leven wekken.
+        <pre><code class="language-php">// index.php
+
+// FOUT! Je mag geen concepten tot leven wekken.
 // Error: Cannot instantiate abstract class Player
-$p = new Player("Spookje");
+// $p = new Player("Spookje");
 
 // GOED! HumanPlayer is een 'echte' class (Concreet), dus dit mag.
 $p = new HumanPlayer("Sjaak");</code></pre>
@@ -99,9 +106,12 @@ $p = new HumanPlayer("Sjaak");</code></pre>
             <p>Het maakt niet uit dat "Player" zelf abstract is. Het gaat erom dat de objecten die binnenkomen <em>afstammen</em> van Player.</p>
         </div>
 
-        <pre><code class="language-php">class BlackjackGame
+
+
+        <pre><code class="language-php">// BlackjackGame.php
+class BlackjackGame
 {
-    private array $players = [];
+    private array $participants = [];
 
     // Type Hint: We vragen om een 'Player'.
     // Omdat Player abstract is, betekent dit: "Geef mij IETS dat van Player afstamt."
@@ -109,8 +119,9 @@ $p = new HumanPlayer("Sjaak");</code></pre>
     {
         $this->participants[] = $participant;
     }
-}
+}</code></pre>
 
+        <pre><code class="language-php">// index.php
 $game = new BlackjackGame();
 
 // DIT WERKT: Want HumanPlayer is een (soort) Player

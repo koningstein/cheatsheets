@@ -25,6 +25,8 @@
         <h3>Abstracte Classes</h3>
         <p>Met het keyword <code>abstract</code> voorkom je dat er objecten van een class worden gemaakt. Het dient puur als basis voor inheritance.</p>
 
+
+
         <div class="table-wrapper">
             <table class="summary-table">
                 <thead>
@@ -46,8 +48,10 @@
             </table>
         </div>
 
-        <pre><code class="language-php">// FOUT: Kan abstracte class niet instantiëren
-$p = new Player();
+        <pre><code class="language-php">// index.php
+
+// FOUT: Kan abstracte class niet instantiëren
+// $p = new Player();
 
 // GOED: HumanPlayer is concreet
 $p = new HumanPlayer("John");</code></pre>
@@ -55,24 +59,26 @@ $p = new HumanPlayer("John");</code></pre>
         <h3>Abstracte Methoden (Het Contract)</h3>
         <p>Een abstracte methode heeft geen body (geen <code>{}</code>) en eindigt met een puntkomma. Het dwingt alle child classes om deze methode te implementeren.</p>
 
-
-
         <pre><code class="language-php">abstract class Player
 {
     // Het contract: Iedereen MOET kunnen beslissen
+    // We verwachten een string terug (geen echo!)
     abstract public function makeDecision(): string;
-}
+}</code></pre>
 
-class Dealer extends Player
+        <pre><code class="language-php">class Dealer extends Player
 {
     // De implementatie: Dealer volgt regels
     public function makeDecision(): string {
+        // Return de waarde, zodat de controller hem kan gebruiken
         return ($this->getScore() < 17) ? 'hit' : 'stand';
     }
 }</code></pre>
 
         <h3>Polymorfisme</h3>
         <p>Doordat we zeker weten dat elke <code>Player</code> de methode <code>makeDecision</code> heeft (dankzij de abstracte definitie), kunnen we polymorfisme toepassen in de Game loop.</p>
+
+
 
         <div class="info-box">
             <p><strong>Polymorfisme</strong> betekent dat verschillende objecten (Human, Dealer) reageren op dezelfde methode-aanroep (<code>makeDecision</code>), maar elk hun eigen unieke gedrag vertonen.</p>
@@ -87,8 +93,6 @@ class Dealer extends Player
             <li><strong>Setter:</strong> Controller geeft de keuze door aan het object: <code>$human->setNextAction(...)</code>.</li>
             <li><strong>Polymorfe Call:</strong> Controller roept <code>$game->playRound()</code> aan, die intern <code>makeDecision()</code> gebruikt.</li>
         </ol>
-
-
 
     </main>
 

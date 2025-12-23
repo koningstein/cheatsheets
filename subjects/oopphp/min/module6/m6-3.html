@@ -25,8 +25,6 @@
             <p>We hebben nu abstracte classes en methodes, maar hoe verbinden we dit met de gebruiker? In een webapplicatie gebeurt interactie via HTML-formulieren. De uitdaging is om de keuze van de gebruiker ("Hit" of "Stand") op de juiste plek in je OOP-structuur te krijgen.</p>
         </div>
 
-
-
         <h3>Stap 1: De User Interface</h3>
         <p>In plaats van hardcoded acties, laten we de gebruiker kiezen. We maken een formulier waarin de speler zijn volgende zet doorgeeft.</p>
 
@@ -43,14 +41,14 @@
         <h3>Stap 2: De Input Verwerken (Setter)</h3>
         <p>In je PHP-code (de Controller) vang je deze keuze op. Je moet deze keuze doorgeven aan het specifieke object dat aan de beurt is (de <code>HumanPlayer</code>).</p>
 
-        <pre><code class="language-php">// index.php
+        <pre><code class="language-php">// index.php (Controller)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action']; // "hit" of "stand"
 
     // Haal de menselijke speler op uit het spel
     $human = $game->getHumanPlayer();
 
-    // Geef de keuze door aan het object
+    // Geef de keuze door aan het object via de setter
     $human->setNextAction($action);
 
     // Start de ronde
@@ -60,8 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h3>Stap 3: Polymorfe Uitvoering</h3>
         <p>Nu komt de kracht van OOP en abstractie naar voren. De <code>Game</code> class roept simpelweg <code>makeDecision()</code> aan op <em>elke</em> speler. Hij hoeft niet te weten dat de één wacht op input en de ander automatisch speelt.</p>
 
-        <pre><code class="language-php">// HumanPlayer implementatie
-class HumanPlayer extends Player {
+
+
+        <h4>HumanPlayer implementatie</h4>
+        <pre><code class="language-php">class HumanPlayer extends Player {
     private string $nextAction;
 
     public function setNextAction(string $action) {
@@ -70,27 +70,34 @@ class HumanPlayer extends Player {
 
     public function makeDecision(): string {
         // Gebruikt de keuze die via het formulier is binnengekomen
+        // Geeft string terug (geen echo)
         return $this->nextAction;
     }
-}
+}</code></pre>
 
-// Dealer implementatie
-class Dealer extends Player {
+        <h4>Dealer implementatie</h4>
+        <pre><code class="language-php">class Dealer extends Player {
     public function makeDecision(): string {
         // Negeert input, volgt altijd de regels
+        // Geeft string terug (geen echo)
         return ($this->getScore() < 17) ? 'hit' : 'stand';
     }
 }</code></pre>
 
         <div class="info-box">
-            <h3>Het Resultaat</h3>
-            <p>De <code>Game</code> loop blijft schoon en simpel:</p>
-            <pre><code class="language-php">foreach ($this->players as $player) {
-    // Polymorfisme: Werkt voor Human (via formulier) én Dealer (automatisch)
-    $move = $player->makeDecision();
+            <h3>Het Resultaat in de Game Class</h3>
+            <p>De <code>Game</code> loop blijft schoon en simpel. De logica zit in een methode van de Game class:</p>
+            <pre><code class="language-php">class Game {
+    public function playRound() {
+        foreach ($this->players as $player) {
+            // Polymorfisme: Werkt voor Human (via formulier) én Dealer (automatisch)
+            // We vangen de return waarde op
+            $move = $player->makeDecision();
 
-    if ($move === 'hit') {
-        $player->addCard($deck->draw());
+            if ($move === 'hit') {
+                $player->addCard($this->deck->draw());
+            }
+        }
     }
 }</code></pre>
         </div>

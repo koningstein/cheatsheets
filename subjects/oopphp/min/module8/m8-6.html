@@ -30,12 +30,14 @@
             <p>Zonder een strikte <code>WHERE</code>-clausule overschrijf je per ongeluk de hele tabel. Daarom bouwen we een beveiliging in.</p>
         </div>
 
+
+
         <h3>De Update Methode Implementeren</h3>
         <p>In deze methode verwachten we drie parameters: de tabel, de data die gewijzigd moet worden, en de condities (waarin verplicht een ID moet zitten).</p>
 
+        <pre><code class="language-php">// Database.php
 
-
-        <pre><code class="language-php">public function update(string $table, array $data, array $conditions): int
+public function update(string $table, array $data, array $conditions): int
 {
     // Stap 1: Veiligheidscheck
     // We updaten ALLEEN als we een specifiek ID hebben.
@@ -82,12 +84,17 @@
         <h3>Toepassing: Saldo Updaten</h3>
         <p>Stel, speler "John" (ID 5) wint een potje Blackjack. We moeten zijn saldo ophogen.</p>
 
-        <pre><code class="language-php">class Player
+        <pre><code class="language-php">// Player.php
+
+class Player
 {
     private int $id;       // Bijv. 5
     private int $balance;  // Bijv. 100
 
-    public function addWin(int $amount)
+    // Constructor e.d. weggelaten...
+
+    // Deze functie voert de update uit en geeft true/false terug
+    public function addWin(int $amount): bool
     {
         $this->balance += $amount; // Nieuw saldo: 200
 
@@ -95,15 +102,25 @@
 
         // Roep de update methode aan
         $rowsAffected = $db->update(
-            'players',                  // Tabel
+            'players',                     // Tabel
             ['balance' => $this->balance], // Data (SET)
-            ['id' => $this->id]         // Conditie (WHERE)
+            ['id' => $this->id]            // Conditie (WHERE)
         );
 
-        if ($rowsAffected > 0) {
-            echo "Database bijgewerkt!";
-        }
+        // Geef terug of het gelukt is (geen echo!)
+        return $rowsAffected > 0;
     }
+}</code></pre>
+
+        <p>In de controller (index.php) controleren we het resultaat en tonen we het bericht.</p>
+
+        <pre><code class="language-php">// index.php
+
+// Stel we hebben speler object $john
+if ($john->addWin(100)) {
+    echo "Database bijgewerkt! Het nieuwe saldo is opgeslagen.";
+} else {
+    echo "Er is niets gewijzigd (misschien was het saldo al up-to-date?)";
 }</code></pre>
 
         <div class="info-box">

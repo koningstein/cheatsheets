@@ -25,9 +25,10 @@
 
         <h3>Het Grote Gevaar: SQL Injection</h3>
         <p>Voordat we de goede code schrijven, moeten we kijken naar hoe het <strong>niet</strong> moet. Vroeger plakten programmeurs variabelen direct in de SQL-zin. Dat ziet er zo uit:</p>
+
         <pre><code class="language-php">// FOUTE MANIER (LEVENSGEVAARLIJK!)
-$naam = $_POST['naam']; // Stel de gebruiker vult in: ' OR '1'='1
-$sql = "INSERT INTO scores (name) VALUES ('" . $naam . "')";</code></pre>
+$name = $_POST['name']; // Stel de gebruiker vult in: ' OR '1'='1
+$sql = "INSERT INTO scores (name) VALUES ('" . $name . "')";</code></pre>
 
         <p>Als een hacker slim is, vult hij geen naam in, maar een stukje SQL-code. Omdat jij de tekst gewoon aan elkaar plakt, voert de database die code uit. Dit heet <strong>SQL Injection</strong>. Hiermee kunnen hackers je hele database wissen of wachtwoorden stelen.</p>
 
@@ -61,7 +62,10 @@ $sql = "INSERT INTO scores (name) VALUES ('" . $naam . "')";</code></pre>
             <li>De data die opgeslagen moet worden (<code>array $data</code>).</li>
         </ol>
 
-        <pre><code class="language-php">    // In MysqlDatabase.php
+        <pre><code class="language-php">// MysqlDatabase.php
+
+class MysqlDatabase {
+    // ... connectie variabele ...
 
     public function insert(string $table, array $data): int
     {
@@ -98,7 +102,8 @@ $sql = "INSERT INTO scores (name) VALUES ('" . $naam . "')";</code></pre>
         // Bonus: Geef het ID terug van de rij die we net gemaakt hebben.
         // Handig om te weten welk nummer de nieuwe score heeft gekregen.
         return (int)$this->connection->lastInsertId();
-    }</code></pre>
+    }
+}</code></pre>
 
         <div class="info-box warning">
             <h3>Let op: Implode</h3>
@@ -114,23 +119,25 @@ $sql = "INSERT INTO scores (name) VALUES ('" . $naam . "')";</code></pre>
         <p>Eerst maken we de class die verantwoordelijk is voor scores. Deze class praat met de database. <br>
             Let op: Deze methode doet <strong>geen echo</strong>. Hij geeft alleen het resultaat (het ID) terug.</p>
 
-        <pre><code class="language-php">class Score
+        <pre><code class="language-php">// Score.php
+
+class Score
 {
     // Deze functie slaat een score op en geeft het nieuwe ID terug
     public function save(string $playerName, int $points): int
     {
-        // 1. Haal de verbinding op (via de manager uit de vorige les)
+        // 1. Haal de verbinding op
         $db = DatabaseManager::getConnection();
 
         // 2. Maak de data klaar
         // De keys ('name', 'points') moeten precies hetzelfde heten als in je database!
-        $dataToSave = [
+        $data = [
             'name'   => $playerName,
             'points' => $points
         ];
 
         // 3. Roep de insert functie aan en RETURN het resultaat
-        return $db->insert('scores', $dataToSave);
+        return $db->insert('scores', $data);
     }
 }</code></pre>
 
@@ -153,7 +160,7 @@ echo "Succes! De score is opgeslagen op regel nummer: $newId";</code></pre>
             <h3>Samenvatting</h3>
             <ul>
                 <li><strong>Nooit plakken:</strong> Plak variabelen nooit direct in een SQL string. Dat is vragen om problemen (SQL Injection).</li>
-                <li><strong>Placeholders:</strong> Gebruik <code>:naam</code> in je query om plek vrij te houden voor data.</li>
+                <li><strong>Placeholders:</strong> Gebruik <code>:name</code> in je query om plek vrij te houden voor data.</li>
                 <li><strong>BindValue:</strong> Gebruik <code>bindValue()</code> om de echte data veilig in de placeholder te stoppen.</li>
                 <li><strong>Return vs Echo:</strong> Methoden in een class geven data terug (`return`). Het tonen (`echo`) doe je pas aan het einde in je hoofdbestand.</li>
             </ul>

@@ -75,18 +75,24 @@
 
 
 
+        <h4>De Ouder (Het Contract)</h4>
         <pre><code class="language-php">abstract class Player
 {
     // HET CONTRACT (geen body, eindigt met ;)
+    // We eisen dat er een string wordt geretourneerd (return type hint)
     abstract public function makeDecision(): string;
-}
+}</code></pre>
 
-class Dealer extends Player
+        <h4>Het Kind (De Ondertekening)</h4>
+        <pre><code class="language-php">class Dealer extends Player
 {
-    // DE ONDERTEKENING (De daadwerkelijke code)
+    // DE IMPLENTATIE (De daadwerkelijke code)
     public function makeDecision(): string {
-        // De dealer volgt de regels
-        return ($this->getScore() < 17) ? 'hit' : 'stand';
+        // De dealer volgt de regels en geeft zijn keuze terug
+        if ($this->getScore() < 17) {
+            return 'hit';
+        }
+        return 'stand';
     }
 }</code></pre>
 
@@ -103,6 +109,22 @@ class Dealer extends Player
             <p>Jij drukt op dezelfde knop (<code>$player->makeDecision()</code>), maar het resultaat is anders per object. Dat is polymorfisme.</p>
         </div>
 
+
+
+        <p>Hier zie je hoe dat er in de code (index.php) uitziet. De code weet niet wie wat is, en dat maakt niet uit.</p>
+
+        <pre><code class="language-php">// index.php (Het gebruik)
+
+$players = [new Dealer(), new HumanPlayer()];
+
+foreach ($players as $player) {
+    // Polymorfisme: We weten niet welk type speler het is.
+    // Maar we weten ZEKER dat hij makeDecision() heeft.
+    $keuze = $player->makeDecision();
+
+    echo "Deze speler kiest voor: " . $keuze;
+}</code></pre>
+
         <h3>4. De Verbinding: Van HTML naar PHP (Data Flow)</h3>
         <p>Tot slot hebben we de gebruiker (jij) laten praten met het object. Dit proces verwarren veel studenten. Hoe komt die klik op de knop nou in mijn class terecht?</p>
         <p>Dit werkt als een estafette waarbij een stokje (de data) wordt doorgegeven.</p>
@@ -118,18 +140,22 @@ class Dealer extends Player
 
         <h4>Stap 2: Het Overnamepunt (PHP Controller)</h4>
         <p>In <code>index.php</code> vangt PHP het formulier op via de superglobal <code>$_POST</code>.</p>
-        <pre><code class="language-php">$actie = $_POST['action']; // Hier zit nu "hit" in</code></pre>
+        <pre><code class="language-php">// index.php
+$actie = $_POST['action']; // Hier zit nu "hit" in</code></pre>
 
         <h4>Stap 3: Het Doorgeven (De Setter)</h4>
         <p>Nu moeten we die string "hit" in het object krijgen. De controller zoekt de <code>HumanPlayer</code> en stopt het briefje in zijn zak via een <strong>setter</strong>.</p>
-        <pre><code class="language-php">// We roepen de setter aan
+        <pre><code class="language-php">// index.php
+// We roepen de setter aan op het object
 $humanPlayer->setNextAction($actie); </code></pre>
 
         <h4>Stap 4: De Finish (Het Object)</h4>
         <p>Even later start het spel. De Game-class vraagt aan de speler: "Wat wil je doen?". De speler haalt het briefje uit zijn zak en geeft het antwoord.</p>
         <pre><code class="language-php">// In HumanPlayer.php
+
 public function makeDecision(): string {
-    return $this->nextAction; // Geeft "hit" terug
+    // Geeft "hit" terug uit het geheugen
+    return $this->nextAction;
 }</code></pre>
 
         <h3>Conclusie</h3>

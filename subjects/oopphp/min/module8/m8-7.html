@@ -31,12 +31,14 @@
                 <br><code>DELETE FROM scores</code> (zonder WHERE) <strong>verwijder alle rijen</strong> uit de tabel. Er is geen "undo" knop in de database.</p>
         </div>
 
+
+
         <h3>De Delete Methode Implementeren</h3>
         <p>Om ongelukken te voorkomen, bouwen we onze `delete` methode zo dat hij weigert iets te doen tenzij we expliciet een ID meegeven.</p>
 
+        <pre><code class="language-php">// Database.php
 
-
-        <pre><code class="language-php">public function delete(string $table, array $conditions): int
+public function delete(string $table, array $conditions): int
 {
     // Stap 1: Veiligheidscheck
     // We eisen dat er een 'id' in de condities zit.
@@ -65,15 +67,17 @@
         <h3>Toepassing: Een Score Wissen</h3>
         <p>In onze applicatie kunnen we nu een methode toevoegen aan het `Score` object om zichzelf te verwijderen.</p>
 
-        <pre><code class="language-php">class Score
-{
-    private int $id;
+        <pre><code class="language-php">// Score.php
 
-    public function remove()
+class Score
+{
+    private ?int $id = null;
+
+    public function remove(): bool
     {
         // Controleer eerst of dit object wel in de database bestaat (heeft het een ID?)
         if ($this->id === null) {
-            return;
+            return false;
         }
 
         $db = DatabaseManager::getConnection();
@@ -85,11 +89,25 @@
         );
 
         if ($deletedRows > 0) {
-            echo "Score succesvol verwijderd.";
             // Zet ID op null om aan te geven dat het niet meer in de DB staat
             $this->id = null;
+            // Return succes (geen echo!)
+            return true;
         }
+
+        return false;
     }
+}</code></pre>
+
+        <p>In de controller (index.php) roepen we de methode aan en tonen we het resultaat aan de gebruiker.</p>
+
+        <pre><code class="language-php">// index.php
+
+// Stel we hebben een score object opgehaald
+if ($score->remove()) {
+    echo "Score succesvol verwijderd.";
+} else {
+    echo "Kon de score niet verwijderen (bestond misschien niet meer?).";
 }</code></pre>
 
         <div class="info-box">

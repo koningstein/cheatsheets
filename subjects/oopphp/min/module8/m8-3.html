@@ -25,6 +25,8 @@
             <p>Het opslaan van data is een kritiek punt in je applicatie. Als je gebruikersinput direct in je SQL-string plakt, ben je kwetsbaar voor <strong>SQL Injection</strong>. Kwaadwillenden kunnen dan je database manipuleren.</p>
         </div>
 
+
+
         <h3>De Oplossing: Prepared Statements & Binding</h3>
         <p>Om dit te voorkomen, gebruiken we <strong>Prepared Statements</strong>. Het proces bestaat uit drie stappen:</p>
         <ol>
@@ -36,9 +38,11 @@
 
 
         <h3>De Insert Methode Implementeren</h3>
-        <p>We bouwen een generieke `insert` methode. Deze accepteert een tabelnaam en een array met data. We gebruiken een loop om alle waarden netjes te binden.</p>
+        <p>We bouwen een generieke `insert` methode in onze database class. Deze accepteert een tabelnaam en een array met data.</p>
 
-        <pre><code class="language-php">public function insert(string $table, array $data): int
+        <pre><code class="language-php">// MysqlDatabase.php
+
+public function insert(string $table, array $data): int
 {
     // Stap 1: Bouw de query dynamisch op
     // We maken een string van kolomnamen: "name, points"
@@ -67,11 +71,14 @@
 }</code></pre>
 
         <h3>Toepassing in Blackjack</h3>
-        <p>Stel dat de speler "John" 21 punten heeft gehaald. We slaan dit op via een Score object.</p>
+        <p>Stel dat de speler "John" 21 punten heeft gehaald. We slaan dit op via een Score object. De class geeft alleen het resultaat terug.</p>
 
-        <pre><code class="language-php">class Score
+        <pre><code class="language-php">// Score.php
+
+class Score
 {
-    public function save(string $playerName, int $points)
+    // Geeft het ID van de opgeslagen score terug
+    public function save(string $playerName, int $points): int
     {
         $db = DatabaseManager::getConnection();
 
@@ -82,11 +89,19 @@
         ];
 
         // De insert methode regelt de veilige binding
-        $newId = $db->insert('scores', $data);
-
-        echo "Score opgeslagen! ID: $newId";
+        // We returnen het resultaat (geen echo!)
+        return $db->insert('scores', $data);
     }
 }</code></pre>
+
+        <p>In je controller of index bestand gebruik je de class en toon je het resultaat.</p>
+
+        <pre><code class="language-php">// index.php
+
+$score = new Score();
+$newId = $score->save('John', 21);
+
+echo "Score opgeslagen! ID: $newId";</code></pre>
 
         <div class="info-box">
             <h3>Waarom bindValue?</h3>
