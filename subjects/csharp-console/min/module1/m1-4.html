@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methoden - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Methoden</h1>
+
+        <h3>Actie ondernemen</h3>
+        <p>Properties zijn de zelfstandige naamwoorden (de Naam, de Energie), maar <strong>Methoden</strong> (Methods) zijn de werkwoorden. Methods zorgen ervoor dat een object iets kan <em>doen</em>.</p>
+
+        <h3>Een method maken</h3>
+        <p>Een method in een class lijkt erg op een normale functie. Het heeft een zichtbaarheid (public), een return type en een naam.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    public string Name { get; set; }
+
+    // Een simpele methode zonder return waarde (void)
+    public void Bark()
+    {
+        Console.WriteLine("Woef! Woef!");
+    }
+}</code></pre>
+
+        <h3>Methoden aanroepen</h3>
+        <p>Net als bij properties gebruiken we de punt <code>.</code> om een methode te gebruiken. Vergeet de haakjes <code>()</code> niet!</p>
+
+        <pre><code class="language-csharp">DigitalPet dog = new DigitalPet();
+dog.Name = "Blafmans";
+
+// Roep de methode aan
+dog.Bark();
+
+// Output: Woef! Woef!</code></pre>
+
+        <h3>Parameters</h3>
+        <p>Je kunt ook informatie meegeven aan een method. Bijvoorbeeld, hoeveel keer moet de hond blaffen?</p>
+
+        <pre><code class="language-csharp">public void Walk(int kilometers)
+{
+    Console.WriteLine("We hebben " + kilometers + " kilometer gewandeld.");
+}</code></pre>
+        <pre><code class="language-csharp">dog.Walk(5); // Output: We hebben 5 kilometer gewandeld.</code></pre>
+
+        <div class="info-box">
+            <h3>Het 'this' keyword</h3>
+            <p>Vaak wil je in een method de eigen properties van het object gebruiken. Bijvoorbeeld: de hond moet zijn <em>eigen</em> naam zeggen. Hiervoor gebruiken we <code>this</code>.</p>
+            <pre><code class="language-csharp">public void Introduce()
+{
+    // 'this.Name' verwijst naar de property Name van DIT specifieke object
+    Console.WriteLine("Hallo, ik ben " + this.Name);
+}</code></pre>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

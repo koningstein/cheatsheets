@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Object</h1>
+
+        <h3>Van Class naar Object</h3>
+        <p>In de vorige les heb je een <code>class</code> gemaakt (de blauwdruk). Maar met alleen een blauwdruk kun je nog niet spelen. Je moet de class tot leven wekken. Dit proces noemen we <strong>instantiëren</strong>. Het resultaat is een <strong>Object</strong>.</p>
+
+        <div class="info-box">
+            <h3>Analogie</h3>
+            <p>De <strong>Class</strong> is de stempel.<br>
+                Het <strong>Object</strong> is de afdruk op papier.</p>
+            <p>Met één stempel (DigitalPet class) kun je duizenden verschillende afdrukken (DigitalPet objecten) maken.</p>
+        </div>
+
+        <h3>Het 'new' keyword</h3>
+        <p>Om een nieuw object te maken, gebruiken we in C# het woord <code>new</code>. Je maakt eerst een variabele aan van het type van je class, en stopt daar vervolgens een nieuw object in.</p>
+
+        <pre><code class="language-csharp">// We maken een variabele 'myPet' van het type 'DigitalPet'
+// En we stoppen er een NIEUWE instantie in.
+DigitalPet myPet = new DigitalPet();</code></pre>
+
+        <h3>Meerdere objecten</h3>
+        <p>Het, kracht van Object Oriented Programming is dat je meerdere, onafhankelijke objecten kunt maken van dezelfde class. Ze lijken op elkaar, maar zijn niet hetzelfde.</p>
+
+        <pre><code class="language-csharp">DigitalPet pet1 = new DigitalPet(); // Dit wordt Dino
+DigitalPet pet2 = new DigitalPet(); // Dit wordt Fluffy
+
+// pet1 en pet2 zijn compleet gescheiden objecten in het geheugen.</code></pre>
+
+        <h3>Objecten gebruiken</h3>
+        <p>Zodra je een object hebt, kun je via de variabele (bijvoorbeeld <code>pet1</code>) toegang krijgen tot de inhoud. Daar gebruiken we de punt <code>.</code> voor.</p>
+        <pre><code class="language-csharp">Console.WriteLine(pet1); // Geeft standaard het type terug: "ProjectNaam.DigitalPet"</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

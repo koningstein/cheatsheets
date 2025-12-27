@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Named Arguments - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Named Arguments</h1>
+
+        <h3>Het probleem met parameters</h3>
+        <p>Naarmate je applicatie groeit, krijg je vaak constructors of methodes met meerdere parameters. Stel je voor dat onze <code>DigitalPet</code> niet alleen een naam nodig heeft, maar ook een start-energie en een start-honger.</p>
+
+        <pre><code class="language-csharp">public DigitalPet(string name, int energy, int hunger)
+{ ... }</code></pre>
+
+        <p>Als je dit object aanmaakt, ziet de code er zo uit:</p>
+        <pre><code class="language-csharp">DigitalPet pet = new DigitalPet("Dino", 50, 10);</code></pre>
+
+        <p>Maar wat betekenen die getallen? Is 50 de honger of de energie? Als je deze code over een maand terugleest, weet je dat waarschijnlijk niet meer.</p>
+
+        <h3>De Oplossing: Named Arguments</h3>
+        <p>C# biedt een geweldige feature om dit op te lossen: <strong>Named Arguments</strong>. Je mag bij het aanroepen van een functie of constructor de naam van de parameter erbij typen, gevolgd door een dubbele punt.</p>
+
+        <pre><code class="language-csharp">// Veel duidelijker:
+DigitalPet pet = new DigitalPet(name: "Dino", energy: 50, hunger: 10);</code></pre>
+
+        <h3>Voordelen</h3>
+        <p>Het gebruik van Named Arguments heeft twee grote voordelen:</p>
+        <ol>
+            <li><strong>Leesbaarheid:</strong> Je ziet direct wat elk getal betekent.</li>
+            <li><strong>Volgorde:</strong> Omdat je de namen gebruikt, maakt de volgorde niet meer uit (hoewel het netjes is om de logische volgorde aan te houden).</li>
+        </ol>
+
+        <pre><code class="language-csharp">// Dit werkt ook, omdat C# door de namen weet wat waar hoort:
+DigitalPet pet = new DigitalPet(hunger: 10, name: "Dino", energy: 50);</code></pre>
+
+        <div class="info-box">
+            <h3>Best Practice</h3>
+            <p>Bij methodes met veel parameters (vooral getallen of <code>bools</code>) is het een goede gewoonte om Named Arguments te gebruiken. Het maakt je code "self-documenting".</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

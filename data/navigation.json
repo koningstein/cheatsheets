@@ -526,5 +526,37 @@
         }
       ]
     }
+  },
+  "csharp-console": {
+    "min": {
+      "title": "C# Console (Basis)",
+      "menu": [
+        {
+          "title": "Introductie",
+          "items": [
+            { "label": "Overzicht", "url": "index.html" }
+          ]
+        },
+        {
+          "title": "Opdrachten",
+          "items": [
+            {
+              "label": "Module 1: Basis OOP",
+              "url": "#",
+              "items": [
+                { "label": "Class", "url": "module1/m1-1.html" },
+                { "label": "Object", "url": "module1/m1-2.html" },
+                { "label": "Properties", "url": "module1/m1-3.html" },
+                { "label": "Methoden", "url": "module1/m1-4.html" },
+                { "label": "Setters", "url": "module1/m1-5.html" },
+                { "label": "Getters", "url": "module1/m1-6.html" },
+                { "label": "Constructors", "url": "module1/m1-7.html" },
+                { "label": "Named Arguments", "url": "module1/m1-8.html" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
   }
 }

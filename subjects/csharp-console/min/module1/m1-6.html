@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getters - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Getters</h1>
+
+        <h3>Computed Properties</h3>
+        <p>Soms heb je informatie nodig die je niet apart hoeft op te slaan, omdat je het kunt berekenen aan de hand van bestaande data. Dit noemen we <strong>Computed Properties</strong> of "Read-only Properties".</p>
+
+        <p>Stel we willen weten of ons huisdier moe is. We hoeven geen variabele <code>bool IsTired</code> bij te houden en steeds te updaten. We kunnen gewoon naar de <code>Energy</code> kijken.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    public int Energy { get; set; }
+
+    // Deze property heeft ALLEEN een get
+    public string Status
+    {
+        get
+        {
+            if (this.Energy > 50)
+            {
+                return "Happy";
+            }
+            return "Tired";
+        }
+    }
+}</code></pre>
+
+        <h3>Geen Set?</h3>
+        <p>Omdat deze property geen <code>set</code> heeft, kun je hem niet instellen. Proberen om <code>pet.Status = "Happy"</code> te doen, zal een foutmelding geven. De status is puur het <em>gevolg</em> van de energie.</p>
+
+        <h3>Expression Body Members (=>)</h3>
+        <p>In C# komen getters die maar één regel code bevatten heel vaak voor. Hiervoor is een kortere schrijfwijze: de <strong>Expression Body</strong> syntax (ook wel "fat arrow" genoemd).</p>
+
+        <pre><code class="language-csharp">// Korte syntax
+public bool IsAlive => this.Energy > 0;
+
+// Dit is precies hetzelfde als:
+/*
+public bool IsAlive
+{
+    get { return this.Energy > 0; }
+}
+*/</code></pre>
+
+        <div class="info-box">
+            <h3>Wanneer gebruik je dit?</h3>
+            <p>Gebruik getters voor data die direct afgeleid kan worden. Bijvoorbeeld:<br>
+                - <code>FullName</code> (combineert Firstname en Lastname)<br>
+                - <code>Area</code> (berekent width * height)<br>
+                - <code>CanAttack</code> (checkt of cooldown 0 is)</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Class</h1>
+
+        <h3>Wat is een Class?</h3>
+        <p>In C# is alles gebaseerd op objecten. Een <strong>class</strong> is de blauwdruk (het ontwerp) van zo'n object. Het beschrijft welke gegevens (data) en functionaliteiten (gedrag) een object heeft, maar het is nog niet het object zelf.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Digital Pet</h3>
+            <p>We gaan een virtueel huisdier maken (een soort Tamagotchi). We maken hiervoor een class <code>DigitalPet</code>. Deze class beschrijft dat elk huisdier een naam en een energieniveau heeft. Maar de class zelf leeft niet! Pas als we de class gebruiken om een <strong>Object</strong> te maken (bijvoorbeeld "Dino" of "Fluffy"), hebben we een echt digitaal huisdier.</p>
+        </div>
+
+        <h3>Hoe ziet een Class eruit?</h3>
+        <p>Een class in C# definieer je met het keyword <code>class</code>, gevolgd door de naam. De inhoud van de class staat tussen accolades <code>{ }</code>.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Hier komt de inhoud (eigenschappen en gedrag)
+}</code></pre>
+
+        <h3>Belangrijke regels voor een Class</h3>
+
+        <h4>1. Naamgeving</h4>
+        <p>In C# gebruiken we <strong>PascalCase</strong> voor class-namen. Dit betekent dat elk woord met een hoofdletter begint.</p>
+        <ul>
+            <li>Goed: <code>DigitalPet</code>, <code>GameManager</code>, <code>Program</code></li>
+            <li>Fout: <code>digitalPet</code>, <code>digital_pet</code>, <code>Digitalpet</code></li>
+        </ul>
+
+        <h4>2. Bestandsnaam</h4>
+        <p>In C# is het de conventie (standaardregel) dat de bestandsnaam exact overeenkomt met de class-naam, gevolgd door de extensie <code>.cs</code>.</p>
+        <p>Als je class <code>DigitalPet</code> heet, noem je het bestand <strong>DigitalPet.cs</strong>.</p>
+        <br>
+        <h4>3. Structuur & Scope</h4>
+        <p>Net als in PHP gebruiken we accolades <code>{ }</code> om het blok code aan te geven. In C# is het gebruikelijk (en in latere modules verplicht) om classes netjes te groeperen, maar voor nu volstaat de basis definitie.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Eigenschappen (bijv. Name, Energy) en methodes (bijv. Feed) komen hier
+}</code></pre>
+
+        <pre><code class="language-csharp">class FoodItem
+{
+    // Een class voor het voedsel van je huisdier
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

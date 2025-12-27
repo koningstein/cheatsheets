@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Properties</h1>
+
+        <h3>Eigenschappen definiëren</h3>
+        <p>Een object zonder data is leeg. We willen dat onze <code>DigitalPet</code> eigenschappen heeft, zoals een naam en een energieniveau. In C# gebruiken we hiervoor <strong>Properties</strong>.</p>
+
+        <p>Een Property is publiek toegankelijk, heeft een datatype (zoals <code>string</code> of <code>int</code>) en een naam.</p>
+
+        <h3>Auto-Properties</h3>
+        <p>De snelste manier om een property te maken is de "Auto-Implemented Property". Je hoeft niet na te denken over hoe de data wordt opgeslagen, C# regelt dit voor je achter de schermen.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Een property voor tekst (de naam)
+    public string Name { get; set; }
+
+    // Een property voor een geheel getal (energie)
+    public int Energy { get; set; }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Get en Set</h3>
+            <p>Je ziet achter de property <code>{ get; set; }</code> staan. Dit zijn de toegangsrechten:</p>
+            <ul>
+                <li><strong>get:</strong> De waarde mag uitgelezen worden (Read).</li>
+                <li><strong>set:</strong> De waarde mag overschreven worden (Write).</li>
+            </ul>
+        </div>
+
+        <h3>Waardes toewijzen (Set)</h3>
+        <p>Nadat je een object hebt aangemaakt met <code>new</code>, kun je de properties vullen. Je gebruikt de punt-notatie om bij de property te komen.</p>
+
+        <pre><code class="language-csharp">DigitalPet myPet = new DigitalPet();
+
+// We schrijven data naar de properties (SET)
+myPet.Name = "Dino";
+myPet.Energy = 100;</code></pre>
+
+        <h3>Waardes uitlezen (Get)</h3>
+        <p>Wil je de naam van je huisdier op het scherm tonen? Dan "haal" je de waarde op.</p>
+
+        <pre><code class="language-csharp">// We lezen de data (GET)
+Console.WriteLine(myPet.Name);
+
+// Output: Dino</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

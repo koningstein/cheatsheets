@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setters - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Setters & Validatie</h1>
+
+        <h3>Het gevaar van Auto-Properties</h3>
+        <p>Tot nu toe gebruikten we <code>{ get; set; }</code>. Dat is makkelijk, maar niet altijd veilig. Stel dat iemand per ongeluk de energie van je huisdier op <code>-50</code> zet, of op <code>9999</code>? Een auto-property accepteert alles.</p>
+
+        <p>Om dit te voorkomen, moeten we <strong>Logica</strong> toevoegen aan de setter. Hiervoor stappen we over naar een <strong>Full Property</strong>.</p>
+
+        <h3>1. Backing Fields</h3>
+        <p>Bij een Full Property slaan we de data op in een <strong>private field</strong> (een variabele die alleen binnen de class bestaat). De publieke Property praat vervolgens met dit geheime veld.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Private Backing Field (kleine letter, vaak met underscore)
+    private int _energy;
+
+    // Public Property (Hoofdletter)
+    public int Energy
+    {
+        get { return _energy; } // Geeft de waarde terug
+        set { _energy = value; } // Schrijft de waarde weg
+    }
+}</code></pre>
+
+        <h3>2. Validatie toevoegen</h3>
+        <p>In het <code>set</code> blok kunnen we nu een <code>if</code>-statement toevoegen. Het keyword <code>value</code> bevat de data die iemand probeert in te vullen.</p>
+
+        <pre><code class="language-csharp">public int Energy
+{
+    get { return _energy; }
+    set
+    {
+        // Validatie: Energie mag niet lager dan 0
+        if (value < 0)
+        {
+            Console.WriteLine("Let op: Energie kan niet negatief zijn! We zetten het op 0.");
+            _energy = 0;
+        }
+        else if (value > 100)
+        {
+            _energy = 100; // Maximaal 100
+        }
+        else
+        {
+            _energy = value; // Geldige waarde, dus opslaan
+        }
+    }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Encapsulation</h3>
+            <p>Dit concept heet <strong>Encapsulatie</strong>. Je beschermt de data (het backing field) door er een gecontroleerde toegangspoort (de property) voor te zetten. De buitenwereld weet niet <em>hoe</em> de data wordt opgeslagen, alleen dat het werkt.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
