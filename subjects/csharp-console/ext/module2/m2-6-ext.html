@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variables Inspecteren (Ext) - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Variables Inspecteren: Onder de motorkap</h1>
+
+        <p>In de vorige les hebben we geleerd hoe we de code kunnen pauzeren met een <strong>Breakpoint</strong>. De code staat stil en de regel is geel.</p>
+        <p>Maar... alleen maar stilstaan heeft geen zin. Je wilt weten <em>waarom</em> je code crasht of waarom je huisdier opeens dood is. Je wilt de waardes van je variabelen zien op dat specifieke moment.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Monteur</h3>
+            <p>Stel je voor dat je auto een raar geluid maakt. Je zet de auto stil langs de kant van de weg (Breakpoint).</p>
+            <p>Nu ga je niet willekeurig onderdelen vervangen. Nee, je doet de motorkap open en kijkt naar de meters: Hoe heet is de motor? Hoeveel olie zit erin? Zit er een kabel los?</p>
+            <p>Het inspecteren van variabelen is precies dat: kijken naar de meters van je programma.</p>
+        </div>
+
+        <h3>Methode 1: Hoveren (Snel kijken)</h3>
+        <p>De snelste manier om een waarde te checken is met je muis.</p>
+        <ol>
+            <li>Zorg dat het programma gepauzeerd is (gele regel).</li>
+            <li>Beweeg je muis over een variabele naam, bijvoorbeeld <code>energy</code>.</li>
+            <li>Er verschijnt direct een klein pop-up venster met de waarde: <code>50</code>.</li>
+        </ol>
+
+        <p>Als je over een object (zoals <code>dino</code>) hovert, zie je een klein pijltje. Als je daarop klikt, klapt het object open en zie je alle properties (Name, Energy, Hunger) in één keer.</p>
+
+
+        <h3>Methode 2: Het 'Locals' Venster</h3>
+        <p>Onderaan in Visual Studio zie je tijdens het debuggen het tabblad <strong>Locals</strong>. Dit is je dashboard.</p>
+        <p>Hier toont C# automatisch <strong>alle</strong> variabelen die op dit moment bekend zijn in de methode waar je bent. Je hoeft dus niet te zoeken.</p>
+
+        <pre>
+Naam        Waarde           Type
+------------------------------------------
+dino        {DigitalPet}     DigitalPet
+  > Name    "Dino"           string
+  > Energy  50               int
+i           0                int
+        </pre>
+
+        <h3>Methode 3: Het 'Watch' Venster (De Monitor)</h3>
+        <p>Soms is <em>Locals</em> te druk. Je wilt alleen één specifiek ding in de gaten houden, bijvoorbeeld of de energie onder de 10 komt.</p>
+        <p>Hiervoor gebruik je de <strong>Watch</strong>. Hier kun je zelf dingen typen.</p>
+
+        <ol>
+            <li>Klik met de rechtermuisknop op een variabele in je code.</li>
+            <li>Kies <strong>Add to Watch</strong>.</li>
+            <li>Onderaan verschijnt het Watch venster.</li>
+        </ol>
+
+        <p>Het krachtige is dat je hier ook sommen of vragen kunt typen:</p>
+        <ul>
+            <li><code>dino.Energy</code> (Toont de waarde: 50)</li>
+            <li><code>dino.Energy - 10</code> (Toont wat het zou zijn: 40)</li>
+            <li><code>dino.Energy < 0</code> (Toont: false)</li>
+        </ul>
+        <p>Terwijl je met <strong>F10</strong> door de code stapt, worden deze waardes live bijgewerkt.</p>
+
+        <h3>Speciale Truc: Waardes aanpassen (God Mode)</h3>
+        <p>Dit weten veel beginners niet: Je kunt tijdens het debuggen de waardes <strong>veranderen</strong>!</p>
+        <p>Stel je wilt testen wat er gebeurt als je huisdier doodgaat. Normaal moet je dan 10 minuten spelen tot de energie 0 is. Dat duurt te lang.</p>
+
+        <ol>
+            <li>Pauzeer de code.</li>
+            <li>Ga naar het Locals of Watch venster.</li>
+            <li>Dubbelklik op de waarde van <code>Energy</code> (bijv. 50).</li>
+            <li>Typ <code>0</code> en druk op Enter.</li>
+            <li>Druk op F5 (Continue).</li>
+        </ol>
+
+        <p>Je programma gaat nu verder alsof de energie altijd al 0 was. Zo kun je heel snel testen of je 'Game Over' scherm werkt.</p>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Ik zie niks als ik hover</h3>
+            <p>Dit gebeurt als het programma <strong>niet gepauzeerd</strong> is. Je kunt alleen variabelen inspecteren als de code 'bevroren' is (dus als je een gele regel ziet). Als het programma gewoon draait, gaat het te snel voor Visual Studio om iets te laten zien.</p>
+        </div>
+
+        <div class="info-box warning">
+            <h3>⚠️ Variabele bestaat (nog) niet</h3>
+            <p>Stel je staat met de gele balk op regel 10, maar je probeert een variabele te bekijken die pas op regel 20 wordt aangemaakt. Dat kan niet. De variabele bestaat op dat moment nog niet in het geheugen.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Gebruik <strong>Hover</strong> (muis) voor een snelle check.</li>
+            <li>Gebruik <strong>Locals</strong> om alles te zien wat nu in het geheugen zit.</li>
+            <li>Gebruik <strong>Watch</strong> om specifieke berekeningen in de gaten te houden.</li>
+            <li>Je kunt waardes <strong>aanpassen</strong> tijdens het debuggen om snel scenario's te testen.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

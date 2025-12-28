@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NuGet Packages (Ext) - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>NuGet: De App Store voor Code</h1>
+
+        <p>Tot nu toe heb je alle code zelf geschreven. Maar stel je voor dat je iets ingewikkelds moet doen, zoals een PDF maken, een QR-code genereren of communiceren met een database. Moet je dat allemaal zelf programmeren?</p>
+        <p>Gelukkig niet. Miljoenen programmeurs hebben dit soort problemen al opgelost en delen hun code gratis. In de .NET wereld (C#) heet het systeem om deze code te delen <strong>NuGet</strong>.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: LEGO</h3>
+            <p>Als je een kasteel van LEGO bouwt, ga je niet zelf het plastic smelten om blokjes te maken. Je koopt kant-en-klare doosjes met blokjes.</p>
+            <ul>
+                <li>Jouw project is het kasteel (jouw eigen creatie).</li>
+                <li>Een <strong>NuGet Package</strong> is een doosje met speciale blokjes (bijv. ramen of wielen) die iemand anders heeft gemaakt.</li>
+            </ul>
+        </div>
+
+        <h3>Waarom NuGet?</h3>
+        <p>Waarom zou je het wiel opnieuw uitvinden? Als je een package gebruikt:</p>
+        <ul>
+            <li>Bespaar je heel veel tijd.</li>
+            <li>Zitten er minder fouten in (want duizenden mensen hebben het al getest).</li>
+            <li>Kun jij je focussen op wat jouw game uniek maakt.</li>
+        </ul>
+
+        <h3>Hoe installeer je een Package?</h3>
+        <p>In Visual Studio zit een ingebouwde winkel. We gaan als voorbeeld het pakket <strong>Newtonsoft.Json</strong> installeren. Dit is een wereldberoemd pakket om objecten om te zetten naar tekst.</p>
+
+
+        <ol>
+            <li>Ga naar de <strong>Solution Explorer</strong> (rechts).</li>
+            <li>Klik met de <strong>rechtermuisknop</strong> op je Project (bijv. <code>DigitalPetGame</code>).</li>
+            <li>Kies in het menu: <strong>Manage NuGet Packages...</strong></li>
+            <li>Er opent een nieuw tabblad. Klik bovenaan op <strong>Browse</strong>.</li>
+            <li>Typ in de zoekbalk: <code>Newtonsoft.Json</code>.</li>
+            <li>Klik op het bovenste resultaat en druk rechts op <strong>Install</strong>.</li>
+        </ol>
+
+        <p>Als er een popup komt over wijzigingen of licenties, klik je gewoon op <strong>OK</strong> of <strong>I Accept</strong>.</p>
+
+        <h3>Het Package gebruiken</h3>
+        <p>Nu het pakket in je project zit, kun je de code gebruiken. Vaak moet je wel even de <strong>Namespace</strong> importeren (met <code>using</code>), anders weet C# niet waar de nieuwe code staat.</p>
+
+        <h4>Het Doel: Opslaan als tekst</h4>
+        <p>Stel, we willen ons huisdier opslaan in een tekstbestand. Een object (met haakjes en geheugenadressen) kun je niet zomaar opslaan. We moeten het omzetten naar JSON tekst.</p>
+
+        <h4>Stap 1: Het Model (DigitalPet.cs)</h4>
+        <p>Hier verandert niks. Dit is gewoon jouw eigen code.</p>
+        <pre><code class="language-csharp">namespace MyTamagotchiGame.Models;
+
+public class DigitalPet
+{
+    public string Name { get; set; }
+    public int Energy { get; set; }
+}</code></pre>
+
+        <h4>Stap 2: Het Gebruik (Program.cs)</h4>
+        <p>Hier gebruiken we de magische code van iemand anders.</p>
+
+        <pre><code class="language-csharp">using System;
+using MyTamagotchiGame.Models;
+
+// 1. BELANGRIJK: Importeer de namespace van het pakket
+using Newtonsoft.Json;
+
+// Maak een huisdier
+DigitalPet dino = new DigitalPet();
+dino.Name = "Dino";
+dino.Energy = 100;
+
+// Gebruik de code uit het pakket (JsonConvert)
+// SerializeObject betekent: "Maak van dit object een stuk tekst"
+string jsonText = JsonConvert.SerializeObject(dino);
+
+Console.WriteLine(jsonText);
+// Output: {"Name":"Dino","Energy":100}</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom is dit handig?</h3>
+            <p>Zonder dit pakket had je zelf een functie moeten schrijven die: <code>"{ \"Name\": \"" + dino.Name + "\" ... "</code> aan elkaar plakt. Dat is moeilijk en foutgevoelig. Nu doet <code>JsonConvert</code> al het zware werk voor je.</p>
+        </div>
+
+        <h3>Samenwerken (Dependencies)</h3>
+        <p>Als je jouw project naar een klasgenoot stuurt (via Teams of Git), stuur je meestal <strong>niet</strong> de gedownloade packages mee (die map is veel te groot). Je stuurt alleen jouw eigen code.</p>
+        <p>Dit is geen probleem! Visual Studio ziet in jouw projectbestand (<code>.csproj</code>) welke packages er nodig zijn.</p>
+        <p>Zodra jouw klasgenoot het project opent en op "Start" drukt, downloadt Visual Studio razendsnel alle ontbrekende pakketten. Dit heet <strong>Package Restore</strong>.</p>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Rode strepen onder de code</h3>
+            <p>Heb je het pakket geïnstalleerd, maar geeft <code>JsonConvert</code> toch een rode streep?</p>
+            <ul>
+                <li>Ben je <code>using Newtonsoft.Json;</code> vergeten bovenaan je bestand?</li>
+                <li>Heb je het pakket misschien in de Solution geïnstalleerd in plaats van in het Project?</li>
+            </ul>
+        </div>
+
+        <div class="info-box warning">
+            <h3>⚠️ Verkeerde versie</h3>
+            <p>Soms zijn er meerdere versies van een pakket. Voor schoolopdrachten is de nieuwste stabiele versie (Stable) meestal prima. Vink "Include prerelease" uit als je zeker wilt zijn dat het werkt.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li><strong>NuGet</strong> is de plek waar je kant-en-klare code van anderen kunt downloaden.</li>
+            <li>Je installeert packages via <strong>Manage NuGet Packages</strong> (rechtermuisknop op Project).</li>
+            <li>Je moet vaak een <strong>using</strong> toevoegen om de code te kunnen gebruiken.</li>
+            <li>Gebruik packages om tijd te besparen bij moeilijke taken (zoals JSON, Database, PDF).</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

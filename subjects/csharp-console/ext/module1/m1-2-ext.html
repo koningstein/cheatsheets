@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object (Ext) - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Object: Van Plan naar Realiteit</h1>
+
+        <p>In het vorige hoofdstuk hebben we de <strong>Class</strong> gemaakt. Dat was onze bouwtekening. Maar met een tekening kun je nog niet spelen. Nu gaan we die tekening gebruiken om echte dingen te maken. Die dingen noemen we <strong>Objecten</strong>.</p>
+
+        <h3>Wat is het verschil?</h3>
+        <p>Dit is de kern van Object Oriented Programming. Zorg dat je dit verschil goed snapt.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Fabriek</h3>
+            <p>Denk terug aan de robot-tekening (de <strong>Class</strong>). Die tekening sturen we naar de fabriek.</p>
+            <ul>
+                <li>De fabriek gebruikt die ene tekening om 1.000 robots te bouwen.</li>
+                <li>Elke robot is een <strong>Object</strong>.</li>
+                <li>Als ik Robot 1 rood verf, blijft Robot 2 gewoon grijs. Ze zijn <strong>onafhankelijk</strong> van elkaar.</li>
+            </ul>
+        </div>
+
+        <h3>Objecten in onze Game</h3>
+        <p>We hebben de <code>DigitalPet</code> class gemaakt. Dat is het <em>idee</em> van een huisdier. Nu gaan we echte huisdieren maken.</p>
+
+        <p>Stel dat we het spel starten. Je maakt twee huisdieren aan:</p>
+        <ol>
+            <li>Dino (een stoere T-Rex).</li>
+            <li>Fluffy (een schattig konijn).</li>
+        </ol>
+        <p>Dit zijn twee losse <strong>Objecten</strong>, gemaakt van dezelfde <code>DigitalPet</code> class.</p>
+
+        <h3>Stap voor Stap: Een Object maken</h3>
+        <p>Om van een class een object te maken, gebruiken we het keyword: <code>new</code>.</p>
+        <p>Het commando <code>new</code> zegt eigenlijk tegen C#: <em>"Kijk naar de class en reserveer geheugen voor een nieuw exemplaar."</em></p>
+
+        <pre><code class="language-csharp">// 1. We hebben de class 'DigitalPet' al gemaakt in een ander bestand.
+
+// 2. Nu maken we een nieuw object (instantiëren)
+DigitalPet dino = new DigitalPet();
+
+// 3. We kunnen er nog eentje maken!
+DigitalPet fluffy = new DigitalPet();</code></pre>
+
+        <div class="info-box">
+            <h3>Wat gebeurt hier?</h3>
+            <p>We hebben nu twee variabelen: <code>dino</code> en <code>fluffy</code>. Ze lijken op elkaar omdat ze van dezelfde class komen, maar het zijn twee totaal verschillende dingen in het geheugen van de computer.</p>
+        </div>
+
+        <h3>Veelgemaakte Fouten</h3>
+        <p>Bij het maken van objecten gaat het soms mis. Let hier op:</p>
+
+        <h4>1. De haakjes vergeten</h4>
+        <p>Achter de naam van de class <strong>moeten</strong> ronde haakjes <code>()</code> staan. Dit zijn de haakjes van de Constructor (daar leren we later meer over).</p>
+        <pre><code class="language-csharp">DigitalPet bad = new DigitalPet;   // FOUT! C# snapt dit niet.
+DigitalPet good = new DigitalPet(); // GOED!</code></pre>
+
+        <h4>2. Denken dat variabelen gekoppeld zijn</h4>
+        <p>Beginners denken soms dat als je iets verandert aan <code>dino</code>, dat <code>fluffy</code> dan ook verandert. Dat is niet zo! Elk object heeft zijn eigen stukje geheugen.</p>
+
+        <h3>Hoe bekijk ik mijn Object?</h3>
+        <p>Als je een variabele als <code>int getal = 5;</code> naar de console schrijft, zie je netjes "5". Maar bij objecten werkt dat anders.</p>
+
+        <pre><code class="language-csharp">Console.WriteLine(dino);
+// Output: "MyProject.DigitalPet"</code></pre>
+
+        <p><strong>Waarom?</strong> Een object is te complex. C# weet niet wat jij wilt zien (de naam? de energie?). Daarom toont hij standaard alleen het <strong>Type</strong> (de naam van de class).</p>
+        <p><em>(Later leren we hoe we dit kunnen aanpassen met de `ToString()` methode, zodat je wel mooie info ziet.)</em></p>
+
+        <h3>Samenvatting: Waarom doen we dit?</h3>
+        <p>Misschien denk je: "Waarom al die moeite met Classes en Objecten?"</p>
+        <p>Stel dat je een game maakt met 100 vijanden.</p>
+        <ul>
+            <li><strong>Zonder OOP:</strong> Je moet honderden losse variabelen maken (`enemy1_hp`, `enemy1_x`, `enemy2_hp`, etc.). Het wordt een chaos.</li>
+            <li><strong>Met OOP:</strong> Je schrijft 1x de code voor <code>Enemy</code>. Daarna maak je met <code>new</code> razendsnel 100 vijanden aan. De code blijft schoon en overzichtelijk.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

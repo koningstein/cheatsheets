@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Class: De Blauwdruk</h1>
+
+        <p>Welkom bij Object Oriented Programming (OOP). Voordat we gaan programmeren, moet je de basis snappen. Alles in C# begint met de <strong>Class</strong>.</p>
+
+        <h3>Wat is een Class?</h3>
+        <p>Je kunt een class zien als een <strong>technische tekening</strong> of een <strong>recept</strong>. Het is een beschrijving van hoe iets eruitziet en wat het kan doen. Maar let op: de class is nog niet het "ding" zelf.</p>
+
+        <div class="info-box">
+            <h3>Voorbeeld: De Robot Fabriek</h3>
+            <p>Stel je voor: je ontwerpt een robot. Je maakt een tekening waarop staat:</p>
+            <ul>
+                <li>De robot heeft een kleur.</li>
+                <li>De robot heeft batterij-energie.</li>
+                <li>De robot kan lopen en praten.</li>
+            </ul>
+            <p>Deze tekening is jouw <strong>Class</strong>. Je kunt niet praten met de tekening. Maar, de fabriek kan met die ene tekening wel 1.000 echte robots bouwen. Die echte robots noemen we straks <strong>Objecten</strong>.</p>
+        </div>
+
+        <h3>De Class in ons project</h3>
+        <p>In deze module maken we een digitaal huisdier (Digital Pet). We willen straks misschien wel drie dieren hebben: Dino, Fluffy en Blafmans.</p>
+
+        <p>Het is onhandig om voor elk dier losse code te schrijven. In plaats daarvan maken we één blauwdruk: de <code>DigitalPet</code> class.</p>
+        <p>Hierin schrijven we op wat <em>elk</em> huisdier heeft:</p>
+        <ul>
+            <li>Elk dier heeft een <strong>Naam</strong>.</li>
+            <li>Elk dier heeft <strong>Energie</strong>.</li>
+        </ul>
+
+        <h3>Hoe maak je een Class?</h3>
+        <p>In C# is het heel simpel. Je gebruikt het woord <code>class</code>, gevolgd door de naam. Daarna gebruik je accolades <code>{ }</code> voor de inhoud.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Alles tussen deze accolades hoort bij de blauwdruk.
+    // Nu is het nog leeg, maar straks komt hier code te staan.
+}</code></pre>
+
+        <h3>De Spelregels (Best Practices)</h3>
+        <p>Om te zorgen dat jouw code netjes is en goed samenwerkt met code van anderen, zijn er strenge regels in C#.</p>
+
+        <h4>1. De Naamgeving (PascalCase)</h4>
+        <p>Geef je class altijd een Engelse naam. We gebruiken hiervoor <strong>PascalCase</strong>. Dat betekent:</p>
+        <ul>
+            <li>De naam begint <strong>altijd</strong> met een Hoofdletter.</li>
+            <li>Elk nieuw woord begint ook met een Hoofdletter.</li>
+            <li>Gebruik geen spaties of lage streepjes (_).</li>
+        </ul>
+
+        <div class="table-wrapper">
+            <table class="summary-table">
+                <thead>
+                <tr>
+                    <th>Goed (PascalCase)</th>
+                    <th>Fout</th>
+                    <th>Waarom?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>DigitalPet</code></td>
+                    <td><code>digitalPet</code></td>
+                    <td>Moet met een hoofdletter beginnen.</td>
+                </tr>
+                <tr>
+                    <td><code>GameManager</code></td>
+                    <td><code>game_manager</code></td>
+                    <td>Geen underscores gebruiken in class namen.</td>
+                </tr>
+                <tr>
+                    <td><code>Program</code></td>
+                    <td><code>program</code></td>
+                    <td>Dit is de standaard in C#.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>2. De Bestandsnaam</h4>
+        <p>Houd je project overzichtelijk: <strong>Eén class per bestand.</strong></p>
+        <p>De naam van het bestand moet precies hetzelfde zijn als de naam van de class, met <code>.cs</code> erachter.</p>
+        <ul>
+            <li>Class: <code>DigitalPet</code> &rarr; Bestand: <strong>DigitalPet.cs</strong></li>
+            <li>Class: <code>Program</code> &rarr; Bestand: <strong>Program.cs</strong></li>
+        </ul>
+
+        <div class="info-box warning">
+            <h3>Waarom is dit belangrijk?</h3>
+            <p>Als je later in een groot team werkt met honderden bestanden, moet je snel dingen kunnen terugvinden. Als je class <code>DigitalPet</code> heet, maar het bestand heet <code>huisdier.cs</code> of <code>code.cs</code>, kan niemand je werk terugvinden.</p>
+        </div>
+
+        <h4>3. De Accolades</h4>
+        <p>In C# zetten we de openings-accolade <code>{</code> altijd op een <strong>nieuwe regel</strong>. Dit leest rustiger.</p>
+
+        <pre><code class="language-csharp">// ZO HOORT HET NETJES IN C#:
+class DigitalPet
+{
+    // ...
+}
+
+// DIT DOEN WE LIEVER NIET:
+class DigitalPet {
+   // ...
+}</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

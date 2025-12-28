@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Stack - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>De Call Stack</h1>
+
+        <h3>Het spoor terug</h3>
+        <p>Als je programma crasht, of als je diep in een methode zit te debuggen, raak je soms het overzicht kwijt. "Hoe ben ik hier eigenlijk terechtgekomen?"</p>
+        <p>De <strong>Call Stack</strong> (Aanroep Stapel) is je GPS. Het laat zien welke ketting van methodes er is uitgevoerd om op het huidige punt te komen.</p>
+
+        <h3>Hoe werkt de Stack?</h3>
+        <p>Stel je hebt deze situatie:</p>
+        <ol>
+            <li><code>Main()</code> roept <code>StartGame()</code> aan.</li>
+            <li><code>StartGame()</code> roept <code>myPet.Feed()</code> aan.</li>
+            <li><code>Feed()</code> roept <code>CheckIsAlive()</code> aan.</li>
+        </ol>
+        <p>Als je een breakpoint zet in <code>CheckIsAlive</code>, ziet de Call Stack er zo uit (van boven naar beneden):</p>
+
+        <pre>
+1. CheckIsAlive  <-- HIER ben je nu
+2. Feed
+3. StartGame
+4. Main
+        </pre>
+
+        <h3>Navigeren in de Stack</h3>
+        <p>In Visual Studio kun je in het <strong>Call Stack</strong> venster dubbelklikken op een regel (bijvoorbeeld op <code>StartGame</code>). Visual Studio brengt je dan terug naar die methode, naar de exacte regel waar de aanroep plaatsvond.</p>
+
+        <div class="info-box">
+            <h3>Waarom is dit nuttig?</h3>
+            <p>Als een variabele een verkeerde waarde heeft in <code>CheckIsAlive</code>, komt die waarde misschien wel uit <code>StartGame</code>. Door terug te klikken in de Call Stack kun je de variabelen inspecteren zoals ze waren in die eerdere methode (snapshot).</p>
+        </div>
+
+        <h3>Stack Overflow</h3>
+        <p>De ruimte op de stack is niet oneindig. Als methodes elkaar oneindig blijven aanroepen (bijvoorbeeld: methode A roept methode A aan zonder stopconditie), loopt het geheugen vol. Het programma crasht dan met de beroemde foutmelding: <strong>System.StackOverflowException</strong>.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

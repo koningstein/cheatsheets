@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappenstructuur - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Mappenstructuur</h1>
+
+        <p>In de vorige lessen stonden al onze bestanden (<code>Program.cs</code>, <code>DigitalPet.cs</code>) gewoon los naast elkaar. Dat is prima als je maar 3 bestanden hebt. Maar wat als je een grote game maakt met honderden classes?</p>
+        <p>Dan wordt je project een rommeltje. Je kunt niks meer terugvinden. Daarom gaan we leren hoe je een C# project netjes indeelt.</p>
+
+        <h3>1. Eén Class = Eén Bestand</h3>
+        <p>De allerbelangrijkste regel in C# is: <strong>Stop elke class in zijn eigen bestand.</strong></p>
+        <ul>
+            <li>Heb je een class <code>DigitalPet</code>? Maak een bestand <strong>DigitalPet.cs</strong>.</li>
+            <li>Heb je een class <code>Food</code>? Maak een bestand <strong>Food.cs</strong>.</li>
+        </ul>
+        <p>Stop ze nooit samen in één bestand, ook al zijn ze klein. Dit houdt je code overzichtelijk.</p>
+
+        <h3>2. Mappen gebruiken (Models)</h3>
+        <p>Net zoals je op je computer mappen gebruikt voor 'School', 'Foto's' en 'Games', doen we dat ook in onze code.</p>
+
+        <p>Een standaard afspraak in C# is dat we "blauwdrukken" van data (zoals een Huisdier, een Speler, of een Product) in een map genaamd <strong>Models</strong> stoppen.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Kledingkast</h3>
+            <p>Als je al je kleren op één hoop op de grond gooit (hoofdmap), vind je nooit je sokken terug.<br>
+                Daarom heb je lades (mappen):</p>
+            <ul>
+                <li>Lade <strong>Sokken</strong> (Models)</li>
+                <li>Lade <strong>T-shirts</strong> (Services)</li>
+            </ul>
+            <p>Het opruimen kost even tijd, maar daarna werkt het veel sneller.</p>
+        </div>
+
+        <h3>Hoe maak je een map in Visual Studio?</h3>
+        <ol>
+            <li>Klik met de <strong>rechtermuisknop</strong> op je Projectnaam (niet de Solution).</li>
+            <li>Kies <strong>Add</strong> -> <strong>New Folder</strong>.</li>
+            <li>Noem de map <code>Models</code>.</li>
+            <li>Sleep nu je bestand <code>DigitalPet.cs</code> in deze map.</li>
+        </ol>
+
+        <pre>
+MijnGame/
+│
+├── Program.cs          (Het startpunt blijft in de hoofdmap)
+├── MijnGame.csproj
+│
+└── Models/             (De nieuwe map)
+    ├── DigitalPet.cs   (Verplaatst)
+    └── Food.cs
+        </pre>
+
+        <h3>3. Namespace volgt de Map</h3>
+        <p>Dit is een belangrijk punt. Als je een bestand verplaatst naar een map, verandert zijn "adres". In C# betekent dit dat de <strong>Namespace</strong> moet veranderen.</p>
+        <p>Als <code>DigitalPet</code> in de map <code>Models</code> staat, moet de namespace ook eindigen op <code>.Models</code>.</p>
+
+        <h4>Stap A: Pas de Namespace aan (DigitalPet.cs)</h4>
+        <pre><code class="language-csharp">// OUD:
+// namespace MijnGame;
+
+// NIEUW (want hij zit in de map Models):
+namespace MijnGame.Models;
+
+public class DigitalPet
+{
+    public string Name { get; set; }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Tip: Automatisch Aanpassen</h3>
+            <p>Als je een bestand versleept in Visual Studio, vraagt hij soms: <em>"Do you want to adjust the namespaces?"</em>. Zeg hier altijd <strong>JA</strong> op. Dan past hij de code voor je aan.</p>
+        </div>
+
+        <h4>Stap B: Gebruik de Using (Program.cs)</h4>
+        <p>Nu staat <code>DigitalPet</code> opgesloten in de map (namespace) <code>Models</code>. Maar <code>Program.cs</code> staat nog buiten die map. Hij kan <code>DigitalPet</code> niet meer vinden.</p>
+
+        <p>Je moet nu bovenaan <code>Program.cs</code> vertellen dat hij ook in de map <code>Models</code> moet kijken.</p>
+
+        <pre><code class="language-csharp">using System;
+// BELANGRIJK: Importeer de map waar je class in zit
+using MijnGame.Models;
+
+// Nu snapt hij weer wat 'DigitalPet' is
+DigitalPet dino = new DigitalPet("Dino");</code></pre>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Namespace vergeten aan te passen</h3>
+            <p>Je hebt het bestand wel verplaatst naar de map <code>Models</code>, maar in de code staat nog steeds <code>namespace MijnGame;</code>.</p>
+            <p>Dit is verwarrend voor andere programmeurs (en voor jezelf). Zorg dat de namespace <strong>altijd</strong> klopt met de mappenstructuur.</p>
+        </div>
+
+        <div class="info-box warning">
+            <h3>⚠️ Verkeerde Using</h3>
+            <p>Krijg je een rode streep onder <code>DigitalPet</code>? Dan ben je waarschijnlijk <code>using MijnGame.Models;</code> vergeten in <code>Program.cs</code>. Klik op de rode streep en druk op <code>Ctrl + .</code> om het te fixen.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Houd je project netjes: <strong>1 class per bestand</strong>.</li>
+            <li>Gebruik mappen (zoals <strong>Models</strong>) om je bestanden te groeperen.</li>
+            <li>Als je een map gebruikt, verander dan ook de <strong>Namespace</strong> (bijv. <code>MijnGame.Models</code>).</li>
+            <li>Gebruik <strong>using</strong> om bestanden uit die map te kunnen gebruiken in andere bestanden.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

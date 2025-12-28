@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NuGet Packages - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>NuGet Packages</h1>
+
+        <h3>Het wiel niet opnieuw uitvinden</h3>
+        <p>Als programmeur hoef je niet alles zelf te schrijven. Wil je complexe berekeningen doen, PDF's genereren of JSON bestanden inlezen? Grote kans dat iemand anders dat al heeft geprogrammeerd en gedeeld.</p>
+        <p>In de .NET wereld heet de pakketbeheerder <strong>NuGet</strong> (vergelijkbaar met <em>Composer</em> voor PHP of <em>NPM</em> voor JavaScript).</p>
+
+        <h3>NuGet Package Manager</h3>
+        <p>In Visual Studio kun je heel makkelijk pakketten installeren zonder commando's te typen:</p>
+        <ol>
+            <li>Rechtermuisknop op je <strong>Project</strong> (niet de Solution).</li>
+            <li>Kies <strong>Manage NuGet Packages...</strong></li>
+            <li>Ga naar het tabblad <strong>Browse</strong> en zoek je library.</li>
+        </ol>
+
+        <div class="info-box">
+            <h3>Voorbeeld: Newtonsoft.Json</h3>
+            <p>Een van de populairste packages is <code>Newtonsoft.Json</code>. Hiermee kun je objecten heel makkelijk omzetten naar tekst (Serialize) en andersom.</p>
+        </div>
+
+        <h3>Code gebruiken</h3>
+        <p>Na installatie kun je de code direct gebruiken. Vaak moet je wel even de juiste namespace importeren.</p>
+
+        <pre><code class="language-csharp">using Newtonsoft.Json; // De namespace van het pakket
+
+DigitalPet myPet = new DigitalPet("Dino");
+
+// Het object omzetten naar een JSON string
+string json = JsonConvert.SerializeObject(myPet);
+
+Console.WriteLine(json);
+// Output: {"Name":"Dino","Energy":50}</code></pre>
+
+        <h3>Dependencies</h3>
+        <p>NuGet houdt in je projectbestand (<code>.csproj</code>) bij welke versies je gebruikt. Als je je project naar een teamgenoot stuurt, downloadt Visual Studio automatisch de ontbrekende pakketten (Restore).</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

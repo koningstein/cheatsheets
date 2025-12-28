@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solution vs Project - C# Module 2</title>
+
+  <script src="../../../../assets/js/theme-init.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+  <div data-include="../../../../components/sidebar.html"></div>
+
+  <main class="main-content">
+    <h1>Solution vs Project</h1>
+
+    <h3>De Hiërarchie</h3>
+    <p>Als je in Visual Studio begint, zie je vaak twee termen voorbijkomen: <strong>Solution</strong> en <strong>Project</strong>. Het is belangrijk om het verschil te begrijpen, want ze hebben een andere functie.</p>
+
+    <div class="info-box">
+      <h3>De Analogie</h3>
+      <p><strong>De Solution (.sln):</strong> Dit is je werkbank of archiefkast. Hij bevat zelf geen code, maar houdt bij waar alles ligt.<br>
+        <strong>Het Project (.csproj):</strong> Dit is een map op de werkbank. Hierin zit de daadwerkelijke code, afbeeldingen en instellingen voor één applicatie.</p>
+    </div>
+
+    <h3>1. Het Project (.csproj)</h3>
+    <p>Een project is een verzameling bestanden die samen één resultaat opleveren (bijvoorbeeld één <code>.exe</code> bestand). Alles wat we tot nu toe hebben gedaan (de DigitalPet classes, Program.cs) zit in één project.</p>
+    <p>Belangrijk om te weten:</p>
+    <ul>
+      <li>Bevat je C# bestanden (`.cs`).</li>
+      <li>Houdt bij welke externe bibliotheken (NuGet packages) je gebruikt.</li>
+      <li>Je kunt het project 'builden' (compileren).</li>
+    </ul>
+
+    <h3>2. De Solution (.sln)</h3>
+    <p>Een Solution is een container die één of meerdere projecten groepeert. In de professionele wereld bestaat software vaak uit meerdere delen:</p>
+    <ul>
+      <li><code>GameApp</code> (Het spel zelf - Console Project)</li>
+      <li><code>GameEngine</code> (Gedeelde logica - Class Library Project)</li>
+      <li><code>GameTests</code> (Testcode - Test Project)</li>
+    </ul>
+    <p>De Solution zorgt ervoor dat je al deze projecten tegelijk kunt openen in Visual Studio en dat ze met elkaar kunnen samenwerken.</p>
+
+    <h3>Visueel in Visual Studio</h3>
+    <p>In de <strong>Solution Explorer</strong> (meestal rechts in beeld) zie je deze structuur terug. De Solution staat helemaal bovenaan als de 'root', met daaronder de projecten als submappen.</p>
+
+  </main>
+
+  <aside class="sidebar-right">
+    <div class="toc-container">
+      <h4>Inhoud</h4>
+      <ul id="toc-list" class="toc-list">
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

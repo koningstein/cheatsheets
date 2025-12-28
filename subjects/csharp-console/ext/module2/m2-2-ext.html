@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namespaces - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Namespaces & Using</h1>
+
+        <p>Als je project groter wordt, krijg je steeds meer bestanden. Je wilt niet dat alles op één grote hoop ligt. Je wilt structuur. In C# gebruiken we hiervoor <strong>Namespaces</strong>.</p>
+
+        <h3>Het Probleem: Dubbele Namen</h3>
+        <p>Stel je voor dat jij een game maakt en je maakt een class genaamd <code>Console</code> (voor een spelcomputer in je game).<br>
+            Maar... C# heeft zelf óók al een class die <code>Console</code> heet (die gebruiken we voor <code>WriteLine</code>).</p>
+        <p>Als je nu <code>Console</code> typt, raakt C# in de war. Welke bedoel je? Die van jou, of die van Microsoft?</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Achternamen</h3>
+            <p>Stel dat er twee jongens in de klas zitten die allebei "Jan" heten. Als de leraar roept: "Jan, kom eens hier!", weten ze niet wie hij bedoelt.</p>
+            <p>Daarom gebruiken we achternamen: "Jan <strong>Jansen</strong>" en "Jan <strong>de Vries</strong>".</p>
+            <p>Een <strong>Namespace</strong> is eigenlijk de achternaam van je Class.</p>
+        </div>
+
+        <h3>1. Een Namespace maken</h3>
+        <p>Je geeft je code een 'achternaam' door bovenaan je bestand aan te geven in welke namespace het hoort. Vaak gebruiken we hier de naam van het project of de map voor.</p>
+
+        <h4>De Moderne Manier (File Scoped)</h4>
+        <p>Sinds C# 10 kunnen we dit heel kort opschrijven. Je zet het bovenaan met een puntkomma. Alles in dit bestand hoort nu bij die familie.</p>
+
+        <pre><code class="language-csharp">// DigitalPet.cs
+
+// Dit is de 'achternaam' van deze code
+namespace MyTamagotchiGame;
+
+class DigitalPet
+{
+    // ...
+}</code></pre>
+        <p>De volledige naam van je class is nu: <strong>MyTamagotchiGame.DigitalPet</strong>.</p>
+
+        <div class="info-box">
+            <h3>Oude code lezen</h3>
+            <p>In oudere tutorials zie je vaak dat de namespace accolades <code>{ }</code> heeft en dat alle code inspringt. Dat werkt nog steeds, maar we gebruiken liever de nieuwe manier (File Scoped) omdat je dan minder witruimte verspilt.</p>
+        </div>
+
+        <h3>2. Using Statements: Code importeren</h3>
+        <p>Nu hebben we onze classes netjes in hokjes (namespaces) gestopt. Maar wat als we ze willen gebruiken?</p>
+        <p>Stel je wilt <code>System.Console.WriteLine()</code> gebruiken. Het is heel irritant om steeds die volledige naam (inclusief achternaam) te typen.</p>
+
+        <p>Hiervoor is het keyword <strong>using</strong>. Hiermee zeg je tegen C#: <em>"Als ik een naam typ die je niet kent, zoek dan even in deze doos."</em></p>
+
+        <pre><code class="language-csharp">// ZONDER using (Heel veel typwerk):
+System.Console.WriteLine("Hallo");
+System.Console.ReadLine();
+
+// MET using (Bovenaan je bestand):
+using System;
+
+Console.WriteLine("Hallo"); // C# snapt nu dat je 'System.Console' bedoelt.</code></pre>
+
+        <h3>Toepassing in Digital Pet</h3>
+        <p>Laten we kijken hoe dit werkt als we onze eigen bestanden koppelen.</p>
+
+        <h4>Stap A: De Class (DigitalPet.cs)</h4>
+        <p>We zetten de class in de namespace van het spel.</p>
+        <pre><code class="language-csharp">using System;
+
+// We definiëren de namespace
+namespace DigitalPetGame;
+
+public class DigitalPet
+{
+    public string Name { get; set; }
+}</code></pre>
+
+        <h4>Stap B: Het Gebruik (Program.cs)</h4>
+        <p>Stel dat <code>Program.cs</code> per ongeluk in een andere namespace zit, of dat we mappen gebruiken (daarover later meer). Dan moeten we vertellen waar <code>DigitalPet</code> woont.</p>
+
+        <pre><code class="language-csharp">using System;
+// We importeren onze eigen namespace!
+using DigitalPetGame;
+
+// Nu kunnen we de korte naam gebruiken
+DigitalPet dino = new DigitalPet();</code></pre>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Rode strepen (CS0246)</h3>
+            <p>Krijg je een rode streep onder <code>DigitalPet</code> met de melding <em>"The type or namespace name could not be found"</em>?</p>
+            <p>Dan ben je waarschijnlijk de <strong>using</strong> vergeten. <br>
+                <strong>Tip:</strong> Klik op de rode tekst en druk op <code>Ctrl + .</code> (punt). Visual Studio stelt dan vaak voor om de using automatisch toe te voegen.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Een <strong>Namespace</strong> groepeert je code en voorkomt naamconflicten (zoals een achternaam).</li>
+            <li>Je definieert een namespace bovenaan je bestand: <code>namespace MijnGame;</code>.</li>
+            <li>Met <strong>using</strong> importeer je een namespace, zodat je niet steeds de volledige naam hoeft te typen.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

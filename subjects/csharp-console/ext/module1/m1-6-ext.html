@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getters (Ext) - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Getters: Berekende Eigenschappen</h1>
+
+        <p>Tot nu toe gebruikten we properties om data op te slaan, zoals <code>Energy</code> of <code>Name</code>. Maar soms wil je informatie hebben die je niet direct opslaat, maar die je kunt <strong>berekenen</strong> aan de hand van andere gegevens.</p>
+        <p>Dit noemen we <strong>Computed Properties</strong> (Berekende Eigenschappen) of Read-Only Properties.</p>
+
+        <h3>Het Probleem: Dubbele Data</h3>
+        <p>Stel je voor dat we willen weten of ons huisdier moe is. Je zou een variabele <code>bool IsTired</code> kunnen maken.</p>
+        <ul>
+            <li>Als je de energie verlaagt, moet je niet vergeten <code>IsTired</code> aan te passen.</li>
+            <li>Als je de energie verhoogt, moet je weer checken of hij nog moe is.</li>
+        </ul>
+        <p>Als je dit één keer vergeet, heb je een bug: Je huisdier heeft 100 energie, maar <code>IsTired</code> staat nog op <code>true</code>. Dat klopt niet!</p>
+
+        <h3>De Oplossing: Live Berekenen</h3>
+        <p>In plaats van de status "Moe" op te slaan, kunnen we het gewoon aan het object <strong>vragen</strong> op het moment dat we het nodig hebben. We kijken gewoon naar de huidige energie.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Je Leeftijd</h3>
+            <p>Op je paspoort staat je <strong>Geboortedatum</strong> (Opgeslagen Data). Er staat <em>niet</em> je <strong>Leeftijd</strong> op.</p>
+            <p>Waarom niet? Omdat je leeftijd elke dag kan veranderen. Als iemand vraagt hoe oud je bent, reken je dat op dat moment uit: <em>Vandaag min Geboortedatum</em>.</p>
+        </div>
+
+        <h3>Hoe maak je een Computed Property?</h3>
+        <p>Een computed property heeft <strong>alleen een get</strong>. Hij heeft geen <code>set</code>, want je kunt de uitkomst niet "instellen". De uitkomst is het resultaat van een som of check.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Dit is opgeslagen data (Read & Write)
+    public int Energy { get; set; }
+
+    // Dit is berekende data (Read Only)
+    // We voegen logica toe in het get-blok
+    public string Status
+    {
+        get
+        {
+            if (this.Energy > 50)
+            {
+                return "Happy";
+            }
+            return "Tired";
+        }
+    }
+}</code></pre>
+
+        <h3>Het gebruik in Program.cs</h3>
+        <p>Voor de gebruiker van de class lijkt het net een gewone variabele. Je gebruikt gewoon de punt.</p>
+
+        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet();
+dino.Energy = 10;
+
+// We lezen de status uit.
+// Op dit moment rekent C# uit: is 10 groter dan 50? Nee. Return "Tired".
+Console.WriteLine(dino.Status); // Output: Tired
+
+dino.Energy = 90;
+// Nu vragen we het opnieuw. C# rekent weer: is 90 groter dan 50? Ja.
+Console.WriteLine(dino.Status); // Output: Happy</code></pre>
+
+        <h3>De 'Fat Arrow' Syntax (=>)</h3>
+        <p>Programmeurs zijn lui. Als een getter maar uit één regel code bestaat (bijvoorbeeld een simpele check), vinden we <code>get { return ... }</code> te veel typowerk.</p>
+        <p>Hiervoor is de <strong>Expression Body</strong> syntax bedacht, ook wel de "Fat Arrow" (dikke pijl) genoemd.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    public int Energy { get; set; }
+
+    // Oude, lange manier:
+    /*
+    public bool IsAlive
+    {
+        get { return this.Energy > 0; }
+    }
+    */
+
+    // Nieuwe, korte manier:
+    public bool IsAlive => this.Energy > 0;
+}</code></pre>
+
+        <p>Het pijltje <code>=></code> betekent eigenlijk: <em>"Deze property is gelijk aan de uitkomst van..."</em>.</p>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Proberen te schrijven (Setten)</h3>
+            <p>Omdat deze properties alleen een <code>get</code> (of een pijl) hebben, zijn ze <strong>Alleen-Lezen</strong> (Read-Only).</p>
+            <pre><code class="language-csharp">// FOUT! Je kunt dit niet instellen. Het is een resultaat.
+pet.IsAlive = true;
+// Error: Property 'IsAlive' cannot be assigned to -- it is read only</code></pre>
+        </div>
+
+        <div class="info-box warning">
+            <h3>⚠️ Pijltje vs Is-Gelijk-Aan</h3>
+            <p>Verwar <code>=></code> (berekend telkens opnieuw) niet met <code>=</code> (startwaarde, één keer).</p>
+            <ul>
+                <li><code>public int Score = 10;</code> (Start op 10, kan veranderen).</li>
+                <li><code>public int Score => 10;</code> (Is ALTIJD 10, kan nooit veranderen).</li>
+            </ul>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Gebruik <strong>Computed Properties</strong> voor data die je kunt afleiden van andere data (zoals leeftijd, totaalbedrag, status).</li>
+            <li>Ze hebben <strong>geen setter</strong>, dus je kunt ze niet handmatig aanpassen.</li>
+            <li>Gebruik de <strong>Fat Arrow</strong> <code>=></code> om je code korter en leesbaarder te maken bij simpele checks.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

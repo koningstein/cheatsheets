@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties (Ext) - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Properties: De Eigenschappen</h1>
+
+        <p>We hebben nu een <strong>Class</strong> (de blauwdruk) en een <strong>Object</strong> (de robot). Maar een kale robot is saai. Een robot heeft eigenschappen: een kleur, een serienummer en een batterijniveau.</p>
+        <p>In C# noemen we deze eigenschappen <strong>Properties</strong>. Het zijn de gegevens die bij een specifiek object horen.</p>
+
+        <h3>Wat zijn Properties precies?</h3>
+        <p>Eigenlijk ken je dit concept al. Een property is niets anders dan een <strong>variabele</strong>, maar dan eentje die <em>vastzit</em> aan een object.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Paspoort</h3>
+            <p>Denk aan een paspoort. Elk paspoort ziet er qua indeling (Class) hetzelfde uit. Maar de <strong>inhoud</strong> verschilt per persoon.</p>
+            <ul>
+                <li>Naam: "Jan Jansen"</li>
+                <li>Geboortedatum: "01-01-2000"</li>
+                <li>Lengte: "1.80m"</li>
+            </ul>
+            <p>Deze invulvelden (Naam, Datum, Lengte) zijn de <strong>Properties</strong>.</p>
+        </div>
+
+        <h3>Properties in onze Digital Pet</h3>
+        <p>Laten we kijken naar ons huisdier. Wat moeten we onthouden van één dier?</p>
+        <p>Voor onze <code>DigitalPet</code> class hebben we de volgende eigenschappen nodig:</p>
+        <ul>
+            <li><strong>Name (Naam):</strong> Hoe heet het beestje? (Tekst)</li>
+            <li><strong>Energy (Energie):</strong> Hoeveel energie heeft hij nog? (Getal)</li>
+        </ul>
+
+        <h3>Hoe maak je een Property?</h3>
+        <p>Je maakt properties aan in je Class bestand. Er zijn in C# twee belangrijke verschillen met gewone variabelen:</p>
+        <ol>
+            <li>Je moet aangeven dat het <code>public</code> is (iedereen mag het zien).</li>
+            <li>Je voegt <code>{ get; set; }</code> toe.</li>
+        </ol>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // Hier definiëren we de lege velden (de properties)
+    public string Name { get; set; }
+    public int Energy { get; set; }
+}</code></pre>
+
+        <div class="info-box">
+            <h3>Wat betekent { get; set; }?</h3>
+            <p>Dit maakt C# heel krachtig. Het betekent:</p>
+            <ul>
+                <li><strong>get:</strong> Iedereen mag de waarde lezen ("Wat is je naam?").</li>
+                <li><strong>set:</strong> Iedereen mag de waarde veranderen ("Je heet nu Dino").</li>
+            </ul>
+            <p><em>In latere modules leren we hoe je de 'set' kunt beveiligen, zodat niemand de energie op -50 kan zetten.</em></p>
+        </div>
+
+        <h3>Waarden geven en uitlezen</h3>
+        <p>Nu we de velden hebben gemaakt in de blauwdruk, kunnen we ze gaan invullen bij onze objecten. Hiervoor gebruiken we de <strong>punt</strong> <code>.</code>.</p>
+
+        <h4>De Punt-notatie (.)</h4>
+        <p>Je kunt de punt lezen als: <em>"Ga naar binnen bij dit object, en pak..."</em>.</p>
+
+        <pre><code class="language-csharp">// 1. Maak Dino (een nieuw object)
+DigitalPet pet1 = new DigitalPet();
+pet1.Name = "Dino";  // SET: We schrijven de naam erin
+pet1.Energy = 100;
+
+// 2. Maak Fluffy (een ander object)
+DigitalPet pet2 = new DigitalPet();
+pet2.Name = "Fluffy";
+pet2.Energy = 50;
+
+// Laten we ze eens bekijken (GET)
+Console.WriteLine("Dier 1 heet: " + pet1.Name);
+// Output: Dier 1 heet: Dino</code></pre>
+
+        <div class="info-box">
+            <h3>Belangrijk: Onafhankelijkheid</h3>
+            <p>Kijk goed naar de code hierboven. Als ik de <code>Name</code> van <code>pet1</code> verander, blijft <code>pet2</code> gewoon Fluffy heten. Elk object heeft zijn eigen set properties.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+        <p>C# is strenger dan veel andere talen. Let op deze valkuilen:</p>
+
+        <h4>1. Verkeerde Datatypes</h4>
+        <p>Je hebt gezegd dat <code>Energy</code> een <code>int</code> (getal) is. Je mag er dan <strong>geen</strong> tekst in stoppen.</p>
+        <pre><code class="language-csharp">pet1.Energy = "Honderd"; // FOUT! C# accepteert dit niet.
+pet1.Energy = 100;       // GOED!</code></pre>
+
+        <h4>2. Hoofdletters (Case Sensitivity)</h4>
+        <p>In C# is <code>Name</code> (met hoofdletter) iets anders dan <code>name</code> (met kleine letter). Omdat we in de class <code>Name</code> met een hoofdletter hebben geschreven, moeten we dat overal doen.</p>
+        <pre><code class="language-csharp">pet1.name = "Dino"; // FOUT! 'DigitalPet' bevat geen 'name'.
+pet1.Name = "Dino"; // GOED!</code></pre>
+
+        <h3>Waarom doen we dit?</h3>
+        <p>Misschien denk je: "Ik kan dit toch ook met een lijstje (array) doen?"</p>
+        <pre><code class="language-csharp">// Slechte manier:
+string[] petData = { "Dino", "100" };</code></pre>
+        <p>Dat kan, maar het is onhandig. Je moet onthouden dat nummer 0 de naam is en nummer 1 de energie. En wat als je energie als getal wilt gebruiken om te rekenen? In de array is het tekst.</p>
+
+        <p>Bij een object zeg je gewoon <code>pet.Name</code> en <code>pet.Energy</code>. Het is duidelijk, leesbaar en C# controleert of je geen rekenfouten maakt met tekst.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

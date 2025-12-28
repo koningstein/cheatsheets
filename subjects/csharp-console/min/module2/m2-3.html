@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappenstructuur - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Mappenstructuur</h1>
+
+        <h3>Alles in één map?</h3>
+        <p>In het begin staan al je bestanden (<code>Program.cs</code>, <code>DigitalPet.cs</code>) los in de hoofdmap van je project. Bij 3 bestanden is dat prima, maar bij 50 bestanden wordt het een rommeltje.</p>
+
+        <h3>1. Eén class per bestand</h3>
+        <p>De gouden regel in C# is: <strong>Stop elke class in zijn eigen bestand.</strong></p>
+        <ul>
+            <li>Class: <code>DigitalPet</code> -> Bestand: <code>DigitalPet.cs</code></li>
+            <li>Class: <code>GameManager</code> -> Bestand: <code>GameManager.cs</code></li>
+        </ul>
+        <p>Zet nooit meerdere classes in één bestand, tenzij ze heel klein zijn en puur bij elkaar horen.</p>
+
+        <h3>2. Mappen gebruiken (Models)</h3>
+        <p>Een veelgebruikte conventie is om je data-objecten (de blauwdrukken zoals <code>DigitalPet</code>, <code>Food</code>, <code>Player</code>) in een map genaamd <strong>Models</strong> te zetten.</p>
+
+        <pre>
+MyTamagotchiGame/
+│
+├── Program.cs          (Het startpunt)
+├── MyTamagotchiGame.csproj
+│
+└── Models/             (Map)
+    ├── DigitalPet.cs
+    └── FoodItem.cs
+        </pre>
+
+        <h3>Namespaces volgen de map</h3>
+        <p>Als je een bestand in een map zet, verandert vaak ook de namespace. Visual Studio doet dit automatisch voor je.</p>
+
+        <pre><code class="language-csharp">// Bestand: Models/DigitalPet.cs
+namespace MyTamagotchiGame.Models; // De namespace bevat nu ook .Models
+
+public class DigitalPet
+{
+    // ...
+}</code></pre>
+
+        <h3>Importeren in Program.cs</h3>
+        <p>Omdat <code>DigitalPet</code> nu in een andere 'kamer' (namespace) woont, moet je in <code>Program.cs</code> aangeven dat je die kamer wilt gebruiken.</p>
+
+        <pre><code class="language-csharp">using MyTamagotchiGame.Models; // Importeer de map
+
+DigitalPet dino = new DigitalPet("Dino");</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

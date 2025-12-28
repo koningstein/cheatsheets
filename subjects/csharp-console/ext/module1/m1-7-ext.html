@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructors (Ext) - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Constructors: De Geboorte</h1>
+
+        <p>Tot nu toe maakten we een object aan in twee stappen:</p>
+        <ol>
+            <li>Eerst het object maken met <code>new DigitalPet()</code>.</li>
+            <li>Daarna pas de naam en energie instellen.</li>
+        </ol>
+        <p>Maar dit is eigenlijk gevaarlijk. Wat als je stap 2 vergeet? Dan heb je een huisdier zonder naam. Dat mag in een game niet gebeuren. We willen afdwingen dat een huisdier <strong>altijd</strong> een naam krijgt op het moment dat hij gemaakt wordt.</p>
+        <p>Hiervoor gebruiken we de <strong>Constructor</strong>.</p>
+
+        <h3>Wat is een Constructor?</h3>
+        <p>Een constructor is een speciale methode die <strong>automatisch</strong> wordt uitgevoerd zodra je het woord <code>new</code> gebruikt. Het is de plek om de startwaarden (fabrieksinstellingen) van je object goed te zetten.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Een Nieuwe Telefoon</h3>
+            <p>Als je een nieuwe telefoon koopt en hem voor het eerst aanzet (<code>new Phone()</code>), kun je hem niet meteen gebruiken. Je <strong>moet</strong> eerst een taal kiezen en inloggen.</p>
+            <p>De constructor is dat installatiescherm: het zorgt ervoor dat het apparaat klaar is voor gebruik voordat je er iets mee kunt doen.</p>
+        </div>
+
+        <h3>Hoe maak je een Constructor?</h3>
+        <p>Een constructor lijkt op een normale methode, maar heeft twee strikte regels:</p>
+        <ol>
+            <li>De naam is <strong>exact</strong> hetzelfde als de Class.</li>
+            <li>Er is <strong>geen return type</strong> (ook geen <code>void</code>).</li>
+        </ol>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    public string Name { get; set; }
+    public int Energy { get; set; }
+
+    // Dit is de Constructor
+    // Hij heet 'DigitalPet', net als de class.
+    public DigitalPet(string name)
+    {
+        // We gebruiken de parameter 'name' om de property te vullen
+        this.Name = name;
+
+        // We geven elk dier standaard 50 energie bij de start
+        this.Energy = 50;
+    }
+}</code></pre>
+
+        <h3>Het Gebruik (Program.cs)</h3>
+        <p>Nu we in de class hebben gezegd dat de constructor een <code>string name</code> verwacht, is onze oude manier van aanmaken kapot. C# dwingt je nu om die naam mee te geven.</p>
+
+        <pre><code class="language-csharp">// FOUT: Dit mag niet meer!
+// DigitalPet pet = new DigitalPet();
+// Error: "There is no argument given that corresponds to the required formal parameter 'name'"
+
+// GOED: We moeten de naam nu tussen de haakjes zetten
+DigitalPet myPet = new DigitalPet("Blafmans");
+
+Console.WriteLine(myPet.Name);   // Output: Blafmans
+Console.WriteLine(myPet.Energy); // Output: 50 (Dit heeft de constructor gedaan)</code></pre>
+
+        <div class="info-box">
+            <h3>De 'Default' Constructor</h3>
+            <p>Waarom werkten die lege haakjes <code>()</code> eerst wel? <br>
+                Als je zelf <strong>geen</strong> constructor schrijft, maakt C# er stiekem eentje voor je (een lege). Maar zodra je er <strong>zelf</strong> één maakt (met parameters), gooit C# die stiekeme lege constructor weg. Vanaf dat moment gelden jouw regels.</p>
+        </div>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Het woordje 'void'</h3>
+            <p>Veel studenten typen uit gewoonte <code>public void DigitalPet()</code>. <br>
+                <strong>Pas op:</strong> Als je er <code>void</code> voor zet, is het geen constructor meer, maar een gewone methode! Hij wordt dan niet uitgevoerd bij <code>new</code>.</p>
+        </div>
+
+        <div class="info-box warning">
+            <h3>⚠️ Hoofdletters</h3>
+            <p>De constructor moet precies heten als de class. Als je class <code>DigitalPet</code> heet, mag de constructor niet <code>digitalPet</code> (kleine letter) heten.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>De <strong>Constructor</strong> wordt aangeroepen op het moment dat je <code>new</code> gebruikt.</li>
+            <li>Gebruik het om data <strong>verplicht</strong> te stellen (zoals een naam) of standaardwaarden in te vullen (zoals start-energie).</li>
+            <li>Hij heeft <strong>geen return type</strong> en heet hetzelfde als de Class.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

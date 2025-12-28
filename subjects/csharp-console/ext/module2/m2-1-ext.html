@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solution vs Project - C# Module 2</title>
+
+  <script src="../../../../assets/js/theme-init.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+  <div data-include="../../../../components/sidebar.html"></div>
+
+  <main class="main-content">
+    <h1>Solution vs Project: De Structuur</h1>
+
+    <p>Als je net begint met Visual Studio, kan de bestandsstructuur verwarrend zijn. Je wilt gewoon programmeren, maar je moet kiezen tussen een "Solution" en een "Project". En als je in je mappen kijkt, zie je <code>.sln</code> en <code>.csproj</code> bestanden.</p>
+    <p>Wat is het verschil? En waarom is één bestand niet genoeg?</p>
+
+    <h3>De Hiërarchie</h3>
+    <p>In de C# wereld is er een vaste rangorde:</p>
+    <ol>
+      <li>Bovenaan staat de <strong>Solution</strong> (De grote container).</li>
+      <li>Daarin zitten één of meer <strong>Projecten</strong> (De onderdelen).</li>
+      <li>In een project zitten je <strong>Bestanden</strong> (De code, plaatjes, etc).</li>
+    </ol>
+
+    <div class="info-box">
+      <h3>De Vergelijking: De Schooltas</h3>
+      <p>Stel je voor dat je naar school gaat. Hoe organiseer je jouw spullen?</p>
+      <ul>
+        <li><strong>De Solution = Je Schooltas.</strong><br>
+          Dit is de hoofdverzameling. Hierin stop je alles wat je nodig hebt voor je opleiding. De tas zelf bevat geen huiswerk, hij houdt alleen de mappen bij elkaar.</li>
+
+        <li><strong>Het Project = Een Vak-map (bijv. Rekenen).</strong><br>
+          In je tas zit een map voor Rekenen en een map voor Nederlands. Dit zijn losse onderdelen. Ze hebben niks met elkaar te maken, maar ze zitten wel in dezelfde tas.</li>
+
+        <li><strong>Het Bestand = Een los blaadje papier.</strong><br>
+          In de map Rekenen zit je huiswerk (je code).</li>
+      </ul>
+    </div>
+
+    <h3>1. Het Project (.csproj)</h3>
+    <p>Het <strong>Project</strong> is waar het echte werk gebeurt. Dit is de map waarin al jouw code (`.cs` bestanden) staat.</p>
+    <p>Als je ons Digital Pet spel maakt, heb je één project: <code>DigitalPet.csproj</code>. Hierin vertel je de computer:</p>
+    <ul>
+      <li>Welke codebestanden er zijn (bijv. <code>DigitalPet.cs</code> en <code>Program.cs</code>).</li>
+      <li>Welke versie van .NET je gebruikt.</li>
+      <li>Welke externe hulpmiddelen (NuGet packages) je nodig hebt.</li>
+    </ul>
+    <p>Een project levert uiteindelijk één resultaat op, bijvoorbeeld één <code>.exe</code> bestand (het programma).</p>
+
+    <h3>2. De Solution (.sln)</h3>
+    <p>De <strong>Solution</strong> is de "grote baas". Het is een tekstbestandje dat alleen maar bijhoudt <em>welke</em> projecten erbij horen.</p>
+
+    <p><strong>Waarom hebben we dit nodig?</strong><br>
+      Bij een simpel spelletje lijkt het overbodig. Maar in het bedrijfsleven bestaat software nooit uit één stukje. Een professionele applicatie ziet er zo uit in de Solution Explorer:</p>
+
+    <ul>
+      <li><strong>DigitalPet.Game</strong> (Het spel zelf - Console App)</li>
+      <li><strong>DigitalPet.Website</strong> (De website voor de highscores - Web App)</li>
+      <li><strong>DigitalPet.Tests</strong> (Code om te testen of het spel werkt - Test Project)</li>
+    </ul>
+
+    <p>De <strong>Solution</strong> zorgt ervoor dat je al deze losse projecten tegelijk in Visual Studio kunt openen en dat ze met elkaar kunnen samenwerken.</p>
+
+    <h3>Samenvatting van de verschillen</h3>
+    <div class="table-wrapper">
+      <table class="summary-table">
+        <thead>
+        <tr>
+          <th>Onderdeel</th>
+          <th>Extensie</th>
+          <th>Doel</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td><strong>Solution</strong></td>
+          <td><code>.sln</code></td>
+          <td>De container. Groepeert meerdere projecten.</td>
+        </tr>
+        <tr>
+          <td><strong>Project</strong></td>
+          <td><code>.csproj</code></td>
+          <td>Het werkblok. Bevat code en instellingen.</td>
+        </tr>
+        <tr>
+          <td><strong>Code File</strong></td>
+          <td><code>.cs</code></td>
+          <td>De inhoud. Hierin schrijf je je classes.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+    <div class="info-box warning">
+      <h3>⚠️ Het verkeerde bestand openen</h3>
+      <p>Als je verder wilt werken aan je huiswerk, ga je naar de map in Windows Verkenner. Je ziet dan vaak een wirwar van bestanden.</p>
+      <p><strong>Fout:</strong> Dubbelklikken op <code>Program.cs</code>. Visual Studio opent dan alleen dat ene bestandje, zonder de rest van het project. Je kunt dan niet op "Start" drukken.</p>
+      <p><strong>Goed:</strong> Dubbelklik altijd op het <strong><code>.sln</code></strong> bestand. Dan opent Visual Studio de hele structuur en kun je direct aan de slag.</p>
+    </div>
+
+  </main>
+
+  <aside class="sidebar-right">
+    <div class="toc-container">
+      <h4>Inhoud</h4>
+      <ul id="toc-list" class="toc-list">
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Stack (Ext) - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>De Call Stack: Waar ben ik?</h1>
+
+        <p>Als je aan het debuggen bent, staar je vaak naar één regel code (de gele balk). Maar soms vraag je je af: <em>"Hoe ben ik hier eigenlijk terechtgekomen?"</em> of <em>"Wie heeft deze functie aangeroepen?"</em></p>
+        <p>Om dit te begrijpen, moeten we kijken naar de <strong>Call Stack</strong> (De Aanroep Stapel). Dit is jouw GPS-systeem tijdens het debuggen.</p>
+
+        <h3>Hoe werken methodes onder water?</h3>
+        <p>Programma's zijn eigenlijk een lange ketting van methodes die elkaar aanroepen.
+        <ol>
+            <li>Het programma begint altijd in <code>Main</code>.</li>
+            <li><code>Main</code> roept misschien <code>StartGame</code> aan.</li>
+            <li><code>StartGame</code> roept <code>dino.Eat()</code> aan.</li>
+            <li><code>Eat</code> roept <code>UpdateEnergy()</code> aan.</li>
+        </ol>
+        <p>Zolang <code>UpdateEnergy</code> nog niet klaar is, staan alle methodes daarboven "in de wacht". Ze kunnen pas verder als de methode die zij hebben aangeroepen klaar is.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: De Stapel Afwas</h3>
+            <p>Stel je voor dat je de afwas doet.</p>
+            <ul>
+                <li>Je pakt een groot bord (<strong>Main</strong>) en legt het in het sop.</li>
+                <li>Bovenop dat bord leg je een kleiner bordje (<strong>Eat</strong>).</li>
+                <li>Bovenop dat bordje leg je een kopje (<strong>UpdateEnergy</strong>).</li>
+            </ul>
+            <p>Je bent nu bezig met het kopje (de bovenste). Het grote bord onderop (Main) ligt er nog wel, maar je kunt er niet bij. Je moet eerst het kopje afwassen, dan het bordje, en dan pas het grote bord.</p>
+            <p>Dit is precies hoe de <strong>Call Stack</strong> werkt: De methode waar je NU bent, ligt bovenop.</p>
+        </div>
+
+        <h3>De Call Stack in Visual Studio</h3>
+        <p>Laten we een situatie in onze Digital Pet simuleren waarbij we diep in de code zitten.</p>
+
+        <h4>Stap 1: De Class (DigitalPet.cs)</h4>
+        <pre><code class="language-csharp">namespace MyGame.Models;
+
+public class DigitalPet
+{
+    public int Energy { get; set; } = 50;
+
+    public void Eat()
+    {
+        Console.WriteLine("Nom nom nom...");
+        // De Eat methode roept een andere methode aan:
+        CheckWeight();
+    }
+
+    public void CheckWeight()
+    {
+        // Zet HIER een Breakpoint (F9)
+        int currentWeight = 10;
+        Console.WriteLine("Gewicht checken...");
+    }
+}</code></pre>
+
+        <h4>Stap 2: Het Gebruik (Program.cs)</h4>
+        <pre><code class="language-csharp">using MyGame.Models;
+
+// Dit is de 'Main' methode (het startpunt)
+DigitalPet dino = new DigitalPet();
+
+Console.WriteLine("Start!");
+dino.Eat(); // Hier roepen we Eat aan
+Console.WriteLine("Klaar!");</code></pre>
+
+        <h3>Kijken in het verleden</h3>
+        <p>Als je de code start (F5), stopt hij bij het breakpoint in <code>CheckWeight</code>.</p>
+        <p>Kijk nu rechtsonder in Visual Studio naar het tabblad <strong>Call Stack</strong>. Je ziet daar een lijstje, van boven naar beneden:</p>
+
+
+        <pre>
+1. CheckWeight   (Hier ben je nu - Bovenop de stapel)
+2. Eat           (Deze methode wacht op CheckWeight)
+3. Main          (Deze methode wacht op Eat)
+        </pre>
+
+        <h3>Tijdreizen</h3>
+        <p>Het mooie is: je kunt op de regels in de Call Stack <strong>dubbelklikken</strong>.</p>
+        <ul>
+            <li>Dubbelklik op <code>Eat</code>. Visual Studio springt naar de regel waar <code>CheckWeight();</code> werd aangeroepen.</li>
+            <li>Dubbelklik op <code>Main</code>. Visual Studio springt naar de regel waar <code>dino.Eat();</code> werd aangeroepen.</li>
+        </ul>
+        <p>Dit is super handig! Soms heeft een variabele in <code>CheckWeight</code> een rare waarde (bijv. <code>0</code>). Door terug te klikken in de stack, kun je in <code>Main</code> kijken welke waarde eroorspronkelijk werd meegegeven. Je kijkt dus terug in de tijd.</p>
+
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ Stack Overflow (De Oneindige Lus)</h3>
+            <p>Je hebt vast wel eens van de website <em>Stack Overflow</em> gehoord. De naam komt van een beroemde programmeerfout.</p>
+            <p>De ruimte op de stapel is niet oneindig. Als methode A methode B aanroept, en methode B roept methode A weer aan... dan blijft de stapel groeien tot het geheugen op is.</p>
+        </div>
+
+        <p>Probeer deze fout maar eens te maken (doe dit niet in een serieus project!):</p>
+        <pre><code class="language-csharp">public void Eat()
+{
+    // De methode roept ZICHZELF aan
+    Eat();
+}</code></pre>
+        <p>Als je dit start, crasht je programma direct met een <strong>System.StackOverflowException</strong>. De stapel pannenkoeken is omgevallen.</p>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>De <strong>Call Stack</strong> laat zien welke route je programma heeft afgelegd om bij de huidige regel te komen.</li>
+            <li>De huidige methode staat <strong>bovenop</strong> de stapel.</li>
+            <li>Je kunt in het Call Stack venster dubbelklikken om te zien welke methodes er "in de wacht" staan.</li>
+            <li>Als methodes elkaar oneindig blijven aanroepen, krijg je een <strong>Stack Overflow</strong> crash.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

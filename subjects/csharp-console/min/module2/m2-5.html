@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakpoints & Stepping - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Breakpoints & Stepping</h1>
+
+        <h3>Wat is Debuggen?</h3>
+        <p>Als je code niet doet wat je verwacht, kun je willekeurig dingen gaan veranderen en hopen dat het werkt. Of je kunt de code <strong>Debuggen</strong>. Dit betekent dat je de uitvoering van je programma pauzeert en "onder de motorkap" kijkt terwijl het draait.</p>
+
+        <h3>1. Breakpoints (F9)</h3>
+        <p>Een breakpoint is een stopbord voor je code. Klik in de grijze marge links naast een regel code (of druk op <strong>F9</strong>). Er verschijnt een rode bol.</p>
+        <p>Start je programma nu in Debug mode (<strong>F5</strong>). Zodra de computer bij die regel komt, bevriest het programma en licht de regel geel op.</p>
+
+        <h3>2. Stepping (Stap voor stap)</h3>
+        <p>Nu de code gepauzeerd is, heb jij de controle. Je kunt regel voor regel door je programma lopen.</p>
+
+        <div class="info-box">
+            <h3>De Knoppen</h3>
+            <ul>
+                <li><strong>Step Over (F10):</strong> Voer de huidige regel uit en ga naar de volgende regel. (Als de regel een methode-aanroep is, wordt die methode in één keer uitgevoerd).</li>
+                <li><strong>Step Into (F11):</strong> Als de huidige regel een methode-aanroep is, spring je <em>in</em> die methode om daar regel voor regel verder te gaan.</li>
+                <li><strong>Step Out (Shift+F11):</strong> Maak de huidige methode snel af en pauzeer zodra je weer terug bent bij de aanroeper.</li>
+            </ul>
+        </div>
+
+        <h3>Continue (F5)</h3>
+        <p>Heb je genoeg gezien? Druk weer op <strong>F5</strong> om het programma gewoon verder te laten draaien tot het volgende breakpoint.</p>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

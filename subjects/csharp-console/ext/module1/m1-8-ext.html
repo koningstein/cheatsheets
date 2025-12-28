@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Named Arguments (Ext) - C# Module 1</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Named Arguments: Duidelijke Code</h1>
+
+        <p>In de vorige lessen heb je geleerd hoe je methodes en constructors maakt met parameters. Zolang je maar één of twee parameters hebt (bijvoorbeeld alleen een <code>naam</code>), is dat prima te lezen.</p>
+        <p>Maar wat als je object ingewikkelder wordt? Wat als je 5 getallen moet meegeven bij het aanmaken? Dan wordt je code onleesbaar.</p>
+        <p>C# heeft hier een geweldige oplossing voor: <strong>Named Arguments</strong>.</p>
+
+        <h3>Het Probleem: De Getallenbrij</h3>
+        <p>Stel je voor dat we onze <code>DigitalPet</code> uitbreiden. Bij de geboorte (constructor) willen we niet alleen de naam weten, maar ook de energie, de honger en of hij slaapt.</p>
+
+        <pre><code class="language-csharp">class DigitalPet
+{
+    // ... properties ...
+
+    // Een constructor met veel parameters
+    public DigitalPet(string name, int energy, int hunger, bool isSleeping)
+    {
+        // ... code om alles in te stellen ...
+    }
+}</code></pre>
+
+        <p>Als je dit object nu aanmaakt in <code>Program.cs</code>, ziet dat er zo uit:</p>
+
+        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet("Dino", 50, 10, false);</code></pre>
+
+        <p>Kijk naar die getallen: <code>50, 10, false</code>. Weet jij over een maand nog wat die 10 betekent? Is het 10 honger? Of 10 levenspunten? En betekent <code>false</code> dat hij niet slaapt, of dat hij niet dood is?</p>
+        <p>Dit is onduidelijke code. Je moet steeds terugkijken naar de class om te weten wat de volgorde is.</p>
+
+        <h3>De Oplossing: Named Arguments</h3>
+        <p>Met Named Arguments mag je de naam van de parameter erbij typen als je de functie aanroept. Je zet de naam, gevolgd door een dubbele punt <code>:</code> en dan de waarde.</p>
+
+        <div class="info-box">
+            <h3>De Vergelijking: Het Formulier</h3>
+            <p><strong>Positional Arguments (De oude manier):</strong> Iemand geeft je een blaadje en zegt: "Schrijf hier je naam, dan je leeftijd, dan je adres." Als je de volgorde vergeet, gaat het mis.</p>
+            <p><strong>Named Arguments (De nieuwe manier):</strong> Je krijgt een formulier met labeltjes: "Naam: ...", "Leeftijd: ...". Je weet precies wat je waar invult, en de volgorde maakt niet eens meer uit.</p>
+        </div>
+
+        <h3>Hoe werkt het?</h3>
+        <p>Je verandert <strong>niets</strong> aan de Class of de Constructor zelf. Je past het alleen aan op het moment dat je het <strong>gebruikt</strong> (in <code>Program.cs</code>).</p>
+
+        <pre><code class="language-csharp">// Duidelijk en leesbaar:
+DigitalPet dino = new DigitalPet(
+    name: "Dino",
+    energy: 50,
+    hunger: 10,
+    isSleeping: false
+);</code></pre>
+
+        <p>Nu kan iedereen (ook je collega's) direct zien wat elk getal betekent. De code legt zichzelf uit ("Self-Documenting Code").</p>
+
+        <h3>Voordeel: De volgorde maakt niet uit</h3>
+        <p>Omdat je de namen gebruikt, hoef je je niet meer aan de volgorde te houden. C# zoekt zelf uit welk getal bij welke parameter hoort.</p>
+
+        <pre><code class="language-csharp">// Dit werkt ook prima, ook al staat het door elkaar:
+DigitalPet fluffy = new DigitalPet(
+    hunger: 0,
+    isSleeping: true,
+    name: "Fluffy",
+    energy: 100
+);</code></pre>
+
+        <h3>Wanneer gebruik je dit?</h3>
+        <p>Je hoeft dit niet altijd te doen. Bij simpele functies is het overbodig.</p>
+        <table class="summary-table">
+            <tr>
+                <th>Situatie</th>
+                <th>Advies</th>
+                <th>Voorbeeld</th>
+            </tr>
+            <tr>
+                <td><strong>Weinig parameters</strong></td>
+                <td>Niet nodig</td>
+                <td><code>Math.Max(5, 10);</code></td>
+            </tr>
+            <tr>
+                <td><strong>Duidelijke context</strong></td>
+                <td>Niet nodig</td>
+                <td><code>pet.Eat("Apple");</code> (Het is logisch dat Apple het voedsel is)</td>
+            </tr>
+            <tr>
+                <td><strong>Veel getallen/bools</strong></td>
+                <td><strong>Gebruiken!</strong></td>
+                <td><code>CreateUser(isAdmin: true, sendEmail: false);</code></td>
+            </tr>
+        </table>
+
+        <div class="info-box warning">
+            <h3>⚠️ Typefouten</h3>
+            <p>De naam die je typt voor de dubbele punt (bijvoorbeeld <code>energy:</code>) moet <strong>exact</strong> overeenkomen met de naam van de parameter in de constructor. Als je in de class <code>int levens</code> hebt staan, werkt <code>energy: 50</code> niet.</p>
+        </div>
+
+        <h3>Samenvatting</h3>
+        <ul>
+            <li>Als een methode of constructor veel onduidelijke parameters heeft (zoals getallen of <code>true/false</code>), wordt je code moeilijk leesbaar.</li>
+            <li>Gebruik <strong>Named Arguments</strong> (<code>naam: waarde</code>) om duidelijk te maken wat je invult.</li>
+            <li>Dit verhoogt de leesbaarheid en je mag de volgorde van argumenten zelf bepalen.</li>
+        </ul>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

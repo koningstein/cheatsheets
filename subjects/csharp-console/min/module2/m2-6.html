@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variables Inspecteren - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Variables Inspecteren</h1>
+
+        <h3>De staat van je programma</h3>
+        <p>Het nut van pauzeren (break) is dat je kunt zien wat de waardes van je variabelen zijn op <em>dat exacte moment</em>. Waarom is <code>Energy</code> opeens 0? Waarom is <code>Name</code> null?</p>
+
+        <h3>1. Hoveren</h3>
+        <p>De simpelste manier: beweeg je muis over een variabele terwijl de code gepauzeerd is. Er verschijnt een pop-up met de huidige waarde. Je kunt zelfs objecten uitklappen om hun properties te zien.</p>
+
+        <h3>2. Locals Window</h3>
+        <p>Onderaan in Visual Studio (tijdens debuggen) zie je het tabblad <strong>Locals</strong>. Hier zie je automatisch alle variabelen die in de huidige methode bekend zijn.</p>
+        <pre>
+Name        Value           Type
+------------------------------------------
+myPet       {DigitalPet}    DigitalPet
+  > Name    "Dino"          string
+  > Energy  50              int
+i           0               int
+        </pre>
+
+        <h3>3. Watch Window</h3>
+        <p>Soms wil je een specifieke variabele in de gaten houden die niet lokaal is, of wil je een berekening zien. In het <strong>Watch</strong> venster kun je zelf expressies typen.</p>
+        <ul>
+            <li>Klik in een lege regel in Watch.</li>
+            <li>Typ bijvoorbeeld: <code>myPet.Energy < 10</code></li>
+            <li>Druk op Enter. Je ziet nu live of dit <code>true</code> of <code>false</code> is terwijl je door de code stapt (F10).</li>
+        </ul>
+
+        <div class="info-box">
+            <h3>Waardes aanpassen</h3>
+            <p><strong>Pro Tip:</strong> Je kunt in het Locals of Watch venster ook waardes <em>aanpassen</em>! Dubbelklik op een waarde (bijv. 50) en maak er 100 van. Je programma gaat nu verder met die nieuwe waarde. Ideaal om edge-cases te testen zonder je code te herschrijven.</p>
+        </div>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

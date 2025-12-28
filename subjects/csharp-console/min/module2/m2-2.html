@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namespaces - C# Module 2</title>
+
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+
+<div data-include="../../../../components/header.html"></div>
+
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+
+    <main class="main-content">
+        <h1>Namespaces & Using</h1>
+
+        <h3>Orde in de chaos</h3>
+        <p>Stel je voor dat je een class <code>Console</code> wil maken voor je game-console. Maar C# heeft zelf óók al een class <code>Console</code> (waarmee je <code>WriteLine</code> doet). Hoe weet C# welke je bedoelt?</p>
+        <p>Hiervoor gebruiken we <strong>Namespaces</strong>. Een namespace is als een achternaam voor je class.</p>
+
+        <h3>Een Namespace definiëren</h3>
+        <p>Je code staat bijna altijd in een namespace. Vaak is dit de naam van je project.</p>
+
+        <pre><code class="language-csharp">namespace MyTamagotchiGame
+{
+    class DigitalPet
+    {
+        // ...
+    }
+}</code></pre>
+        <p>De volledige naam van je class is nu <code>MyTamagotchiGame.DigitalPet</code>.</p>
+
+        <h3>Using Statements</h3>
+        <p>Je hebt vast al bovenaan je bestanden regels gezien zoals <code>using System;</code>. Dit betekent: "Ik wil alle classes uit de doos 'System' kunnen gebruiken zonder steeds de achternaam te typen."</p>
+
+        <pre><code class="language-csharp">// ZONDER using:
+System.Console.WriteLine("Hallo");
+
+// MET using:
+using System;
+
+Console.WriteLine("Hallo"); // C# snapt nu dat je System.Console bedoelt</code></pre>
+
+        <h3>File Scoped Namespaces (Nieuw in C# 10)</h3>
+        <p>Vroeger moest je hele bestand inspringen (indents) binnen de accolades van de namespace. Tegenwoordig mag het korter:</p>
+
+        <pre><code class="language-csharp">// Oude stijl:
+namespace MyGame
+{
+    class Player { } // Alles springt in
+}
+
+// Nieuwe stijl (File Scoped):
+namespace MyGame; // Puntkomma aan het eind
+
+class Player { } // Geen extra indentatie nodig!</code></pre>
+
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list">
+            </ul>
+        </div>
+    </aside>
+</div>
+
+<div data-include="../../../../components/footer.html"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
