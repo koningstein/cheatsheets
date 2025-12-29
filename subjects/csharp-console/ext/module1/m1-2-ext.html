@@ -20,7 +20,8 @@
     <main class="main-content">
         <h1>Object: Van Plan naar Realiteit</h1>
 
-        <p>In het vorige hoofdstuk hebben we de <strong>Class</strong> gemaakt. Dat was onze bouwtekening. Maar met een tekening kun je nog niet spelen. Nu gaan we die tekening gebruiken om echte dingen te maken. Die dingen noemen we <strong>Objecten</strong>.</p>
+        <p>In het vorige hoofdstuk heb je het bestand <code>DigitalPet.cs</code> gemaakt. Dat was de <strong>Class</strong> (de blauwdruk). Maar met een blauwdruk alleen gebeurt er nog niks.</p>
+        <p>Nu gaan we die tekening gebruiken om echte huisdieren te maken in je programma. Deze 'levende' kopieën noemen we <strong>Objecten</strong>.</p>
 
         <h3>Wat is het verschil?</h3>
         <p>Dit is de kern van Object Oriented Programming. Zorg dat je dit verschil goed snapt.</p>
@@ -35,59 +36,90 @@
             </ul>
         </div>
 
-        <h3>Objecten in onze Game</h3>
-        <p>We hebben de <code>DigitalPet</code> class gemaakt. Dat is het <em>idee</em> van een huisdier. Nu gaan we echte huisdieren maken.</p>
+        <h3>Waar typ je de code?</h3>
+        <p>Hier raken veel mensen in de war. Je hebt nu twee bestanden in je project. Het is belangrijk om ze goed uit elkaar te houden:</p>
 
-        <p>Stel dat we het spel starten. Je maakt twee huisdieren aan:</p>
-        <ol>
-            <li>Dino (een stoere T-Rex).</li>
-            <li>Fluffy (een schattig konijn).</li>
-        </ol>
-        <p>Dit zijn twee losse <strong>Objecten</strong>, gemaakt van dezelfde <code>DigitalPet</code> class.</p>
+        <table class="summary-table">
+            <tr>
+                <th>Bestand</th>
+                <th>Doel</th>
+            </tr>
+            <tr>
+                <td><code>DigitalPet.cs</code></td>
+                <td>Dit is de <strong>Blauwdruk</strong>. Hier beschrijf je alleen hoe een huisdier eruitziet. Je voert hier GEEN acties uit.</td>
+            </tr>
+            <tr>
+                <td><code>Program.cs</code></td>
+                <td>Dit is de <strong>Fabriek</strong> (het startpunt). Hier gebruik je het commando <code>new</code> om de huisdieren daadwerkelijk te maken.</td>
+            </tr>
+        </table>
 
         <h3>Stap voor Stap: Een Object maken</h3>
-        <p>Om van een class een object te maken, gebruiken we het keyword: <code>new</code>.</p>
-        <p>Het commando <code>new</code> zegt eigenlijk tegen C#: <em>"Kijk naar de class en reserveer geheugen voor een nieuw exemplaar."</em></p>
+        <p>Ga naar het bestand <strong>Program.cs</strong>. Hier gaan we onze huisdieren tot leven wekken met het keyword <code>new</code>.</p>
+        <p>Het commando <code>new</code> zegt eigenlijk tegen C#: <em>"Kijk naar de blauwdruk en reserveer geheugen voor een nieuw exemplaar."</em></p>
 
-        <pre><code class="language-csharp">// 1. We hebben de class 'DigitalPet' al gemaakt in een ander bestand.
+        <pre><code class="language-csharp">// BESTAND: Program.cs
 
-// 2. Nu maken we een nieuw object (instantiëren)
+// 1. Maak een variabele 'dino' en stop er een NIEUWE DigitalPet in.
 DigitalPet dino = new DigitalPet();
 
-// 3. We kunnen er nog eentje maken!
-DigitalPet fluffy = new DigitalPet();</code></pre>
+// 2. We kunnen er nog eentje maken!
+// 'fluffy' is een compleet ander object in het geheugen.
+DigitalPet fluffy = new DigitalPet();
+
+Console.WriteLine("De huisdieren zijn aangemaakt!");</code></pre>
 
         <div class="info-box">
             <h3>Wat gebeurt hier?</h3>
-            <p>We hebben nu twee variabelen: <code>dino</code> en <code>fluffy</code>. Ze lijken op elkaar omdat ze van dezelfde class komen, maar het zijn twee totaal verschillende dingen in het geheugen van de computer.</p>
+            <p>We hebben nu twee variabelen: <code>dino</code> en <code>fluffy</code>. Ze zijn gemaakt van dezelfde blauwdruk, maar ze leven hun eigen leven in het geheugen van de computer.</p>
         </div>
+
+        <h3>Hoe bekijk ik mijn Object?</h3>
+        <p>Als je een variabele als <code>int getal = 5;</code> naar de console schrijft, zie je netjes "5". Maar bij objecten werkt dat anders.</p>
+
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+Console.WriteLine(dino);
+// Output: "MijnGame.DigitalPet"</code></pre>
+
+        <p><strong>Waarom zie ik geen naam?</strong><br>
+            Een object is complex. C# weet niet wat jij wilt zien (de naam? de energie? de kleur?). Daarom toont hij standaard alleen het <strong>Type</strong> (de naam van de class).</p>
+        <p><em>(Later leren we hoe we dit kunnen aanpassen zodat je wel mooie info ziet.)</em></p>
+
+        <h3>Help! Mijn scherm flitst weg</h3>
+        <p>Als je op de groene Start-knop drukt, zie je misschien heel even een zwart schermpje en dan... weg! Dit is normaal, maar wel onhandig.</p>
+        <p>De computer is supersnel. Hij maakt de huisdieren, print de tekst en denkt dan: "Mijn takenlijst is klaar! Ik sluit af."</p>
+
+        <h4>De Oplossing</h4>
+        <p>We moeten het programma dwingen om even te wachten voordat het afsluit. Voeg helemaal onderaan je code deze regel toe:</p>
+
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// ... (je andere code) ...
+
+Console.WriteLine(dino);
+
+// Wacht tot de gebruiker op Enter drukt
+Console.ReadLine();</code></pre>
+        <p>Nu blijft het scherm openstaan met een knipperende cursor. Pas als jij op <strong>Enter</strong> drukt, gaat hij verder en sluit hij af.</p>
 
         <h3>Veelgemaakte Fouten</h3>
         <p>Bij het maken van objecten gaat het soms mis. Let hier op:</p>
 
         <h4>1. De haakjes vergeten</h4>
-        <p>Achter de naam van de class <strong>moeten</strong> ronde haakjes <code>()</code> staan. Dit zijn de haakjes van de Constructor (daar leren we later meer over).</p>
-        <pre><code class="language-csharp">DigitalPet bad = new DigitalPet;   // FOUT! C# snapt dit niet.
+        <p>Achter de naam van de class <strong>moeten</strong> ronde haakjes <code>()</code> staan. Dit is verplicht in C#.</p>
+        <pre><code class="language-csharp">DigitalPet bad = new DigitalPet;    // FOUT!
 DigitalPet good = new DigitalPet(); // GOED!</code></pre>
 
-        <h4>2. Denken dat variabelen gekoppeld zijn</h4>
-        <p>Beginners denken soms dat als je iets verandert aan <code>dino</code>, dat <code>fluffy</code> dan ook verandert. Dat is niet zo! Elk object heeft zijn eigen stukje geheugen.</p>
-
-        <h3>Hoe bekijk ik mijn Object?</h3>
-        <p>Als je een variabele als <code>int getal = 5;</code> naar de console schrijft, zie je netjes "5". Maar bij objecten werkt dat anders.</p>
-
-        <pre><code class="language-csharp">Console.WriteLine(dino);
-// Output: "MyProject.DigitalPet"</code></pre>
-
-        <p><strong>Waarom?</strong> Een object is te complex. C# weet niet wat jij wilt zien (de naam? de energie?). Daarom toont hij standaard alleen het <strong>Type</strong> (de naam van de class).</p>
-        <p><em>(Later leren we hoe we dit kunnen aanpassen met de `ToString()` methode, zodat je wel mooie info ziet.)</em></p>
+        <h4>2. Code in het verkeerde bestand</h4>
+        <p>Je mag <strong>geen</strong> <code>new DigitalPet()</code> typen binnen in het bestand <code>DigitalPet.cs</code>. Een blauwdruk kan zichzelf niet bouwen!</p>
 
         <h3>Samenvatting: Waarom doen we dit?</h3>
         <p>Misschien denk je: "Waarom al die moeite met Classes en Objecten?"</p>
         <p>Stel dat je een game maakt met 100 vijanden.</p>
         <ul>
             <li><strong>Zonder OOP:</strong> Je moet honderden losse variabelen maken (`enemy1_hp`, `enemy1_x`, `enemy2_hp`, etc.). Het wordt een chaos.</li>
-            <li><strong>Met OOP:</strong> Je schrijft 1x de code voor <code>Enemy</code>. Daarna maak je met <code>new</code> razendsnel 100 vijanden aan. De code blijft schoon en overzichtelijk.</li>
+            <li><strong>Met OOP:</strong> Je schrijft 1x de code voor <code>Enemy</code>. Daarna maak je in <code>Program.cs</code> met een simpele loop razendsnel 100 vijanden aan. De code blijft schoon en overzichtelijk.</li>
         </ul>
 
     </main>
