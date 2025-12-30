@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setters - C# Module 1</title>
+    <title>Validatie - C# Module 1</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,58 +18,41 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Setters & Validatie</h1>
+        <h1>Setter & Validatie</h1>
 
-        <h3>Het gevaar van Auto-Properties</h3>
-        <p>Tot nu toe gebruikten we <code>{ get; set; }</code>. Dat is makkelijk, maar niet altijd veilig. Stel dat iemand per ongeluk de energie van je huisdier op <code>-50</code> zet, of op <code>9999</code>? Een auto-property accepteert alles.</p>
+        <h3>Data beschermen</h3>
+        <p>Soms wil je controleren wat er in een variabele wordt gestopt. Bijvoorbeeld: energie mag nooit negatief zijn. Omdat properties nu nog openbaar zijn, gebruiken we een <strong>Methode</strong> om dit te controleren.</p>
 
-        <p>Om dit te voorkomen, moeten we <strong>Logica</strong> toevoegen aan de setter. Hiervoor stappen we over naar een <strong>Full Property</strong>.</p>
+        <h3>De Validatie Methode</h3>
+        <p>We maken een methode in de class die kijkt of de waarde geldig is, voordat hij deze opslaat.</p>
 
-        <h3>1. Backing Fields</h3>
-        <p>Bij een Full Property slaan we de data op in een <strong>private field</strong> (een variabele die alleen binnen de class bestaat). De publieke Property praat vervolgens met dit geheime veld.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+public void SetEnergy(int amount)
 {
-    // Private Backing Field (kleine letter, vaak met underscore)
-    private int _energy;
-
-    // Public Property (Hoofdletter)
-    public int Energy
+    if (amount < 0)
     {
-        get { return _energy; } // Geeft de waarde terug
-        set { _energy = value; } // Schrijft de waarde weg
+        Console.WriteLine("Fout! Mag niet negatief zijn.");
+        this.Energy = 0; // Corrigeer naar 0
+    }
+    else
+    {
+        this.Energy = amount; // Het is veilig, sla op
     }
 }</code></pre>
 
-        <h3>2. Validatie toevoegen</h3>
-        <p>In het <code>set</code> blok kunnen we nu een <code>if</code>-statement toevoegen. Het keyword <code>value</code> bevat de data die iemand probeert in te vullen.</p>
+        <h3>Het gebruik</h3>
+        <p>In <code>Program.cs</code> gebruik je nu deze methode in plaats van de property rechtstreeks aan te passen.</p>
 
-        <pre><code class="language-csharp">public int Energy
-{
-    get { return _energy; }
-    set
-    {
-        // Validatie: Energie mag niet lager dan 0
-        if (value < 0)
-        {
-            Console.WriteLine("Let op: Energie kan niet negatief zijn! We zetten het op 0.");
-            _energy = 0;
-        }
-        else if (value > 100)
-        {
-            _energy = 100; // Maximaal 100
-        }
-        else
-        {
-            _energy = value; // Geldige waarde, dus opslaan
-        }
-    }
-}</code></pre>
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+DigitalPet dino = new DigitalPet();
 
-        <div class="info-box">
-            <h3>Encapsulation</h3>
-            <p>Dit concept heet <strong>Encapsulatie</strong>. Je beschermt de data (het backing field) door er een gecontroleerde toegangspoort (de property) voor te zetten. De buitenwereld weet niet <em>hoe</em> de data wordt opgeslagen, alleen dat het werkt.</p>
-        </div>
+// Niet veilig:
+// dino.Energy = -50;
+
+// Veilig (via de methode):
+dino.SetEnergy(-50);
+// Output: Fout! Mag niet negatief zijn. De energie is nu 0.</code></pre>
 
     </main>
 

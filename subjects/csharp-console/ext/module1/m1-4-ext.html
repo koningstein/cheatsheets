@@ -21,7 +21,7 @@
         <h1>Methoden: De Acties</h1>
 
         <p>In de vorige lessen hebben we geleerd over de <strong>Class</strong> (de blauwdruk) en de <strong>Properties</strong> (de eigenschappen). We weten nu <em>wat</em> een object is (bijvoorbeeld: Dino de DigitalPet, met 100 energie).</p>
-        <p>Maar... een huisdier dat alleen maar stilstaat, is saai. In een spel willen we actie. Het dier moet kunnen lopen, eten, slapen en geluid maken.</p>
+        <p>Maar... een huisdier dat alleen maar stilstaat, is saai. In een spel willen we actie. Het dier moet kunnen praten, eten, slapen en geluid maken.</p>
         <p>Hiervoor gebruiken we <strong>Methoden</strong>.</p>
 
         <h3>Wat is een Methode?</h3>
@@ -33,11 +33,11 @@
             <ul>
                 <li><strong>Class:</strong> Het zelfstandig naamwoord (Het <strong>Huisdier</strong>).</li>
                 <li><strong>Property:</strong> Het bijvoeglijk naamwoord (Het <strong>Energieke</strong> Huisdier).</li>
-                <li><strong>Method:</strong> Het werkwoord (Het Huisdier <strong>blaft</strong>).</li>
+                <li><strong>Method:</strong> Het werkwoord (Het Huisdier <strong>vertelt</strong> iets).</li>
             </ul>
         </div>
 
-        <h3>Deel 1: De Class (De Blauwdruk)</h3>
+        <h3>Deel 1: De Class (DigitalPet.cs)</h3>
         <p>We gaan een methode toevoegen aan onze <code>DigitalPet</code> class. We willen dat het dier zich kan voorstellen.</p>
         <p>We noemen deze functie <code>GetDescription</code>. Let op: we gebruiken hier <code>return</code> en geen <code>Console.WriteLine</code>. De methode <em>geeft</em> de tekst aan ons terug.</p>
 
@@ -52,9 +52,10 @@
                 Met <code>this.Name</code> zegt het object: <em>"Pak de naam die in MIJN eigenschappenlijst staat."</em></p>
         </div>
 
-        <p>Hier is de code voor de Class:</p>
+        <p>Hier is de complete code voor de Class:</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
     // De Eigenschappen (Wat BEN ik?)
     public string Name { get; set; }
@@ -72,34 +73,36 @@
         <h3>Deel 2: Het Gebruik (Program.cs)</h3>
         <p>Nu we de blauwdruk hebben aangepast, kunnen alle huisdieren die we maken dit kunstje uitvoeren. We roepen de methode aan met de punt <code>.</code> gevolgd door de naam van de methode én ronde haakjes <code>()</code>.</p>
 
-        <pre><code class="language-csharp">// 1. Maak Dino (Object aanmaken)
-DigitalPet pet1 = new DigitalPet();
-pet1.Name = "Dino";
-pet1.Energy = 100;
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// 1. Maak Dino (Object aanmaken)
+DigitalPet dino = new DigitalPet();
+dino.Name = "Rex";
+dino.Energy = 100;
 
 // 2. Maak Fluffy
-DigitalPet pet2 = new DigitalPet();
-pet2.Name = "Fluffy";
-pet2.Energy = 50;
+DigitalPet fluffy = new DigitalPet();
+fluffy.Name = "Fluffy";
+fluffy.Energy = 80;
 
 // 3. Roep de methode aan
-// pet1 gebruikt ZIJN eigen naam en energie omdat we 'this' gebruikten.
-string info1 = pet1.GetDescription();
-Console.WriteLine(info1);
-// Output: "Ik ben Dino en ik heb 100 energie."
+// We printen direct het resultaat van de methode naar het scherm
+Console.WriteLine(dino.GetDescription());
+// Output: "Ik ben Rex en ik heb 100 energie."
 
-// pet2 doet hetzelfde trucje met HAAR eigen data.
-Console.WriteLine(pet2.GetDescription());
-// Output: "Ik ben Fluffy en ik heb 50 energie."</code></pre>
+Console.WriteLine(fluffy.GetDescription());
+// Output: "Ik ben Fluffy en ik heb 80 energie."
+
+Console.ReadLine(); // Wacht op enter</code></pre>
 
         <div class="info-box">
             <h3>Void vs Return</h3>
-            <p>In het voorbeeld hierboven gaf de methode een antwoord terug (<code>string</code>). Soms wil je dat een methode gewoon iets doet en verder niks terugzegt. Dan gebruik je <strong>void</strong>.</p>
+            <p>In het voorbeeld hierboven gaf de methode een antwoord terug (<code>string</code>). Soms wil je dat een methode gewoon iets doet en verder niks terugzegt (bijvoorbeeld alleen geluid maken). Dan gebruik je <strong>void</strong>.</p>
             <pre><code class="language-csharp">public void Bark()
 {
     Console.WriteLine("Woef!");
 }
-// Gebruik: pet1.Bark(); (Je hoeft niks op te vangen)</code></pre>
+// Gebruik: dino.Bark(); (Je hoeft niks op te vangen)</code></pre>
         </div>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
@@ -108,8 +111,8 @@ Console.WriteLine(pet2.GetDescription());
             <h3>⚠️ Vergeet de haakjes niet!</h3>
             <p>Een methode is een functie. Een functie heeft altijd haakjes nodig om te starten, ook als ze leeg zijn.</p>
             <ul>
-                <li>❌ <code>pet1.GetDescription;</code> (C# denkt dat dit een property is, maar die bestaat niet)</li>
-                <li>✅ <code>pet1.GetDescription();</code> (Voer de functie uit!)</li>
+                <li>❌ <code>dino.GetDescription;</code> (C# denkt dat dit een property is, maar die bestaat niet)</li>
+                <li>✅ <code>dino.GetDescription();</code> (Voer de functie uit!)</li>
             </ul>
         </div>
 

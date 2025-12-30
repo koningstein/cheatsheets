@@ -46,13 +46,14 @@
         </ul>
 
         <h3>Hoe maak je een Property?</h3>
-        <p>Je maakt properties aan in je Class bestand. Er zijn in C# twee belangrijke verschillen met gewone variabelen:</p>
+        <p>Je maakt properties aan in je Class bestand (<code>DigitalPet.cs</code>). Er zijn in C# twee belangrijke verschillen met gewone variabelen:</p>
         <ol>
             <li>Je moet aangeven dat het <code>public</code> is (iedereen mag het zien).</li>
             <li>Je voegt <code>{ get; set; }</code> toe.</li>
         </ol>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
     // Hier definiëren we de lege velden (de properties)
     public string Name { get; set; }
@@ -70,28 +71,32 @@
         </div>
 
         <h3>Waarden geven en uitlezen</h3>
-        <p>Nu we de velden hebben gemaakt in de blauwdruk, kunnen we ze gaan invullen bij onze objecten. Hiervoor gebruiken we de <strong>punt</strong> <code>.</code>.</p>
+        <p>Nu we de velden hebben gemaakt in de blauwdruk, kunnen we ze gaan invullen bij onze objecten in <code>Program.cs</code>. Hiervoor gebruiken we de <strong>punt</strong> <code>.</code>.</p>
 
         <h4>De Punt-notatie (.)</h4>
         <p>Je kunt de punt lezen als: <em>"Ga naar binnen bij dit object, en pak..."</em>.</p>
 
-        <pre><code class="language-csharp">// 1. Maak Dino (een nieuw object)
-DigitalPet pet1 = new DigitalPet();
-pet1.Name = "Dino";  // SET: We schrijven de naam erin
-pet1.Energy = 100;
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// 1. Maak Dino (een nieuw object)
+DigitalPet dino = new DigitalPet();
+dino.Name = "Rex";  // SET: We schrijven de naam erin
+dino.Energy = 100;
 
 // 2. Maak Fluffy (een ander object)
-DigitalPet pet2 = new DigitalPet();
-pet2.Name = "Fluffy";
-pet2.Energy = 50;
+DigitalPet fluffy = new DigitalPet();
+fluffy.Name = "Fluffy";
+fluffy.Energy = 80;
 
 // Laten we ze eens bekijken (GET)
-Console.WriteLine("Dier 1 heet: " + pet1.Name);
-// Output: Dier 1 heet: Dino</code></pre>
+Console.WriteLine("Dier 1 heet: " + dino.Name);
+Console.WriteLine("Dier 2 heet: " + fluffy.Name);
+
+Console.ReadLine(); // Even wachten tot enter</code></pre>
 
         <div class="info-box">
             <h3>Belangrijk: Onafhankelijkheid</h3>
-            <p>Kijk goed naar de code hierboven. Als ik de <code>Name</code> van <code>pet1</code> verander, blijft <code>pet2</code> gewoon Fluffy heten. Elk object heeft zijn eigen set properties.</p>
+            <p>Kijk goed naar de code hierboven. Als ik de <code>Name</code> van <code>dino</code> verander, blijft <code>fluffy</code> gewoon Fluffy heten. Elk object heeft zijn eigen stukje geheugen met eigen properties.</p>
         </div>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
@@ -99,21 +104,21 @@ Console.WriteLine("Dier 1 heet: " + pet1.Name);
 
         <h4>1. Verkeerde Datatypes</h4>
         <p>Je hebt gezegd dat <code>Energy</code> een <code>int</code> (getal) is. Je mag er dan <strong>geen</strong> tekst in stoppen.</p>
-        <pre><code class="language-csharp">pet1.Energy = "Honderd"; // FOUT! C# accepteert dit niet.
-pet1.Energy = 100;       // GOED!</code></pre>
+        <pre><code class="language-csharp">dino.Energy = "Honderd"; // FOUT! C# accepteert dit niet.
+dino.Energy = 100;       // GOED!</code></pre>
 
         <h4>2. Hoofdletters (Case Sensitivity)</h4>
         <p>In C# is <code>Name</code> (met hoofdletter) iets anders dan <code>name</code> (met kleine letter). Omdat we in de class <code>Name</code> met een hoofdletter hebben geschreven, moeten we dat overal doen.</p>
-        <pre><code class="language-csharp">pet1.name = "Dino"; // FOUT! 'DigitalPet' bevat geen 'name'.
-pet1.Name = "Dino"; // GOED!</code></pre>
+        <pre><code class="language-csharp">dino.name = "Rex"; // FOUT! 'DigitalPet' bevat geen 'name'.
+dino.Name = "Rex"; // GOED!</code></pre>
 
         <h3>Waarom doen we dit?</h3>
         <p>Misschien denk je: "Ik kan dit toch ook met een lijstje (array) doen?"</p>
         <pre><code class="language-csharp">// Slechte manier:
-string[] petData = { "Dino", "100" };</code></pre>
+string[] petData = { "Rex", "100" };</code></pre>
         <p>Dat kan, maar het is onhandig. Je moet onthouden dat nummer 0 de naam is en nummer 1 de energie. En wat als je energie als getal wilt gebruiken om te rekenen? In de array is het tekst.</p>
 
-        <p>Bij een object zeg je gewoon <code>pet.Name</code> en <code>pet.Energy</code>. Het is duidelijk, leesbaar en C# controleert of je geen rekenfouten maakt met tekst.</p>
+        <p>Bij een object zeg je gewoon <code>dino.Name</code> en <code>dino.Energy</code>. Het is duidelijk, leesbaar en C# controleert of je geen rekenfouten maakt met tekst.</p>
 
     </main>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setters (Ext) - C# Module 1</title>
+    <title>Validatie (Ext) - C# Module 1</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,119 +18,95 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Setters & Validatie</h1>
+        <h1>Setter & Validatie</h1>
 
-        <p>In de vorige les maakten we properties met <code>{ get; set; }</code>. Dat is lekker snel, maar er is één groot probleem: <strong>er is geen controle</strong>.</p>
+        <p>In de vorige lessen hebben we Properties gemaakt. Dat is handig, maar ook gevaarlijk. Omdat alles <code>public</code> is, kan iedereen er zomaar rare waarden in stoppen.</p>
+
         <p>Stel je voor dat iemand jouw Digital Pet gebruikt en per ongeluk dit typt:</p>
-        <pre><code class="language-csharp">pet.Energy = -5000;</code></pre>
-        <p>Een huisdier met negatieve energie? Dat slaat nergens op. Toch accepteert C# dit gewoon, want een <code>int</code> kan prima negatief zijn. Om dit te voorkomen, moeten we de poort bewaken.</p>
+        <pre><code class="language-csharp">dino.Energy = -5000;</code></pre>
+        <p>Een huisdier met negatieve energie? Dat slaat nergens op. Toch accepteert C# dit gewoon, want een <code>int</code> kan prima negatief zijn. Om dit te voorkomen, moeten we controle inbouwen.</p>
 
-        <h3>Van Auto-Property naar Full Property</h3>
-        <p>Om controle te krijgen over wat er in een variabele wordt gestopt, stappen we over van de automatische property naar een handmatige <strong>Full Property</strong>.</p>
+        <h3>De Oplossing: Een Setter Methode</h3>
+        <p>Omdat we nog niet met verborgen (private) variabelen werken, lossen we dit op met een <strong>Methode</strong>. We spreken met elkaar af: <em>"Als je de energie wilt veranderen, gebruik je deze methode."</em></p>
 
         <div class="info-box">
-            <h3>Stel je voor: De Nachtclub</h3>
-            <p><strong>Auto-Property:</strong> Een club zonder deurbeleid. Iedereen loopt zo naar binnen, ook mensen die problemen veroorzaken (foutieve data).</p>
-            <p><strong>Full Property (Setter):</strong> Er staat een uitsmijter (de Setter) bij de deur. Voordat je naar binnen mag, checkt hij je ID. Ben je te jong (ongeldige waarde)? Dan kom je er niet in, of word je naar huis gestuurd.</p>
+            <h3>De Vergelijking: De Nachtclub</h3>
+            <p>Als je zomaar de achterdeur open laat staan (de Property), loopt iedereen naar binnen.<br>
+                We zetten nu een uitsmijter bij de deur (de Methode). Hij checkt eerst je ID. Ben je oud genoeg (geldige waarde)? Dan mag je naar binnen. Zo niet, dan word je weggestuurd.</p>
         </div>
 
-        <h3>Stap 1: De Privé Kluis (Backing Field)</h3>
-        <p>We gaan de data niet meer direct in de publieke property opslaan. We maken een geheime, privé variabele aan. Dit noemen we het <strong>Backing Field</strong>.</p>
-        <p>Conventie: Een private field begint vaak met een <strong>underscore</strong> <code>_</code> en een kleine letter.</p>
+        <h3>De Code in de Class</h3>
+        <p>We voegen een methode toe aan <code>DigitalPet.cs</code>. Deze methode noem je vaak <code>Set...</code>.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
-    // Hier zit de échte data. Niemand mag hier direct bij komen.
-    private int _energy;
-}</code></pre>
+    // De gewone eigenschappen
+    public string Name { get; set; }
+    public int Energy { get; set; }
 
-        <h3>Stap 2: De Publieke Poort</h3>
-        <p>Nu maken we de Property die de buitenwereld mag gebruiken. In de <code>set</code> voegen we logica toe.</p>
-        <p>Er is een speciaal woordje in C#: <strong><code>value</code></strong>. Dit staat voor "het getal dat iemand erin probeert te stoppen".</p>
-
-        <pre><code class="language-csharp">class DigitalPet
-{
-    // 1. Het privé veld (De opslag)
-    private int _energy;
-
-    // 2. De publieke toegang (De poort)
-    public int Energy
+    // 1. De Validatie Methode (De Setter)
+    // We vragen om een 'amount' (hoeveelheid)
+    public void SetEnergy(int amount)
     {
-        get
+        // 2. De Controle
+        if (amount < 0)
         {
-            // Als iemand de waarde vraagt, geven we die uit de kluis
-            return _energy;
+            Console.WriteLine("Foutje! Energie mag niet negatief zijn.");
+            Console.WriteLine("We zetten de energie op 0.");
+            this.Energy = 0; // We corrigeren de fout
         }
-        set
+        else if (amount > 100)
         {
-            // HIER staat de uitsmijter!
-            // 'value' is het getal dat binnenkomt (bijv. -50 of 200)
+             Console.WriteLine("Wow, dat is te veel! Maximaal 100.");
+             this.Energy = 100; // We begrenzen het op 100
+        }
+        else
+        {
+            // 3. Alles is veilig, sla het op!
+            this.Energy = amount;
+        }
+    }
 
-            if (value < 0)
-            {
-                Console.WriteLine("Foutje! Energie kan niet negatief zijn. We maken er 0 van.");
-                _energy = 0; // We corrigeren de fout
-            }
-            else if (value > 100)
-            {
-                _energy = 100; // Maximaal 100
-            }
-            else
-            {
-                _energy = value; // Alles is goed, sla maar op.
-            }
-        }
+    public string GetDescription()
+    {
+        return "Ik ben " + this.Name + " en ik heb " + this.Energy + " energie.";
     }
 }</code></pre>
 
-        <h3>Het gebruik in de praktijk</h3>
-        <p>Laten we kijken wat er gebeurt als we nu proberen vals te spelen in <code>Program.cs</code>.</p>
+        <h3>Het Gebruik in Program.cs</h3>
+        <p>Nu gaan we de methode gebruiken. In plaats van direct de variabele aan te passen met <code>=</code>, roepen we de functie aan.</p>
 
-        <pre><code class="language-csharp">// We maken een huisdier
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
 DigitalPet dino = new DigitalPet();
+dino.Name = "Rex";
 
-// Poging 1: Een geldige waarde
-dino.Energy = 50;
-Console.WriteLine(dino.Energy); // Output: 50
+// FOUTE MANIER (Direct):
+// dino.Energy = -50;
+// Dit kan technisch nog wel, maar we spreken af dit NIET te doen.
 
-// Poging 2: Een illegale waarde
-dino.Energy = -200;
-// De setter grijpt in!
-// Output in console: "Foutje! Energie kan niet negatief zijn..."
-// De waarde wordt automatisch 0.
+// GOEDE MANIER (Via de methode):
+Console.WriteLine("Poging 1: -50 energie");
+dino.SetEnergy(-50);
+// De methode grijpt in! Energy wordt 0.
 
-Console.WriteLine(dino.Energy); // Output: 0</code></pre>
+Console.WriteLine(dino.GetDescription());
+// Output: Ik ben Rex en ik heb 0 energie.
 
-        <div class="info-box">
-            <h3>Encapsulatie</h3>
-            <p>Dit concept heet <strong>Encapsulatie</strong> (Inkapseling). Je beschermt de gevoelige onderdelen van je code (het backing field) door er een beschermlaag (de property) omheen te bouwen. De gebruiker hoeft niet te weten hoe het werkt, als het maar veilig is.</p>
-        </div>
+Console.WriteLine("Poging 2: 200 energie");
+dino.SetEnergy(200);
+// De methode grijpt in! Energy wordt 100.
 
-        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+Console.WriteLine(dino.GetDescription());
+// Output: Ik ben Rex en ik heb 100 energie.
 
-        <div class="info-box warning">
-            <h3>⚠️ De oneindige loop (StackOverflow)</h3>
-            <p>Dit is de meest gemaakte fout bij beginners. Kijk goed naar dit voorbeeld:</p>
-            <pre><code class="language-csharp">public int Energy
-{
-    get { return _energy; }
-    set
-    {
-        // FOUT! Je roept hier de Property ZELF aan, niet het backing field.
-        Energy = value;
-    }
-}</code></pre>
-            <p>Als je <code>Energy = value</code> typt <em>binnen</em> de setter van <code>Energy</code>, roept hij zichzelf opnieuw aan. En die roept zichzelf weer aan... Totdat het geheugen vol is en je programma crasht (StackOverflowException).<br>
-                <strong>Regel:</strong> In de setter schrijf je altijd naar het <code>_backingField</code> (met underscore!).</p>
-        </div>
+Console.ReadLine();</code></pre>
 
-        <h3>Samenvatting</h3>
-        <ul>
-            <li>Gebruik <strong>Auto-Properties</strong> <code>{ get; set; }</code> als je geen logica nodig hebt.</li>
-            <li>Gebruik <strong>Full Properties</strong> met een <strong>Backing Field</strong> als je data wilt controleren of valideren.</li>
-            <li>Het keyword <strong><code>value</code></strong> in de setter bevat de nieuwe data.</li>
-            <li>Schrijf in de setter altijd naar het privé veld (<code>_variabele</code>) om crashes te voorkomen.</li>
-        </ul>
+        <h3>Waarom doen we dit?</h3>
+        <p>Door een methode te gebruiken tussen de invoer en de opslag, voorkom je dat je game crasht of raar gedrag vertoont. Je beschermt het object tegen ongeldige data.</p>
+
+        <p><em>(In latere modules leren we hoe we de property echt op slot kunnen doen met 'private', zodat je niet meer per ongeluk de foute manier kunt gebruiken.)</em></p>
 
     </main>
 

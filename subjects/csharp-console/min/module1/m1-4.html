@@ -21,51 +21,59 @@
         <h1>Methoden</h1>
 
         <h3>Actie ondernemen</h3>
-        <p>Properties zijn de zelfstandige naamwoorden (de Naam, de Energie), maar <strong>Methoden</strong> (Methods) zijn de werkwoorden. Methods zorgen ervoor dat een object iets kan <em>doen</em>.</p>
+        <p>Properties zijn de zelfstandige naamwoorden (Naam, Energie), maar <strong>Methoden</strong> zijn de werkwoorden. Methods zorgen ervoor dat een object iets kan <em>doen</em> (bijv. zichzelf voorstellen).</p>
 
         <h3>Een method maken</h3>
-        <p>Een method in een class lijkt erg op een normale functie. Het heeft een zichtbaarheid (public), een return type en een naam.</p>
+        <p>Je maakt een method in je Class bestand. Het lijkt op een normale functie, maar je hebt toegang tot de data van het object.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
     public string Name { get; set; }
+    public int Energy { get; set; }
 
-    // Een simpele methode zonder return waarde (void)
-    public void Bark()
+    // Een methode die tekst teruggeeft (string)
+    public string GetDescription()
     {
-        Console.WriteLine("Woef! Woef!");
+        // 'this' verwijst naar de properties van DIT object
+        return "Ik ben " + this.Name + " en ik heb " + this.Energy + " energie.";
     }
 }</code></pre>
 
-        <h3>Methoden aanroepen</h3>
-        <p>Net als bij properties gebruiken we de punt <code>.</code> om een methode te gebruiken. Vergeet de haakjes <code>()</code> niet!</p>
-
-        <pre><code class="language-csharp">DigitalPet dog = new DigitalPet();
-dog.Name = "Blafmans";
-
-// Roep de methode aan
-dog.Bark();
-
-// Output: Woef! Woef!</code></pre>
-
-        <h3>Parameters</h3>
-        <p>Je kunt ook informatie meegeven aan een method. Bijvoorbeeld, hoeveel keer moet de hond blaffen?</p>
-
-        <pre><code class="language-csharp">public void Walk(int kilometers)
-{
-    Console.WriteLine("We hebben " + kilometers + " kilometer gewandeld.");
-}</code></pre>
-        <pre><code class="language-csharp">dog.Walk(5); // Output: We hebben 5 kilometer gewandeld.</code></pre>
-
         <div class="info-box">
             <h3>Het 'this' keyword</h3>
-            <p>Vaak wil je in een method de eigen properties van het object gebruiken. Bijvoorbeeld: de hond moet zijn <em>eigen</em> naam zeggen. Hiervoor gebruiken we <code>this</code>.</p>
-            <pre><code class="language-csharp">public void Introduce()
-{
-    // 'this.Name' verwijst naar de property Name van DIT specifieke object
-    Console.WriteLine("Hallo, ik ben " + this.Name);
-}</code></pre>
+            <p>Met het woordje <code>this</code> zeg je eigenlijk: "Mijn".<br>
+                <code>this.Name</code> betekent: "Mijn eigen naam". Zo weet het object welke data hij moet pakken.</p>
         </div>
+
+        <h3>Methoden aanroepen</h3>
+        <p>In <code>Program.cs</code> gebruik je de punt <code>.</code> om de methode te starten. Vergeet de haakjes <code>()</code> niet!</p>
+
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// 1. Maak Dino
+DigitalPet dino = new DigitalPet();
+dino.Name = "Rex";
+dino.Energy = 100;
+
+// 2. Maak Fluffy
+DigitalPet fluffy = new DigitalPet();
+fluffy.Name = "Fluffy";
+fluffy.Energy = 80;
+
+// 3. Roep de methoden aan
+// Dino gebruikt ZIJN data, Fluffy gebruikt HAAR data.
+Console.WriteLine(dino.GetDescription());
+Console.WriteLine(fluffy.GetDescription());
+
+Console.ReadLine();</code></pre>
+
+        <h3>Return vs Void</h3>
+        <p>Let op het return-type:</p>
+        <ul>
+            <li><strong>string / int:</strong> De methode geeft een antwoord terug (zoals hierboven). Je moet dit opvangen of printen.</li>
+            <li><strong>void:</strong> De methode doet alleen iets (actie) en geeft niks terug.</li>
+        </ul>
 
     </main>
 

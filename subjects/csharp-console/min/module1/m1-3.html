@@ -22,13 +22,13 @@
 
         <h3>Eigenschappen definiëren</h3>
         <p>Een object zonder data is leeg. We willen dat onze <code>DigitalPet</code> eigenschappen heeft, zoals een naam en een energieniveau. In C# gebruiken we hiervoor <strong>Properties</strong>.</p>
-
-        <p>Een Property is publiek toegankelijk, heeft een datatype (zoals <code>string</code> of <code>int</code>) en een naam.</p>
+        <p>Je definieert deze in je Class bestand (<code>DigitalPet.cs</code>).</p>
 
         <h3>Auto-Properties</h3>
-        <p>De snelste manier om een property te maken is de "Auto-Implemented Property". Je hoeft niet na te denken over hoe de data wordt opgeslagen, C# regelt dit voor je achter de schermen.</p>
+        <p>De snelste manier is de "Auto-Implemented Property". Je voegt <code>{ get; set; }</code> toe achter de naam.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
     // Een property voor tekst (de naam)
     public string Name { get; set; }
@@ -39,29 +39,36 @@
 
         <div class="info-box">
             <h3>Get en Set</h3>
-            <p>Je ziet achter de property <code>{ get; set; }</code> staan. Dit zijn de toegangsrechten:</p>
             <ul>
                 <li><strong>get:</strong> De waarde mag uitgelezen worden (Read).</li>
                 <li><strong>set:</strong> De waarde mag overschreven worden (Write).</li>
             </ul>
         </div>
 
-        <h3>Waardes toewijzen (Set)</h3>
-        <p>Nadat je een object hebt aangemaakt met <code>new</code>, kun je de properties vullen. Je gebruikt de punt-notatie om bij de property te komen.</p>
+        <h3>Waardes toewijzen en uitlezen</h3>
+        <p>In <code>Program.cs</code> gebruik je de punt-notatie <code>.</code> om bij de properties te komen. Je kunt meerdere objecten maken die elk hun eigen waardes hebben.</p>
 
-        <pre><code class="language-csharp">DigitalPet myPet = new DigitalPet();
+        <pre><code class="language-csharp">// BESTAND: Program.cs
 
-// We schrijven data naar de properties (SET)
-myPet.Name = "Dino";
-myPet.Energy = 100;</code></pre>
+// 1. Maak Dino en geef hem eigenschappen (SET)
+DigitalPet dino = new DigitalPet();
+dino.Name = "Rex";
+dino.Energy = 100;
 
-        <h3>Waardes uitlezen (Get)</h3>
-        <p>Wil je de naam van je huisdier op het scherm tonen? Dan "haal" je de waarde op.</p>
+// 2. Maak Fluffy en geef haar eigenschappen (SET)
+DigitalPet fluffy = new DigitalPet();
+fluffy.Name = "Fluffy";
+fluffy.Energy = 80;
 
-        <pre><code class="language-csharp">// We lezen de data (GET)
-Console.WriteLine(myPet.Name);
+// 3. Lees de data uit en toon het op het scherm (GET)
+Console.WriteLine("Dier 1 heet: " + dino.Name);
+Console.WriteLine("Dier 2 heet: " + fluffy.Name);
 
-// Output: Dino</code></pre>
+Console.ReadLine(); // Wacht op enter</code></pre>
+
+        <h3>Onafhankelijkheid</h3>
+        <p>Belangrijk: Omdat we twee keer <code>new</code> hebben gebruikt, zijn <code>dino</code> en <code>fluffy</code> compleet gescheiden. Als je de energie van Dino aanpast, blijft de energie van Fluffy gelijk.</p>
+
 
     </main>
 
