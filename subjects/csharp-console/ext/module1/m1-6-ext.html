@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Getters (Ext) - C# Module 1</title>
+    <title>Getters & Formatting (Ext) - C# Module 1</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,111 +18,149 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Getters: Berekende Eigenschappen</h1>
+        <h1>Getters: Data Formatteren</h1>
 
-        <p>Tot nu toe gebruikten we properties om data op te slaan, zoals <code>Energy</code> of <code>Name</code>. Maar soms wil je informatie hebben die je niet direct opslaat, maar die je kunt <strong>berekenen</strong> aan de hand van andere gegevens.</p>
-        <p>Dit noemen we <strong>Computed Properties</strong> (Berekende Eigenschappen) of Read-Only Properties.</p>
+        <p>In de vorige lessen hebben we properties gemaakt waar je data in kunt stoppen (Set) en uit kunt halen (Get). Vaak is die data "rauw".</p>
+        <p>Bijvoorbeeld: <code>Energy</code> is gewoon het getal <code>50</code>. Maar misschien wil je dit op het scherm tonen als een mooie tekst: <strong>"🔋 Energie: 50 / 100"</strong>.</p>
+        <p>Je kunt dit steeds in <code>Program.cs</code> aan elkaar plakken, maar het is veel slimmer om dit in de Class zelf te regelen.</p>
 
-        <h3>Het Probleem: Dubbele Data</h3>
-        <p>Stel je voor dat we willen weten of ons huisdier moe is. Je zou een variabele <code>bool IsTired</code> kunnen maken.</p>
-        <ul>
-            <li>Als je de energie verlaagt, moet je niet vergeten <code>IsTired</code> aan te passen.</li>
-            <li>Als je de energie verhoogt, moet je weer checken of hij nog moe is.</li>
-        </ul>
-        <p>Als je dit één keer vergeet, heb je een bug: Je huisdier heeft 100 energie, maar <code>IsTired</code> staat nog op <code>true</code>. Dat klopt niet!</p>
-
-        <h3>De Oplossing: Live Berekenen</h3>
-        <p>In plaats van de status "Moe" op te slaan, kunnen we het gewoon aan het object <strong>vragen</strong> op het moment dat we het nodig hebben. We kijken gewoon naar de huidige energie.</p>
+        <h3>Wat is een Custom Getter?</h3>
+        <p>Normaal gesproken geeft een property direct de waarde terug die opgeslagen is. Bij een Custom Getter (aangepaste getter) voeren we eerst wat code uit voordat we het antwoord geven. We "formatteren" de data.</p>
 
         <div class="info-box">
-            <h3>De Vergelijking: Je Leeftijd</h3>
-            <p>Op je paspoort staat je <strong>Geboortedatum</strong> (Opgeslagen Data). Er staat <em>niet</em> je <strong>Leeftijd</strong> op.</p>
-            <p>Waarom niet? Omdat je leeftijd elke dag kan veranderen. Als iemand vraagt hoe oud je bent, reken je dat op dat moment uit: <em>Vandaag min Geboortedatum</em>.</p>
+            <h3>De Vergelijking: De Barista</h3>
+
+            <p>Stel je voor dat je koffie bestelt.</p>
+            <ul>
+                <li><strong>De Opslag (Variabele):</strong> De koffiebonen en het water in de machine.</li>
+                <li><strong>De Getter (De Barista):</strong> Jij vraagt om "Koffie". Je krijgt niet de losse bonen. De barista maalt ze, voegt water toe, doet er melk bij en geeft jou een <em>kant-en-klaar product</em>.</li>
+            </ul>
         </div>
 
-        <h3>Hoe maak je een Computed Property?</h3>
-        <p>Een computed property heeft <strong>alleen een get</strong>. Hij heeft geen <code>set</code>, want je kunt de uitkomst niet "instellen". De uitkomst is het resultaat van een som of check.</p>
+        <h3>De Code: Hoe maak je het?</h3>
+        <p>We maken een nieuwe property in onze class. Deze property slaat zelf niks op, maar kijkt naar de andere data (Naam en Energie) en maakt daar een mooi tekstje van.</p>
+        <p>Omdat we deze data alleen willen <em>lezen</em> (het is een resultaat), gebruiken we <strong>alleen een get</strong>. Geen set.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
-    // Dit is opgeslagen data (Read & Write)
+    // De ruwe data (hier slaan we het echt op)
+    public string Name { get; set; }
     public int Energy { get; set; }
 
-    // Dit is berekende data (Read Only)
-    // We voegen logica toe in het get-blok
-    public string Status
+    // De "Formatter" Property
+    // Deze slaat niks op, maar geeft een mooi opgemaakt resultaat.
+    public string EnergyDisplay
     {
         get
         {
-            if (this.Energy > 50)
-            {
-                return "Happy";
-            }
-            return "Tired";
+            // We plakken tekst en data aan elkaar
+            return "🔋 " + this.Name + " - Level: " + this.Energy + "/100";
         }
     }
 }</code></pre>
 
         <h3>Het gebruik in Program.cs</h3>
-        <p>Voor de gebruiker van de class lijkt het net een gewone variabele. Je gebruikt gewoon de punt.</p>
+        <p>In je programma merk je geen verschil tussen een "echte" variabele en onze "verzonnen" variabele.</p>
 
-        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet();
-dino.Energy = 10;
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+DigitalPet dino = new DigitalPet();
+dino.Name = "Rex";
+dino.Energy = 50;
 
-// We lezen de status uit.
-// Op dit moment rekent C# uit: is 10 groter dan 50? Nee. Return "Tired".
-Console.WriteLine(dino.Status); // Output: Tired
+// We vragen de mooi gemaakte tekst op
+Console.WriteLine(dino.EnergyDisplay);
 
-dino.Energy = 90;
-// Nu vragen we het opnieuw. C# rekent weer: is 90 groter dan 50? Ja.
-Console.WriteLine(dino.Status); // Output: Happy</code></pre>
+// Output: 🔋 Rex - Level: 50/100</code></pre>
 
-        <h3>De 'Fat Arrow' Syntax (=>)</h3>
-        <p>Programmeurs zijn lui. Als een getter maar uit één regel code bestaat (bijvoorbeeld een simpele check), vinden we <code>get { return ... }</code> te veel typowerk.</p>
-        <p>Hiervoor is de <strong>Expression Body</strong> syntax bedacht, ook wel de "Fat Arrow" (dikke pijl) genoemd.</p>
+        <h3>Verdieping: Waarom een Property en geen Methode?</h3>
+        <p>Je vraagt je misschien af: <em>"Waarom moeilijk doen met een get-blok? Ik kan toch ook gewoon een methode maken?"</em></p>
+        <p>Dat klopt! Technisch doen ze hetzelfde (tekst teruggeven). Het verschil zit in hoe je de code <strong>gebruikt</strong> in je programma. Laten we ze naast elkaar leggen.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <h4>Manier A: De Methode (Zoals je gewend bent)</h4>
+        <p>Dit is een <strong>actie</strong>. Omdat het een actie is, moet je verplicht <strong>haakjes ()</strong> gebruiken.</p>
+
+        <pre><code class="language-csharp">// IN DE CLASS:
+public string GetInfo()
 {
-    public int Energy { get; set; }
+    return "Naam: " + Name;
+}
 
-    // Oude, lange manier:
-    /*
-    public bool IsAlive
+// IN PROGRAM.CS (Het gebruik):
+Console.WriteLine(dino.GetInfo()); // <-- Haakjes verplicht!</code></pre>
+
+        <h4>Manier B: De Property (Met de 'get')</h4>
+        <p>Dit vermomt zich als een <strong>variabele</strong>. Je gebruikt <strong>geen haakjes</strong>.</p>
+
+        <pre><code class="language-csharp">// IN DE CLASS:
+public string Info
+{
+    get
     {
-        get { return this.Energy > 0; }
+        return "Naam: " + Name;
     }
-    */
+}
 
-    // Nieuwe, korte manier:
-    public bool IsAlive => this.Energy > 0;
-}</code></pre>
+// IN PROGRAM.CS (Het gebruik):
+Console.WriteLine(dino.Info); // <-- Lijkt net een variabele!</code></pre>
 
-        <p>Het pijltje <code>=></code> betekent eigenlijk: <em>"Deze property is gelijk aan de uitkomst van..."</em>.</p>
-
-        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
-
-        <div class="info-box warning">
-            <h3>⚠️ Proberen te schrijven (Setten)</h3>
-            <p>Omdat deze properties alleen een <code>get</code> (of een pijl) hebben, zijn ze <strong>Alleen-Lezen</strong> (Read-Only).</p>
-            <pre><code class="language-csharp">// FOUT! Je kunt dit niet instellen. Het is een resultaat.
-pet.IsAlive = true;
-// Error: Property 'IsAlive' cannot be assigned to -- it is read only</code></pre>
+        <div class="info-box">
+            <h3>Het geheim van 'Get'</h3>
+            <p>In C# betekent het woordje <code>get</code> eigenlijk: <em>"Wanneer iemand deze variabele probeert te lezen, voer dan stiekem deze code uit."</em></p>
+            <p>Het zorgt ervoor dat je slimme code (logica/berekeningen) kunt verstoppen achter iets dat eruitziet als een simpele eigenschap.</p>
         </div>
 
-        <div class="info-box warning">
-            <h3>⚠️ Pijltje vs Is-Gelijk-Aan</h3>
-            <p>Verwar <code>=></code> (berekend telkens opnieuw) niet met <code>=</code> (startwaarde, één keer).</p>
+        <div class="info-box">
+            <h3>Wanneer kies je wat? (De Vuistregel)</h3>
             <ul>
-                <li><code>public int Score = 10;</code> (Start op 10, kan veranderen).</li>
-                <li><code>public int Score => 10;</code> (Is ALTIJD 10, kan nooit veranderen).</li>
+                <li><strong>Is het een Actie?</strong> (Blaffen, Lopen, Opslaan, Berekenen)<br>
+                    -> Gebruik een <strong>Methode</strong> met <code>()</code>.<br>
+                    -> Voorbeeld: <code>dino.Bark()</code></li>
+                <br>
+                <li><strong>Is het Data/Informatie?</strong> (Naam, Leeftijd, Omschrijving)<br>
+                    -> Gebruik een <strong>Property</strong> (Getter) zonder <code>()</code>.<br>
+                    -> Voorbeeld: <code>dino.EnergyDisplay</code></li>
             </ul>
         </div>
 
+        <h3>De 'Fat Arrow' (De Afkorting)</h3>
+        <p>Programmeurs houden van korte code. Als een getter heel simpel is (zoals hierboven: alleen maar <code>return ...</code>), dan vinden we al die accolades <code>{ }</code> en het woordje <code>return</code> te veel werk.</p>
+        <p>Hiervoor is de <strong>Fat Arrow</strong> (Dikke Pijl) <code>=></code> bedacht. Het betekent simpelweg: <em>"Deze property is gelijk aan..."</em>.</p>
+
+        <table class="summary-table">
+            <thead>
+            <tr>
+                <th>De Lange Manier (Block Body)</th>
+                <th>De Korte Manier (Expression Body)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+<pre><code class="language-csharp">public string Info
+{
+    get
+    {
+        return "Naam: " + Name;
+    }
+}</code></pre>
+                </td>
+                <td>
+<pre><code class="language-csharp">public string Info => "Naam: " + Name;
+
+// Geen 'get', geen 'return', geen accolades.
+// De pijl wijst direct naar het resultaat.</code></pre>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
         <h3>Samenvatting</h3>
         <ul>
-            <li>Gebruik <strong>Computed Properties</strong> voor data die je kunt afleiden van andere data (zoals leeftijd, totaalbedrag, status).</li>
-            <li>Ze hebben <strong>geen setter</strong>, dus je kunt ze niet handmatig aanpassen.</li>
-            <li>Gebruik de <strong>Fat Arrow</strong> <code>=></code> om je code korter en leesbaarder te maken bij simpele checks.</li>
+            <li>Gebruik een <strong>Getter</strong> om data mooi te maken (formatteren) voordat je het toont.</li>
+            <li>Gebruik <code>get { ... }</code> om code te vermommen als variabele.</li>
+            <li>Gebruik <strong>Properties</strong> voor informatie en <strong>Methoden</strong> voor acties.</li>
+            <li>De <strong>Fat Arrow</strong> <code>=></code> is een handige afkorting.</li>
         </ul>
 
     </main>

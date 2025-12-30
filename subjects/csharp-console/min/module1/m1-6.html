@@ -18,55 +18,67 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Getters</h1>
+        <h1>Getters: Data Formatteren</h1>
 
-        <h3>Computed Properties</h3>
-        <p>Soms heb je informatie nodig die je niet apart hoeft op te slaan, omdat je het kunt berekenen aan de hand van bestaande data. Dit noemen we <strong>Computed Properties</strong> of "Read-only Properties".</p>
+        <h3>Mooie data tonen</h3>
+        <p>Soms wil je data niet "rauw" tonen (bijv. <code>50</code>), maar mooi opgemaakt (bijv. <code>"Level: 50/100"</code>). Hiervoor gebruiken we een <strong>Custom Getter</strong> in de class.</p>
 
-        <p>Stel we willen weten of ons huisdier moe is. We hoeven geen variabele <code>bool IsTired</code> bij te houden en steeds te updaten. We kunnen gewoon naar de <code>Energy</code> kijken.</p>
+        <h3>De Code</h3>
+        <p>Je maakt een property die alleen een <code>get</code> heeft. Deze slaat zelf niks op, maar berekent het resultaat.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+public string EnergyDisplay
 {
-    public int Energy { get; set; }
-
-    // Deze property heeft ALLEEN een get
-    public string Status
+    get
     {
-        get
-        {
-            if (this.Energy > 50)
-            {
-                return "Happy";
-            }
-            return "Tired";
-        }
+        // Plak tekst en variabelen aan elkaar
+        return "🔋 " + this.Name + " - Level: " + this.Energy;
     }
 }</code></pre>
 
-        <h3>Geen Set?</h3>
-        <p>Omdat deze property geen <code>set</code> heeft, kun je hem niet instellen. Proberen om <code>pet.Status = "Happy"</code> te doen, zal een foutmelding geven. De status is puur het <em>gevolg</em> van de energie.</p>
+        <h3>Het Gebruik</h3>
+        <p>In <code>Program.cs</code> gebruik je het alsof het een gewone variabele is (zonder haakjes).</p>
 
-        <h3>Expression Body Members (=>)</h3>
-        <p>In C# komen getters die maar één regel code bevatten heel vaak voor. Hiervoor is een kortere schrijfwijze: de <strong>Expression Body</strong> syntax (ook wel "fat arrow" genoemd).</p>
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+Console.WriteLine(dino.EnergyDisplay);
+// Output: 🔋 Rex - Level: 50</code></pre>
 
-        <pre><code class="language-csharp">// Korte syntax
-public bool IsAlive => this.Energy > 0;
+        <h3>Verschil: Property of Methode?</h3>
+        <p>Je kunt dit ook met een methode doen. Wanneer kies je wat?</p>
 
-// Dit is precies hetzelfde als:
-/*
-public bool IsAlive
-{
-    get { return this.Energy > 0; }
-}
-*/</code></pre>
 
-        <div class="info-box">
-            <h3>Wanneer gebruik je dit?</h3>
-            <p>Gebruik getters voor data die direct afgeleid kan worden. Bijvoorbeeld:<br>
-                - <code>FullName</code> (combineert Firstname en Lastname)<br>
-                - <code>Area</code> (berekent width * height)<br>
-                - <code>CanAttack</code> (checkt of cooldown 0 is)</p>
-        </div>
+
+        <table class="summary-table">
+            <thead>
+            <tr>
+                <th>Type</th>
+                <th>Gebruik</th>
+                <th>Wanneer gebruiken?</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>Methode</strong></td>
+                <td><code>dino.GetInfo()</code><br>(Met haakjes)</td>
+                <td>Bij een <strong>Actie</strong> (Werkwoord).<br><em>Bijv: Berekenen, Opslaan, Lopen.</em></td>
+            </tr>
+            <tr>
+                <td><strong>Property</strong></td>
+                <td><code>dino.Info</code><br>(Zonder haakjes)</td>
+                <td>Bij <strong>Informatie</strong> (Zelfstandig naamwoord).<br><em>Bijv: Naam, Status, Omschrijving.</em></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h3>De Fat Arrow (=>)</h3>
+        <p>Als je getter heel kort is, mag je de <strong>Fat Arrow</strong> syntax gebruiken. Dit scheelt typwerk.</p>
+
+
+        <pre><code class="language-csharp">// Lange manier
+public string Status { get { return "Energy: " + Energy; } }
+
+// Korte manier (Doet precies hetzelfde)
+public string Status => "Energy: " + Energy;</code></pre>
 
     </main>
 
