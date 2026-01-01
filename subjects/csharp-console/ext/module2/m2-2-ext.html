@@ -40,7 +40,7 @@
         <h4>De Moderne Manier (File Scoped)</h4>
         <p>Sinds C# 10 kunnen we dit heel kort opschrijven. Je zet het bovenaan met een puntkomma. Alles in dit bestand hoort nu bij die familie.</p>
 
-        <pre><code class="language-csharp">// DigitalPet.cs
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
 
 // Dit is de 'achternaam' van deze code
 namespace MyTamagotchiGame;
@@ -84,6 +84,12 @@ namespace DigitalPetGame;
 public class DigitalPet
 {
     public string Name { get; set; }
+
+    // Constructor (zoals geleerd in Module 1)
+    public DigitalPet(string name)
+    {
+        this.Name = name;
+    }
 }</code></pre>
 
         <h4>Stap B: Het Gebruik (Program.cs)</h4>
@@ -94,7 +100,8 @@ public class DigitalPet
 using DigitalPetGame;
 
 // Nu kunnen we de korte naam gebruiken
-DigitalPet dino = new DigitalPet();</code></pre>
+// Let op: We gebruiken de constructor die we in Module 1 leerden
+DigitalPet dino = new DigitalPet("Rex");</code></pre>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 

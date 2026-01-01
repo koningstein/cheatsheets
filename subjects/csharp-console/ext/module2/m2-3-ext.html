@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mappenstructuur - C# Module 2</title>
+    <title>Mappenstructuur (Ext) - C# Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -71,15 +71,23 @@ MijnGame/
         <p>Als <code>DigitalPet</code> in de map <code>Models</code> staat, moet de namespace ook eindigen op <code>.Models</code>.</p>
 
         <h4>Stap A: Pas de Namespace aan (DigitalPet.cs)</h4>
-        <pre><code class="language-csharp">// OUD:
-// namespace MijnGame;
+        <pre><code class="language-csharp">// BESTAND: Models/DigitalPet.cs
 
+// OUD: namespace MijnGame;
 // NIEUW (want hij zit in de map Models):
 namespace MijnGame.Models;
 
 public class DigitalPet
 {
     public string Name { get; set; }
+    public int Energy { get; set; }
+
+    // Onze constructor uit Module 1
+    public DigitalPet(string name)
+    {
+        this.Name = name;
+        this.Energy = 50;
+    }
 }</code></pre>
 
         <div class="info-box">
@@ -92,12 +100,17 @@ public class DigitalPet
 
         <p>Je moet nu bovenaan <code>Program.cs</code> vertellen dat hij ook in de map <code>Models</code> moet kijken.</p>
 
-        <pre><code class="language-csharp">using System;
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+using System;
+
 // BELANGRIJK: Importeer de map waar je class in zit
 using MijnGame.Models;
 
 // Nu snapt hij weer wat 'DigitalPet' is
-DigitalPet dino = new DigitalPet("Dino");</code></pre>
+// We gebruiken netjes de constructor die we gemaakt hebben
+DigitalPet dino = new DigitalPet("Dino");
+
+Console.WriteLine("Het beestje is aangemaakt!");</code></pre>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 

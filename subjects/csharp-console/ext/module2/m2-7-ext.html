@@ -31,7 +31,7 @@
             <li><code>StartGame</code> roept <code>dino.Eat()</code> aan.</li>
             <li><code>Eat</code> roept <code>UpdateEnergy()</code> aan.</li>
         </ol>
-        <p>Zolang <code>UpdateEnergy</code> nog niet klaar is, staan alle methodes daarboven "in de wacht". Ze kunnen pas verder als de methode die zij hebben aangeroepen klaar is.</p>
+        <p>Zolang <code>UpdateEnergy</code> nog niet klaar is, staan alle methodes daarboven "in de wacht".</p>
 
         <div class="info-box">
             <h3>De Vergelijking: De Stapel Afwas</h3>
@@ -41,8 +41,7 @@
                 <li>Bovenop dat bord leg je een kleiner bordje (<strong>Eat</strong>).</li>
                 <li>Bovenop dat bordje leg je een kopje (<strong>UpdateEnergy</strong>).</li>
             </ul>
-            <p>Je bent nu bezig met het kopje (de bovenste). Het grote bord onderop (Main) ligt er nog wel, maar je kunt er niet bij. Je moet eerst het kopje afwassen, dan het bordje, en dan pas het grote bord.</p>
-            <p>Dit is precies hoe de <strong>Call Stack</strong> werkt: De methode waar je NU bent, ligt bovenop.</p>
+            <p>Je bent nu bezig met het kopje (de bovenste). Het grote bord onderop (Main) ligt er nog wel, maar je kunt er niet bij. Dit is precies hoe de <strong>Call Stack</strong> werkt: De methode waar je NU bent, ligt bovenop.</p>
         </div>
 
         <h3>De Call Stack in Visual Studio</h3>
@@ -53,7 +52,13 @@
 
 public class DigitalPet
 {
-    public int Energy { get; set; } = 50;
+    public int Energy { get; set; }
+
+    public DigitalPet(string name)
+    {
+        // Startwaarde via constructor!
+        this.Energy = 50;
+    }
 
     public void Eat()
     {
@@ -74,7 +79,7 @@ public class DigitalPet
         <pre><code class="language-csharp">using MyGame.Models;
 
 // Dit is de 'Main' methode (het startpunt)
-DigitalPet dino = new DigitalPet();
+DigitalPet dino = new DigitalPet("Rex");
 
 Console.WriteLine("Start!");
 dino.Eat(); // Hier roepen we Eat aan
@@ -92,18 +97,12 @@ Console.WriteLine("Klaar!");</code></pre>
         </pre>
 
         <h3>Tijdreizen</h3>
-        <p>Het mooie is: je kunt op de regels in de Call Stack <strong>dubbelklikken</strong>.</p>
-        <ul>
-            <li>Dubbelklik op <code>Eat</code>. Visual Studio springt naar de regel waar <code>CheckWeight();</code> werd aangeroepen.</li>
-            <li>Dubbelklik op <code>Main</code>. Visual Studio springt naar de regel waar <code>dino.Eat();</code> werd aangeroepen.</li>
-        </ul>
-        <p>Dit is super handig! Soms heeft een variabele in <code>CheckWeight</code> een rare waarde (bijv. <code>0</code>). Door terug te klikken in de stack, kun je in <code>Main</code> kijken welke waarde eroorspronkelijk werd meegegeven. Je kijkt dus terug in de tijd.</p>
+        <p>Het mooie is: je kunt op de regels in de Call Stack <strong>dubbelklikken</strong>. Visual Studio springt dan terug naar de plek waar die methode werd aangeroepen. Zo kun je zien welke waardes er op dat moment waren.</p>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 
         <div class="info-box warning">
             <h3>⚠️ Stack Overflow (De Oneindige Lus)</h3>
-            <p>Je hebt vast wel eens van de website <em>Stack Overflow</em> gehoord. De naam komt van een beroemde programmeerfout.</p>
             <p>De ruimte op de stapel is niet oneindig. Als methode A methode B aanroept, en methode B roept methode A weer aan... dan blijft de stapel groeien tot het geheugen op is.</p>
         </div>
 
@@ -113,13 +112,12 @@ Console.WriteLine("Klaar!");</code></pre>
     // De methode roept ZICHZELF aan
     Eat();
 }</code></pre>
-        <p>Als je dit start, crasht je programma direct met een <strong>System.StackOverflowException</strong>. De stapel pannenkoeken is omgevallen.</p>
+        <p>Als je dit start, crasht je programma direct met een <strong>System.StackOverflowException</strong>.</p>
 
         <h3>Samenvatting</h3>
         <ul>
-            <li>De <strong>Call Stack</strong> laat zien welke route je programma heeft afgelegd om bij de huidige regel te komen.</li>
+            <li>De <strong>Call Stack</strong> laat zien welke route je programma heeft afgelegd.</li>
             <li>De huidige methode staat <strong>bovenop</strong> de stapel.</li>
-            <li>Je kunt in het Call Stack venster dubbelklikken om te zien welke methodes er "in de wacht" staan.</li>
             <li>Als methodes elkaar oneindig blijven aanroepen, krijg je een <strong>Stack Overflow</strong> crash.</li>
         </ul>
 

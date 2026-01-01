@@ -18,10 +18,9 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Breakpoints & Stepping: De Tijd Stilzetten</h1>
+        <h1>Breakpoints: De Tijd Stilzetten</h1>
 
         <p>Je hebt je code geschreven, je drukt op Start... en er gebeurt iets wat je niet verwacht. Misschien crasht het programma, of misschien blijft de energie van je huisdier op 0 staan. Wat nu?</p>
-        <p>Veel beginners gaan dan gokken. Ze veranderen willekeurig wat code, of zetten overal <code>Console.WriteLine("Hier ben ik");</code> neer. Dit werkt traag en is frustrerend.</p>
         <p>De professionele manier om fouten te vinden heet <strong>Debuggen</strong>.</p>
 
         <h3>Wat is Debuggen?</h3>
@@ -38,7 +37,6 @@
 
         <h3>1. De Breakpoint (Het Stopbord)</h3>
         <p>Om te debuggen, moet je eerst aangeven <em>waar</em> de computer moet stoppen. Dit doe je met een Breakpoint.</p>
-
         <p>Klik in Visual Studio helemaal links in de grijze rand naast een regel code (of zet je cursor op de regel en druk op <strong>F9</strong>). Er verschijnt een <strong>Rode Bol</strong>. </p>
 
         <p>Laten we dit testen met onze Digital Pet.</p>
@@ -48,11 +46,17 @@
 
 public class DigitalPet
 {
-    public int Energy { get; set; } = 100;
+    public int Energy { get; set; }
+
+    public DigitalPet()
+    {
+        // Zoals geleerd in Module 1: Startwaarden in de constructor!
+        this.Energy = 100;
+    }
 
     public void Walk()
     {
-        // Zet hier straks een breakpoint!
+        // Zet hier straks een breakpoint! (F9)
         this.Energy = this.Energy - 10;
         Console.WriteLine("We hebben gewandeld.");
     }
@@ -129,11 +133,6 @@ Console.WriteLine("Einde spel.");</code></pre>
         <div class="info-box warning">
             <h3>⚠️ De gele regel is nog NIET uitgevoerd</h3>
             <p>Dit is de grootste verwarring. Als de regel <code>Energy = Energy - 10;</code> geel is, is de energie <strong>nog niet</strong> verlaagd. De computer staat klaar om het te doen. Pas als je op F10 drukt en de gele balk <em>voorbij</em> die regel is, is het gebeurd.</p>
-        </div>
-
-        <div class="info-box warning">
-            <h3>⚠️ Verkeerde startknop</h3>
-            <p>Je kunt een programma ook starten met <code>Ctrl + F5</code> (Start without Debugging). Je programma negeert dan al je breakpoints en rode bollen. Gebruik altijd gewoon <strong>F5</strong> of de groene "Play" knop als je wilt debuggen.</p>
         </div>
 
         <h3>Samenvatting</h3>
