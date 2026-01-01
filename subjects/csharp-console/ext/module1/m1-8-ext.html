@@ -20,66 +20,69 @@
     <main class="main-content">
         <h1>Named Arguments: Duidelijke Code</h1>
 
-        <p>In de vorige lessen heb je geleerd hoe je methodes en constructors maakt met parameters. Zolang je maar één of twee parameters hebt (bijvoorbeeld alleen een <code>naam</code>), is dat prima te lezen.</p>
-        <p>Maar wat als je object ingewikkelder wordt? Wat als je 5 getallen moet meegeven bij het aanmaken? Dan wordt je code onleesbaar.</p>
-        <p>C# heeft hier een geweldige oplossing voor: <strong>Named Arguments</strong>.</p>
+        <p>In de vorige lessen heb je geleerd hoe je een constructor maakt. Zolang je maar één parameter hebt, is dat prima te lezen. Maar wat als je object ingewikkelder wordt? Wat als je 5 getallen moet meegeven bij het aanmaken?</p>
+        <p>Dan wordt je code onleesbaar en onhandig. C# heeft hier een geweldige oplossing voor: <strong>Named Arguments</strong>.</p>
 
         <h3>Het Probleem: De Getallenbrij</h3>
-        <p>Stel je voor dat we onze <code>DigitalPet</code> uitbreiden. Bij de geboorte (constructor) willen we niet alleen de naam weten, maar ook de energie, de honger en of hij slaapt.</p>
+        <p>Stel je voor dat we onze <code>DigitalPet</code> uitbreiden. We voegen ook standaardwaarden toe (Optional Parameters), zodat je niet alles verplicht hoeft in te vullen.</p>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
-    // ... properties ...
+    public string Name { get; set; }
+    public int Energy { get; set; }
+    public int Hunger { get; set; }
+    public bool IsSleeping { get; set; }
 
-    // Een constructor met veel parameters
-    public DigitalPet(string name, int energy, int hunger, bool isSleeping)
+    // Een constructor met Default Values (Optionele parameters)
+    // Energy is standaard 50, Hunger is standaard 0, Slapen is false.
+    public DigitalPet(string name, int energy = 50, int hunger = 0, bool isSleeping = false)
     {
-        // ... code om alles in te stellen ...
+        this.Name = name;
+        this.Energy = energy;
+        this.Hunger = hunger;
+        this.IsSleeping = isSleeping;
     }
 }</code></pre>
 
-        <p>Als je dit object nu aanmaakt in <code>Program.cs</code>, ziet dat er zo uit:</p>
+        <p>Als we nu een dier willen maken dat toevallig al slaapt, maar wél de standaard energie en honger heeft, hebben we op de oude manier een probleem.</p>
 
-        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet("Dino", 50, 10, false);</code></pre>
+        <pre><code class="language-csharp">// OUDE MANIER:
+// We willen alleen de laatste parameter (slapen) op 'true' zetten.
+// Maar we MOETEN die middelste getallen ook invullen, anders snapt C# de volgorde niet.
+DigitalPet dino = new DigitalPet("Rex", 50, 0, true);</code></pre>
 
-        <p>Kijk naar die getallen: <code>50, 10, false</code>. Weet jij over een maand nog wat die 10 betekent? Is het 10 honger? Of 10 levenspunten? En betekent <code>false</code> dat hij niet slaapt, of dat hij niet dood is?</p>
-        <p>Dit is onduidelijke code. Je moet steeds terugkijken naar de class om te weten wat de volgorde is.</p>
+        <p>Dit is onhandig. Je bent verplicht om waarden in te typen die je eigenlijk helemaal niet wilde veranderen, alleen maar om bij die laatste parameter te komen.</p>
 
         <h3>De Oplossing: Named Arguments</h3>
-        <p>Met Named Arguments mag je de naam van de parameter erbij typen als je de functie aanroept. Je zet de naam, gevolgd door een dubbele punt <code>:</code> en dan de waarde.</p>
+        <p>Met Named Arguments mag je de naam van de parameter erbij typen. Je zet de naam, gevolgd door een dubbele punt <code>:</code> en dan de waarde.</p>
+        [Image of C# named arguments skipping optional parameters]
 
         <div class="info-box">
-            <h3>De Vergelijking: Het Formulier</h3>
-            <p><strong>Positional Arguments (De oude manier):</strong> Iemand geeft je een blaadje en zegt: "Schrijf hier je naam, dan je leeftijd, dan je adres." Als je de volgorde vergeet, gaat het mis.</p>
-            <p><strong>Named Arguments (De nieuwe manier):</strong> Je krijgt een formulier met labeltjes: "Naam: ...", "Leeftijd: ...". Je weet precies wat je waar invult, en de volgorde maakt niet eens meer uit.</p>
+            <h3>De Krachtcombinatie: Overslaan</h3>
+            <p>Omdat je nu expliciet zegt <em>"Dit getal is voor de honger"</em>, mag je andere parameters overslaan (mits die een default waarde hebben in de class).</p>
         </div>
 
-        <h3>Hoe werkt het?</h3>
-        <p>Je verandert <strong>niets</strong> aan de Class of de Constructor zelf. Je past het alleen aan op het moment dat je het <strong>gebruikt</strong> (in <code>Program.cs</code>).</p>
+        <h3>Hoe werkt het in Program.cs?</h3>
+        <p>Je kunt nu parameters "skippen". In het voorbeeld hieronder hoeven we <code>energy</code> en <code>hunger</code> niet in te vullen. C# pakt daar de standaardwaarden (50 en 0), en pakt voor <code>isSleeping</code> jouw waarde.</p>
 
-        <pre><code class="language-csharp">// Duidelijk en leesbaar:
-DigitalPet dino = new DigitalPet(
-    name: "Dino",
-    energy: 50,
-    hunger: 10,
-    isSleeping: false
-);</code></pre>
+        <pre><code class="language-csharp">// BESTAND: Program.cs (Nieuwe manier)
 
-        <p>Nu kan iedereen (ook je collega's) direct zien wat elk getal betekent. De code legt zichzelf uit ("Self-Documenting Code").</p>
+// 1. We skippen de middelste parameters!
+// C# snapt: "Naam is Rex, Slapen is true. De rest doe ik standaard."
+DigitalPet dino = new DigitalPet("Rex", isSleeping: true);
 
-        <h3>Voordeel: De volgorde maakt niet uit</h3>
-        <p>Omdat je de namen gebruikt, hoef je je niet meer aan de volgorde te houden. C# zoekt zelf uit welk getal bij welke parameter hoort.</p>
-
-        <pre><code class="language-csharp">// Dit werkt ook prima, ook al staat het door elkaar:
+// 2. Volledig invullen kan ook, en de volgorde maakt niet meer uit:
 DigitalPet fluffy = new DigitalPet(
-    hunger: 0,
-    isSleeping: true,
+    hunger: 10,
+    isSleeping: false,
     name: "Fluffy",
-    energy: 100
+    energy: 80
 );</code></pre>
+
+        <p>Nu is je code niet alleen korter (je typt minder onnodige defaults), maar ook veel leesbaarder ("Self-Documenting").</p>
 
         <h3>Wanneer gebruik je dit?</h3>
-        <p>Je hoeft dit niet altijd te doen. Bij simpele functies is het overbodig.</p>
         <table class="summary-table">
             <tr>
                 <th>Situatie</th>
@@ -92,12 +95,12 @@ DigitalPet fluffy = new DigitalPet(
                 <td><code>Math.Max(5, 10);</code></td>
             </tr>
             <tr>
-                <td><strong>Duidelijke context</strong></td>
-                <td>Niet nodig</td>
-                <td><code>pet.Eat("Apple");</code> (Het is logisch dat Apple het voedsel is)</td>
+                <td><strong>Parameters overslaan</strong></td>
+                <td><strong>Gebruiken!</strong></td>
+                <td><code>new Pet("Rex", isSleeping: true);</code></td>
             </tr>
             <tr>
-                <td><strong>Veel getallen/bools</strong></td>
+                <td><strong>Veel parameters (Configuratie)</strong></td>
                 <td><strong>Gebruiken!</strong></td>
                 <td><code>CreateUser(isAdmin: true, sendEmail: false);</code></td>
             </tr>
@@ -105,14 +108,14 @@ DigitalPet fluffy = new DigitalPet(
 
         <div class="info-box warning">
             <h3>⚠️ Typefouten</h3>
-            <p>De naam die je typt voor de dubbele punt (bijvoorbeeld <code>energy:</code>) moet <strong>exact</strong> overeenkomen met de naam van de parameter in de constructor. Als je in de class <code>int levens</code> hebt staan, werkt <code>energy: 50</code> niet.</p>
+            <p>De naam die je typt voor de dubbele punt (bijvoorbeeld <code>energy:</code>) moet <strong>exact</strong> overeenkomen met de naam van de parameter in de constructor (camelCase). Als je in de class <code>int levens</code> hebt staan, werkt <code>energy: 50</code> niet.</p>
         </div>
 
         <h3>Samenvatting</h3>
         <ul>
-            <li>Als een methode of constructor veel onduidelijke parameters heeft (zoals getallen of <code>true/false</code>), wordt je code moeilijk leesbaar.</li>
-            <li>Gebruik <strong>Named Arguments</strong> (<code>naam: waarde</code>) om duidelijk te maken wat je invult.</li>
-            <li>Dit verhoogt de leesbaarheid en je mag de volgorde van argumenten zelf bepalen.</li>
+            <li>Gebruik <strong>Named Arguments</strong> (<code>naam: waarde</code>) om parameters over te slaan die al een standaardwaarde hebben.</li>
+            <li>Je hoeft je niet aan de volgorde te houden.</li>
+            <li>Je code wordt leesbaarder omdat er labels bij de waarden staan.</li>
         </ul>
 
     </main>

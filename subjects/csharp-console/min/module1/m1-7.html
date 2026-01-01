@@ -20,19 +20,20 @@
     <main class="main-content">
         <h1>Constructors</h1>
 
-        <h3>Een object geboren laten worden</h3>
-        <p>Tot nu toe maakten we een huisdier aan met <code>new DigitalPet()</code> en vulden we <em>daarna</em> pas de naam in. Maar bestaat er zoiets als een naamloos huisdier? Eigenlijk willen we afdwingen dat zodra een huisdier wordt gemaakt, hij <strong>verplicht</strong> een naam krijgt.</p>
+        <h3>Een vliegende start</h3>
+        <p>Tot nu toe maakten we een huisdier aan en vulden we <em>daarna</em> pas de naam in. Maar een naamloos huisdier zou niet moeten bestaan. We willen afdwingen dat een object <strong>verplicht</strong> data krijgt bij de geboorte.</p>
 
-        <p>Hiervoor gebruiken we de <strong>Constructor</strong>. Dit is een methode die automatisch wordt uitgevoerd op het moment dat je het keyword <code>new</code> gebruikt.</p>
 
-        <h3>Syntax</h3>
-        <p>Een constructor heeft twee unieke eigenschappen:</p>
+        <p>Hiervoor gebruiken we de <strong>Constructor</strong>. Dit is een methode die automatisch wordt uitgevoerd zodra je <code>new</code> gebruikt.</p>
+
+        <h3>Syntax Regels</h3>
         <ol>
-            <li>Hij heeft <strong>exact</strong> dezelfde naam als de class.</li>
-            <li>Hij heeft <strong>geen</strong> return type (ook geen void).</li>
+            <li>De methode heet <strong>exact</strong> hetzelfde als de Class.</li>
+            <li>Er is <strong>geen</strong> return type (ook geen void).</li>
         </ol>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
     public string Name { get; set; }
     public int Energy { get; set; }
@@ -40,23 +41,28 @@
     // De Constructor
     public DigitalPet(string name)
     {
-        this.Name = name;
-        this.Energy = 50; // We geven direct een startwaarde mee
+        this.Name = name;    // Verplichte data opslaan
+        this.Energy = 50;    // Standaard startwaarde instellen
     }
 }</code></pre>
 
-        <h3>Verplichte data</h3>
-        <p>Omdat we nu een constructor hebben gemaakt die een parameter verwacht (`string name`), vervalt de standaard 'lege' constructor. Je code wordt nu strenger en veiliger:</p>
+        <h3>Het Gebruik</h3>
+        <p>Omdat we een constructor hebben gemaakt die een parameter verwacht, mag je geen lege haakjes meer gebruiken.</p>
 
-        <pre><code class="language-csharp">// FOUT: Dit mag niet meer! De class eist nu een naam.
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// FOUT: De class eist nu een naam.
 // DigitalPet pet = new DigitalPet();
 
-// GOED: We geven de verplichte naam mee bij de geboorte.
-DigitalPet myPet = new DigitalPet("Blafmans");</code></pre>
+// GOED: We geven de naam mee bij de start.
+DigitalPet dino = new DigitalPet("Rex");
+
+Console.WriteLine(dino.Name);   // Output: Rex
+Console.WriteLine(dino.Energy); // Output: 50 (Automatisch ingesteld)</code></pre>
 
         <div class="info-box">
             <h3>Tip: 'ctor' Snippet</h3>
-            <p>In Visual Studio hoef je de constructor niet helemaal zelf te typen. Typ simpelweg <code>ctor</code> en druk twee keer op de <strong>TAB</strong>-toets. Visual Studio genereert dan automatisch de constructor code voor je class.</p>
+            <p>In Visual Studio hoef je dit niet helemaal zelf te typen. Typ simpelweg <code>ctor</code> en druk twee keer op de <strong>TAB</strong>-toets. Visual Studio genereert dan automatisch de constructor code.</p>
         </div>
 
     </main>

@@ -20,12 +20,12 @@
     <main class="main-content">
         <h1>Constructors: De Geboorte</h1>
 
-        <p>Tot nu toe maakten we een object aan in twee stappen:</p>
-        <ol>
-            <li>Eerst het object maken met <code>new DigitalPet()</code>.</li>
-            <li>Daarna pas de naam en energie instellen.</li>
-        </ol>
-        <p>Maar dit is eigenlijk gevaarlijk. Wat als je stap 2 vergeet? Dan heb je een huisdier zonder naam. Dat mag in een game niet gebeuren. We willen afdwingen dat een huisdier <strong>altijd</strong> een naam krijgt op het moment dat hij gemaakt wordt.</p>
+        <p>Tot nu toe maakten we een object aan in twee losse stappen:</p>
+        <pre><code class="language-csharp">// De oude manier (niet veilig)
+DigitalPet dino = new DigitalPet(); // Stap 1: Maken (Naam is nog leeg!)
+dino.Name = "Rex";                  // Stap 2: Naam geven</code></pre>
+
+        <p>Dit is gevaarlijk. Wat als je stap 2 vergeet? Dan heb je een naamloos huisdier. Dat mag in een game niet gebeuren. We willen afdwingen dat een huisdier <strong>altijd</strong> een naam krijgt op het moment dat hij gemaakt wordt.</p>
         <p>Hiervoor gebruiken we de <strong>Constructor</strong>.</p>
 
         <h3>Wat is een Constructor?</h3>
@@ -44,35 +44,49 @@
             <li>Er is <strong>geen return type</strong> (ook geen <code>void</code>).</li>
         </ol>
 
-        <pre><code class="language-csharp">class DigitalPet
+        <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
+class DigitalPet
 {
     public string Name { get; set; }
     public int Energy { get; set; }
 
-    // Dit is de Constructor
+    // --- DE CONSTRUCTOR ---
     // Hij heet 'DigitalPet', net als de class.
+    // We eisen een string 'name' als parameter.
     public DigitalPet(string name)
     {
-        // We gebruiken de parameter 'name' om de property te vullen
+        // 1. We slaan de verplichte naam op
         this.Name = name;
 
-        // We geven elk dier standaard 50 energie bij de start
+        // 2. We geven elk dier standaard 50 energie bij de start
+        // (Zo vergeten we nooit de energie in te stellen!)
         this.Energy = 50;
     }
 }</code></pre>
 
         <h3>Het Gebruik (Program.cs)</h3>
-        <p>Nu we in de class hebben gezegd dat de constructor een <code>string name</code> verwacht, is onze oude manier van aanmaken kapot. C# dwingt je nu om die naam mee te geven.</p>
+        <p>Nu we in de class hebben gezegd dat de constructor een parameter (<code>string name</code>) verwacht, is onze oude manier van aanmaken kapot. C# dwingt je nu om die naam mee te geven.</p>
 
-        <pre><code class="language-csharp">// FOUT: Dit mag niet meer!
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// FOUT: Dit mag niet meer!
 // DigitalPet pet = new DigitalPet();
-// Error: "There is no argument given that corresponds to the required formal parameter 'name'"
+// Error: "Er is geen argument gegeven voor de parameter 'name'"
 
-// GOED: We moeten de naam nu tussen de haakjes zetten
-DigitalPet myPet = new DigitalPet("Blafmans");
+// GOED: We moeten de naam nu direct tussen de haakjes zetten
+DigitalPet dino = new DigitalPet("Rex");
+DigitalPet fluffy = new DigitalPet("Fluffy");
 
-Console.WriteLine(myPet.Name);   // Output: Blafmans
-Console.WriteLine(myPet.Energy); // Output: 50 (Dit heeft de constructor gedaan)</code></pre>
+// Laten we kijken of het werkt
+Console.WriteLine(dino.Name);
+// Output: Rex
+Console.WriteLine(dino.Energy);
+// Output: 50 (Dit heeft de constructor automatisch gedaan)
+
+Console.WriteLine(fluffy.Name);
+// Output: Fluffy
+Console.WriteLine(fluffy.Energy);
+// Output: 50</code></pre>
 
         <div class="info-box">
             <h3>De 'Default' Constructor</h3>
@@ -85,7 +99,7 @@ Console.WriteLine(myPet.Energy); // Output: 50 (Dit heeft de constructor gedaan)
         <div class="info-box warning">
             <h3>⚠️ Het woordje 'void'</h3>
             <p>Veel studenten typen uit gewoonte <code>public void DigitalPet()</code>. <br>
-                <strong>Pas op:</strong> Als je er <code>void</code> voor zet, is het geen constructor meer, maar een gewone methode! Hij wordt dan niet uitgevoerd bij <code>new</code>.</p>
+                <strong>Pas op:</strong> Als je er <code>void</code> voor zet, is het geen constructor meer, maar een gewone methode! Hij wordt dan niet uitgevoerd bij het opstarten.</p>
         </div>
 
         <div class="info-box warning">
@@ -96,8 +110,8 @@ Console.WriteLine(myPet.Energy); // Output: 50 (Dit heeft de constructor gedaan)
         <h3>Samenvatting</h3>
         <ul>
             <li>De <strong>Constructor</strong> wordt aangeroepen op het moment dat je <code>new</code> gebruikt.</li>
-            <li>Gebruik het om data <strong>verplicht</strong> te stellen (zoals een naam) of standaardwaarden in te vullen (zoals start-energie).</li>
-            <li>Hij heeft <strong>geen return type</strong> en heet hetzelfde als de Class.</li>
+            <li>Gebruik het om data <strong>verplicht</strong> te stellen (zoals een naam) en startwaarden in te vullen (zoals 50 energie).</li>
+            <li>Hij heeft <strong>geen return type</strong> en heet exact hetzelfde als de Class.</li>
         </ul>
 
     </main>
