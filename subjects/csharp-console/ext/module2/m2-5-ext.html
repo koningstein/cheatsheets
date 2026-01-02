@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breakpoints - C# Module 2</title>
+    <title>Breakpoints (Ext) - C# Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -20,11 +20,11 @@
     <main class="main-content">
         <h1>Breakpoints: De Tijd Stilzetten</h1>
 
-        <p>Je hebt je code geschreven, je drukt op Start... en er gebeurt iets wat je niet verwacht. Misschien crasht het programma, of misschien blijft de energie van je huisdier op 0 staan. Wat nu?</p>
-        <p>De professionele manier om fouten te vinden heet <strong>Debuggen</strong>.</p>
+        <p>Je hebt nu code die over meerdere bestanden verspreid staat (<code>Program.cs</code> en <code>DigitalPet.cs</code>). Als er iets fout gaat, is het moeilijk te zien <em>waar</em> het misgaat. In welk bestand zit de fout?</p>
+        <p>De professionele manier om dit te onderzoeken heet <strong>Debuggen</strong>.</p>
 
         <h3>Wat is Debuggen?</h3>
-        <p>Debuggen betekent dat je de uitvoering van je programma op een specifiek moment <strong>pauzeert</strong>. Terwijl het programma bevroren is, kun jij rustig rondkijken wat de computer aan het doen is.</p>
+        <p>Debuggen betekent dat je de uitvoering van je programma op een specifiek moment <strong>pauzeert</strong>. Terwijl het programma bevroren is, kun jij als een detective rondkijken wat de computer aan het doen is.</p>
 
         <div class="info-box">
             <h3>De Vergelijking: Een Film Pauzeren</h3>
@@ -35,70 +35,64 @@
             </ul>
         </div>
 
-        <h3>1. De Breakpoint (Het Stopbord)</h3>
-        <p>Om te debuggen, moet je eerst aangeven <em>waar</em> de computer moet stoppen. Dit doe je met een Breakpoint.</p>
-        <p>Klik in Visual Studio helemaal links in de grijze rand naast een regel code (of zet je cursor op de regel en druk op <strong>F9</strong>). Er verschijnt een <strong>Rode Bol</strong>. </p>
+        <h3>Stap 1: Voorbereiding</h3>
+        <p>We voegen een methode toe die iets <strong>teruggeeft</strong> (return). Zo kunnen we zien hoe data heen en weer reist tussen bestanden.</p>
 
-        <p>Laten we dit testen met onze Digital Pet.</p>
+        <h4>A. Pas DigitalPet.cs aan</h4>
+        <p>Zet deze methode in je class <code>DigitalPet</code>. Let op: het is een <code>string</code>, geen void!</p>
+        <pre><code class="language-csharp">// IN BESTAND: Tamagotchi/Models/DigitalPet.cs
 
-        <h4>Stap A: De Code (DigitalPet.cs)</h4>
-        <pre><code class="language-csharp">namespace MyGame.Models;
-
-public class DigitalPet
+public string Sleep()
 {
-    public int Energy { get; set; }
+    this.IsSleeping = true;
+    this.Energy += 20;
 
-    public DigitalPet()
-    {
-        // Zoals geleerd in Module 1: Startwaarden in de constructor!
-        this.Energy = 100;
-    }
-
-    public void Walk()
-    {
-        // Zet hier straks een breakpoint! (F9)
-        this.Energy = this.Energy - 10;
-        Console.WriteLine("We hebben gewandeld.");
-    }
+    // We printen NIET hier, maar sturen de tekst terug
+    return "Zzz... Dat deed deugd! (+20 Energie)";
 }</code></pre>
 
-        <h4>Stap B: Het Programma (Program.cs)</h4>
-        <pre><code class="language-csharp">using MyGame.Models;
+        <h4>B. Pas Program.cs aan</h4>
+        <p>Voeg onderaan <code>Program.cs</code> de code toe die de methode aanroept en het antwoord opvangt.</p>
+        <pre><code class="language-csharp">// IN BESTAND: Program.cs
 
-DigitalPet dino = new DigitalPet();
+// ... (Je bestaande code) ...
 
-Console.WriteLine("Start het spel...");
+Console.WriteLine("Het wordt laat...");
 
-// Roep de methode aan
-dino.Walk();
+// Zet HIER STRAKS je Breakpoint (op de regel hieronder)
+Console.WriteLine(dino.Sleep());
+Console.ReadLine();</code></pre>
 
-Console.WriteLine("Einde spel.");</code></pre>
+        <h3>Stap 2: De Breakpoint (Het Stopbord)</h3>
+        <p>Om te debuggen, moet je aangeven <em>waar</em> de computer moet stoppen.</p>
+        <ol>
+            <li>Ga naar <code>Program.cs</code>.</li>
+            <li>Zoek de regel: <code>string resultaat = dino.Sleep();</code>.</li>
+            <li>Klik helemaal links in de grijze rand naast deze regel (of druk op <strong>F9</strong>).</li>
+            <li>Er verschijnt een <strong>Rode Bol</strong>.</li>
+        </ol>
 
-        <h3>2. Het programma bevriezen</h3>
-        <p>Zet een breakpoint op de regel <code>dino.Walk();</code> in Program.cs. Druk nu op <strong>F5</strong> (Start Debugging).</p>
-        <p>Het programma start, maar stopt plotseling. De regel met de rode bol wordt <strong>Geel</strong>. </p>
-        <p>Dit betekent: <em>"Ik sta op het punt om deze regel uit te voeren, maar ik wacht op jou."</em></p>
 
-        <h3>3. Navigeren (Stepping)</h3>
-        <p>Nu heb jij de controle. Bovenin Visual Studio zie je een werkbalk met pijltjes. De belangrijkste toetsen zijn F10 en F11. Het verschil is cruciaal.</p>
+        <h3>Stap 3: Step Into (F11) - De Sprong</h3>
+        <p>Start de debugger met <strong>F5</strong>. De code stopt en de regel wordt geel.</p>
 
-        <h4>Step Over (F10)</h4>
-        <p>Betekenis: <em>"Voer deze regel uit en ga naar de volgende regel in DIT bestand."</em></p>
-        <ul>
-            <li>Als je op <code>dino.Walk()</code> staat en je drukt F10...</li>
-            <li>Dan voert hij de hele wandeling in één keer uit.</li>
-            <li>De gele balk springt direct naar <code>Console.WriteLine("Einde spel.");</code>.</li>
-        </ul>
-        <p>Gebruik dit als je zeker weet dat de functie <code>Walk</code> goed werkt en je er niet in hoeft te kijken.</p>
+        <p>We staan nu in <code>Program.cs</code>, maar de actie gebeurt in <code>DigitalPet.cs</code>.
+            <br>Als we op F10 drukken, missen we de actie. Wij willen erin duiken!</p>
 
-        <h4>Step Into (F11)</h4>
-        <p>Betekenis: <em>"Als deze regel een methode aanroept, duik er dan IN."</em></p>
-        <ul>
-            <li>Als je op <code>dino.Walk()</code> staat en je drukt F11...</li>
-            <li>Dan springt de gele balk <strong>naar het bestand DigitalPet.cs</strong>.</li>
-            <li>Je ziet nu regel voor regel hoe de energie eraf gaat.</li>
-        </ul>
-        <p>Gebruik dit als je wilt controleren of je methode wel goed werkt.</p>
+        <p><strong>Druk op F11 (Step Into).</strong></p>
+        <p>Visual Studio springt nu <strong>IN</strong> de methode. Je scherm wisselt automatisch naar <code>DigitalPet.cs</code>.</p>
+
+        <h3>Stap 4: Variabelen Inspecteren</h3>
+        <p>Nu je in de methode staat, kun je kijken wat er gebeurt.</p>
+        <ol>
+            <li>Druk een paar keer op <strong>F10</strong> (Step Over) om door de regels te lopen.</li>
+            <li>Stop vlak voor de <code>return</code>.</li>
+            <li>Beweeg je muis over <code>this.Energy</code>. Je ziet de waarde live veranderen (bijv. van 50 naar 70).</li>
+        </ol>
+
+        <h3>Stap 5: Terug naar de start</h3>
+        <p>Druk nog een keer op <strong>F10</strong> bij de return-regel.</p>
+        <p>Je springt nu automatisch weer terug naar <code>Program.cs</code>! De variabele <code>resultaat</code> is nu gevuld met de tekst die uit de andere class kwam. Beweeg je muis er maar eens overheen.</p>
 
         <table class="summary-table">
             <tr>
@@ -109,38 +103,25 @@ Console.WriteLine("Einde spel.");</code></pre>
             <tr>
                 <td><strong>F5</strong></td>
                 <td>Continue</td>
-                <td>Haal de pauze eraf en ren door tot het volgende breakpoint (of het einde).</td>
+                <td>Haal de pauze eraf en ren door tot het volgende breakpoint.</td>
             </tr>
             <tr>
                 <td><strong>F10</strong></td>
                 <td>Step Over</td>
-                <td>Doe de regel en ga naar de volgende (blijf in huidig bestand).</td>
+                <td>Volgende regel (blijf in dit bestand).</td>
             </tr>
             <tr>
                 <td><strong>F11</strong></td>
                 <td>Step Into</td>
-                <td>Spring <strong>in</strong> de methode om details te zien.</td>
-            </tr>
-            <tr>
-                <td><strong>Shift+F11</strong></td>
-                <td>Step Out</td>
-                <td>Ik heb genoeg gezien, maak deze methode snel af en ga terug.</td>
+                <td>Spring <strong>in</strong> de methode (wissel van bestand).</td>
             </tr>
         </table>
 
-        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
-
-        <div class="info-box warning">
-            <h3>⚠️ De gele regel is nog NIET uitgevoerd</h3>
-            <p>Dit is de grootste verwarring. Als de regel <code>Energy = Energy - 10;</code> geel is, is de energie <strong>nog niet</strong> verlaagd. De computer staat klaar om het te doen. Pas als je op F10 drukt en de gele balk <em>voorbij</em> die regel is, is het gebeurd.</p>
-        </div>
-
         <h3>Samenvatting</h3>
         <ul>
-            <li><strong>Breakpoint (F9):</strong> Hier moet het programma pauzeren.</li>
-            <li><strong>Gele regel:</strong> Dit is de regel die <em>zo meteen</em> uitgevoerd gaat worden.</li>
-            <li><strong>F10 (Over):</strong> Volgende regel in dit bestand.</li>
-            <li><strong>F11 (Into):</strong> Spring in de methode om details te zien.</li>
+            <li>Gebruik <strong>F9</strong> om een stoppunt te maken.</li>
+            <li>Gebruik <strong>F11</strong> om te zien hoe een methode van binnen werkt (jump naar andere file).</li>
+            <li>Debuggen laat je zien hoe data heen (parameters) en weer (return) reist.</li>
         </ul>
 
     </main>

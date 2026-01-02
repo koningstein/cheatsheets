@@ -20,90 +20,102 @@
     <main class="main-content">
         <h1>Variables Inspecteren: Onder de motorkap</h1>
 
-        <p>In de vorige les hebben we geleerd hoe we de code kunnen pauzeren met een <strong>Breakpoint</strong>. De code staat stil en de regel is geel.</p>
-        <p>Maar... alleen maar stilstaan heeft geen zin. Je wilt weten <em>waarom</em> je code crasht of waarom je huisdier opeens dood is. Je wilt de waardes van je variabelen zien op dat specifieke moment.</p>
+        <p>In de vorige les heb je geleerd hoe je de code pauzeert met een <strong>Breakpoint</strong>. Maar... alleen maar stilstaan heeft geen zin. Je wilt weten <em>waarom</em> je huisdier doet wat hij doet.</p>
+        <p>Je wilt onder de motorkap kijken: Hoeveel honger heeft Dino precies? Is Fluffy al aangemaakt? Wat is de waarde van de appel?</p>
 
         <div class="info-box">
             <h3>De Vergelijking: De Monteur</h3>
             <p>Stel je voor dat je auto een raar geluid maakt. Je zet de auto stil langs de kant van de weg (Breakpoint).</p>
-            <p>Nu ga je niet willekeurig onderdelen vervangen. Nee, je doet de motorkap open en kijkt naar de meters: Hoe heet is de motor? Hoeveel olie zit erin? Zit er een kabel los?</p>
+            <p>Nu ga je niet willekeurig onderdelen vervangen. Nee, je doet de motorkap open en kijkt naar de meters: Hoe heet is de motor? Hoeveel olie zit erin?</p>
             <p>Het inspecteren van variabelen is precies dat: kijken naar de meters van je programma.</p>
         </div>
+
+        <h3>Voorbereiding</h3>
+        <p>Zorg dat je een breakpoint hebt staan in <code>Program.cs</code>, bijvoorbeeld op de regel:</p>
+        <pre><code class="language-csharp">Console.WriteLine(dino.Sleep());</code></pre>
+        <p>Start het programma met <strong>F5</strong> en wacht tot het geel wordt.</p>
 
         <h3>Methode 1: Hoveren (Snel kijken)</h3>
         <p>De snelste manier om een waarde te checken is met je muis.</p>
         <ol>
-            <li>Zorg dat het programma gepauzeerd is (gele regel).</li>
-            <li>Beweeg je muis over een variabele naam, bijvoorbeeld <code>energy</code>.</li>
-            <li>Er verschijnt direct een klein pop-up venster met de waarde: <code>50</code>.</li>
+            <li>Beweeg je muis over het woordje <code>dino</code> in je code.</li>
+            <li>Er verschijnt een pop-up. Waarschijnlijk zie je alleen <code>{Tamagotchi.Models.DigitalPet}</code>.</li>
+            <li><strong>Klik op het pijltje (>)</strong> in de pop-up.</li>
         </ol>
-
-        <p>Als je over een object (zoals <code>dino</code>) hovert, zie je een klein pijltje. Als je daarop klikt, klapt het object open en zie je alle properties (Name, Energy, Hunger) in één keer.</p>
-
+        <p>Nu klapt het object open en zie je live de inhoud:</p>
+        <ul>
+            <li><code>Name: "Rex"</code></li>
+            <li><code>Energy: 50</code> (of 70 als hij al geslapen heeft)</li>
+            <li><code>IsSleeping: true</code></li>
+        </ul>
 
         <h3>Methode 2: Het 'Locals' Venster</h3>
-        <p>Onderaan in Visual Studio zie je tijdens het debuggen het tabblad <strong>Locals</strong>. Dit is je dashboard.</p>
-        <p>Hier toont C# automatisch <strong>alle</strong> variabelen die op dit moment bekend zijn in de methode waar je bent. Je hoeft dus niet te zoeken.</p>
+        <p>Onderaan in Visual Studio zie je het tabblad <strong>Locals</strong>. Dit is je dashboard. Hier zie je <strong>alles</strong> wat op dit moment bestaat.</p>
+
+        <p>Als je iets verder in je code pauzeert (bijvoorbeeld bij de regel over de Appel), zie je hier al je objecten onder elkaar:</p>
 
         <pre>
 Naam        Waarde           Type
 ------------------------------------------
 dino        {DigitalPet}     DigitalPet
-  > Name    "Dino"           string
-  > Energy  50               int
-i           0                int
+  > Name    "Rex"            string
+  > Energy  70               int
+fluffy      {DigitalPet}     DigitalPet
+  > Name    "Fluffy"         string
+apple       {Food}           Food
+  > Name    "Appel"          string
         </pre>
 
         <h3>Methode 3: Het 'Watch' Venster (De Monitor)</h3>
-        <p>Soms is <em>Locals</em> te druk. Je wilt alleen één specifiek ding in de gaten houden, bijvoorbeeld of de energie onder de 10 komt.</p>
-        <p>Hiervoor gebruik je de <strong>Watch</strong>. Hier kun je zelf dingen typen.</p>
+        <p>Soms is <em>Locals</em> te druk. Je wilt alleen één specifiek ding in de gaten houden. Bijvoorbeeld: <em>"Heeft Dino genoeg energie om te winnen?"</em></p>
+        <p>Hiervoor gebruik je de <strong>Watch</strong>. Hier kun je zelf vragen stellen aan je code.</p>
 
         <ol>
-            <li>Klik met de rechtermuisknop op een variabele in je code.</li>
+            <li>Klik met de rechtermuisknop op <code>dino</code> in je code.</li>
             <li>Kies <strong>Add to Watch</strong>.</li>
             <li>Onderaan verschijnt het Watch venster.</li>
         </ol>
 
-        <p>Het krachtige is dat je hier ook sommen of vragen kunt typen:</p>
+        <p>Klik in de lege regel onderaan de lijst en typ zelf deze formules in:</p>
         <ul>
-            <li><code>dino.Energy</code> (Toont de waarde: 50)</li>
-            <li><code>dino.Energy - 10</code> (Toont wat het zou zijn: 40)</li>
-            <li><code>dino.Energy < 0</code> (Toont: false)</li>
+            <li>Typ: <code>dino.Energy</code> (Resultaat: 70)</li>
+            <li>Typ: <code>dino.Energy > 90</code> (Resultaat: <code>false</code> -> Hij zit nog niet vol)</li>
+            <li>Typ: <code>dino.Name + " is lief"</code> (Resultaat: "Rex is lief")</li>
         </ul>
-        <p>Terwijl je met <strong>F10</strong> door de code stapt, worden deze waardes live bijgewerkt.</p>
+        <p>Terwijl je met <strong>F10</strong> door de code stapt, worden deze antwoorden live bijgewerkt!</p>
 
         <h3>Speciale Truc: Waardes aanpassen (God Mode)</h3>
-        <p>Dit weten veel beginners niet: Je kunt tijdens het debuggen de waardes <strong>veranderen</strong>!</p>
-        <p>Stel je wilt testen wat er gebeurt als je huisdier doodgaat. Normaal moet je dan 10 minuten spelen tot de energie 0 is. Dat duurt te lang.</p>
+        <p>Dit weten veel beginners niet: Je kunt tijdens het debuggen de waardes <strong>veranderen</strong>! Je kunt dus valsspelen in je eigen programma om dingen te testen.</p>
 
+        <p><strong>Oefening: Verander de naam</strong></p>
         <ol>
-            <li>Pauzeer de code.</li>
-            <li>Ga naar het Locals of Watch venster.</li>
-            <li>Dubbelklik op de waarde van <code>Energy</code> (bijv. 50).</li>
-            <li>Typ <code>0</code> en druk op Enter.</li>
-            <li>Druk op F5 (Continue).</li>
+            <li>Zorg dat de code gepauzeerd is op een regel <em>voordat</em> de <code>GetDescription</code> wordt geprint.</li>
+            <li>Ga naar het <strong>Locals</strong> venster en klap <code>dino</code> open.</li>
+            <li>Dubbelklik op de waarde <code>"Rex"</code>.</li>
+            <li>Verander het in <code>"Godzilla"</code> en druk op Enter.</li>
+            <li>Druk nu op <strong>F5</strong> om het programma verder te laten gaan.</li>
         </ol>
 
-        <p>Je programma gaat nu verder alsof de energie altijd al 0 was. Zo kun je heel snel testen of je 'Game Over' scherm werkt.</p>
+        <p>Kijk in je Console output. Er staat nu: <em>"Ik ben Godzilla..."</em> terwijl je dat nooit geprogrammeerd hebt! Dit is ideaal om snel te testen wat er gebeurt als een waarde heel raar is (bijv. Energy: -1000).</p>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 
         <div class="info-box warning">
-            <h3>⚠️ Ik zie niks als ik hover</h3>
-            <p>Dit gebeurt als het programma <strong>niet gepauzeerd</strong> is. Je kunt alleen variabelen inspecteren als de code 'bevroren' is (dus als je een gele regel ziet). Als het programma gewoon draait, gaat het te snel voor Visual Studio om iets te laten zien.</p>
+            <h3>⚠️ Variabele is 'null'</h3>
+            <p>Zie je bij <code>fluffy</code> de waarde <code>null</code> staan? Dat betekent dat je breakpoint te vroeg staat. De regel <code>new DigitalPet(...)</code> voor Fluffy is nog niet uitgevoerd. Druk een paar keer op <strong>F10</strong>.</p>
         </div>
 
         <div class="info-box warning">
-            <h3>⚠️ Variabele bestaat (nog) niet</h3>
-            <p>Stel je staat met de gele balk op regel 10, maar je probeert een variabele te bekijken die pas op regel 20 wordt aangemaakt. Dat kan niet. De variabele bestaat op dat moment nog niet in het geheugen.</p>
+            <h3>⚠️ Ik zie niks als ik hover</h3>
+            <p>Je kunt alleen variabelen inspecteren als de code <strong>geel</strong> (gepauzeerd) is. Als het programma gewoon draait, gaat het te snel voor Visual Studio om iets te laten zien.</p>
         </div>
 
         <h3>Samenvatting</h3>
         <ul>
-            <li>Gebruik <strong>Hover</strong> (muis) voor een snelle check.</li>
-            <li>Gebruik <strong>Locals</strong> om alles te zien wat nu in het geheugen zit.</li>
-            <li>Gebruik <strong>Watch</strong> om specifieke berekeningen in de gaten te houden.</li>
-            <li>Je kunt waardes <strong>aanpassen</strong> tijdens het debuggen om snel scenario's te testen.</li>
+            <li>Gebruik <strong>Hover</strong> (muis) om snel in een object te kijken.</li>
+            <li>Gebruik <strong>Locals</strong> om al je variabelen (Dino, Fluffy, Apple) tegelijk te zien.</li>
+            <li>Gebruik <strong>Watch</strong> om berekeningen te testen (bijv. <code>Energy > 100</code>).</li>
+            <li>Je kunt waardes <strong>aanpassen</strong> tijdens het debuggen ("God Mode") om scenario's te testen.</li>
         </ul>
 
     </main>

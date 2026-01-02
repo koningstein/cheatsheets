@@ -20,48 +20,34 @@
     <main class="main-content">
         <h1>Mappenstructuur</h1>
 
-        <h3>Alles in één map?</h3>
-        <p>In het begin staan al je bestanden (<code>Program.cs</code>, <code>DigitalPet.cs</code>) los in de hoofdmap van je project. Bij 3 bestanden is dat prima, maar bij 50 bestanden wordt het een rommeltje.</p>
+        <h3>Orde houden</h3>
+        <p>Als je veel classes hebt, stop je die niet allemaal in de hoofdmap. Net als op je computer gebruik je <strong>Mappen</strong>. Een standaardnaam voor een map met data-objecten (zoals je Pet en Food) is <code>Models</code>.</p>
 
-        <h3>1. Eén class per bestand</h3>
-        <p>De gouden regel in C# is: <strong>Stop elke class in zijn eigen bestand.</strong></p>
-        <ul>
-            <li>Class: <code>DigitalPet</code> -> Bestand: <code>DigitalPet.cs</code></li>
-            <li>Class: <code>GameManager</code> -> Bestand: <code>GameManager.cs</code></li>
-        </ul>
-        <p>Zet nooit meerdere classes in één bestand, tenzij ze heel klein zijn en puur bij elkaar horen.</p>
+        <h3>1. Map aanmaken</h3>
+        <p>Klik rechts op je Project -> <strong>Add</strong> -> <strong>New Folder</strong>. Noem deze <code>Models</code>. Sleep je classes hierin (of maak nieuwe aan).</p>
 
-        <h3>2. Mappen gebruiken (Models)</h3>
-        <p>Een veelgebruikte conventie is om je data-objecten (de blauwdrukken zoals <code>DigitalPet</code>, <code>Food</code>, <code>Player</code>) in een map genaamd <strong>Models</strong> te zetten.</p>
+        <h3>2. Namespace aanpassen</h3>
+        <p>De namespace moet altijd de mapstructuur volgen. De namespace was eerst <code>Tamagotchi</code>, maar omdat het bestand nu in een map zit, plak je er <code>.Models</code> achter.</p>
 
-        <pre>
-MyTamagotchiGame/
-│
-├── Program.cs          (Het startpunt)
-├── MyTamagotchiGame.csproj
-│
-└── Models/             (Map)
-    ├── DigitalPet.cs
-    └── FoodItem.cs
-        </pre>
-
-        <h3>Namespaces volgen de map</h3>
-        <p>Als je een bestand in een map zet, verandert vaak ook de namespace. Visual Studio doet dit automatisch voor je.</p>
-
-        <pre><code class="language-csharp">// Bestand: Models/DigitalPet.cs
-namespace MyTamagotchiGame.Models; // De namespace bevat nu ook .Models
+        <pre><code class="language-csharp">// BESTAND: Models/DigitalPet.cs
+namespace Tamagotchi.Models; // <-- Was: namespace Tamagotchi;
 
 public class DigitalPet
 {
     // ...
 }</code></pre>
 
-        <h3>Importeren in Program.cs</h3>
-        <p>Omdat <code>DigitalPet</code> nu in een andere 'kamer' (namespace) woont, moet je in <code>Program.cs</code> aangeven dat je die kamer wilt gebruiken.</p>
+        <h3>3. Using toevoegen</h3>
+        <p>In <code>Program.cs</code> (die buiten de map staat) moet je nu aangeven dat hij in de map moet kijken.</p>
 
-        <pre><code class="language-csharp">using MyTamagotchiGame.Models; // Importeer de map
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+using Tamagotchi.Models; // <-- Één keer importeren is genoeg
 
-DigitalPet dino = new DigitalPet("Dino");</code></pre>
+// Nu kun je ALLE classes uit die map gebruiken
+DigitalPet dino = new DigitalPet("Rex");
+Food appel = new Food("Appel", 10);
+
+Console.WriteLine("We hebben " + dino.Name + " en een " + appel.Name);</code></pre>
 
     </main>
 

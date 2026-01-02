@@ -24,80 +24,72 @@
         <p>Om dit te begrijpen, moeten we kijken naar de <strong>Call Stack</strong> (De Aanroep Stapel). Dit is jouw GPS-systeem tijdens het debuggen.</p>
 
         <h3>Hoe werken methodes onder water?</h3>
-        <p>Programma's zijn eigenlijk een lange ketting van methodes die elkaar aanroepen.
-        <ol>
-            <li>Het programma begint altijd in <code>Main</code>.</li>
-            <li><code>Main</code> roept misschien <code>StartGame</code> aan.</li>
-            <li><code>StartGame</code> roept <code>dino.Eat()</code> aan.</li>
-            <li><code>Eat</code> roept <code>UpdateEnergy()</code> aan.</li>
-        </ol>
-        <p>Zolang <code>UpdateEnergy</code> nog niet klaar is, staan alle methodes daarboven "in de wacht".</p>
+        <p>Programma's zijn eigenlijk een lange ketting van methodes die elkaar aanroepen. Zolang de bovenste methode niet klaar is, staan alle methodes daaronder "in de wacht".</p>
 
         <div class="info-box">
             <h3>De Vergelijking: De Stapel Afwas</h3>
             <p>Stel je voor dat je de afwas doet.</p>
             <ul>
                 <li>Je pakt een groot bord (<strong>Main</strong>) en legt het in het sop.</li>
-                <li>Bovenop dat bord leg je een kleiner bordje (<strong>Eat</strong>).</li>
-                <li>Bovenop dat bordje leg je een kopje (<strong>UpdateEnergy</strong>).</li>
+                <li>Bovenop dat bord leg je een kleiner bordje (<strong>Sleep</strong>).</li>
+                <li>Bovenop dat bordje leg je een kopje (<strong>UpdateStatus</strong>).</li>
             </ul>
-            <p>Je bent nu bezig met het kopje (de bovenste). Het grote bord onderop (Main) ligt er nog wel, maar je kunt er niet bij. Dit is precies hoe de <strong>Call Stack</strong> werkt: De methode waar je NU bent, ligt bovenop.</p>
+            <p>Je bent nu bezig met het kopje (de bovenste). Het grote bord onderop (Main) ligt er nog wel, maar je kunt er niet bij zolang de stapel erop ligt. Dit is precies hoe de <strong>Call Stack</strong> werkt: De methode waar je NU bent, ligt bovenop.</p>
         </div>
 
-        <h3>De Call Stack in Visual Studio</h3>
-        <p>Laten we een situatie in onze Digital Pet simuleren waarbij we diep in de code zitten.</p>
 
-        <h4>Stap 1: De Class (DigitalPet.cs)</h4>
-        <pre><code class="language-csharp">namespace MyGame.Models;
+        <h3>Dieper de code in</h3>
+        <p>Om dit te testen, moeten we zorgen dat onze methodes elkaar gaan aanroepen. We gaan de <code>Sleep</code> methode uitbreiden zodat hij een "hulp-methode" aanroept.</p>
 
-public class DigitalPet
+        <h4>Stap 1: Pas DigitalPet.cs aan</h4>
+        <p>Pas je bestaande `Sleep` methode aan. We roepen een nieuwe methode aan die de honger bijwerkt (want van slapen krijg je honger).</p>
+
+        <pre><code class="language-csharp">// IN BESTAND: DigitalPet.cs
+
+public string Sleep()
 {
-    public int Energy { get; set; }
+    this.IsSleeping = true;
+    this.Energy += 20;
 
-    public DigitalPet(string name)
-    {
-        // Startwaarde via constructor!
-        this.Energy = 50;
-    }
+    // NIEUW: We roepen vanuit hier weer een andere methode aan!
+    UpdateStatus();
 
-    public void Eat()
-    {
-        Console.WriteLine("Nom nom nom...");
-        // De Eat methode roept een andere methode aan:
-        CheckWeight();
-    }
+    return "Zzz... Dat deed deugd! (+20 Energie)";
+}
 
-    public void CheckWeight()
-    {
-        // Zet HIER een Breakpoint (F9)
-        int currentWeight = 10;
-        Console.WriteLine("Gewicht checken...");
-    }
+// Een hulp-methode (zet deze ergens onderaan in je class)
+public void UpdateStatus()
+{
+    // Omdat we slapen, gaat de tijd voorbij en krijgen we honger.
+    // Zet HIER je Breakpoint (F9) op de regel hieronder:
+    this.Hunger += 5;
 }</code></pre>
 
-        <h4>Stap 2: Het Gebruik (Program.cs)</h4>
-        <pre><code class="language-csharp">using MyGame.Models;
+        <h4>Stap 2: Starten maar</h4>
+        <p>In <code>Program.cs</code> hoef je niks te veranderen. Die roept namelijk `dino.Sleep()` al aan.</p>
+        <ol>
+            <li>Zorg dat het <strong>Breakpoint</strong> (rode bol) in de nieuwe methode <code>UpdateStatus</code> staat (op de regel <code>this.Hunger += 5;</code>).</li>
+            <li>Druk op <strong>F5</strong>.</li>
+        </ol>
 
-// Dit is de 'Main' methode (het startpunt)
-DigitalPet dino = new DigitalPet("Rex");
-
-Console.WriteLine("Start!");
-dino.Eat(); // Hier roepen we Eat aan
-Console.WriteLine("Klaar!");</code></pre>
-
-        <h3>Kijken in het verleden</h3>
-        <p>Als je de code start (F5), stopt hij bij het breakpoint in <code>CheckWeight</code>.</p>
-        <p>Kijk nu rechtsonder in Visual Studio naar het tabblad <strong>Call Stack</strong>. Je ziet daar een lijstje, van boven naar beneden:</p>
-
+        <h3>De Call Stack Bekijken</h3>
+        <p>Het programma stopt nu in `UpdateStatus`. Kijk rechtsonder in Visual Studio naar het tabblad <strong>Call Stack</strong>.</p>
+        <p>Je ziet nu precies de stapel methodes die "open" staan:</p>
 
         <pre>
-1. CheckWeight   (Hier ben je nu - Bovenop de stapel)
-2. Eat           (Deze methode wacht op CheckWeight)
-3. Main          (Deze methode wacht op Eat)
+1. UpdateStatus  (Hier ben je nu - Bovenop de stapel)
+2. Sleep         (Deze methode wacht tot UpdateStatus klaar is)
+3. Main          (Deze methode wacht tot Sleep klaar is)
         </pre>
 
         <h3>Tijdreizen</h3>
-        <p>Het mooie is: je kunt op de regels in de Call Stack <strong>dubbelklikken</strong>. Visual Studio springt dan terug naar de plek waar die methode werd aangeroepen. Zo kun je zien welke waardes er op dat moment waren.</p>
+        <p>Het mooie is: je kunt op de regels in de Call Stack <strong>dubbelklikken</strong>.</p>
+        <ol>
+            <li>Dubbelklik op <code>Main</code> (de onderste in de lijst).</li>
+            <li>Visual Studio springt direct naar <code>Program.cs</code>.</li>
+            <li>Je ziet een <strong>Groene Pijl</strong>. Die geeft aan: <em>"Hier was ik gebleven voordat ik Sleep aanriep."</em></li>
+        </ol>
+        <p>Dit is superhandig om te achterhalen <em>waarom</em> een methode werd aangeroepen met bepaalde data.</p>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 
@@ -107,18 +99,19 @@ Console.WriteLine("Klaar!");</code></pre>
         </div>
 
         <p>Probeer deze fout maar eens te maken (doe dit niet in een serieus project!):</p>
-        <pre><code class="language-csharp">public void Eat()
+        <pre><code class="language-csharp">public string Sleep()
 {
-    // De methode roept ZICHZELF aan
-    Eat();
+    // Oeps! Sleep roept ZICHZELF aan, in plaats van UpdateStatus
+    // Dit blijft doorgaan tot je computer crasht.
+    return Sleep();
 }</code></pre>
-        <p>Als je dit start, crasht je programma direct met een <strong>System.StackOverflowException</strong>.</p>
+        <p>Als je dit start, crasht je programma direct met een <strong>System.StackOverflowException</strong>. De stapel borden is omgevallen.</p>
 
         <h3>Samenvatting</h3>
         <ul>
             <li>De <strong>Call Stack</strong> laat zien welke route je programma heeft afgelegd.</li>
             <li>De huidige methode staat <strong>bovenop</strong> de stapel.</li>
-            <li>Als methodes elkaar oneindig blijven aanroepen, krijg je een <strong>Stack Overflow</strong> crash.</li>
+            <li>Je kunt <strong>dubbelklikken</strong> in de lijst om terug te kijken in vorige methodes.</li>
         </ul>
 
     </main>

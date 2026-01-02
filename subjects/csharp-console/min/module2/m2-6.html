@@ -20,35 +20,64 @@
     <main class="main-content">
         <h1>Variables Inspecteren</h1>
 
-        <h3>De staat van je programma</h3>
-        <p>Het nut van pauzeren (break) is dat je kunt zien wat de waardes van je variabelen zijn op <em>dat exacte moment</em>. Waarom is <code>Energy</code> opeens 0? Waarom is <code>Name</code> null?</p>
+        <h3>Onder de motorkap kijken</h3>
+        <p>Als je programma gepauzeerd is (gele regel), kun je precies zien wat de waardes van je variabelen zijn. Er zijn drie manieren om dit te doen.</p>
 
-        <h3>1. Hoveren</h3>
-        <p>De simpelste manier: beweeg je muis over een variabele terwijl de code gepauzeerd is. Er verschijnt een pop-up met de huidige waarde. Je kunt zelfs objecten uitklappen om hun properties te zien.</p>
 
-        <h3>2. Locals Window</h3>
-        <p>Onderaan in Visual Studio (tijdens debuggen) zie je het tabblad <strong>Locals</strong>. Hier zie je automatisch alle variabelen die in de huidige methode bekend zijn.</p>
-        <pre>
-Name        Value           Type
-------------------------------------------
-myPet       {DigitalPet}    DigitalPet
-  > Name    "Dino"          string
-  > Energy  50              int
-i           0               int
-        </pre>
-
-        <h3>3. Watch Window</h3>
-        <p>Soms wil je een specifieke variabele in de gaten houden die niet lokaal is, of wil je een berekening zien. In het <strong>Watch</strong> venster kun je zelf expressies typen.</p>
+        <h3>1. Hoveren (Snel)</h3>
+        <p>Beweeg je muis over een variabele (bijv. <code>dino</code>). Er verschijnt een pop-up met de huidige waarde.</p>
         <ul>
-            <li>Klik in een lege regel in Watch.</li>
-            <li>Typ bijvoorbeeld: <code>myPet.Energy < 10</code></li>
-            <li>Druk op Enter. Je ziet nu live of dit <code>true</code> of <code>false</code> is terwijl je door de code stapt (F10).</li>
+            <li>Klik op het pijltje (<strong>></strong>) om een object open te klappen en de properties (Energy, Name) te zien.</li>
+        </ul>
+
+        <h3>2. Locals Venster (Overzicht)</h3>
+        <p>Onderaan in Visual Studio staat het tabblad <strong>Locals</strong>. Hier zie je automatisch een lijst van <strong>alles</strong> wat op dit moment bestaat (Dino, Fluffy, Apple, etc.).</p>
+
+        <h3>3. Watch Venster (Custom)</h3>
+        <p>Hier kun je zelf vragen stellen of berekeningen maken. Rechtsklik op een variabele -> <strong>Add to Watch</strong>.</p>
+        <ul>
+            <li><code>dino.Energy</code> (Wat is de waarde?)</li>
+            <li><code>dino.Energy < 0</code> (Is hij dood? Antwoord: false)</li>
         </ul>
 
         <div class="info-box">
-            <h3>Waardes aanpassen</h3>
-            <p><strong>Pro Tip:</strong> Je kunt in het Locals of Watch venster ook waardes <em>aanpassen</em>! Dubbelklik op een waarde (bijv. 50) en maak er 100 van. Je programma gaat nu verder met die nieuwe waarde. Ideaal om edge-cases te testen zonder je code te herschrijven.</p>
+            <h3>Hack: God Mode (Waardes aanpassen)</h3>
+            <p>Je kunt tijdens het debuggen waardes veranderen om scenario's te testen zonder het spel opnieuw te spelen.</p>
+            <ol>
+                <li>Ga naar het <strong>Locals</strong> venster.</li>
+                <li>Dubbelklik op een waarde (bijv. de naam "Rex").</li>
+                <li>Verander het in "Godzilla" en druk op Enter.</li>
+                <li>Druk op <strong>F5</strong>. Je programma gaat nu verder met de nieuwe naam!</li>
+            </ol>
         </div>
+
+        <h3>Cheat Sheet Inspectie</h3>
+        <table class="summary-table">
+            <thead>
+            <tr>
+                <th>Methode</th>
+                <th>Wanneer gebruiken?</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>Muis Hover</strong></td>
+                <td>Voor een snelle check van één variabele.</td>
+            </tr>
+            <tr>
+                <td><strong>Locals</strong></td>
+                <td>Om al je objecten (Dino, Fluffy) tegelijk te zien.</td>
+            </tr>
+            <tr>
+                <td><strong>Watch</strong></td>
+                <td>Om specifieke berekeningen te testen.</td>
+            </tr>
+            <tr>
+                <td><strong>Aanpassen</strong></td>
+                <td>Om te testen wat er gebeurt bij rare waardes (bijv. Energy = -100).</td>
+            </tr>
+            </tbody>
+        </table>
 
     </main>
 

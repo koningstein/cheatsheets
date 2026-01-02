@@ -34,7 +34,7 @@
         <h3>2. Mappen gebruiken (Models)</h3>
         <p>Net zoals je op je computer mappen gebruikt voor 'School', 'Foto's' en 'Games', doen we dat ook in onze code.</p>
 
-        <p>Een standaard afspraak in C# is dat we "blauwdrukken" van data (zoals een Huisdier, een Speler, of een Product) in een map genaamd <strong>Models</strong> stoppen.</p>
+        <p>Een standaard afspraak in C# is dat we "blauwdrukken" van objecten (zoals een Huisdier, een Speler, of Voedsel) in een map genaamd <strong>Models</strong> stoppen. Ook al maken we geen website, deze naamgeving is standaard in de hele C# wereld.</p>
 
         <div class="info-box">
             <h3>De Vergelijking: De Kledingkast</h3>
@@ -42,7 +42,7 @@
                 Daarom heb je lades (mappen):</p>
             <ul>
                 <li>Lade <strong>Sokken</strong> (Models)</li>
-                <li>Lade <strong>T-shirts</strong> (Services)</li>
+                <li>Lade <strong>T-shirts</strong> (Services / Logic)</li>
             </ul>
             <p>Het opruimen kost even tijd, maar daarna werkt het veel sneller.</p>
         </div>
@@ -53,40 +53,58 @@
             <li>Kies <strong>Add</strong> -> <strong>New Folder</strong>.</li>
             <li>Noem de map <code>Models</code>.</li>
             <li>Sleep nu je bestand <code>DigitalPet.cs</code> in deze map.</li>
+            <li>Maak ook een nieuw bestand <code>Food.cs</code> aan in deze map.</li>
         </ol>
 
         <pre>
-MijnGame/
+TamagotchiGame/
 │
 ├── Program.cs          (Het startpunt blijft in de hoofdmap)
-├── MijnGame.csproj
+├── TamagotchiGame.csproj
 │
 └── Models/             (De nieuwe map)
     ├── DigitalPet.cs   (Verplaatst)
-    └── Food.cs
+    └── Food.cs         (Nieuw bestand)
         </pre>
 
         <h3>3. Namespace volgt de Map</h3>
         <p>Dit is een belangrijk punt. Als je een bestand verplaatst naar een map, verandert zijn "adres". In C# betekent dit dat de <strong>Namespace</strong> moet veranderen.</p>
-        <p>Als <code>DigitalPet</code> in de map <code>Models</code> staat, moet de namespace ook eindigen op <code>.Models</code>.</p>
+        <p>Als een bestand in de map <code>Models</code> staat, moet de namespace ook eindigen op <code>.Models</code>.</p>
 
-        <h4>Stap A: Pas de Namespace aan (DigitalPet.cs)</h4>
+        <h4>Stap A: Pas de Namespaces aan</h4>
+
+        <p>We passen eerst ons huisdier aan:</p>
         <pre><code class="language-csharp">// BESTAND: Models/DigitalPet.cs
 
-// OUD: namespace MijnGame;
+// OUD: namespace Tamagotchi;
 // NIEUW (want hij zit in de map Models):
-namespace MijnGame.Models;
+namespace Tamagotchi.Models;
 
 public class DigitalPet
 {
     public string Name { get; set; }
-    public int Energy { get; set; }
 
-    // Onze constructor uit Module 1
     public DigitalPet(string name)
     {
         this.Name = name;
-        this.Energy = 50;
+    }
+}</code></pre>
+
+        <p>En we vullen meteen het nieuwe bestand <code>Food.cs</code> in. Let op de namespace!</p>
+        <pre><code class="language-csharp">// BESTAND: Models/Food.cs
+
+// Ook deze zit in dezelfde map, dus krijgt hij dezelfde namespace!
+namespace Tamagotchi.Models;
+
+public class Food
+{
+    public string Name { get; set; }
+    public int EnergyGain { get; set; }
+
+    public Food(string name, int energyGain)
+    {
+        this.Name = name;
+        this.EnergyGain = energyGain;
     }
 }</code></pre>
 
@@ -96,41 +114,49 @@ public class DigitalPet
         </div>
 
         <h4>Stap B: Gebruik de Using (Program.cs)</h4>
-        <p>Nu staat <code>DigitalPet</code> opgesloten in de map (namespace) <code>Models</code>. Maar <code>Program.cs</code> staat nog buiten die map. Hij kan <code>DigitalPet</code> niet meer vinden.</p>
+        <p>Nu staan <code>DigitalPet</code> en <code>Food</code> opgesloten in de map (namespace) <code>Models</code>. Maar <code>Program.cs</code> staat nog buiten die map.</p>
 
-        <p>Je moet nu bovenaan <code>Program.cs</code> vertellen dat hij ook in de map <code>Models</code> moet kijken.</p>
+        <p>Het mooie is: we hoeven maar <strong>één keer</strong> de map te importeren om <strong>alle</strong> bestanden in die map te kunnen gebruiken.</p>
 
         <pre><code class="language-csharp">// BESTAND: Program.cs
-using System;
 
-// BELANGRIJK: Importeer de map waar je class in zit
-using MijnGame.Models;
+// BELANGRIJK: Importeer de map 'Models'.
+// Hierdoor krijgen we toegang tot DigitalPet ÉN Food.
+using Tamagotchi.Models;
 
-// Nu snapt hij weer wat 'DigitalPet' is
-// We gebruiken netjes de constructor die we gemaakt hebben
+// 1. Maak het huisdier (Komt uit Models)
 DigitalPet dino = new DigitalPet("Dino");
 
-Console.WriteLine("Het beestje is aangemaakt!");</code></pre>
+// 2. Maak voedsel (Komt OOK uit Models)
+// Doordat we de map geïmporteerd hebben, kent hij 'Food' nu ook.
+Food apple = new Food("Appel", 10);
+
+Console.WriteLine("We hebben een dier: " + dino.Name);
+Console.WriteLine("En we hebben eten: " + apple.Name);
+
+// Output:
+// We hebben een dier: Dino
+// En we hebben eten: Appel</code></pre>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 
         <div class="info-box warning">
             <h3>⚠️ Namespace vergeten aan te passen</h3>
-            <p>Je hebt het bestand wel verplaatst naar de map <code>Models</code>, maar in de code staat nog steeds <code>namespace MijnGame;</code>.</p>
+            <p>Je hebt het bestand wel verplaatst naar de map <code>Models</code>, maar in de code staat nog steeds <code>namespace Tamagotchi;</code>.</p>
             <p>Dit is verwarrend voor andere programmeurs (en voor jezelf). Zorg dat de namespace <strong>altijd</strong> klopt met de mappenstructuur.</p>
         </div>
 
         <div class="info-box warning">
             <h3>⚠️ Verkeerde Using</h3>
-            <p>Krijg je een rode streep onder <code>DigitalPet</code>? Dan ben je waarschijnlijk <code>using MijnGame.Models;</code> vergeten in <code>Program.cs</code>. Klik op de rode streep en druk op <code>Ctrl + .</code> om het te fixen.</p>
+            <p>Krijg je een rode streep onder <code>Food</code>? Dan ben je waarschijnlijk <code>using Tamagotchi.Models;</code> vergeten in <code>Program.cs</code>.</p>
         </div>
 
         <h3>Samenvatting</h3>
         <ul>
             <li>Houd je project netjes: <strong>1 class per bestand</strong>.</li>
-            <li>Gebruik mappen (zoals <strong>Models</strong>) om je bestanden te groeperen.</li>
-            <li>Als je een map gebruikt, verander dan ook de <strong>Namespace</strong> (bijv. <code>MijnGame.Models</code>).</li>
-            <li>Gebruik <strong>using</strong> om bestanden uit die map te kunnen gebruiken in andere bestanden.</li>
+            <li>Gebruik de map <strong>Models</strong> voor je data-objecten.</li>
+            <li>Als je een map gebruikt, verander dan ook de <strong>Namespace</strong> (bijv. <code>Tamagotchi.Models</code>).</li>
+            <li>Eén <strong>using</strong> regel geeft toegang tot alle bestanden in die map.</li>
         </ul>
 
     </main>

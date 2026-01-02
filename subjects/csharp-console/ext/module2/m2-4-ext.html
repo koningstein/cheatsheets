@@ -20,8 +20,9 @@
     <main class="main-content">
         <h1>NuGet: De App Store voor Code</h1>
 
-        <p>Tot nu toe heb je alle code zelf geschreven. Maar stel je voor dat je iets ingewikkelds moet doen, zoals een PDF maken, een QR-code genereren of communiceren met een database. Moet je dat allemaal zelf programmeren?</p>
+        <p>Tot nu toe heb je alle code zelf geschreven. Maar stel je voor dat je iets ingewikkelds moet doen, zoals een PDF maken, ingewikkelde wiskunde, of... vette graffiti letters in je console zetten. Moet je dat allemaal zelf programmeren?</p>
         <p>Gelukkig niet. Miljoenen programmeurs hebben dit soort problemen al opgelost en delen hun code gratis. In de .NET wereld (C#) heet het systeem om deze code te delen <strong>NuGet</strong>.</p>
+
 
         <div class="info-box">
             <h3>De Vergelijking: LEGO</h3>
@@ -41,75 +42,75 @@
         </ul>
 
         <h3>Hoe installeer je een Package?</h3>
-        <p>In Visual Studio zit een ingebouwde winkel. We gaan als voorbeeld het pakket <strong>Newtonsoft.Json</strong> installeren. Dit is een wereldberoemd pakket om objecten om te zetten naar tekst.</p>
+        <p>In Visual Studio zit een ingebouwde winkel. We gaan als voorbeeld <strong>Figgle</strong> gebruiken voor ASCII-Art. Let goed op, want er zijn meerdere versies!</p>
 
         <ol>
             <li>Ga naar de <strong>Solution Explorer</strong> (rechts).</li>
-            <li>Klik met de <strong>rechtermuisknop</strong> op je Project (bijv. <code>DigitalPetGame</code>).</li>
+            <li>Klik met de <strong>rechtermuisknop</strong> op je Project (bijv. <code>TamagotchiGame</code>).</li>
             <li>Kies in het menu: <strong>Manage NuGet Packages...</strong></li>
             <li>Er opent een nieuw tabblad. Klik bovenaan op <strong>Browse</strong>.</li>
-            <li>Typ in de zoekbalk: <code>Newtonsoft.Json</code>.</li>
-            <li>Klik op het bovenste resultaat en druk rechts op <strong>Install</strong>.</li>
+            <li>Typ in de zoekbalk: <code>Figgle</code>.</li>
+            <li><strong>BELANGRIJK:</strong> Kies het pakket <strong>Figgle.Fonts</strong> (Dus NIET alleen 'Figgle').</li>
+            <li>Klik rechts op <strong>Install</strong>.</li>
         </ol>
 
-        <p>Als er een popup komt over wijzigingen of licenties, klik je gewoon op <strong>OK</strong> of <strong>I Accept</strong>.</p>
+        <p><em>Waarom Figgle.Fonts?</em> Het pakket 'Figgle' is alleen de motor. Het pakket 'Figgle.Fonts' bevat de daadwerkelijke lettertypes (zoals Standard). Als je die installeert, krijg je de motor er gratis bij.</p>
 
         <h3>Het Package gebruiken</h3>
         <p>Nu het pakket in je project zit, kun je de code gebruiken. Vaak moet je wel even de <strong>Namespace</strong> importeren (met <code>using</code>), anders weet C# niet waar de nieuwe code staat.</p>
 
-        <h4>Het Doel: Opslaan als tekst</h4>
-        <p>Stel, we willen ons huisdier opslaan in een tekstbestand. Een object (met haakjes en geheugenadressen) kun je niet zomaar opslaan. We moeten het omzetten naar JSON tekst.</p>
+        <h4>Het Doel: Een vet startscherm</h4>
+        <p>We willen onze game beginnen met een groot logo.</p>
 
-        <h4>Stap 1: Het Model (DigitalPet.cs)</h4>
-        <pre><code class="language-csharp">namespace MyTamagotchiGame.Models;
-
-public class DigitalPet
-{
-    public string Name { get; set; }
-    public int Energy { get; set; }
-
-    public DigitalPet(string name)
-    {
-        this.Name = name;
-        this.Energy = 100;
-    }
-}</code></pre>
-
-        <h4>Stap 2: Het Gebruik (Program.cs)</h4>
-        <p>Hier gebruiken we de magische code van iemand anders.</p>
-
-        <pre><code class="language-csharp">using System;
-using MyTamagotchiGame.Models;
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+using Tamagotchi.Models;
 
 // 1. BELANGRIJK: Importeer de namespace van het pakket
-using Newtonsoft.Json;
+// Hierdoor kunnen we bij de class 'FiggleFonts'
+using Figgle.Fonts;
 
-// Maak een huisdier (met de constructor uit M1)
+// ... (Hieronder je Main code) ...
+
+// Gebruik de code uit het pakket.
+// De class heet 'FiggleFonts'.
+string banner = FiggleFonts.Standard.Render("Dino Game");
+
+Console.WriteLine(banner);
+
 DigitalPet dino = new DigitalPet("Dino");
+Console.WriteLine("Welkom bij " + dino.Name);</code></pre>
 
-// Gebruik de code uit het pakket (JsonConvert)
-// SerializeObject betekent: "Maak van dit object een stuk tekst"
-string jsonText = JsonConvert.SerializeObject(dino);
+        <p><strong>De Output:</strong></p>
+        <pre>
+  ____  _                  ____
+ |  _ \(_)_ __   ___      / ___| __ _ _ __ ___   ___
+ | | | | | '_ \ / _ \    | |  _ / _` | '_ ` _ \ / _ \
+ | |_| | | | | | (_) |   | |_| | (_| | | | | | |  __/
+ |____/|_|_| |_|\___/     \____|\__,_|_| |_| |_|\___|
 
-Console.WriteLine(jsonText);
-// Output: {"Name":"Dino","Energy":100}</code></pre>
+Welkom bij Dino
+        </pre>
 
         <div class="info-box">
             <h3>Waarom is dit handig?</h3>
-            <p>Zonder dit pakket had je zelf een functie moeten schrijven die: <code>"{ \"Name\": \"" + dino.Name + "\" ... "</code> aan elkaar plakt. Dat is moeilijk en foutgevoelig. Nu doet <code>JsonConvert</code> al het zware werk voor je.</p>
+            <p>Zonder dit pakket had je regel voor regel met <code>Console.WriteLine("  ____  _ ...")</code> moeten uittypen. Dat kost uren en als je de tekst wilt veranderen, moet je opnieuw beginnen. Nu doet <code>Figgle</code> al het werk voor je.</p>
         </div>
 
-        <h3>Samenwerken (Dependencies)</h3>
-        <p>Als je jouw project naar een klasgenoot stuurt (via Teams of Git), stuur je meestal <strong>niet</strong> de gedownloade packages mee (die map is veel te groot). Je stuurt alleen jouw eigen code.</p>
-        <p>Dit is geen probleem! Visual Studio ziet in jouw projectbestand (<code>.csproj</code>) welke packages er nodig zijn.</p>
-        <p>Zodra jouw klasgenoot het project opent en op "Start" drukt, downloadt Visual Studio razendsnel alle ontbrekende pakketten. Dit heet <strong>Package Restore</strong>.</p>
+        <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
+
+        <div class="info-box warning">
+            <h3>⚠️ FiggleFonts is rood of onbekend</h3>
+            <p>1. Heb je echt <strong>Figgle.Fonts</strong> geïnstalleerd en niet alleen <strong>Figgle</strong>?<br>
+                2. Ben je <code>using Figgle.Fonts;</code> bovenaan vergeten?<br>
+                3. Staat er wel echt <code>FiggleFonts</code> (meervoud met een s)?</p>
+        </div>
 
         <h3>Samenvatting</h3>
         <ul>
             <li><strong>NuGet</strong> is de plek waar je kant-en-klare code van anderen kunt downloaden.</li>
             <li>Je installeert packages via <strong>Manage NuGet Packages</strong>.</li>
-            <li>Je moet vaak een <strong>using</strong> toevoegen om de code te kunnen gebruiken.</li>
-            <li>Gebruik packages om tijd te besparen bij moeilijke taken.</li>
+            <li>Let goed op welk pakket je kiest (soms zijn er losse pakketten voor data, zoals <strong>Figgle.Fonts</strong>).</li>
+            <li>Gebruik packages om tijd te besparen.</li>
         </ul>
 
     </main>

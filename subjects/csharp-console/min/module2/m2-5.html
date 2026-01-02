@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breakpoints & Stepping - C# Module 2</title>
+    <title>Breakpoints - C# Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,29 +18,61 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Breakpoints & Stepping</h1>
+        <h1>Debugging & Breakpoints</h1>
 
-        <h3>Wat is Debuggen?</h3>
-        <p>Als je code niet doet wat je verwacht, kun je willekeurig dingen gaan veranderen en hopen dat het werkt. Of je kunt de code <strong>Debuggen</strong>. Dit betekent dat je de uitvoering van je programma pauzeert en "onder de motorkap" kijkt terwijl het draait.</p>
+        <h3>Code voorbereiden</h3>
+        <p>Om te oefenen met debuggen, gebruiken we een methode die data teruggeeft. Voeg deze toe aan je project:</p>
 
-        <h3>1. Breakpoints (F9)</h3>
-        <p>Een breakpoint is een stopbord voor je code. Klik in de grijze marge links naast een regel code (of druk op <strong>F9</strong>). Er verschijnt een rode bol.</p>
-        <p>Start je programma nu in Debug mode (<strong>F5</strong>). Zodra de computer bij die regel komt, bevriest het programma en licht de regel geel op.</p>
+        <pre><code class="language-csharp">// 1. In Models/DigitalPet.cs
+public string Sleep()
+{
+    this.Energy += 20;
+    return "Zzz... Dat deed deugd! (+20 Energie)";
+}</code></pre>
 
-        <h3>2. Stepping (Stap voor stap)</h3>
-        <p>Nu de code gepauzeerd is, heb jij de controle. Je kunt regel voor regel door je programma lopen.</p>
+        <pre><code class="language-csharp">// 2. In Program.cs
+Console.WriteLine(dino.Sleep()); // <-- Zet HIER je breakpoint (F9)</code></pre>
 
-        <div class="info-box">
-            <h3>De Knoppen</h3>
-            <ul>
-                <li><strong>Step Over (F10):</strong> Voer de huidige regel uit en ga naar de volgende regel. (Als de regel een methode-aanroep is, wordt die methode in één keer uitgevoerd).</li>
-                <li><strong>Step Into (F11):</strong> Als de huidige regel een methode-aanroep is, spring je <em>in</em> die methode om daar regel voor regel verder te gaan.</li>
-                <li><strong>Step Out (Shift+F11):</strong> Maak de huidige methode snel af en pauzeer zodra je weer terug bent bij de aanroeper.</li>
-            </ul>
-        </div>
+        <h3>Debuggen in 3 stappen</h3>
 
-        <h3>Continue (F5)</h3>
-        <p>Heb je genoeg gezien? Druk weer op <strong>F5</strong> om het programma gewoon verder te laten draaien tot het volgende breakpoint.</p>
+        <h4>1. Breakpoint zetten (F9)</h4>
+        <p>Klik in de grijze rand naast de regel <code>dino.Sleep();</code>. De rode bol betekent dat de code daar stopt.</p>
+
+
+        <h4>2. Starten (F5)</h4>
+        <p>Het programma start en pauzeert bij de rode bol. De regel wordt <strong>Geel</strong>.</p>
+
+        <h4>3. Step Into (F11)</h4>
+        <p>Dit is de belangrijkste toets voor vandaag. We staan op een regel die naar een ander bestand verwijst.</p>
+        <ul>
+            <li>Druk op <strong>F11</strong>.</li>
+            <li>Je ziet dat Visual Studio direct naar <code>DigitalPet.cs</code> springt.</li>
+            <li>Beweeg je muis over <code>Energy</code> om de waarde te zien veranderen.</li>
+        </ul>
+
+        <h3>Cheat Sheet</h3>
+        <table class="summary-table">
+            <thead>
+            <tr>
+                <th>Toets</th>
+                <th>Actie</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><strong>F5</strong></td>
+                <td><strong>Continue:</strong> Stop met pauzeren en ren door.</td>
+            </tr>
+            <tr>
+                <td><strong>F10</strong></td>
+                <td><strong>Step Over:</strong> Volgende regel (blijf in dit bestand).</td>
+            </tr>
+            <tr>
+                <td><strong>F11</strong></td>
+                <td><strong>Step Into:</strong> Spring <strong>IN</strong> de methode (wissel van bestand).</td>
+            </tr>
+            </tbody>
+        </table>
 
     </main>
 

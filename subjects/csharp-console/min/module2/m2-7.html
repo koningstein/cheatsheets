@@ -20,36 +20,51 @@
     <main class="main-content">
         <h1>De Call Stack</h1>
 
-        <h3>Het spoor terug</h3>
-        <p>Als je programma crasht, of als je diep in een methode zit te debuggen, raak je soms het overzicht kwijt. "Hoe ben ik hier eigenlijk terechtgekomen?"</p>
-        <p>De <strong>Call Stack</strong> (Aanroep Stapel) is je GPS. Het laat zien welke ketting van methodes er is uitgevoerd om op het huidige punt te komen.</p>
+        <h3>Wie riep wie aan?</h3>
+        <p>Programma's zijn een kettingreactie. Methode A roept B aan, en B roept C aan. Als je in methode C zit, wil je soms weten: <em>"Hoe ben ik hier gekomen?"</em></p>
+        <p>Dit zie je in de <strong>Call Stack</strong> (De Stapel).</p>
 
-        <h3>Hoe werkt de Stack?</h3>
-        <p>Stel je hebt deze situatie:</p>
+
+        <h3>1. De Code (Ketting maken)</h3>
+        <p>Om een "stapel" te zien, laten we de ene methode de andere aanroepen. Pas je `Sleep` methode aan in `DigitalPet.cs`:</p>
+
+        <pre><code class="language-csharp">// IN BESTAND: DigitalPet.cs
+
+public string Sleep()
+{
+    this.IsSleeping = true;
+    this.Energy += 20;
+
+    // KETTING: Sleep roept nu zelf ook weer een methode aan
+    UpdateStatus();
+
+    return "Zzz... (+20 Energie)";
+}
+
+// De helper methode
+public void UpdateStatus()
+{
+    // Zet HIER je Breakpoint (F9) op de regel hieronder:
+    this.Hunger += 5;
+}</code></pre>
+
+        <h3>2. De Stack bekijken</h3>
         <ol>
-            <li><code>Main()</code> roept <code>StartGame()</code> aan.</li>
-            <li><code>StartGame()</code> roept <code>myPet.Feed()</code> aan.</li>
-            <li><code>Feed()</code> roept <code>CheckIsAlive()</code> aan.</li>
+            <li>Zet een <strong>Breakpoint (F9)</strong> in de nieuwe methode <code>UpdateStatus</code>.</li>
+            <li>Start het programma (F5).</li>
+            <li>Als het programma stopt, kijk je rechtsonder naar het tabblad <strong>Call Stack</strong>.</li>
         </ol>
-        <p>Als je een breakpoint zet in <code>CheckIsAlive</code>, ziet de Call Stack er zo uit (van boven naar beneden):</p>
 
+
+        <p>Je ziet nu de geschiedenis van je programma (van boven naar beneden):</p>
         <pre>
-1. CheckIsAlive  <-- HIER ben je nu
-2. Feed
-3. StartGame
-4. Main
+1. UpdateStatus   (Hier ben je nu)
+2. Sleep          (Wacht op UpdateStatus)
+3. Main           (Wacht op Sleep)
         </pre>
 
-        <h3>Navigeren in de Stack</h3>
-        <p>In Visual Studio kun je in het <strong>Call Stack</strong> venster dubbelklikken op een regel (bijvoorbeeld op <code>StartGame</code>). Visual Studio brengt je dan terug naar die methode, naar de exacte regel waar de aanroep plaatsvond.</p>
-
-        <div class="info-box">
-            <h3>Waarom is dit nuttig?</h3>
-            <p>Als een variabele een verkeerde waarde heeft in <code>CheckIsAlive</code>, komt die waarde misschien wel uit <code>StartGame</code>. Door terug te klikken in de Call Stack kun je de variabelen inspecteren zoals ze waren in die eerdere methode (snapshot).</p>
-        </div>
-
-        <h3>Stack Overflow</h3>
-        <p>De ruimte op de stack is niet oneindig. Als methodes elkaar oneindig blijven aanroepen (bijvoorbeeld: methode A roept methode A aan zonder stopconditie), loopt het geheugen vol. Het programma crasht dan met de beroemde foutmelding: <strong>System.StackOverflowException</strong>.</p>
+        <h3>3. Tijdreizen (Groene Pijl)</h3>
+        <p>Dubbelklik in de lijst op <code>Main</code> (of Sleep). Visual Studio springt terug naar die methode en laat met een <strong>Groene Pijl</strong> zien waar de code aan het wachten is. Zo kun je zien welke variabelen er op dat moment waren.</p>
 
     </main>
 

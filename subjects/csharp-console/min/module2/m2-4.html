@@ -20,38 +20,36 @@
     <main class="main-content">
         <h1>NuGet Packages</h1>
 
-        <h3>Het wiel niet opnieuw uitvinden</h3>
-        <p>Als programmeur hoef je niet alles zelf te schrijven. Wil je complexe berekeningen doen, PDF's genereren of JSON bestanden inlezen? Grote kans dat iemand anders dat al heeft geprogrammeerd en gedeeld.</p>
-        <p>In de .NET wereld heet de pakketbeheerder <strong>NuGet</strong> (vergelijkbaar met <em>Composer</em> voor PHP of <em>NPM</em> voor JavaScript).</p>
+        <h3>Code lenen van anderen</h3>
+        <p>Soms heb je functionaliteit nodig die te complex is om zelf te bouwen (zoals ASCII Art genereren). Hiervoor gebruiken we <strong>NuGet Packages</strong>.</p>
 
-        <h3>NuGet Package Manager</h3>
-        <p>In Visual Studio kun je heel makkelijk pakketten installeren zonder commando's te typen:</p>
+
+        <h3>1. Installeren (Let op!)</h3>
+        <p>Er zijn meerdere pakketten. Wij willen de fonts hebben.</p>
         <ol>
-            <li>Rechtermuisknop op je <strong>Project</strong> (niet de Solution).</li>
-            <li>Kies <strong>Manage NuGet Packages...</strong></li>
-            <li>Ga naar het tabblad <strong>Browse</strong> en zoek je library.</li>
+            <li>Rechtsklik op je Project -> <strong>Manage NuGet Packages</strong>.</li>
+            <li>Zoek naar <code>Figgle</code>.</li>
+            <li><strong>BELANGRIJK:</strong> Kies het pakket <strong>Figgle.Fonts</strong> (Dus NIET alleen 'Figgle').</li>
+            <li>Klik op <strong>Install</strong>.</li>
         </ol>
 
-        <div class="info-box">
-            <h3>Voorbeeld: Newtonsoft.Json</h3>
-            <p>Een van de populairste packages is <code>Newtonsoft.Json</code>. Hiermee kun je objecten heel makkelijk omzetten naar tekst (Serialize) en andersom.</p>
-        </div>
+        <h3>2. Gebruiken (De Using)</h3>
+        <p>Om de code te gebruiken, moet je de specifieke namespace van het pakket importeren.</p>
 
-        <h3>Code gebruiken</h3>
-        <p>Na installatie kun je de code direct gebruiken. Vaak moet je wel even de juiste namespace importeren.</p>
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+using Figgle.Fonts; // &lt;-- Importeer de namespace
 
-        <pre><code class="language-csharp">using Newtonsoft.Json; // De namespace van het pakket
+// Nu herkent hij de class 'FiggleFonts'
+string banner = FiggleFonts.Standard.Render("Dino Game");
 
-DigitalPet myPet = new DigitalPet("Dino");
+Console.WriteLine(banner);</code></pre>
 
-// Het object omzetten naar een JSON string
-string json = JsonConvert.SerializeObject(myPet);
-
-Console.WriteLine(json);
-// Output: {"Name":"Dino","Energy":50}</code></pre>
-
-        <h3>Dependencies</h3>
-        <p>NuGet houdt in je projectbestand (<code>.csproj</code>) bij welke versies je gebruikt. Als je je project naar een teamgenoot stuurt, downloadt Visual Studio automatisch de ontbrekende pakketten (Restore).</p>
+        <h3>Rode strepen?</h3>
+        <ul>
+            <li>Heb je wel <strong>Figgle.Fonts</strong> geïnstalleerd (en niet alleen Figgle)?</li>
+            <li>Staat <code>using Figgle.Fonts;</code> bovenaan?</li>
+            <li>Typ je <code>FiggleFonts</code> (meervoud met s)?</li>
+        </ul>
 
     </main>
 
