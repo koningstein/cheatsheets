@@ -22,145 +22,96 @@
 
         <p>In de vorige lessen hebben we properties gemaakt waar je data in kunt stoppen (Set) en uit kunt halen (Get). Vaak is die data "rauw".</p>
         <p>Bijvoorbeeld: <code>Energy</code> is gewoon het getal <code>50</code>. Maar misschien wil je dit op het scherm tonen als een mooie tekst: <strong>"🔋 Energie: 50 / 100"</strong>.</p>
-        <p>Je kunt dit steeds in <code>Program.cs</code> aan elkaar plakken, maar het is veel slimmer om dit in de Class zelf te regelen.</p>
+        <p>Je kunt dit steeds in <code>Program.cs</code> aan elkaar plakken, maar het is veel slimmer om dit in de Class zelf te regelen met een speciale <strong>Getter Methode</strong>.</p>
 
-        <h3>Wat is een Custom Getter?</h3>
-        <p>Normaal gesproken geeft een property direct de waarde terug die opgeslagen is. Bij een Custom Getter (aangepaste getter) voeren we eerst wat code uit voordat we het antwoord geven. We "formatteren" de data.</p>
+        <h3>Wat is een Getter Methode?</h3>
+        <p>Een getter is een methode die niets anders doet dan data ophalen, het mooi maken (formatteren) en teruggeven. Hij verandert niets aan het object, hij "leest" alleen.</p>
 
         <div class="info-box">
             <h3>De Vergelijking: De Barista</h3>
-
             <p>Stel je voor dat je koffie bestelt.</p>
             <ul>
-                <li><strong>De Opslag (Variabele):</strong> De koffiebonen en het water in de machine.</li>
-                <li><strong>De Getter (De Barista):</strong> Jij vraagt om "Koffie". Je krijgt niet de losse bonen. De barista maalt ze, voegt water toe, doet er melk bij en geeft jou een <em>kant-en-klaar product</em>.</li>
+                <li><strong>De Opslag (De Property):</strong> De koffiebonen en het water in de machine.</li>
+                <li><strong>De Getter (De Methode):</strong> De handeling van koffie zetten. De barista pakt de bonen, maalt ze en geeft jou een <em>kant-en-klaar product</em>.</li>
             </ul>
         </div>
 
-        <h3>De Code: Hoe maak je het?</h3>
-        <p>We maken een nieuwe property in onze class. Deze property slaat zelf niks op, maar kijkt naar de andere data (Naam en Energie) en maakt daar een mooi tekstje van.</p>
-        <p>Omdat we deze data alleen willen <em>lezen</em> (het is een resultaat), gebruiken we <strong>alleen een get</strong>. Geen set.</p>
+        <h3>De Code: Een methode maken</h3>
+        <p>We maken een nieuwe methode in onze class. Deze methode slaat zelf niks op, maar kijkt naar de andere data (Naam en Energie) en maakt daar een mooi tekstje van.</p>
 
         <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
 class DigitalPet
 {
-    // De ruwe data (hier slaan we het echt op)
+    // De ruwe data (De Properties)
     public string Name { get; set; }
     public int Energy { get; set; }
 
-    // De "Formatter" Property
-    // Deze slaat niks op, maar geeft een mooi opgemaakt resultaat.
-    public string EnergyDisplay
+    // De "Formatter" Methode
+    // Dit is een actie: "Geef mij de mooie tekst"
+    public string EnergyDisplay()
     {
-        get
-        {
-            // We plakken tekst en data aan elkaar
-            return "🔋 " + this.Name + " - Level: " + this.Energy + "/100";
-        }
+        // We plakken tekst en data aan elkaar en geven het terug
+        return "🔋 " + this.Name + " - Level: " + this.Energy + "/100";
     }
 }</code></pre>
 
         <h3>Het gebruik in Program.cs</h3>
-        <p>In je programma merk je geen verschil tussen een "echte" variabele en onze "verzonnen" variabele.</p>
+        <p>Omdat het een methode is, gebruiken we <strong>haakjes ()</strong> om hem aan te roepen. Dit helpt je herinneren dat er code wordt uitgevoerd (het berekenen van de tekst).</p>
 
         <pre><code class="language-csharp">// BESTAND: Program.cs
 DigitalPet dino = new DigitalPet();
 dino.Name = "Rex";
 dino.Energy = 50;
 
-// We vragen de mooi gemaakte tekst op
-Console.WriteLine(dino.EnergyDisplay);
+// We roepen de methode aan met ()
+Console.WriteLine(dino.EnergyDisplay());
 
 // Output: 🔋 Rex - Level: 50/100</code></pre>
 
-        <h3>Verdieping: Waarom een Property en geen Methode?</h3>
-        <p>Je vraagt je misschien af: <em>"Waarom moeilijk doen met een get-blok? Ik kan toch ook gewoon een methode maken?"</em></p>
-        <p>Dat klopt! Technisch doen ze hetzelfde (tekst teruggeven). Het verschil zit in hoe je de code <strong>gebruikt</strong> in je programma. Laten we ze naast elkaar leggen.</p>
-
-        <h4>Manier A: De Methode (Zoals je gewend bent)</h4>
-        <p>Dit is een <strong>actie</strong>. Omdat het een actie is, moet je verplicht <strong>haakjes ()</strong> gebruiken.</p>
-
-        <pre><code class="language-csharp">// IN DE CLASS:
-public string GetInfo()
-{
-    return "Naam: " + Name;
-}
-
-// IN PROGRAM.CS (Het gebruik):
-Console.WriteLine(dino.GetInfo()); // <-- Haakjes verplicht!</code></pre>
-
-        <h4>Manier B: De Property (Met de 'get')</h4>
-        <p>Dit vermomt zich als een <strong>variabele</strong>. Je gebruikt <strong>geen haakjes</strong>.</p>
-
-        <pre><code class="language-csharp">// IN DE CLASS:
-public string Info
-{
-    get
-    {
-        return "Naam: " + Name;
-    }
-}
-
-// IN PROGRAM.CS (Het gebruik):
-Console.WriteLine(dino.Info); // <-- Lijkt net een variabele!</code></pre>
-
-        <div class="info-box">
-            <h3>Het geheim van 'Get'</h3>
-            <p>In C# betekent het woordje <code>get</code> eigenlijk: <em>"Wanneer iemand deze variabele probeert te lezen, voer dan stiekem deze code uit."</em></p>
-            <p>Het zorgt ervoor dat je slimme code (logica/berekeningen) kunt verstoppen achter iets dat eruitziet als een simpele eigenschap.</p>
-        </div>
-
-        <div class="info-box">
-            <h3>Wanneer kies je wat? (De Vuistregel)</h3>
-            <ul>
-                <li><strong>Is het een Actie?</strong> (Blaffen, Lopen, Opslaan, Berekenen)<br>
-                    -> Gebruik een <strong>Methode</strong> met <code>()</code>.<br>
-                    -> Voorbeeld: <code>dino.Bark()</code></li>
-                <br>
-                <li><strong>Is het Data/Informatie?</strong> (Naam, Leeftijd, Omschrijving)<br>
-                    -> Gebruik een <strong>Property</strong> (Getter) zonder <code>()</code>.<br>
-                    -> Voorbeeld: <code>dino.EnergyDisplay</code></li>
-            </ul>
-        </div>
-
-        <h3>De 'Fat Arrow' (De Afkorting)</h3>
-        <p>Programmeurs houden van korte code. Als een getter heel simpel is (zoals hierboven: alleen maar <code>return ...</code>), dan vinden we al die accolades <code>{ }</code> en het woordje <code>return</code> te veel werk.</p>
-        <p>Hiervoor is de <strong>Fat Arrow</strong> (Dikke Pijl) <code>=></code> bedacht. Het betekent simpelweg: <em>"Deze property is gelijk aan..."</em>.</p>
+        <h3>De 'Fat Arrow' (Kortere schrijfwijze)</h3>
+        <p>Programmeurs houden van korte code. Als een methode heel simpel is (zoals hierboven: alleen maar één <code>return</code> regel), dan vinden we al die accolades <code>{ }</code> en het woordje <code>return</code> te veel werk.</p>
+        <p>Hiervoor is de <strong>Fat Arrow</strong> (Dikke Pijl) <code>=></code> bedacht. Het betekent simpelweg: <em>"Deze methode geeft direct dit terug..."</em>.</p>
 
         <table class="summary-table">
             <thead>
             <tr>
-                <th>De Lange Manier (Block Body)</th>
-                <th>De Korte Manier (Expression Body)</th>
+                <th>De Lange Manier</th>
+                <th>De Korte Manier (Fat Arrow)</th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <td>
-<pre><code class="language-csharp">public string Info
+<pre><code class="language-csharp">public string EnergyDisplay()
 {
-    get
-    {
-        return "Naam: " + Name;
-    }
+    return "Level: " + Energy;
 }</code></pre>
                 </td>
                 <td>
-<pre><code class="language-csharp">public string Info => "Naam: " + Name;
-
-// Geen 'get', geen 'return', geen accolades.
-// De pijl wijst direct naar het resultaat.</code></pre>
+<pre><code class="language-csharp">// Let op: nog steeds haakjes ()
+public string EnergyDisplay() => "Level: " + Energy;</code></pre>
                 </td>
             </tr>
             </tbody>
         </table>
 
+        <div class="info-box">
+            <h3>Voor de fijnproevers: Computed Properties</h3>
+            <p>In C# is er nog een speciale truc. Je kunt een methode vermommen als een variabele. Dit heet een <strong>Computed Property</strong>. Je laat de haakjes <code>()</code> weg en gebruikt het woordje <code>get</code>.</p>
+            <pre><code class="language-csharp">// Ziet eruit als een variabele, maar voert stiekem code uit
+public string Info
+{
+    get { return "Naam: " + Name; }
+}
+// Gebruik: Console.WriteLine(dino.Info); // Geen haakjes!</code></pre>
+            <p>Dit mag je gebruiken, maar om verwarring te voorkomen raden we aan om voorlopig gewoon methodes met <code>()</code> te gebruiken voor acties.</p>
+        </div>
+
         <h3>Samenvatting</h3>
         <ul>
-            <li>Gebruik een <strong>Getter</strong> om data mooi te maken (formatteren) voordat je het toont.</li>
-            <li>Gebruik <code>get { ... }</code> om code te vermommen als variabele.</li>
-            <li>Gebruik <strong>Properties</strong> voor informatie en <strong>Methoden</strong> voor acties.</li>
-            <li>De <strong>Fat Arrow</strong> <code>=></code> is een handige afkorting.</li>
+            <li>Gebruik een <strong>Getter Methode</strong> om data mooi te maken (formatteren) voordat je het aan de gebruiker toont.</li>
+            <li>Omdat het een methode is, gebruik je <strong>haakjes ()</strong>.</li>
+            <li>Je kunt de <strong>Fat Arrow</strong> <code>=></code> gebruiken om de methode korter op te schrijven.</li>
         </ul>
 
     </main>

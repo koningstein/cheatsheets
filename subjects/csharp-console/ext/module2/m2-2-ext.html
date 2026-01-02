@@ -23,9 +23,8 @@
         <p>Als je project groter wordt, krijg je steeds meer bestanden. Je wilt niet dat alles op één grote hoop ligt. Je wilt structuur. In C# gebruiken we hiervoor <strong>Namespaces</strong>.</p>
 
         <h3>Het Probleem: Dubbele Namen</h3>
-        <p>Stel je voor dat jij een game maakt en je maakt een class genaamd <code>Console</code> (voor een spelcomputer in je game).<br>
-            Maar... C# heeft zelf óók al een class die <code>Console</code> heet (die gebruiken we voor <code>WriteLine</code>).</p>
-        <p>Als je nu <code>Console</code> typt, raakt C# in de war. Welke bedoel je? Die van jou, of die van Microsoft?</p>
+        <p>Stel je voor dat jij een game maakt en je noemt een vijand <code>Monster</code>. Later download je code van een ander, en die heeft óók een class <code>Monster</code>.</p>
+        <p>Als je nu <code>new Monster()</code> typt, raakt C# in de war. Welke bedoel je? Die van jou, of die van de ander?</p>
 
         <div class="info-box">
             <h3>De Vergelijking: Achternamen</h3>
@@ -34,89 +33,78 @@
             <p>Een <strong>Namespace</strong> is eigenlijk de achternaam van je Class.</p>
         </div>
 
-        <h3>1. Een Namespace maken</h3>
-        <p>Je geeft je code een 'achternaam' door bovenaan je bestand aan te geven in welke namespace het hoort. Vaak gebruiken we hier de naam van het project of de map voor.</p>
-
-        <h4>De Moderne Manier (File Scoped)</h4>
-        <p>Sinds C# 10 kunnen we dit heel kort opschrijven. Je zet het bovenaan met een puntkomma. Alles in dit bestand hoort nu bij die familie.</p>
+        <h3>1. Een Namespace toevoegen</h3>
+        <p>Laten we onze code een 'achternaam' geven. Dit doen we in het bestand van de class zelf.</p>
+        <p>Sinds C# 10 kunnen we dit heel kort opschrijven (File Scoped Namespace). Je zet het bovenaan met een puntkomma.</p>
 
         <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
 
-// Dit is de 'achternaam' van deze code
-namespace MyTamagotchiGame;
-
-class DigitalPet
-{
-    // ...
-}</code></pre>
-        <p>De volledige naam van je class is nu: <strong>MyTamagotchiGame.DigitalPet</strong>.</p>
-
-        <div class="info-box">
-            <h3>Oude code lezen</h3>
-            <p>In oudere tutorials zie je vaak dat de namespace accolades <code>{ }</code> heeft en dat alle code inspringt. Dat werkt nog steeds, maar we gebruiken liever de nieuwe manier (File Scoped) omdat je dan minder witruimte verspilt.</p>
-        </div>
-
-        <h3>2. Using Statements: Code importeren</h3>
-        <p>Nu hebben we onze classes netjes in hokjes (namespaces) gestopt. Maar wat als we ze willen gebruiken?</p>
-        <p>Stel je wilt <code>System.Console.WriteLine()</code> gebruiken. Het is heel irritant om steeds die volledige naam (inclusief achternaam) te typen.</p>
-
-        <p>Hiervoor is het keyword <strong>using</strong>. Hiermee zeg je tegen C#: <em>"Als ik een naam typ die je niet kent, zoek dan even in deze doos."</em></p>
-
-        <pre><code class="language-csharp">// ZONDER using (Heel veel typwerk):
-System.Console.WriteLine("Hallo");
-System.Console.ReadLine();
-
-// MET using (Bovenaan je bestand):
-using System;
-
-Console.WriteLine("Hallo"); // C# snapt nu dat je 'System.Console' bedoelt.</code></pre>
-
-        <h3>Toepassing in Digital Pet</h3>
-        <p>Laten we kijken hoe dit werkt als we onze eigen bestanden koppelen.</p>
-
-        <h4>Stap A: De Class (DigitalPet.cs)</h4>
-        <p>We zetten de class in de namespace van het spel.</p>
-        <pre><code class="language-csharp">using System;
-
-// We definiëren de namespace
-namespace DigitalPetGame;
+// 1. We geven dit bestand een namespace (de 'achternaam')
+namespace Tamagotchi;
 
 public class DigitalPet
 {
     public string Name { get; set; }
-
-    // Constructor (zoals geleerd in Module 1)
-    public DigitalPet(string name)
-    {
-        this.Name = name;
-    }
+    // ... rest van de class ...
 }</code></pre>
+        <p>De volledige naam van je class is nu veranderd van <code>DigitalPet</code> naar <strong>Tamagotchi.DigitalPet</strong>.</p>
 
-        <h4>Stap B: Het Gebruik (Program.cs)</h4>
-        <p>Stel dat <code>Program.cs</code> per ongeluk in een andere namespace zit, of dat we mappen gebruiken (daarover later meer). Dan moeten we vertellen waar <code>DigitalPet</code> woont.</p>
+        <h3>2. Het gevolg: Program.cs is stuk!</h3>
+        <p>Ga nu terug naar <code>Program.cs</code>. Je zult zien dat er opeens rode strepen staan onder <code>DigitalPet</code>.</p>
 
-        <pre><code class="language-csharp">using System;
-// We importeren onze eigen namespace!
-using DigitalPetGame;
+        <pre><code class="language-csharp">// BESTAND: Program.cs
 
-// Nu kunnen we de korte naam gebruiken
-// Let op: We gebruiken de constructor die we in Module 1 leerden
-DigitalPet dino = new DigitalPet("Rex");</code></pre>
+// FOUT: C# zegt: "Ik weet niet wat een 'DigitalPet' is."
+// Hij zoekt naar de korte naam, maar het bestand heet nu 'Tamagotchi.DigitalPet'.
+DigitalPet dino = new DigitalPet("Rex", isSleeping: true);</code></pre>
+
+        <h3>3. De Oplossing: Using</h3>
+        <p>We kunnen dit op twee manieren oplossen.</p>
+
+        <h4>Manier A: De volledige naam typen (Onhandig)</h4>
+        <pre><code class="language-csharp">Tamagotchi.DigitalPet dino = new Tamagotchi.DigitalPet("Rex", isSleeping: true);</code></pre>
+        <p>Dit werkt, maar is vreselijk veel typwerk.</p>
+
+        <h4>Manier B: Using (De beste manier)</h4>
+        <p>Met het keyword <strong>using</strong> zeg je tegen C#: <em>"Als ik een naam typ die je niet kent (zoals DigitalPet), zoek dan even in deze doos."</em></p>
+
+        <pre><code class="language-csharp">// BESTAND: Program.cs
+
+// 1. We importeren de namespace bovenaan
+using Tamagotchi;
+
+// 2. Nu snapt C# weer wat we bedoelen!
+DigitalPet dino = new DigitalPet("Rex", isSleeping: true);
+
+Console.WriteLine(dino.GetDescription());</code></pre>
+
+        <div class="info-box">
+            <h3>Waarom werkt 'Console' dan wel?</h3>
+            <p>Misschien is het je opgevallen dat <code>Console.WriteLine</code> het altijd doet, zonder dat je zelf <code>using System;</code> typt.</p>
+            <p>Dat komt omdat moderne C# projecten (sinds .NET 6) gebruik maken van <strong>Implicit Usings</strong>. Visual Studio voegt op de achtergrond stiekem al een lijstje met veelgebruikte namespaces (zoals System) toe. Jouw eigen namespace (Tamagotchi) staat daar niet bij, dus die moet je wél zelf toevoegen.</p>
+        </div>
 
         <h3>Wat kan er fout gaan? (Veelgemaakte Fouten)</h3>
 
         <div class="info-box warning">
-            <h3>⚠️ Rode strepen (CS0246)</h3>
-            <p>Krijg je een rode streep onder <code>DigitalPet</code> met de melding <em>"The type or namespace name could not be found"</em>?</p>
-            <p>Dan ben je waarschijnlijk de <strong>using</strong> vergeten. <br>
-                <strong>Tip:</strong> Klik op de rode tekst en druk op <code>Ctrl + .</code> (punt). Visual Studio stelt dan vaak voor om de using automatisch toe te voegen.</p>
+            <h3>Verkeerde plek</h3>
+            <p>De <code>using</code> moet altijd helemaal <strong>bovenaan</strong> in je bestand staan. Nog voor je code begint.</p>
+        </div>
+
+        <div class="info-box warning">
+            <h3>Rode strepen oplossen</h3>
+            <p>Zie je een rode streep onder een class naam?
+                <br>1. Klik op de rode tekst.
+                <br>2. Druk op <code>Ctrl + .</code> (punt).
+                <br>3. Kies de optie <strong>using Tamagotchi;</strong>.
+                <br>Visual Studio voegt de regel dan zelf bovenaan toe.</p>
         </div>
 
         <h3>Samenvatting</h3>
         <ul>
-            <li>Een <strong>Namespace</strong> groepeert je code en voorkomt naamconflicten (zoals een achternaam).</li>
-            <li>Je definieert een namespace bovenaan je bestand: <code>namespace MijnGame;</code>.</li>
-            <li>Met <strong>using</strong> importeer je een namespace, zodat je niet steeds de volledige naam hoeft te typen.</li>
+            <li>Een <strong>Namespace</strong> geeft je code een uniek adres (zoals een achternaam).</li>
+            <li>Zodra je een class in een namespace zet, kan <code>Program.cs</code> hem niet meer zomaar vinden.</li>
+            <li>Gebruik <strong>using</strong> bovenaan je bestand om de namespace te importeren.</li>
         </ul>
 
     </main>

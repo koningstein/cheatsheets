@@ -21,64 +21,37 @@
         <h1>Getters: Data Formatteren</h1>
 
         <h3>Mooie data tonen</h3>
-        <p>Soms wil je data niet "rauw" tonen (bijv. <code>50</code>), maar mooi opgemaakt (bijv. <code>"Level: 50/100"</code>). Hiervoor gebruiken we een <strong>Custom Getter</strong> in de class.</p>
+        <p>Soms wil je data niet "rauw" tonen (bijv. <code>50</code>), maar mooi opgemaakt (bijv. <code>"Level: 50/100"</code>). Hiervoor maken we een speciale <strong>Getter Methode</strong> in de class.</p>
 
         <h3>De Code</h3>
-        <p>Je maakt een property die alleen een <code>get</code> heeft. Deze slaat zelf niks op, maar berekent het resultaat.</p>
+        <p>Je maakt een methode die niets opslaat, maar data pakt, samenvoegt en teruggeeft (return).</p>
 
         <pre><code class="language-csharp">// BESTAND: DigitalPet.cs
-public string EnergyDisplay
+public string EnergyDisplay()
 {
-    get
-    {
-        // Plak tekst en variabelen aan elkaar
-        return "🔋 " + this.Name + " - Level: " + this.Energy;
-    }
+    // Plak tekst en variabelen aan elkaar
+    return "🔋 " + this.Name + " - Level: " + this.Energy;
 }</code></pre>
 
         <h3>Het Gebruik</h3>
-        <p>In <code>Program.cs</code> gebruik je het alsof het een gewone variabele is (zonder haakjes).</p>
+        <p>Omdat het een methode is (een actie), gebruik je <strong>haakjes ()</strong> bij het aanroepen.</p>
 
         <pre><code class="language-csharp">// BESTAND: Program.cs
-Console.WriteLine(dino.EnergyDisplay);
+Console.WriteLine(dino.EnergyDisplay());
 // Output: 🔋 Rex - Level: 50</code></pre>
 
-        <h3>Verschil: Property of Methode?</h3>
-        <p>Je kunt dit ook met een methode doen. Wanneer kies je wat?</p>
-
-
-
-        <table class="summary-table">
-            <thead>
-            <tr>
-                <th>Type</th>
-                <th>Gebruik</th>
-                <th>Wanneer gebruiken?</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><strong>Methode</strong></td>
-                <td><code>dino.GetInfo()</code><br>(Met haakjes)</td>
-                <td>Bij een <strong>Actie</strong> (Werkwoord).<br><em>Bijv: Berekenen, Opslaan, Lopen.</em></td>
-            </tr>
-            <tr>
-                <td><strong>Property</strong></td>
-                <td><code>dino.Info</code><br>(Zonder haakjes)</td>
-                <td>Bij <strong>Informatie</strong> (Zelfstandig naamwoord).<br><em>Bijv: Naam, Status, Omschrijving.</em></td>
-            </tr>
-            </tbody>
-        </table>
-
         <h3>De Fat Arrow (=>)</h3>
-        <p>Als je getter heel kort is, mag je de <strong>Fat Arrow</strong> syntax gebruiken. Dit scheelt typwerk.</p>
+        <p>Als je methode heel kort is (één regel), mag je de <strong>Fat Arrow</strong> syntax gebruiken. Dit scheelt typwerk.</p>
 
 
         <pre><code class="language-csharp">// Lange manier
-public string Status { get { return "Energy: " + Energy; } }
+public string Status()
+{
+    return "Energy: " + Energy;
+}
 
 // Korte manier (Doet precies hetzelfde)
-public string Status => "Energy: " + Energy;</code></pre>
+public string Status() => "Energy: " + Energy;</code></pre>
 
     </main>
 
