@@ -1,10 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encapsulation & Properties - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.1: Encapsulation & Properties</h1>
 
+        <p class="lead">We beveiligen data door schrijftoegang te beperken. We gebruiken <code>private set</code> om directe wijzigingen van buitenaf te blokkeren.</p>
+
+        <h2>Het Doel</h2>
+        <p>Op dit moment kan <code>Program.cs</code> elke waarde direct aanpassen (`dino.Energy = -100`). Dit willen we voorkomen. Alleen de class zelf mag zijn interne data wijzigen.</p>
+
+        <hr>
+
+        <h2>Stap 1: Private Setters toevoegen</h2>
+        <p>Pas in <code>Models/DigitalPet.cs</code> de properties aan. Voeg <code>private</code> toe voor de set.</p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    // De buitenwereld mag lezen (get), maar niet schrijven (private set).
+    public string Name { get; private set; }
+    public int Energy { get; private set; }
+    public int Hunger { get; private set; }
+    public bool IsSleeping { get; private set; }
+
+    // ...</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Constructor Controle</h2>
+        <p>De Constructor heeft toegang tot private setters omdat deze onderdeel is van de class. De onderstaande code in <code>DigitalPet.cs</code> blijft dus correct werken:</p>
+
+        <pre><code class="language-csharp">    public DigitalPet(string name, int energy = 50, int hunger = 0, bool isSleeping = false)
+    {
+        this.Name = name; // Dit is toegestaan binnen de class
+        this.Energy = energy;
+        this.Hunger = hunger;
+        this.IsSleeping = isSleeping;
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Wijzigingsmethodes maken</h2>
+        <p>Om de naam later toch te kunnen wijzigen, moeten we een publieke methode aanbieden.</p>
+
+        <pre><code class="language-csharp">    // Voeg deze methode toe aan DigitalPet.cs
+    public void Rename(string newName)
+    {
+        this.Name = newName;
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Program.cs aanpassen</h2>
+        <p>In <code>Program.cs</code> mag je properties niet meer direct toewijzen. Pas je code aan:</p>
+
+        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet("Rex");
+
+// ✅ LEZEN mag:
+Console.WriteLine(dino.Name);
+
+// ❌ SCHRIJVEN mag niet meer (verwijder dit soort regels):
+// dino.Name = "Bob";
+
+// ✅ GEBRUIK METHODES:
+dino.Rename("Super Rex");
+dino.Sleep();</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

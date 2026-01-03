@@ -16,116 +16,162 @@
     <main class="main-content">
         <h1>Les 3.2: Validatie & Logic</h1>
 
-        <p class="lead">We gaan onze properties slim maken. In plaats van alleen data opslaan, gaan ze fungeren als poortwachters die controleren of de data wel klopt.</p>
+        <p class="lead">We gaan onze properties slim maken. In plaats van alleen data opslaan, gaan ze fungeren als poortwachters. Maar eerst moeten we begrijpen waarom we data <strong>verbergen</strong>.</p>
 
-        <h2>De Metafoor: De Portier</h2>
-        <p>In de vorige les hebben we de deur op slot gedaan (`private set`). Alleen het personeel (de methodes) mocht naar binnen.</p>
-        <p>Maar... wat als een medewerker per ongeluk 200 mensen toelaat in een zaal waar er maar 100 mogen? Een slot is niet genoeg; je hebt een <strong>Portier</strong> nodig die telt en controleert, ongeacht wie er naar binnen wil.</p>
+        <h2>De Metafoor: Het Restaurant</h2>
+        <p>Stel je een restaurant voor.</p>
 
-        <p>In C# doen we dit door van een simpele Property een <strong>Full Property met Logica</strong> te maken.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>🍽️ De Eetzaal (Public)</h3>
+                <p>Hier zitten de gasten (`Program.cs`). Ze kunnen de menukaart zien en een bestelling plaatsen via de ober. Dit is de <strong>Interface</strong>.</p>
+            </div>
+            <div class="feature-card">
+                <h3>👨‍🍳 De Keuken (Private)</h3>
+                <p>Hier liggen de rauwe ingrediënten (`_energy`). Gasten mogen <strong>nooit</strong> de keuken inlopen om zelf in de pannen te roeren. Dat is onhygiënisch en gevaarlijk!</p>
+            </div>
+        </div>
 
-        <hr>
-
-        <h2>Het Probleem</h2>
-        <p>Kijk eens naar je methode <code>Sleep()</code> in <code>DigitalPet.cs</code>:</p>
-        <pre><code class="language-csharp">public string Sleep()
-{
-    this.IsSleeping = true;
-    this.Energy += 20; // <--- HIER ZIT HET GEVAAR!
-    // ...
-}</code></pre>
-
-        <p>Stel dat de energie al op 90 staat. <code>90 + 20 = 110</code>. Dat mag niet, want het maximum is 100.<br>
-            Je hebt wel een methode <code>SetEnergy</code> die dit controleert, maar in <code>Sleep</code> gebruiken we die niet! We passen <code>Energy</code> direct aan en omzeilen onze eigen regels.</p>
+        <p>In C# is <strong>Private</strong> de muur tussen de eetzaal en de keuken. Het zorgt ervoor dat niemand van buitenaf direct bij je kwetsbare data kan.</p>
 
         <hr>
 
-        <h2>De Oplossing: Full Properties</h2>
-        <p>We gaan de opslag van de data (de variabele) splitsen van de toegang (de property). Zo dwingen we af dat <em>elke</em> wijziging gecontroleerd wordt.</p>
-
-        <h3>Stap 1: Backing Field toevoegen</h3>
-        <p>Open <code>Models/DigitalPet.cs</code>. Voeg bovenaan in de class (boven de properties) een privaat veld toe. Dit is de "kluis" waar de échte waarde in zit.</p>
+        <h2>Wat is Private precies?</h2>
+        <p>Als je een variabele <code>private</code> maakt, wordt hij <strong>onzichtbaar</strong> voor de rest van je applicatie.</p>
 
         <pre><code class="language-csharp">public class DigitalPet
 {
-    // De 'Backing Field' (De interne opslag)
-    // We gebruiken vaak een underscore voor private fields
+    public string Name;   // Iedereen kan dit zien
+    private int _energy;  // ALLEEN DigitalPet code kan dit zien
+}</code></pre>
+
+        <p>Als je in <code>Program.cs</code> nu <code>dino.</code> typt, zul je <code>_energy</code> <strong>niet</strong> in de lijst zien staan. Het bestaat wel in het geheugen, maar je mag er niet bij. Dit is essentieel voor veiligheid.</p>
+
+        <hr>
+
+        <h2>Het Probleem: Dubbele Controle</h2>
+        <p>In les 3.1 heb je een methode <code>SetEnergy</code> gemaakt om te zorgen dat energie niet boven de 100 komt. Dat was een goede tijdelijke oplossing.</p>
+        <p>Maar er is een lek! De methode <code>Sleep()</code> gebruikt die check helemaal niet:</p>
+        <pre><code class="language-csharp">public void Sleep()
+{
+    this.Energy += 20; // Oeps! Als ik op 90 sta, ga ik naar 110.
+}</code></pre>
+        <p>We hebben nu twee kapiteins op één schip: de methode `SetEnergy` én de property `Energy`. We moeten de controle verplaatsen naar de enige plek waar álle wijzigingen doorheen moeten: <strong>De Property zelf</strong>.</p>
+
+        <hr>
+
+        <h2>De Oplossing: Backing Fields</h2>
+        <p>We gaan een constructie bouwen die we een <strong>Full Property</strong> noemen. Dit bestaat uit twee delen:</p>
+        <ol>
+            <li><strong>Het Private Field (`_energy`):</strong> De "keuken". Hier ligt de échte waarde. Niemand mag hierbij, behalve de class zelf.</li>
+            <li><strong>De Public Property (`Energy`):</strong> De "ober". Iedereen praat hiermee. De ober controleert de bestelling en geeft het door aan de keuken.</li>
+        </ol>
+
+        <h3>Stap 1: De "Keuken" bouwen (Private Field)</h3>
+        <p>Open <code>Models/DigitalPet.cs</code>. Voeg bovenaan in de class (boven de properties) een privaat veld toe.</p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    // HET BACKING FIELD (De Keuken)
+    // Conventie: Private fields beginnen vaak met een _underscore.
+    // Omdat het 'private' is, kan Program.cs hier NOOIT direct bij.
     private int _energy;
 
     // ... hieronder komen de properties</code></pre>
 
-        <h3>Stap 2: De Property Ombouwen</h3>
-        <p>Verwijder de oude regel: <code>public int Energy { get; private set; }</code>.<br>
-            Vervang deze door de nieuwe "Slimme Property":</p>
+        <h3>Stap 2: De "Ober" aannemen (Public Property)</h3>
+        <p>Vervang de oude `Energy` property door deze slimme versie. De logica die eerst in `SetEnergy` zat, verhuizen we nu naar de `set`.</p>
 
-        <pre><code class="language-csharp">    // De Publieke Property (De Portier)
+        <pre><code class="language-csharp">    // DE PROPERTY (De Ober)
     public int Energy
     {
         get
         {
-            return _energy; // Geef de inhoud van de kluis terug
+            return _energy; // De ober haalt de waarde uit de keuken
         }
         private set
         {
-            // 'value' is het getal dat we proberen in te stellen
+            // HET NIEUWE WOORDJE: 'value'
+            // Dit bevat het getal dat we proberen in te stellen.
 
-            // Hier plakken we de logica die eerst in SetEnergy zat:
             if (value < 0)
             {
-                _energy = 0; // Corrigeer naar minimum
+                Console.WriteLine("Correctie: Energie mag niet negatief zijn.");
+                _energy = 0; // Stop 0 in de keuken
             }
             else if (value > 100)
             {
-                _energy = 100; // Corrigeer naar maximum
+                Console.WriteLine("Correctie: Maximaal 100 energie.");
+                _energy = 100; // Stop 100 in de keuken
             }
             else
             {
-                _energy = value; // Alles oké? Opslaan in de kluis!
+                _energy = value; // Bestelling goedgekeurd: opslaan!
             }
         }
     }</code></pre>
 
+        <div class="info-box note">
+            <h3>Het mysterie van 'value'</h3>
+            <p>Je vraagt je misschien af: <em>"Ik heb nergens <code>int value;</code> getypt. Waar komt dat woord vandaan?"</em></p>
+            <p><code>value</code> is een <strong>gereserveerd sleutelwoord</strong> (keyword) dat C# automatisch voor je aanmaakt binnen een setter. Het is "Het onzichtbare pakketje" dat door de brievenbus valt.</p>
+            <p>Als jij typt <code>dino.Energy = 85;</code>, dan stopt C# die <strong>85</strong> automatisch in <code>value</code>.</p>
+        </div>
+
         <div class="info-box warning">
-            <strong>Grote Valkuil:</strong><br>
-            Schrijf in de set <strong>NOOIT</strong> <code>Energy = value;</code> (met een hoofdletter).<br>
-            Dan roep je namelijk de property zelf weer aan &rarr; die roept weer de set aan &rarr; oneindige lus (StackOverflow)! <br>
-            Gebruik altijd het private field (<code>_energy</code>) om op te slaan.
+            <strong>Belangrijk:</strong> Zie je dat we in de <code>set</code> schrijven naar <code>_energy</code> (kleine letter)? <br>
+            Als je hier <code>Energy = ...</code> zou typen, roep je de property zelf weer aan... tot je applicatie crasht (StackOverflow). Schrijf altijd naar het private field!
         </div>
 
         <hr>
 
-        <h2>Stap 3: Opruimen & Testen</h2>
-        <p>Nu onze Property slim is geworden, is de oude methode <code>SetEnergy</code> overbodig geworden. Sterker nog, hij doet nu dubbel werk.</p>
+        <h2>Stap 3: Refactoring (Grote Schoonmaak)</h2>
+        <p>Nu komt het belangrijkste punt. We hebben de controle nu ingebouwd in de Property. </p>
+        <p>Dat betekent dat de oude methode <code>SetEnergy</code> nu <strong>overbodig</strong> en zelfs verwarrend is. Waarom zou je een losse methode houden als de Property het zelf al regelt?</p>
 
-        <p><strong>Actie:</strong> Verwijder de hele methode <code>public void SetEnergy(int amount)</code> uit je class.</p>
+        <p><strong>Actie:</strong> Verwijder de volledige methode <code>public void SetEnergy(int amount) { ... }</code> uit je class <code>DigitalPet.cs</code>.</p>
 
-        <h3>Waarom werkt Sleep() nu wel veilig?</h3>
-        <p>Kijk naar de code van <code>Sleep()</code>. Je hoeft hier <strong>niets</strong> aan te veranderen:</p>
-        <pre><code class="language-csharp">    this.Energy += 20;</code></pre>
-        <p>Omdat <code>Energy</code> (met hoofdletter) nu onze slimme property is, wordt bij deze optelsom automatisch de <code>set</code>-code uitgevoerd. Als de uitkomst 110 is, zet de setter hem stiekem terug naar 100.</p>
+        <p><em>Heb je hem verwijderd? Goed zo! Dan is je code nu weer strak en netjes.</em></p>
 
         <hr>
 
-        <h2>Stap 4: Bewijs in Program.cs</h2>
-        <p>Laten we testen of onze beveiliging werkt, zelfs bij het aanmaken van een nieuwe Pet.</p>
-        <p>Open <code>Program.cs</code> en voeg deze test toe:</p>
+        <h2>Stap 4: Program.cs Repareren</h2>
+        <p>Omdat we <code>SetEnergy</code> hebben verwijderd, raakt <code>Program.cs</code> in paniek als je die methode daar nog gebruikte.</p>
 
-        <pre><code class="language-csharp">// Test: Probeer een 'God Mode' dino te maken met 9999 energie
+        <div class="info-box warning">
+            <strong>Verwachte Foutmelding:</strong><br>
+            <em>'DigitalPet' does not contain a definition for 'SetEnergy'.</em>
+        </div>
+
+        <h3>Hoe lossen we dit op?</h3>
+        <p>Misschien denk je: <em>"Oh, dan verander ik het toch gewoon naar `dino.Energy = 50`?"</em></p>
+        <p><strong>NEE!</strong> Want we hebben de setter <code>private</code> gemaakt (zie les 3.1). Je mag van buitenaf helemaal niet meer handmatig aan de knoppen draaien.</p>
+
+        <p><strong>De Oplossing:</strong><br>
+            Als je wilt testen of je validatie (max 100) werkt, moet je dat doen via de <strong>Constructor</strong> (bij het aanmaken) of via een bestaande actie zoals <code>Sleep()</code>.</p>
+
+        <p>Pas je <code>Program.cs</code> aan:</p>
+
+        <pre><code class="language-csharp">// 1. Verwijder regels met SetEnergy (die bestaat niet meer)
+// dino.SetEnergy(-50); <--- WEG ERMEE!
+
+// 2. Test je validatie door een 'Cheater' dino te maken
+// We proberen 9999 energie te geven bij de geboorte.
 DigitalPet cheater = new DigitalPet("Cheater", 9999);
 
-Console.WriteLine("Cheater Stats:");
+// 3. Bekijk het resultaat
 Console.WriteLine(cheater.EnergyDisplay());
-// Verwacht: "Cheater - Level: 100/100" (automatisch afgekapt!)</code></pre>
-
-        <p>Omdat de constructor <code>this.Energy = energy;</code> doet, gaat ook die waarde door de "portier" heen. Je code is nu waterdicht!</p>
+// Omdat de Constructor 'this.Energy = ...' doet,
+// gaat ook dit getal door jouw nieuwe check heen!
+// Verwacht resultaat: "Cheater - Level: 100/100"</code></pre>
 
         <hr>
 
         <h2>Samenvatting</h2>
         <ul>
-            <li>Je hebt geleerd hoe je een <strong>Backing Field</strong> (`_energy`) combineert met een Property.</li>
-            <li>Je hebt logica ("if/else") verplaatst van een losse methode naar de <strong>set</strong> van de property.</li>
-            <li>Hierdoor is je variabele <strong>altijd</strong> beschermd, of je hem nu aanpast via <code>Sleep()</code>, de Constructor of een andere methode.</li>
+            <li><strong>Refactoring:</strong> Als je functionaliteit verbetert (van methode naar property), moet je de oude code verwijderen.</li>
+            <li><strong>Value:</strong> De verborgen variabele in de `set` die de input bevat.</li>
+            <li><strong>Backing Field:</strong> De privékamer (`_energy`) waar de property (`Energy`) zijn data opslaat.</li>
         </ul>
 
     </main>

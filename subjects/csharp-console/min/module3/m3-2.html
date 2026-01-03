@@ -1,10 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validatie & Logic - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.2: Validatie & Logic</h1>
 
+        <p class="lead">We verplaatsen validatielogica (zoals "maximaal 100 energie") naar de Property zelf met behulp van Backing Fields.</p>
+
+        <h2>Full Properties</h2>
+        <p>Om logica toe te voegen aan een property, splitsen we deze in twee delen:</p>
+        <ol>
+            <li><strong>Backing Field (`private`):</strong> De variabele die de data echt opslaat.</li>
+            <li><strong>Property (`public`):</strong> De toegangspoort die controleert.</li>
+        </ol>
+
+
+        <hr>
+
+        <h2>Stap 1: Backing Field toevoegen</h2>
+        <p>Voeg in <code>DigitalPet.cs</code> een privaat veld toe boven de properties.</p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    private int _energy; // Opslag voor energie
+
+    // ...</code></pre>
+
+        <h2>Stap 2: Property ombouwen</h2>
+        <p>Vervang de oude `Energy` property door deze volledige versie met validatie logic.</p>
+
+        <pre><code class="language-csharp">    public int Energy
+    {
+        get { return _energy; }
+        private set
+        {
+            // 'value' is de nieuwe waarde die wordt aangeboden
+            if (value < 0)
+            {
+                _energy = 0;
+            }
+            else if (value > 100)
+            {
+                _energy = 100;
+            }
+            else
+            {
+                _energy = value;
+            }
+        }
+    }</code></pre>
+
+        <div class="info-box warning">
+            <strong>Let op:</strong> Gebruik in de `set` altijd het veld `_energy`. Als je `Energy = ...` gebruikt, ontstaat er een oneindige lus (StackOverflow).
+        </div>
+
+        <hr>
+
+        <h2>Stap 3: Refactoring</h2>
+        <p>De methode <code>SetEnergy</code> is nu overbodig, omdat de property zelf de controle uitvoert.</p>
+        <ul>
+            <li>Verwijder de methode <code>public void SetEnergy(...)</code> uit `DigitalPet.cs`.</li>
+            <li>In `Program.cs`: Verwijder aanroepen naar `SetEnergy`.</li>
+        </ul>
+
+        <h2>Stap 4: Testen</h2>
+        <p>Test in <code>Program.cs</code> of de validatie werkt via de Constructor.</p>
+
+        <pre><code class="language-csharp">// Probeer 9999 energie te geven
+DigitalPet cheater = new DigitalPet("Cheater", 9999);
+
+Console.WriteLine(cheater.EnergyDisplay());
+// Verwacht: "Level: 100/100" (automatisch gecorrigeerd)</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

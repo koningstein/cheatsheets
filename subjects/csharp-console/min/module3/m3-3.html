@@ -1,10 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constants & Readonly - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.3: Constants & Readonly</h1>
 
+        <p class="lead">We vervangen "Magic Numbers" (losse getallen) door constanten en gebruiken `readonly` voor data die na aanmaak niet meer mag wijzigen.</p>
+
+        <h2>Stap 1: Constants definiëren</h2>
+        <p>Voeg <code>const</code> variabelen toe bovenin <code>DigitalPet.cs</code>. Deze waardes staan vast voor de hele applicatie.</p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    public const int MaxEnergy = 100;
+    public const int MinEnergy = 0;
+    public const int SleepEnergyGain = 20;
+
+    // ... fields en properties</code></pre>
+
+        <h2>Stap 2: Implementeren en String Interpolation</h2>
+        <p>Vervang de harde getallen in je code door de constanten. Gebruik de <code>$</code> syntax voor tekst.</p>
+
+        <pre><code class="language-csharp">    // Voorbeeld in Sleep() methode:
+    public string Sleep()
+    {
+        this.IsSleeping = true;
+        this.Energy += SleepEnergyGain; // Gebruik constant
+        UpdateStatus();
+
+        // String Interpolation ($)
+        return $"Zzz... (+{SleepEnergyGain} Energie)";
+    }</code></pre>
+
+        <p><em>Vergeet niet ook je Property validatie aan te passen naar `MinEnergy` en `MaxEnergy`.</em></p>
+
+        <hr>
+
+        <h2>Stap 3: Readonly Property</h2>
+        <p>Gebruik een <strong>Read-only Property</strong> (alleen `get`) voor waardes die uniek zijn per object, maar na de constructor vaststaan.</p>
+
+        <pre><code class="language-csharp">    // Geen 'set', ook geen private set.
+    public DateTime BirthDate { get; }</code></pre>
+
+        <h2>Stap 4: Constructor Update</h2>
+        <p>De constructor is de enige plek waar je een read-only property mag vullen.</p>
+
+        <pre><code class="language-csharp">    public DigitalPet(string name, int energy = 50, int hunger = 0, bool isSleeping = false)
+    {
+        this.Name = name;
+        this.Energy = energy;
+        this.Hunger = hunger;
+        this.IsSleeping = isSleeping;
+
+        this.BirthDate = DateTime.Now; // Hier mag het!
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 5: Aanroepen in Program.cs</h2>
+        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet("Rex");
+
+// Const: Via de Class naam
+Console.WriteLine($"Max: {DigitalPet.MaxEnergy}");
+
+// Readonly: Via het Object
+Console.WriteLine($"Geboren: {dino.BirthDate}");</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

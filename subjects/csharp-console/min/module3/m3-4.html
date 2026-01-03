@@ -1,10 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Safety & Nullable Types - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.4: Type Safety & Nullable Types</h1>
 
+        <p class="lead">We voorkomen crashes door veilig om te gaan met ontbrekende data (`null`) en user input.</p>
+
+        <h2>Het Concept</h2>
+        <ul>
+            <li><strong>Type Safety:</strong> Variabelen hebben een vast type.</li>
+            <li><strong>Null:</strong> De afwezigheid van waarde. Dit veroorzaakt crashes als je het niet checkt.</li>
+            <li><strong>Nullable Type (`?`):</strong> Geeft expliciet aan dat een variabele leeg mag zijn (bijv. `string?`).</li>
+        </ul>
+
+
+        <hr>
+
+        <h2>Stap 1: DigitalPet update</h2>
+        <p>Pas de <code>Rename</code> methode aan zodat deze <code>string?</code> accepteert en checkt op null.</p>
+
+        <pre><code class="language-csharp">    // string? betekent: input mag tekst zijn OF null
+    public string Rename(string? newName)
+    {
+        // IsNullOrWhiteSpace checkt op: null, lege tekst "", of spaties " "
+        if (!string.IsNullOrWhiteSpace(newName))
+        {
+            this.Name = newName;
+            return $"Naam gewijzigd naar: {this.Name}";
+        }
+        else
+        {
+            return "Ongeldige naam, oude naam behouden.";
+        }
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Program.cs Interactie</h2>
+        <p>We gebruiken <code>Console.ReadLine()</code> om input te vragen. Omdat de gebruiker niets kan invullen, is dit een risico.</p>
+        <p>Vervang de code in <code>Program.cs</code>:</p>
+
+        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet("Rex");
+Console.WriteLine($"Huidige naam: {dino.Name}");
+
+Console.Write("Typ een nieuwe naam: ");
+
+// Input lezen (kan null zijn)
+string? input = Console.ReadLine();
+
+// Veilige methode aanroepen
+Console.WriteLine(dino.Rename(input));
+
+Console.WriteLine(dino.GetDescription());
+Console.ReadLine();</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

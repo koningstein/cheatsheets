@@ -1,10 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constants & Readonly - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.3: Constants & Readonly</h1>
 
+        <p class="lead">Onze code wordt veiliger en slimmer. Vandaag leren we hoe we "harde afspraken" vastleggen in code, zodat we niet overal losse getallen hoeven te typen.</p>
+
+        <h2>De Metafoor: Natuurwetten vs. DNA</h2>
+        <p>Er zijn twee soorten "vaste gegevens" in de wereld:</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>🌌 Natuurwetten (Const)</h3>
+                <p>Dingen die voor <strong>iedereen</strong> en <strong>altijd</strong> hetzelfde zijn. Bijvoorbeeld: Water kookt bij 100 graden. Dit verandert nooit.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🧬 DNA (Readonly)</h3>
+                <p>Dingen die uniek zijn per persoon, maar vaststaan na de geboorte. Bijvoorbeeld: Jouw geboortedatum of oogkleur. Zodra je geboren bent (Constructor), verandert dit niet meer.</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>Het Probleem: Magic Numbers</h2>
+        <p>Kijk eens kritisch naar je huidige code in <code>DigitalPet.cs</code>. We gebruiken overal losse getallen:</p>
+        <pre><code class="language-csharp">if (value > 100) // Waarom 100? Wat als we dit willen verhogen naar 150?
+this.Energy += 20; // Waarom 20? Wat als slapen minder effectief wordt?</code></pre>
+
+        <p>Dit noemen we <strong>Magic Numbers</strong>. Als je de spelregels wilt aanpassen, moet je nu op 5 plekken zoeken en vervangen. Dat is foutgevoelig.</p>
+
+        <hr>
+
+        <h2>De Oplossing: Constants</h2>
+        <p>We gaan deze getallen vervangen door namen. Dat leest fijner én je hoeft het maar op één plek aan te passen.</p>
+
+        <h3>Stap 1: Spelregels definiëren</h3>
+        <p>Open <code>Models/DigitalPet.cs</code>. We voegen bovenaan de class (boven de fields) onze constanten toe.</p>
+        <p><em>Conventie: Constanten schrijven we vaak met PascalCase (Hoofdletters), omdat ze voor de hele applicatie gelden.</em></p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    // CONFIGURATIE (De Natuurwetten)
+    // 'const' betekent: dit staat vast tijdens het programmeren en verandert nooit.
+    public const int MaxEnergy = 100;
+    public const int MinEnergy = 0;
+    public const int SleepEnergyGain = 20;
+
+    // ... hieronder komen je fields en properties</code></pre>
+
+        <h3>Stap 2: De logica aanpassen</h3>
+        <p>Nu gaan we de losse getallen vervangen door onze nieuwe woorden. Pas je Property <code>Energy</code> en de methode <code>Sleep</code> aan.</p>
+
+        <pre><code class="language-csharp">    // De Property (De Ober)
+    public int Energy
+    {
+        get { return _energy; }
+        private set
+        {
+            // Kijk hoe leesbaar dit nu is!
+            if (value < MinEnergy)
+            {
+                _energy = MinEnergy;
+            }
+            else if (value > MaxEnergy)
+            {
+                _energy = MaxEnergy;
+            }
+            else
+            {
+                _energy = value;
+            }
+        }
+    }
+
+    // ...
+
+    public string Sleep()
+    {
+        this.IsSleeping = true;
+
+        // 1. Gebruik de constant in plaats van het getal 20
+        this.Energy += SleepEnergyGain;
+
+        // Zorg dat de honger toeneemt terwijl we slapen
+        UpdateStatus();
+
+        // 2. String Interpolation (Nieuw!)
+        return $"Zzz... (+{SleepEnergyGain} Energie)";
+    }</code></pre>
+
+        <div class="info-box note">
+            <h3>Nieuwe Syntax: String Interpolation ($)</h3>
+            <p>Tot nu toe plakten we tekst aan elkaar met <code>+</code>:</p>
+            <pre><code>return "Zzz... (+" + SleepEnergyGain + " Energie)";</code></pre>
+            <p>Vanaf nu gebruiken we <strong>String Interpolation</strong>. Door een <strong>dollar-teken ($)</strong> voor de aanhalingstekens te zetten, mag je variabelen direct in de tekst plaatsen tussen accolades <code>{ }</code>.</p>
+            <pre><code>return $"Zzz... (+{SleepEnergyGain} Energie)";</code></pre>
+            <p>Dit is veel korter, leesbaarder en minder gevoelig voor typefouten met spaties!</p>
+        </div>
+
+        <div class="info-box success">
+            <strong>Oefening:</strong> Verander bovenin <code>MaxEnergy</code> eens naar 150. Je zult zien dat je hele applicatie (inclusief checks) direct werkt met de nieuwe limiet!
+        </div>
+
+        <hr>
+
+        <h2>Deel 2: Readonly (DNA)</h2>
+        <p>Soms heb je waardes die per Pet verschillen, maar die na de geboorte niet meer mogen veranderen. Denk aan een geboortedatum.</p>
+        <p>Hiervoor gebruiken we een <strong>Read-only Property</strong>. Dat is simpelweg een property die <strong>alleen een `get`</strong> heeft (en helemaal geen `set`).</p>
+
+        <h3>Stap 3: Geboortedatum toevoegen</h3>
+        <p>Voeg een nieuwe property toe aan <code>DigitalPet.cs</code>:</p>
+
+        <pre><code class="language-csharp">    // READ-ONLY PROPERTY (Het DNA)
+    // We hebben GEEN 'set', ook geen private set.
+    // Dit betekent dat deze waarde ALLEEN in de Constructor gevuld kan worden.
+    public DateTime BirthDate { get; }</code></pre>
+
+        <h3>Stap 4: De Constructor updaten</h3>
+        <p>Omdat de property geen setter heeft, is de Constructor de <strong>enige</strong> plek waar we hem een waarde kunnen geven. Laten we zeggen dat de geboortedatum altijd "nu" is.</p>
+
+        <pre><code class="language-csharp">    public DigitalPet(string name, int energy = 50, int hunger = 0, bool isSleeping = false)
+    {
+        this.Name = name;
+        this.Energy = energy; // Gaat door de validatie
+        this.Hunger = hunger;
+        this.IsSleeping = isSleeping;
+
+        // Dit mag hier, omdat het de constructor is!
+        this.BirthDate = DateTime.Now;
+    }</code></pre>
+
+        <div class="info-box warning">
+            <strong>Let op:</strong> Probeer eens een methode <code>Reset()</code> te maken en daarin <code>this.BirthDate = DateTime.Now;</code> te zetten. <br>
+            Je zult zien dat dit <strong>niet mag</strong>. Een property zonder setter is muurvast na de constructor.
+        </div>
+
+        <hr>
+
+        <h2>Stap 5: Program.cs</h2>
+        <p>Laten we in <code>Program.cs</code> onze nieuwe data tonen. Je zult zien dat je de constanten op een bijzondere manier aanroept.</p>
+
+        <pre><code class="language-csharp">DigitalPet dino = new DigitalPet("Rex");
+
+// 1. Constanten aanroepen
+// Omdat 'MaxEnergy' voor ALLE pets hetzelfde is, roep je hem aan via de Class-naam
+// Let op: ook hier gebruiken we de $ syntax!
+Console.WriteLine($"De maximale energie voor elke pet is: {DigitalPet.MaxEnergy}");
+
+// 2. Readonly aanroepen
+// De geboortedatum is uniek per pet, dus die roep je aan via het object
+Console.WriteLine($"Rex is geboren op: {dino.BirthDate}");
+
+Console.WriteLine(dino.Sleep()); // Werkt nu met de variabele SleepEnergyGain</code></pre>
+
+        <hr>
+
+        <h2>Samenvatting</h2>
+        <ul>
+            <li><strong>Const:</strong> Voor waardes die nooit veranderen (Natuurwetten). Je roept ze aan via de Class naam (`DigitalPet.MaxEnergy`).</li>
+            <li><strong>Read-only Property (`get;`):</strong> Voor waardes die vaststaan na aanmaak (DNA). Je vult ze in de Constructor.</li>
+            <li><strong>String Interpolation (`$"{var}"`):</strong> Een moderne, schonere manier om tekst en variabelen te combineren.</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

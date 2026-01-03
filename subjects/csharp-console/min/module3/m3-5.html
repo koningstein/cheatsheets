@@ -1,10 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentatie & XML Comments - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.5: Documentatie (XML Comments)</h1>
 
+        <p class="lead">We voegen XML-documentatie toe zodat Visual Studio IntelliSense (pop-ups) kan tonen met uitleg over onze code.</p>
+
+        <h2>XML Comments</h2>
+        <p>Door `///` boven een class, methode of property te typen, kun je documentatie toevoegen.</p>
+        <ul>
+            <li><code>&lt;summary&gt;</code>: Korte beschrijving.</li>
+            <li><code>&lt;remarks&gt;</code>: Extra details/waarschuwingen.</li>
+            <li><code>&lt;param&gt;</code>: Uitleg van input parameters.</li>
+            <li><code>&lt;returns&gt;</code>: Uitleg van het resultaat.</li>
+        </ul>
+
+
+        <hr>
+
+        <h2>Stap 1: Class Documentatie</h2>
+        <p>Voeg documentatie toe boven de class definitie in <code>DigitalPet.cs</code>.</p>
+
+        <pre><code class="language-csharp">/// &lt;summary&gt;
+/// Een virtueel huisdier dat kan eten, slapen en spelen.
+/// &lt;/summary&gt;
+/// &lt;remarks&gt;
+/// Energie wordt automatisch begrensd tussen 0 en 100.
+/// &lt;/remarks&gt;
+public class DigitalPet
+{
+    // ...</code></pre>
+
+        <h2>Stap 2: Constructor Documentatie</h2>
+        <p>Dit zorgt voor uitleg tijdens het typen van `new DigitalPet(...)`.</p>
+
+        <pre><code class="language-csharp">    /// &lt;summary&gt;
+    /// Maakt een nieuw digitaal huisdier aan.
+    /// &lt;/summary&gt;
+    /// &lt;param name="name"&gt;De naam van het dier (verplicht).&lt;/param&gt;
+    /// &lt;param name="energy"&gt;Start energie (Standaard 50).&lt;/param&gt;
+    /// &lt;param name="hunger"&gt;Start honger (Standaard 0).&lt;/param&gt;
+    /// &lt;param name="isSleeping"&gt;Slaapt het dier bij geboorte? (Standaard false).&lt;/param&gt;
+    public DigitalPet(string name, int energy = 50, int hunger = 0, bool isSleeping = false)
+    {
+        // ...</code></pre>
+
+        <h2>Stap 3: Methode Documentatie</h2>
+        <p>Voeg uitleg toe aan de `Rename` methode.</p>
+
+        <pre><code class="language-csharp">    /// &lt;summary&gt;
+    /// Probeert de naam van het dier te wijzigen.
+    /// &lt;/summary&gt;
+    /// &lt;param name="newName"&gt;De gewenste nieuwe naam.&lt;/param&gt;
+    /// &lt;returns&gt;Een bericht of de wijziging gelukt is.&lt;/returns&gt;
+    public string Rename(string? newName)
+    {
+        // ...</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Controleren</h2>
+        <p>Ga naar <code>Program.cs</code> en hover met je muis over `DigitalPet` of de methodes om je eigen documentatie te zien.</p>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>

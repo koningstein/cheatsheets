@@ -1,10 +1,208 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl" data-theme="light" data-color="purple">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Safety & Nullable Types - C# Module 2</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.4: Type Safety & Nullable Types</h1>
 
+        <p class="lead">Vandaag behandelen we de "aartsvijand" van elke programmeur: de gevreesde crash omdat er data mist. We leren hoe we veilig omgaan met <code>null</code>.</p>
+
+        <h2>De Metafoor: De Lege Doos vs. Lucht</h2>
+        <p>Stel je voor dat variabelen dozen zijn waar je iets in stopt.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>📦 Een string (Tekst)</h3>
+                <p>Dit is een doos met het label "Name". In de doos zit een briefje met "Rex". Als je de doos openmaakt, vind je tekst.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📭 Een lege string ("")</h3>
+                <p>De doos is er wel, maar het briefje is blanco. Je kunt het briefje nog steeds lezen, er staat alleen niets op.</p>
+            </div>
+            <div class="feature-card">
+                <h3>💥 Null (Niets)</h3>
+                <p>Dit is géén doos. Je probeert een doos te pakken die er niet is. Je grijpt in de lucht en... <strong>je valt om</strong> (Crash!).</p>
+            </div>
+        </div>
+
+
+
+        <p>In C# noemen we dit "grijpen in de lucht" een <code>NullReferenceException</code>. Dit is de nummer 1 reden waarom apps crashen. Vandaag leren we hoe we dat voorkomen.</p>
+
+        <hr>
+
+        <h2>Het Probleem: De Onzichtbare Val</h2>
+        <p>C# is een <strong>Type Safe</strong> taal. Dat betekent dat een <code>int</code> altijd een getal moet zijn en een <code>string</code> altijd tekst.</p>
+        <p>Maar... soms weten we een waarde (nog) niet. Bijvoorbeeld:</p>
+        <ul>
+            <li>Een gebruiker vult zijn naam niet in.</li>
+            <li>We vragen data op uit een database, maar het resultaat is leeg.</li>
+        </ul>
+
+        <p>Vroeger (in oude C# versies) mocht je dit doen:</p>
+        <pre><code class="language-csharp">string name = null; // Gevaarlijk!
+int length = name.Length; // CRASH! Want je kunt de lengte van 'niets' niet meten.</code></pre>
+
+        <hr>
+
+        <h2>De Oplossing: Nullable Types (?)</h2>
+        <p>In moderne C# (.NET 6 en hoger) helpen we de compiler een handje. We moeten expliciet aangeven: "Hé, deze variabele <em>mag</em> leeg zijn."</p>
+
+        <h3>1. Het vraagteken (?)</h3>
+        <p>Door een vraagteken achter het type te zetten, maak je het <strong>Nullable</strong>.</p>
+        <pre><code class="language-csharp">string  name  = "Rex";  // Mag NOOIT null zijn. Moet altijd tekst bevatten.
+string? input = null;   // Mag tekst zijn, maar mag ook null (leeg) zijn.</code></pre>
+
+        <h3>2. De Check (if)</h3>
+        <p>Als je een variabele hebt die <code>null</code> kan zijn, moet je checken of er iets in zit voordat je hem gebruikt.</p>
+        <pre><code class="language-csharp">if (input != null)
+{
+    // Veilig! We weten zeker dat er iets is.
+    dino.Rename(input);
+}</code></pre>
+
+        <h3>3. De Back-up Plan (??)</h3>
+        <p>Dit is een trucje voor pro's. De <strong>Null Coalescing Operator</strong> (<code>??</code>). Het betekent: <em>"Gebruik de waarde links, maar als die er niet is (null), gebruik dan de waarde rechts."</em></p>
+        <pre><code class="language-csharp">string finalName = input ?? "Unnamed";</code></pre>
+
+        <hr>
+
+        <h2>Implementatie: Interactie toevoegen</h2>
+        <p>We gaan onze applicatie interactief maken. We vragen de gebruiker om input voor zowel Rex als Fluffy. Omdat gebruikers soms niets intypen (gewoon op Enter drukken), moeten we ons beschermen tegen <code>null</code>.</p>
+
+        <h3>Stap 1: DigitalPet aanpassen</h3>
+        <p>We passen de <code>Rename</code> methode in <code>DigitalPet.cs</code> aan. We willen dat deze methode flexibel is: hij moet een invoer accepteren die misschien leeg is (`string?`).</p>
+
+        <p>We maken er een <code>string</code> methode van (met return), zodat we netjes een bericht teruggeven in plaats van zelf te printen.</p>
+
+        <p>Open <code>Models/DigitalPet.cs</code> en zoek de methode <code>Rename</code>. Vervang hem door deze veilige versie:</p>
+
+        <pre><code class="language-csharp">    // 1. Return type is 'string' (geen void meer)
+    // 2. Input type is 'string?' (mag leeg zijn)
+    public string Rename(string? newName)
+    {
+        // Check 1: Is de doos er wel? (Is het niet null?)
+        // Check 2: Is het briefje niet blanco? (Is het geen lege tekst?)
+        if (!string.IsNullOrWhiteSpace(newName))
+        {
+            this.Name = newName;
+            return $"Naam succesvol gewijzigd naar: {this.Name}";
+        }
+        else
+        {
+            return "Ongeldige naam! We houden de oude naam.";
+        }
+    }</code></pre>
+
+        <div class="info-box warning">
+            <strong>Code Uitleg:</strong> <code>string.IsNullOrWhiteSpace(...)</code> is een superhandige methode. Hij checkt in één keer of de tekst <code>null</code> is, leeg is <code>""</code>, of alleen spaties bevat <code>"   "</code>.
+        </div>
+
+        <h3>Stap 2: Program.cs interactief maken</h3>
+        <p>Nu gaan we <code>Program.cs</code> uitbreiden. De volgorde is logisch: eerst maken we het dier, dan vragen we om een naam, en daarna tonen we de (nieuwe) status.</p>
+
+        <p>Vervang de <strong>volledige inhoud</strong> van <code>Program.cs</code> door onderstaande code:</p>
+
+        <pre><code class="language-csharp">using Figgle.Fonts;
+using Tamagotchi.Models;
+
+// 1. Banner tonen
+string banner = FiggleFonts.Standard.Render("Dino Game");
+Console.WriteLine(banner);
+
+// --- DINO 1 (Rex) ---
+// We maken hem aan (met een tijdelijke naam 'Rex')
+DigitalPet dino = new DigitalPet("Rex", isSleeping: true);
+
+Console.WriteLine("----------------------------------");
+Console.WriteLine($"Er is een nieuwe dino gevonden! (Standaard naam: {dino.Name})");
+Console.Write("Hoe wil je hem noemen? ");
+
+// INPUT VRAGEN
+// Hier gebruiken we string? omdat Console.ReadLine leeg kan zijn.
+string? inputDino = Console.ReadLine();
+Console.WriteLine(dino.Rename(inputDino)); // Veilige update
+
+// DETAILS TONEN (Na de input)
+Console.WriteLine(dino.GetDescription());
+Console.WriteLine(dino.EnergyDisplay());
+Console.WriteLine(dino.Sleep()); // Actie uitvoeren
+
+
+// --- DINO 2 (Fluffy) ---
+// We maken een tweede dino aan met andere stats
+DigitalPet fluffy = new DigitalPet(
+    hunger: 10,
+    isSleeping: false,
+    name: "Fluffy",
+    energy: 80
+);
+
+Console.WriteLine("\n----------------------------------");
+Console.WriteLine($"Er komt een tweede dino aanlopen... (Standaard naam: {fluffy.Name})");
+Console.Write("Hoe wil je deze noemen? ");
+
+// INPUT VRAGEN
+string? inputFluffy = Console.ReadLine();
+Console.WriteLine(fluffy.Rename(inputFluffy)); // Veilige update
+
+// DETAILS TONEN (Hetzelfde rijtje als bij dino 1)
+Console.WriteLine(fluffy.GetDescription());
+Console.WriteLine(fluffy.EnergyDisplay());
+// (Fluffy laten we niet slapen, die is wakker)
+
+
+// --- OVERIGE CODE ---
+Food apple = new Food("Appel", 10);
+Console.WriteLine("\nEn we hebben eten: " + apple.Name);
+
+// De Cheater test (om te zien of validatie werkt)
+DigitalPet cheater = new DigitalPet("Cheater", 9999);
+Console.WriteLine(cheater.EnergyDisplay());
+
+// Scherm open houden
+Console.ReadLine();</code></pre>
+
+        <hr>
+
+        <h2>Zelf testen</h2>
+        <p>Run je programma en probeer het volgende:</p>
+        <ol>
+            <li>Vul voor de eerste dino een normale naam in (bijv. "Godzilla"). &rarr; De naam verandert en je ziet daarna de stats met "Godzilla".</li>
+            <li>Druk bij de tweede dino direct op <strong>Enter</strong> zonder iets te typen. &rarr; De code crasht niet! Hij geeft een melding en houdt de naam "Fluffy".</li>
+        </ol>
+
+        <hr>
+
+        <h2>Samenvatting</h2>
+        <ul>
+            <li><strong>Type Safety</strong> beschermt je, maar <code>null</code> is een gevaarlijke uitzondering.</li>
+            <li>Gebruik <code>string?</code> (met vraagteken) als een variabele leeg <em>mag</em> zijn.</li>
+            <li>Controleer altijd of data bestaat (`if != null` of `string.IsNullOrWhiteSpace`) voordat je het gebruikt.</li>
+            <li>Laat methodes informatie <strong>returnen</strong> in plaats van zelf te printen (`Console.WriteLine`).</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
 </body>
 </html>
