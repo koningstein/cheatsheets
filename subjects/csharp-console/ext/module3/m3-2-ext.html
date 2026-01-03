@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validatie & Logic - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.2: Validatie & Logic</h1>
+
+        <p class="lead">We gaan onze properties slim maken. In plaats van alleen data opslaan, gaan ze fungeren als poortwachters die controleren of de data wel klopt.</p>
+
+        <h2>De Metafoor: De Portier</h2>
+        <p>In de vorige les hebben we de deur op slot gedaan (`private set`). Alleen het personeel (de methodes) mocht naar binnen.</p>
+        <p>Maar... wat als een medewerker per ongeluk 200 mensen toelaat in een zaal waar er maar 100 mogen? Een slot is niet genoeg; je hebt een <strong>Portier</strong> nodig die telt en controleert, ongeacht wie er naar binnen wil.</p>
+
+        <p>In C# doen we dit door van een simpele Property een <strong>Full Property met Logica</strong> te maken.</p>
+
+        <hr>
+
+        <h2>Het Probleem</h2>
+        <p>Kijk eens naar je methode <code>Sleep()</code> in <code>DigitalPet.cs</code>:</p>
+        <pre><code class="language-csharp">public string Sleep()
+{
+    this.IsSleeping = true;
+    this.Energy += 20; // <--- HIER ZIT HET GEVAAR!
+    // ...
+}</code></pre>
+
+        <p>Stel dat de energie al op 90 staat. <code>90 + 20 = 110</code>. Dat mag niet, want het maximum is 100.<br>
+            Je hebt wel een methode <code>SetEnergy</code> die dit controleert, maar in <code>Sleep</code> gebruiken we die niet! We passen <code>Energy</code> direct aan en omzeilen onze eigen regels.</p>
+
+        <hr>
+
+        <h2>De Oplossing: Full Properties</h2>
+        <p>We gaan de opslag van de data (de variabele) splitsen van de toegang (de property). Zo dwingen we af dat <em>elke</em> wijziging gecontroleerd wordt.</p>
+
+        <h3>Stap 1: Backing Field toevoegen</h3>
+        <p>Open <code>Models/DigitalPet.cs</code>. Voeg bovenaan in de class (boven de properties) een privaat veld toe. Dit is de "kluis" waar de échte waarde in zit.</p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    // De 'Backing Field' (De interne opslag)
+    // We gebruiken vaak een underscore voor private fields
+    private int _energy;
+
+    // ... hieronder komen de properties</code></pre>
+
+        <h3>Stap 2: De Property Ombouwen</h3>
+        <p>Verwijder de oude regel: <code>public int Energy { get; private set; }</code>.<br>
+            Vervang deze door de nieuwe "Slimme Property":</p>
+
+        <pre><code class="language-csharp">    // De Publieke Property (De Portier)
+    public int Energy
+    {
+        get
+        {
+            return _energy; // Geef de inhoud van de kluis terug
+        }
+        private set
+        {
+            // 'value' is het getal dat we proberen in te stellen
+
+            // Hier plakken we de logica die eerst in SetEnergy zat:
+            if (value < 0)
+            {
+                _energy = 0; // Corrigeer naar minimum
+            }
+            else if (value > 100)
+            {
+                _energy = 100; // Corrigeer naar maximum
+            }
+            else
+            {
+                _energy = value; // Alles oké? Opslaan in de kluis!
+            }
+        }
+    }</code></pre>
+
+        <div class="info-box warning">
+            <strong>Grote Valkuil:</strong><br>
+            Schrijf in de set <strong>NOOIT</strong> <code>Energy = value;</code> (met een hoofdletter).<br>
+            Dan roep je namelijk de property zelf weer aan &rarr; die roept weer de set aan &rarr; oneindige lus (StackOverflow)! <br>
+            Gebruik altijd het private field (<code>_energy</code>) om op te slaan.
+        </div>
+
+        <hr>
+
+        <h2>Stap 3: Opruimen & Testen</h2>
+        <p>Nu onze Property slim is geworden, is de oude methode <code>SetEnergy</code> overbodig geworden. Sterker nog, hij doet nu dubbel werk.</p>
+
+        <p><strong>Actie:</strong> Verwijder de hele methode <code>public void SetEnergy(int amount)</code> uit je class.</p>
+
+        <h3>Waarom werkt Sleep() nu wel veilig?</h3>
+        <p>Kijk naar de code van <code>Sleep()</code>. Je hoeft hier <strong>niets</strong> aan te veranderen:</p>
+        <pre><code class="language-csharp">    this.Energy += 20;</code></pre>
+        <p>Omdat <code>Energy</code> (met hoofdletter) nu onze slimme property is, wordt bij deze optelsom automatisch de <code>set</code>-code uitgevoerd. Als de uitkomst 110 is, zet de setter hem stiekem terug naar 100.</p>
+
+        <hr>
+
+        <h2>Stap 4: Bewijs in Program.cs</h2>
+        <p>Laten we testen of onze beveiliging werkt, zelfs bij het aanmaken van een nieuwe Pet.</p>
+        <p>Open <code>Program.cs</code> en voeg deze test toe:</p>
+
+        <pre><code class="language-csharp">// Test: Probeer een 'God Mode' dino te maken met 9999 energie
+DigitalPet cheater = new DigitalPet("Cheater", 9999);
+
+Console.WriteLine("Cheater Stats:");
+Console.WriteLine(cheater.EnergyDisplay());
+// Verwacht: "Cheater - Level: 100/100" (automatisch afgekapt!)</code></pre>
+
+        <p>Omdat de constructor <code>this.Energy = energy;</code> doet, gaat ook die waarde door de "portier" heen. Je code is nu waterdicht!</p>
+
+        <hr>
+
+        <h2>Samenvatting</h2>
+        <ul>
+            <li>Je hebt geleerd hoe je een <strong>Backing Field</strong> (`_energy`) combineert met een Property.</li>
+            <li>Je hebt logica ("if/else") verplaatst van een losse methode naar de <strong>set</strong> van de property.</li>
+            <li>Hierdoor is je variabele <strong>altijd</strong> beschermd, of je hem nu aanpast via <code>Sleep()</code>, de Constructor of een andere methode.</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

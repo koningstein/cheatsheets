@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encapsulation & Properties - C# Module 3</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 3.1: Encapsulation & Properties</h1>
+
+        <p class="lead">Vandaag leren we een van de belangrijkste principes van programmeren: <strong>Encapsulation</strong>. We gaan onze data beschermen tegen fouten van buitenaf.</p>
+
+        <h2>De Metafoor: De Bankrekening</h2>
+        <p>Stel je een bankrekening voor.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>👀 Het Saldo (Get)</h3>
+                <p>Je mag op je app altijd zien hoeveel geld je hebt. Dit is <strong>publieke</strong> informatie voor jou.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Het Geld (Set)</h3>
+                <p>Mag je zelf het saldo in de database van de bank aanpassen? <strong>Nee!</strong> Je moet een 'storting' doen (een methode). De bank controleert dan of het geld echt is. De schrijftoegang is <strong>privé</strong> voor de bank.</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>Het Probleem</h2>
+        <p>Tot nu toe waren onze eigenschappen in `DigitalPet` altijd open. Iedereen mocht alles aanpassen:</p>
+        <pre><code class="language-csharp">dino.Name = "rex"; // ❌ FOUT! Geen hoofdletter, maar het mag wel.
+dino.Energy = -500; // ❌ FOUT! Dood, maar de code houdt je niet tegen.</code></pre>
+
+        <p>We gaan dit oplossen met <strong>Private Setters</strong>. Dit betekent: "Iedereen mag kijken, maar alleen de class zelf mag wijzigen".</p>
+
+        <hr>
+
+        <h2>Stap 1: De Properties Beveiligen</h2>
+        <p>Open <code>Models/DigitalPet.cs</code>. We beginnen bovenaan met de eigenschappen. Voeg bij elke property het woordje `private` toe voor de `set`.</p>
+
+        <pre><code class="language-csharp">public class DigitalPet
+{
+    // 1. De Naam op slot
+    // We willen later afdwingen dat namen met een Hoofdletter beginnen.
+    public string Name { get; private set; }
+
+    // 2. De Stats op slot
+    // Geen directe toegang meer tot de levensbalkjes!
+    public int Energy { get; private set; }
+    public int Hunger { get; private set; }
+    public bool IsSleeping { get; private set; }
+
+    // ... de code gaat verder ...</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: De Constructor Controleren</h2>
+        <p>Misschien denk je nu: <em>"Maar als de setter privé is, hoe krijgt het dier dan een naam bij het opstarten?"</em></p>
+        <p>Geen zorgen! De <strong>Constructor</strong> is onderdeel van de class zelf. De "interne medewerkers" hebben de sleutel van de kluis. Je huidige constructor blijft dus gewoon werken:</p>
+
+        <pre><code class="language-csharp">    // Deze code hoef je NIET aan te passen, maar kijk er even goed naar.
+    // Omdat we BINNEN de class zijn, mogen we 'this.Name = ...' doen.
+    public DigitalPet(string name, int energy = 50, int hunger = 0, bool isSleeping = false)
+    {
+        this.Name = name;
+        this.Energy = energy;
+        this.Hunger = hunger;
+        this.IsSleeping = isSleeping;
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Methodes voor Wijzigingen</h2>
+        <p>Nu de buitenwereld niet meer bij de variabelen mag, moeten wij methodes aanbieden om interactie mogelijk te maken.</p>
+
+        <h3>3a. De Naam wijzigen (Nieuw!)</h3>
+        <p>Omdat `Name` nu op slot zit (`private set`), kunnen we hem in `Program.cs` niet meer veranderen. Stel dat we het dier later willen hernoemen, dan moeten we daar nu een methode voor maken. Voeg deze toe aan je class:</p>
+
+        <pre><code class="language-csharp">    // Nieuwe methode: Hernoemen
+    public void Rename(string newName)
+    {
+        // Later kunnen we hier checks toevoegen (bijv: check op scheldwoorden)
+        this.Name = newName;
+    }</code></pre>
+
+        <h3>3b. Slapen en Eten</h3>
+        <p>Controleer je bestaande methodes. Omdat `Sleep` en `Feed` (of `SetEnergy`) in de class staan, mogen zij de `Energy` property gewoon aanpassen. Daar hoef je dus niets aan te veranderen!</p>
+
+        <pre><code class="language-csharp">    public string Sleep()
+    {
+        this.IsSleeping = true; // ✅ Dit mag, want we zijn binnen de class
+        this.Energy += 20;      // ✅ Dit mag ook
+        UpdateStatus();
+        return "Zzz... Dat deed deugd!";
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Program.cs Repareren</h2>
+        <p>Nu we de beveiliging hebben aangezet, gaan we naar <code>Program.cs</code>. Je zult zien dat Visual Studio rode kringels geeft op plekken waar je "illegaal" toegang probeert te krijgen.</p>
+
+        <div class="info-box warning">
+            <strong>Foutmelding:</strong> <em>"The property ... cannot be used in this context because the set accessor is inaccessible."</em>
+        </div>
+
+        <p>Pas je code in `Program.cs` aan zodat je alleen nog maar de <strong>methodes</strong> gebruikt:</p>
+
+        <pre><code class="language-csharp">// In Program.cs
+
+DigitalPet dino = new DigitalPet("Rex");
+
+// ✅ LEZEN (Get) mag nog steeds:
+Console.WriteLine($"Naam: {dino.Name}");
+Console.WriteLine($"Energie: {dino.Energy}");
+
+// ❌ SCHRIJVEN (Set) mag niet meer direct:
+// dino.Name = "rex";      <-- VERWIJDER DEZE REGEL
+// dino.Energy = 500;      <-- VERWIJDER DEZE REGEL
+
+// ✅ GEBRUIK METHODES:
+dino.Rename("Super Rex"); // Via onze nieuwe methode
+dino.Sleep();             // Via de bestaande logica</code></pre>
+
+        <hr>
+
+        <h2>Samenvatting</h2>
+        <ul>
+            <li><strong>Private Setters</strong> (`{ get; private set; }`) zorgen dat alleen de class zelf zijn data mag aanpassen.</li>
+            <li>De <strong>Constructor</strong> en <strong>Methodes</strong> binnen de class hebben wél schrijftoegang.</li>
+            <li>In <code>Program.cs</code> (de buitenwereld) mag je alleen nog lezen. Wijzigen doe je via methodes zoals `Rename()` of `Sleep()`.</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
