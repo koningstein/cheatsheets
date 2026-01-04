@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-1: De Lijst & De Loop - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-1: Van Losse Variabelen naar een Lijst</h1>
+
+        <p class="lead">In Module 3 leerden we hoe we objecten maken. We hadden variabelen zoals <code>dino</code> en
+            <code>fluffy</code>. Maar in software weten we vaak niet van tevoren hoeveel data we binnenkrijgen. Misschien heeft de gebruiker 1 huisdier, misschien wel 100.</p>
+
+        <div class="info-box tip">
+            <p><strong>Doel van deze les:</strong> We vervangen de losse variabelen door een <strong>List</strong>
+                (Lijst). Dit maakt je applicatie flexibel en schaalbaar.</p>
+        </div>
+
+        <h2>Deel 1: Arrays vs. Lists (Waarom kiezen?)</h2>
+        <p>
+            Veel studenten vragen: <em>"Waarom gebruiken we geen Array? In andere talen (zoals PHP of JS) kan ik daar toch gewoon items in blijven stoppen?"</em>
+        </p>
+        <p>
+            Dat klopt, maar C# werkt iets dichter op de hardware:
+        </p>
+        <ul>
+            <li><strong>De Array (`[]`):</strong> Is als een <strong>eierdoos</strong>. Je koopt hem voor 6, 10 of 12 eieren.
+                Als hij vol is, past er fysiek niets meer bij. Probeer je er een 13e ei in te duwen? Dan crasht je programma (`IndexOutOfRangeException`).</li>
+            <li><strong>De List (`List&lt;T&gt;`):</strong> Is als een <strong>boodschappentas</strong>.
+                Hij begint leeg, maar rekt oneindig mee. Je kunt er items in blijven stoppen (`Add`) en uithalen (`Remove`).</li>
+        </ul>
+
+        <div class="info-box warning">
+            <p><strong>De Valkuil:</strong><br>
+                In C# gebruiken we voor data die kan veranderen <strong>altijd</strong> een <code>List</code>. Arrays gebruiken we alleen als we zeker weten dat het aantal nooit verandert (zoals: de dagen van de week).</p>
+        </div>
+
+        <h3>Stap 1: De Lijst Declareren</h3>
+        <p>
+            We gaan in <code>Program.cs</code> de losse variabelen verwijderen. We maken één flexibele container aan.
+        </p>
+        <p>
+            Let op de naamgeving: Omdat een lijst <em>meerdere</em> items bevat, schrijven we de naam altijd in het <strong>meervoud (Plural)</strong>. Dus <code>pets</code>.
+        </p>
+
+        <pre><code class="language-csharp">using Figgle.Fonts;
+using Tamagotchi.Models;
+
+Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter"));
+
+// OUDE MANIER (Array - Niet doen voor dit doel):
+// DigitalPet[] petsArray = new DigitalPet[5]; // Maximaal 5. Bij de 6e crasht het.
+
+// NIEUWE MANIER (List - Wel doen):
+// <DigitalPet> betekent: "In deze lijst mogen ALLEEN DigitalPet objecten."
+List&lt;DigitalPet&gt; pets = new List&lt;DigitalPet&gt;();</code></pre>
+
+        <hr>
+
+        <h2>Deel 2: De Real-time Loop</h2>
+        <p>
+            Nu we een lege lijst hebben, willen we deze vullen. En het zou mooi zijn als we <strong>direct feedback</strong> krijgen: elke keer als we een dier toevoegen, willen we de nieuwe lijst zien.
+        </p>
+        <p>
+            We gebruiken een <strong><code>while(true)</code></strong> loop (Input) en stoppen daar de <strong><code>foreach</code></strong> loop (Output) IN.
+        </p>
+
+        <h3>Hoe werkt de logica?</h3>
+        <ol>
+            <li><strong>Input:</strong> Vraag om een naam.</li>
+            <li><strong>Process:</strong> Maak het dier en stop het in de lijst (<code>.Add</code>).</li>
+            <li><strong>Output:</strong> Loop direct door de lijst om de huidige stand van zaken te tonen.</li>
+        </ol>
+
+        <p>Voeg deze code toe onder de declaratie van je lijst:</p>
+
+        <pre><code class="language-csharp">Console.WriteLine("Welkom! Voer namen in. Druk op ENTER (zonder naam) om te stoppen.");
+
+while (true)
+{
+    Console.Write("\nNaam van het nieuwe dier: ");
+    string? input = Console.ReadLine(); // 'input' is een Engelse variabele
+
+    // Validatie: Als de input leeg is, stoppen we.
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        Console.WriteLine("Invoer gestopt.");
+        break; // SPRINGT UIT DE LOOP
+    }
+
+    // 1. Maak het object en voeg toe
+    pets.Add(new DigitalPet(input));
+
+    // 2. Toon DIRECT de huidige lijst (Feedback)
+    Console.WriteLine($"\n--- Huidige dieren in opvang ({pets.Count}) ---");
+
+    foreach (DigitalPet pet in pets)
+    {
+        // We tonen de naam of de status van elk dier
+        Console.WriteLine($"- {pet.Name} (Energy: {pet.Energy})");
+    }
+}</code></pre>
+
+        <hr>
+
+        <h2>Samenvatting & Volledige Code</h2>
+        <p>
+            Door de loops in elkaar te nesten, heb je een interactief dashboard gemaakt. De gebruiker ziet zijn acties direct terug in het resultaat.
+        </p>
+        <p>
+            Vervang je volledige <code>Program.cs</code> door onderstaande code om te testen of alles werkt:
+        </p>
+
+        <pre><code class="language-csharp">using Figgle.Fonts;
+using Tamagotchi.Models;
+
+// 1. Setup en Lijst aanmaken
+Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter"));
+
+List&lt;DigitalPet&gt; pets = new List&lt;DigitalPet&gt;();
+
+// 2. De Interactieve Loop
+Console.WriteLine("Voer namen in. Druk op ENTER om te stoppen.");
+
+while (true)
+{
+    // A. INPUT
+    Console.Write($"\nNaam van dier {pets.Count + 1}: ");
+    string? input = Console.ReadLine();
+
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        break;
+    }
+
+    // B. PROCESS (Toevoegen)
+    pets.Add(new DigitalPet(input));
+
+    // C. OUTPUT (De lijst tonen)
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine($"\n--- Huidige Lijst ({pets.Count} dieren) ---");
+
+    foreach (DigitalPet pet in pets)
+    {
+        Console.WriteLine(pet.EnergyDisplay());
+    }
+
+    Console.ResetColor();
+    Console.WriteLine("-------------------------------------");
+}
+
+Console.WriteLine("\nBedankt voor het gebruik!");
+// Scherm open houden
+Console.ReadLine();</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

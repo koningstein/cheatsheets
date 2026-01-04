@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-2: Input & Parsing - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-2: Input & Parsing</h1>
+
+        <p class="lead">We gaan de applicatie interactief maken. We beginnen met een lege lijst. De gebruiker moet zelf via een menu dieren toevoegen en daarbij de statistieken (Energie/Honger) bepalen.</p>
+
+        <h2>Stap 1: De Lege Lijst</h2>
+        <p>
+            We beginnen in <code>Program.cs</code>. We maken alleen het "mandje" (de List) aan. Deze is bij het opstarten leeg.
+        </p>
+
+        <pre><code class="language-csharp">using Figgle.Fonts;
+using Tamagotchi.Models;
+
+Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter"));
+
+// We maken een LEGE lijst aan.
+List&lt;DigitalPet&gt; pets = new List&lt;DigitalPet&gt;();</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: De Menu Loop</h2>
+        <p>
+            We bouwen een `while`-loop die blijft draaien. In die loop tonen we het menu en vragen we de gebruiker om een keuze.
+        </p>
+
+        <pre><code class="language-csharp">bool appRunning = true;
+
+while (appRunning)
+{
+    // Toon de status (bij start is count 0)
+    Console.WriteLine($"\n--- HOOFDMENU ({pets.Count} dieren) ---");
+    Console.WriteLine("1. Nieuw dier toevoegen");
+    Console.WriteLine("2. Alle dieren tonen");
+    Console.WriteLine("Q. Stoppen");
+    Console.Write("Maak uw keuze: ");
+
+    string choice = Console.ReadLine().ToUpper();
+
+    // Hieronder komt de switch...
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Input & Parsing (Case 1)</h2>
+        <p>
+            Dit is de kern van de les. Als de gebruiker "1" kiest, vragen we om gegevens.
+            Omdat `Console.ReadLine()` altijd tekst teruggeeft, moeten we de Energie en Honger omzetten naar getallen met `int.Parse()`.
+        </p>
+        <div class="info-box warning">
+            <p><strong>Let op:</strong> De methode `int.Parse()` werkt alleen als de gebruiker cijfers typt. Als je letters typt, crasht de app (dit lossen we in latere modules op).</p>
+        </div>
+
+        <p>Plaats deze switch <strong>binnen</strong> de while-loop:</p>
+
+        <pre><code class="language-csharp">    switch (choice)
+    {
+        case "1":
+            Console.Write("Naam: ");
+            string name = Console.ReadLine();
+
+            Console.Write("Start Energie (0-100): ");
+            string energyText = Console.ReadLine();
+            int energy = int.Parse(energyText); // <-- Van tekst naar getal
+
+            Console.Write("Start Honger (0-100): ");
+            string hungerText = Console.ReadLine();
+            int hunger = int.Parse(hungerText); // <-- Van tekst naar getal
+
+            // We maken het dier met de ingevoerde waardes
+            DigitalPet newPet = new DigitalPet(name, energy, hunger);
+
+            // En voegen hem toe aan de lijst
+            pets.Add(newPet);
+
+            Console.WriteLine($"{name} is toegevoegd!");
+            break;</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Lijst Tonen & Afsluiten</h2>
+        <p>
+            We voegen de optie toe om de lijst te bekijken. Als de lijst leeg is, zal de `foreach` loop simpelweg niets doen (wat logisch is). Ook voegen we de stop-optie toe.
+        </p>
+
+        <pre><code class="language-csharp">        case "2":
+            Console.WriteLine("\n--- OVERZICHT ---");
+
+            // Loop door alle dieren die de gebruiker heeft toegevoegd
+            foreach (DigitalPet pet in pets)
+            {
+                Console.WriteLine(pet.EnergyDisplay());
+            }
+
+            Console.WriteLine("Druk op ENTER om terug te gaan.");
+            Console.ReadLine();
+            break;
+
+        case "Q":
+            appRunning = false; // Stop de loop
+            Console.WriteLine("Tot ziens!");
+            break;
+
+        default:
+            Console.WriteLine("Ongeldige keuze.");
+            break;
+    } // Einde switch
+} // Einde while</code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>
+            Je hebt nu een applicatie die begint met niets. De gebruiker bouwt de data zelf op.
+            De belangrijkste techniek hier is <strong>Parsing</strong>: het omzetten van `string` (input) naar `int` (data).
+        </p>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

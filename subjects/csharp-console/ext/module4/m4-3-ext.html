@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-3: Zoeken met LINQ - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-3: Zoeken met LINQ</h1>
+
+        <p class="lead">Je applicatie kan nu dieren toevoegen en een lijst tonen. Maar stel je voor dat je 50 dieren
+            hebt. Als je met "Rex" wilt spelen, hoe vind je hem dan? Ga je ze allemaal één voor één af? Nee, we
+            gebruiken <strong>LINQ</strong>.</p>
+
+        <h2>De Metafoor: De Naald in de Hooiberg</h2>
+        <p>
+            Stel je voor dat je een bak met 100 appels hebt (je Lijst). Je zoekt die ene specifieke groene appel.
+        </p>
+        <ul>
+            <li><strong>De Oude Manier (Loop):</strong> Je pakt appel 1. Is hij groen? Nee. Je pakt appel 2. Is hij
+                groen? Nee... Dit duurt lang en is veel code.
+            </li>
+            <li><strong>De Nieuwe Manier (LINQ):</strong> Je knipt met je vingers en zegt: <em>"Geef mij de eerste appel
+                die groen is."</em> De computer doet het zoekwerk voor je.
+            </li>
+        </ul>
+
+        <div class="info-box tip">
+            <p><strong>LINQ</strong> staat voor <em>Language Integrated Query</em>. Het is een set slimme commando's om
+                door data heen te zoeken, te filteren en te sorteren.</p>
+        </div>
+
+        <hr>
+
+        <h2>Stap 1: De Gereedschapskist openen</h2>
+        <p>
+            LINQ zit niet standaard in de basis-gereedschapskist van <code>Program.cs</code>. We moeten C# vertellen dat
+            we deze geavanceerde functies willen gebruiken.
+        </p>
+        <p>
+            Voeg helemaal bovenin je bestand, bij de andere `using` regels, deze regel toe:
+        </p>
+
+        <pre><code class="language-csharp">using Figgle.Fonts;
+using Tamagotchi.Models;
+using System.Linq; // <--- DEZE HEB JE NODIG!</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Menu Optie Toevoegen</h2>
+        <p>
+            We breiden ons menu uit met een derde optie: Zoeken.
+            Pas in je <code>while</code> loop het menu-gedeelte aan:
+        </p>
+
+        <pre><code class="language-csharp">    Console.WriteLine($"\n--- HOOFDMENU ({pets.Count} dieren) ---");
+    Console.WriteLine("1. Nieuw dier toevoegen");
+    Console.WriteLine("2. Alle dieren tonen");
+    Console.WriteLine("3. Dier zoeken & Selecteren"); // <--- NIEUW
+    Console.WriteLine("Q. Stoppen");
+    Console.Write("Maak uw keuze: ");</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: De Lambda Expressie (De Magie)</h2>
+        <p>
+            Nu gaan we de logica bouwen voor <strong>Case 3</strong>.
+            We vragen de gebruiker om een naam en gebruiken dan het commando <code>FirstOrDefault</code>.
+        </p>
+        <p>
+            Dit commando gebruikt een speciale syntax, de "Lambda pijl" <code>=></code>.
+            <br>Code: <code>p => p.Name == searchName</code>
+        </p>
+        <p>
+            Lees dit als: <em>"Check voor elk dier (p) of zijn naam (p.Name) gelijk is aan wat ik zoek."</em>
+        </p>
+
+        <p>Voeg deze code toe als nieuwe case in je switch:</p>
+
+        <pre><code class="language-csharp">        case "3":
+            Console.Write("Welk dier zoek je? Typ de naam: ");
+            string searchName = Console.ReadLine();
+
+            // LINQ QUERY:
+            // Zoek in de lijst 'pets'.
+            // Pak de EERSTE (First) die voldoet aan de eis, of geef NULL (Default) als hij niet bestaat.
+            DigitalPet? foundPet = pets.FirstOrDefault(p => p.Name == searchName);
+
+            // ... (Hier komt stap 4) ...
+            break;</code></pre>
+
+        <div class="info-box warning">
+            <p><strong>Let op het vraagteken:</strong> <code>DigitalPet?</code> betekent dat de variabele leeg (null)
+                mag zijn. Dit is logisch, want misschien bestaat "Godzilla" helemaal niet in jouw lijst.</p>
+        </div>
+
+        <hr>
+
+        <h2>Stap 4: De Resultaat-Check (Null Check)</h2>
+        <p>
+            Als LINQ niets kan vinden, is de variabele <code>foundPet</code> gelijk aan <code>null</code>.
+            Als je probeert om <code>foundPet.Name</code> te lezen terwijl hij null is, crasht je app
+            (NullReferenceException).
+        </p>
+        <p>
+            We moeten dus altijd checken of we iets gevonden hebben.
+            Vul de code van Case 3 verder aan:
+        </p>
+
+        <pre><code class="language-csharp">            // ... vervolg van Case 3 ...
+
+            if (foundPet != null)
+            {
+                // JA! We hebben hem gevonden.
+                Console.WriteLine("\nGEVONDEN!");
+                Console.WriteLine(foundPet.EnergyDisplay());
+
+                // Hier kunnen we straks acties toevoegen, zoals voeren of slapen.
+                Console.WriteLine("Druk op ENTER om terug te gaan.");
+            }
+            else
+            {
+                // NEE! Hij bestaat niet.
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Helaas, geen dier gevonden met die naam.");
+                Console.ResetColor();
+            }
+            Console.ReadLine();
+            break;</code></pre>
+
+        <hr>
+
+        <h2>Stap 5: Case Insensitive Zoeken (Bonus)</h2>
+        <p>
+            Standaard is C# heel strikt. "rex" is niet hetzelfde als "Rex". Dat is vervelend voor de gebruiker.
+            We kunnen onze LINQ query iets slimmer maken door beide kanten om te zetten naar kleine letters.
+        </p>
+        <p>
+            Verander de zoekregel naar dit:
+        </p>
+
+        <pre><code class="language-csharp">// We zetten de naam van het dier (p.Name) om naar kleine letters (.ToLower())
+// En we zetten de invoer (searchName) om naar kleine letters.
+// Nu vindt "rex" ook "REX", "Rex" of "rEx".
+DigitalPet? foundPet = pets.FirstOrDefault(p => p.Name.ToLower() == searchName.ToLower());</code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>
+            Je hebt nu de kracht van LINQ ontdekt. Je hoeft geen ingewikkelde loops meer te schrijven om iets te vinden.
+        </p>
+        <ul>
+            <li><strong>using System.Linq;</strong> activeert de functies.</li>
+            <li><strong>FirstOrDefault(...)</strong> zoekt 1 item of geeft null.</li>
+            <li><strong>p => p.Name == ...</strong> is de voorwaarde (Lambda).</li>
+            <li><strong>Null Check:</strong> Altijd controleren of je iets gevonden hebt!</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>
