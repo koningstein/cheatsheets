@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-6: Dictionaries & Interaction - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-6: Dictionaries & Eten Geven</h1>
+
+        <p class="lead">We kunnen inloggen op een dier! Nu willen we het voeren. We maken een voorraadkast (Dictionary) in de Game en leren het dier eten.</p>
+
+        <h2>Stap 1: De Voorraadkast (Game.cs)</h2>
+        <p>
+            In <code>Game.cs</code> maken we een Dictionary aan. Dit is onze pantry.
+            We zetten dit bovenaan bij de andere private fields.
+
+        </p>
+
+        <pre><code class="language-csharp">// In Game.cs
+
+private Dictionary&lt;string, Food&gt; _pantry = new Dictionary&lt;string, Food&gt;();
+
+// Tip: In de Constructor (public Game()) kun je hem vullen:
+public Game()
+{
+    _pantry.Add("Appel", new Food("Appel", 10));
+    _pantry.Add("Brood", new Food("Brood", 20));
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Logica in de Class (DigitalPet.cs)</h2>
+        <p>
+            De Game-class mag niet zelf aan de <code>Energy</code> variabele van het dier zitten (dat is private!).
+            We moeten het dier netjes vragen om te eten.
+        </p>
+        <p>Open <code>Models/DigitalPet.cs</code> en voeg toe:</p>
+
+        <pre><code class="language-csharp">// In DigitalPet.cs
+
+public string Feed(Food food)
+{
+    this.Energy += food.EnergyGain;
+    this.Hunger -= 10;
+
+    if (this.Hunger < 0) this.Hunger = 0;
+
+    return $"{this.Name} at een {food.Name}. (+{food.EnergyGain} Energie)";
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Het Menu Uitbreiden (Game.cs)</h2>
+        <p>
+            Nu voegen we de optie "Voeren" toe aan het Actie Menu (de `else` in je loop).
+            We tonen de keys (namen) en laten de gebruiker kiezen.
+        </p>
+
+        <pre><code class="language-csharp">        // In het else blok van Game.cs, case "2":
+
+        case "2": // Stel dat 2 = Voeren
+            Console.WriteLine("Kast: " + string.Join(", ", _pantry.Keys));
+
+            string foodChoice = Menu.AskString("Wat geef je?");
+
+            // Check of het in de Dictionary zit
+            if (_pantry.ContainsKey(foodChoice))
+            {
+                // Haal het object op
+                Food item = _pantry[foodChoice];
+
+                // Geef het aan het huidige dier
+                string result = _currentPet.Feed(item);
+                Console.WriteLine(result);
+            }
+            else
+            {
+                Console.WriteLine("Hebben we niet.");
+            }
+            break;</code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>
+            Je hebt nu een perfecte scheiding van taken:
+        </p>
+        <ul>
+            <li><strong>Game:</strong> Beheert de voorraad (Dictionary).</li>
+            <li><strong>DigitalPet:</strong> Beheert zijn eigen buik (Energy/Hunger).</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

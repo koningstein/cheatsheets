@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-7: JSON Opslaan & Laden - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-7: Opslaan & Laden (JSON)</h1>
+
+        <p class="lead">Onze game is leuk, maar als we afsluiten zijn de dieren dood. Dat kan niet! We gaan de dieren opslaan in een tekstbestand met <strong>JSON</strong>.</p>
+
+        <h2>Stap 1: Namespaces (Game.cs)</h2>
+        <p>
+            Om bestanden te lezen en JSON te gebruiken, hebben we tools nodig.
+            Zet dit helemaal bovenin <code>Game.cs</code>:
+        </p>
+
+        <pre><code class="language-csharp">using System.IO;         // Voor bestanden
+using System.Text.Json;  // Voor JSON</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Opslaan (Serialize)</h2>
+        <p>
+            We maken een methode <code>SaveGame()</code> in <code>Game.cs</code>.
+            Deze pakt de lijst <code>_pets</code> en maakt er tekst van.
+        </p>
+
+        <pre><code class="language-csharp">private void SaveGame()
+{
+    // Opties voor mooie leesbare tekst
+    var options = new JsonSerializerOptions { WriteIndented = true };
+
+    // 1. Van Lijst naar Tekst (JSON)
+    string json = JsonSerializer.Serialize(_pets, options);
+
+    // 2. Schrijf naar bestand
+    File.WriteAllText("dieren.json", json);
+
+    Console.WriteLine("Opgeslagen!");
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Laden (Deserialize)</h2>
+        <p>
+            We maken een methode <code>LoadGame()</code>. Deze doet het omgekeerde: van Tekst naar Lijst.
+            We moeten wel checken of het bestand bestaat, anders crasht de app.
+        </p>
+
+        <pre><code class="language-csharp">private void LoadGame()
+{
+    if (File.Exists("dieren.json"))
+    {
+        // 1. Lees tekst
+        string json = File.ReadAllText("dieren.json");
+
+        // 2. Van Tekst naar Lijst
+        _pets = JsonSerializer.Deserialize&lt;List&lt;DigitalPet&gt;&gt;(json);
+
+        Console.WriteLine("Dieren ingeladen!");
+    }
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Integreren</h2>
+        <p>
+            Nu moeten we deze methodes nog aanroepen in de <code>Start()</code> methode.
+        </p>
+
+        <pre><code class="language-csharp">public void Start()
+{
+    // LADEN bij opstarten
+    LoadGame();
+
+    while (appRunning)
+    {
+        // ... (De loop) ...
+
+        if (choice == "Q")
+        {
+            // OPSLAAN bij afsluiten
+            SaveGame();
+            appRunning = false;
+        }
+    }
+}</code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>
+            Gefeliciteerd! Je hebt Module 4 afgerond.
+        </p>
+        <ul>
+            <li>Je hebt een professionele <strong>Architectuur</strong> (Game/Menu).</li>
+            <li>Je gebruikt <strong>State Management</strong> voor menu's.</li>
+            <li>Je werkt met <strong>Dictionaries</strong> en <strong>JSON</strong>.</li>
+        </ul>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

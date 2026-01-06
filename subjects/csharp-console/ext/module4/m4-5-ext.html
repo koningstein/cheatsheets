@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-5: State Management - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-5: State Management</h1>
+
+        <p class="lead">We hebben een lege <code>Game</code> class. Nu gaan we zorgen dat we dieren kunnen toevoegen én selecteren. We gebruiken een variabele om te onthouden op welk dier we "ingelogd" zijn.</p>
+
+        <h2>Stap 1: De State Variabele</h2>
+        <p>
+            In <code>Game.cs</code> voegen we een variabele toe: <code>_currentPet</code>.
+        <ul>
+            <li>Is deze <code>null</code>? Dan tonen we het <strong>Hoofdmenu</strong>.</li>
+            <li>Is deze gevuld? Dan tonen we het <strong>Actie Menu</strong>.</li>
+        </ul>
+        </p>
+
+        <pre><code class="language-csharp">// In Game.cs (bovenin bij de lijst)
+
+private List&lt;DigitalPet&gt; _pets = new List&lt;DigitalPet&gt;();
+
+// De State Variabele (nullable, want hij begint leeg)
+private DigitalPet? _currentPet = null;</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: De Loop Splitsen</h2>
+        <p>
+            We passen de <code>Start()</code> methode aan. We kijken steeds: is er een dier geselecteerd?
+            Zo niet (if), toon menu A. Zo wel (else), toon menu B.
+        </p>
+
+        <pre><code class="language-csharp">// In Game.cs -> Start()
+
+while (appRunning)
+{
+    // SITUATIE A: Geen dier (Hoofdmenu)
+    if (_currentPet == null)
+    {
+        Console.WriteLine("\n--- HOOFDMENU ---");
+        Console.WriteLine("1. Nieuw dier");
+        Console.WriteLine("2. Login (Selecteer dier)");
+        Console.WriteLine("Q. Stoppen");
+
+        string choice = Menu.AskString("Keuze:");
+
+        // ... (Switch voor Hoofdmenu, zie Stap 3) ...
+    }
+    // SITUATIE B: Wel dier (Actie Menu)
+    else
+    {
+        Console.WriteLine($"\n--- MENU: {_currentPet.Name} ---");
+        Console.WriteLine("1. Uitloggen (Terug)");
+
+        string action = Menu.AskString("Actie:");
+
+        // ... (Switch voor Actie Menu, zie Stap 4) ...
+    }
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Het Hoofdmenu (Toevoegen & Zoeken)</h2>
+        <p>
+            Nu vullen we de logica in voor Situatie A.
+            We gebruiken LINQ om een dier te zoeken en slaan het resultaat op in <code>_currentPet</code>.
+        </p>
+
+        <pre><code class="language-csharp">        // In het if (_currentPet == null) blok:
+        switch (choice.ToUpper())
+        {
+            case "1":
+                string name = Menu.AskString("Naam:");
+                _pets.Add(new DigitalPet(name));
+                Console.WriteLine("Toegevoegd!");
+                break;
+
+            case "2":
+                string search = Menu.AskString("Wie zoek je?");
+                // LINQ: Zoek het dier en zet het in de variabele
+                _currentPet = _pets.FirstOrDefault(p => p.Name == search);
+
+                if (_currentPet == null)
+                    Console.WriteLine("Niet gevonden.");
+                break;
+
+            case "Q":
+                appRunning = false;
+                break;
+        }</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Het Actie Menu (Uitloggen)</h2>
+        <p>
+            Als <code>_currentPet</code> gevuld is, komen we in de `else`.
+            Als we willen "uitloggen", zetten we de variabele simpelweg weer op `null`. De loop springt dan vanzelf terug naar Situatie A.
+        </p>
+
+        <pre><code class="language-csharp">        // In het else blok:
+        switch (action)
+        {
+            case "1":
+                _currentPet = null; // Terug naar Hoofdmenu
+                break;
+        }</code></pre>
+
+        <h2>Samenvatting</h2>
+        <p>
+            Je hebt nu <strong>State Management</strong> toegepast! Je navigeert door de applicatie door simpelweg een variabele te vullen of leeg te maken.
+        </p>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

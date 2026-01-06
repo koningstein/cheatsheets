@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Module 4-4: Dictionaries & Structuur - C# Module 4</title>
+    <title>Module 4-4: Architectuur - C# Module 4</title>
     <script src="../../../../assets/js/theme-init.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap"
-          rel="stylesheet">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <link rel="stylesheet" href="../../../../assets/css/style.css">
 </head>
 <body>
@@ -16,217 +14,104 @@
 <div class="layout-wrapper">
     <div data-include="../../../../components/sidebar.html"></div>
     <main class="main-content">
-        <h1>Module 4-4: Dictionaries & Structuur</h1>
+        <h1>Module 4-4: De Grote Verhuizing</h1>
 
-        <p class="lead">We willen onze dieren verzorgen (voeren, slapen, etc.). Als we dit allemaal in één groot menu
-            proppen, wordt de code een rommeltje. In deze les leren we <strong>Dictionaries</strong> gebruiken én
-            structureren we onze code met <strong>Helper Methodes</strong>.</p>
+        <p class="lead">Je <code>Program.cs</code> staat bomvol. Dat is niet handig. In professionele software splitsen we taken op. We gaan de code verhuizen naar twee nieuwe Classes: <code>Game</code> (de manager) en <code>Menu</code> (de ober).</p>
 
-        <h2>Deel 1: De Voorraadkast (Dictionary)</h2>
+        <h2>Stap 1: De Ober (Menu.cs)</h2>
         <p>
-            Een <code>List</code> werkt op volgorde (0, 1, 2). Dat is onhandig voor een voorraadkast. Als je een "Appel"
-            zoekt, wil je niet hoeven weten dat die toevallig op plek 4 ligt.
+            We maken een class die verantwoordelijk is voor alle tekst op het scherm.
+            Maak een nieuw bestand: <code>Menu.cs</code>.
         </p>
         <p>
-            We gebruiken een <strong>Dictionary</strong> (Woordenboek). Hiermee zoeken we items op <strong>Naam</strong>
-            (Key) in plaats van op nummer.
-
-        </p>
-
-        <h3>Stap 1: De Setup (Program.cs)</h3>
-        <p>
-            We beginnen bovenin <code>Program.cs</code>. We maken de lijsten aan en – heel belangrijk – een variabele
-            <code>currentPet</code>. Deze variabele houdt bij of we ingelogd zijn op een dier.
+            We maken de methodes <code>static</code>. Dat betekent dat we ze direct kunnen gebruiken, zonder <code>new Menu()</code> te hoeven typen.
         </p>
 
         <pre><code class="language-csharp">using Figgle.Fonts;
-using Tamagotchi.Models;
-using System.Linq;
 
-Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter"));
+namespace Tamagotchi;
 
-// 1. De Dierenlijst (met 1 testdier)
-List&lt;DigitalPet&gt; pets = new List&lt;DigitalPet&gt;();
-pets.Add(new DigitalPet("Rex", 100, 10));
-
-// 2. De Voorraadkast (Dictionary)
-// Key = string (De naam), Value = Food (Het object)
-Dictionary&lt;string, Food&gt; pantry = new Dictionary&lt;string, Food&gt;();
-pantry.Add("Appel", new Food("Appel", 10));
-pantry.Add("Brood", new Food("Brood", 20));
-
-// 3. De Status Variabele
-// Als deze null is, zitten we in het hoofdmenu.
-// Als deze gevuld is, zijn we met DIT dier bezig.
-DigitalPet? currentPet = null;
-
-bool appRunning = true;</code></pre>
-
-        <hr>
-
-        <h2>Deel 2: Leren Eten (Class Interaction)</h2>
-        <p>
-            Voordat we het menu bouwen, moet het dier weten hoe hij moet eten.
-            We voegen een methode toe aan <code>DigitalPet.cs</code> die een <code>Food</code> object accepteert.
-        </p>
-        <p>Open <code>Models/DigitalPet.cs</code> en voeg deze methode toe:</p>
-
-        <pre><code class="language-csharp">// In DigitalPet.cs
-
-public string Feed(Food food)
+public static class Menu
 {
-    this.Energy += food.EnergyGain;
-    this.Hunger -= 10;
-
-    // Zorg dat honger niet onder de 0 komt
-    if (this.Hunger < 0) this.Hunger = 0;
-
-    return $"Nom nom! {this.Name} smult van de {food.Name}. (+{food.EnergyGain} Energie)";
-}</code></pre>
-
-        <hr>
-
-        <h2>Deel 3: Refactoring (Helper Methodes)</h2>
-        <p>
-            Nu komt de truc voor schone code. In plaats van de logica voor "Eten Geven" in de while-loop te proppen,
-            maken we er een <strong>aparte functie</strong> voor.
-        </p>
-        <p>
-            Plak deze methode <strong>helemaal onderaan</strong> je <code>Program.cs</code> (buiten de while-loop!).
-        </p>
-
-        <pre><code class="language-csharp">// --- HELPER METHODES (Onderaan de file) ---
-
-void HandleFeeding()
-{
-    Console.Clear();
-    Console.WriteLine($"\n--- VOERTIJD VOOR {currentPet.Name} ---");
-
-    // .Keys geeft ons alle namen uit de Dictionary
-    Console.WriteLine("In de kast ligt: " + string.Join(", ", pantry.Keys));
-    Console.Write("Wat wil je geven? ");
-    string foodName = Console.ReadLine();
-
-    // Check: Bestaat deze sleutel in de Dictionary?
-    if(pantry.ContainsKey(foodName))
-    {
-        // Pak het item en geef het aan het dier
-        Food item = pantry[foodName];
-        Console.WriteLine(currentPet.Feed(item));
-    }
-    else
-    {
-        Console.WriteLine("Dat hebben we niet in huis.");
-    }
-    Console.WriteLine("Druk op ENTER.");
-    Console.ReadLine();
-}</code></pre>
-
-        <hr>
-
-        <h2>Deel 4: De Slimme Loop</h2>
-        <p>
-            Nu bouwen we de loop. We splitsen deze in twee situaties:
-        <ol>
-            <li><strong>Hoofdmenu:</strong> Er is geen dier gekozen (<code>currentPet == null</code>).</li>
-            <li><strong>Actie Menu:</strong> Er is WEL een dier gekozen.</li>
-        </ol>
-        </p>
-        <p>Begin met <strong>Situatie A (Hoofdmenu)</strong> in je while-loop:</p>
-
-        <pre><code class="language-csharp">while (appRunning)
-{
-    // SITUATIE A: Geen dier gekozen
-    if (currentPet == null)
+    // Titel tonen
+    public static void ShowTitle()
     {
         Console.Clear();
-        Console.WriteLine($"\n--- HOOFDMENU ({pets.Count} dieren) ---");
-        Console.WriteLine("1. Nieuw dier");
-        Console.WriteLine("2. Selecteer dier (Login)");
-        Console.WriteLine("Q. Stoppen");
-        Console.Write("Keuze: ");
+        Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter"));
+    }
 
-        string choice = Console.ReadLine().ToUpper();
+    // Een vraag stellen en het antwoord teruggeven
+    public static string AskString(string question)
+    {
+        Console.Write(question + " ");
+        return Console.ReadLine() ?? "";
+    }
+}</code></pre>
 
-        switch(choice)
+        <hr>
+
+        <h2>Stap 2: De Manager (Game.cs)</h2>
+        <p>
+            Nu maken we de baas van de applicatie. Deze class beheert de lijst met dieren en de game-loop.
+            Maak een nieuw bestand: <code>Game.cs</code>.
+        </p>
+        <p>
+            We beginnen met de lijst (nu private, want alleen de Game mag erbij) en de Start-methode.
+        </p>
+
+        <pre><code class="language-csharp">using Tamagotchi.Models;
+
+namespace Tamagotchi;
+
+public class Game
+{
+    // De lijst met dieren (Private field)
+    private List&lt;DigitalPet&gt; _pets = new List&lt;DigitalPet&gt;();
+
+    public void Start()
+    {
+        Menu.ShowTitle();
+        bool appRunning = true;
+
+        while (appRunning)
         {
-            case "1":
-                Console.Write("Naam: ");
-                pets.Add(new DigitalPet(Console.ReadLine()));
-                break;
-            case "2":
-                Console.Write("Naam van het dier: ");
-                string search = Console.ReadLine();
-                // Zoek het dier en sla het op in 'currentPet'
-                currentPet = pets.FirstOrDefault(p => p.Name.ToLower() == search.ToLower());
+            // Hier komt straks de logica
+            Console.WriteLine("Game draait...");
+            string choice = Menu.AskString("Toets Q om te stoppen:");
 
-                if (currentPet == null)
-                {
-                    Console.WriteLine("Niet gevonden! Druk op ENTER.");
-                    Console.ReadLine();
-                }
-                break;
-            case "Q":
+            if (choice.ToUpper() == "Q")
+            {
                 appRunning = false;
-                break;
+            }
         }
     }
-    // ... Hieronder komt de else (Situatie B) ...</code></pre>
+}</code></pre>
 
         <hr>
 
-        <h3>Stap 5: Het Actie Menu (Situatie B)</h3>
+        <h2>Stap 3: Program.cs Opschonen</h2>
         <p>
-            Als <code>currentPet</code> gevuld is, komen we in het <code>else</code> blok. Hier kunnen we acties
-            uitvoeren op het gekozen dier.
-            Merk op hoe kort de code hier is, omdat we <code>HandleFeeding()</code> gebruiken!
+            Nu we alles verplaatst hebben, mag <code>Program.cs</code> bijna leeg zijn. Dit bestand is alleen nog maar de "deur" van je applicatie.
         </p>
-        <p>Vul de loop aan met het <code>else</code> blok:</p>
 
-        <pre><code class="language-csharp">    // SITUATIE B: Wel dier gekozen
-    else
-    {
-        Console.Clear();
-        Console.WriteLine($"\n--- ZORG VOOR: {currentPet.Name} ---");
-        Console.WriteLine(currentPet.EnergyDisplay());
-        Console.WriteLine("1. Voeren");
-        Console.WriteLine("2. Slapen");
-        Console.WriteLine("3. Terug naar Hoofdmenu");
-        Console.Write("Actie: ");
+        <pre><code class="language-csharp">using Tamagotchi;
 
-        string action = Console.ReadLine();
+// 1. Maak de game aan
+Game myGame = new Game();
 
-        switch(action)
-        {
-            case "1":
-                HandleFeeding(); // <--- Hier roepen we onze helper methode aan!
-                break;
-
-            case "2":
-                Console.WriteLine(currentPet.Sleep());
-                Console.ReadLine();
-                break;
-
-            case "3":
-                currentPet = null; // Door dit op null te zetten, gaan we terug naar het Hoofdmenu
-                break;
-        }
-    }
-} // Einde while loop</code></pre>
+// 2. Start de game
+myGame.Start();</code></pre>
 
         <h2>Samenvatting</h2>
         <p>
-            Je hebt nu een applicatie die klaar is voor de toekomst.
+            Je hebt nu een <strong>Architectuur</strong> neergezet!
         </p>
         <ul>
-            <li><strong>Dictionary:</strong> Je zoekt items razendsnel op naam.</li>
-            <li><strong>Helper Methodes:</strong> Je houdt je hoofdmenu schoon door complexe logica (zoals voeren) in
-                een eigen functie te zetten.
-            </li>
-            <li><strong>State Management:</strong> Je wisselt soepel tussen "Hoofdmenu" en "Dier Menu" door de variabele
-                <code>currentPet</code> te gebruiken.
-            </li>
+            <li><strong>Program.cs:</strong> Startpunt.</li>
+            <li><strong>Menu.cs:</strong> Regelt Input/Output.</li>
+            <li><strong>Game.cs:</strong> Regelt de Logica.</li>
         </ul>
+        <p>In de volgende les gaan we de echte logica (dieren toevoegen en selecteren) in de <code>Game</code> class bouwen.</p>
 
     </main>
     <aside class="sidebar-right">
