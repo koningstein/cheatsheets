@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lists & Generics - C# Module 4</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Les 4.1: Lists & Generics</h1>
+
+        <p class="lead">We vervangen losse variabelen en arrays door een <strong>List</strong>. Hiermee kunnen we dynamisch objecten toevoegen zonder vooraf de hoeveelheid te weten.</p>
+
+        <h2>Stap 1: De Lijst Declareren</h2>
+        <p>In plaats van een Array (`[]`) gebruiken we `List&lt;T&gt;`. Tussen de haakjes geef je het type aan.</p>
+
+        <pre><code class="language-csharp">using Tamagotchi.Models;
+
+// OUDE MANIER (Array - Vaste grootte, crasht bij te veel items)
+// DigitalPet[] pets = new DigitalPet[5];
+
+// NIEUWE MANIER (List - Groeit automatisch mee)
+List&lt;DigitalPet&gt; pets = new List&lt;DigitalPet&gt;();</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: De Loop (Toevoegen & Tonen)</h2>
+        <p>We maken een interactieve loop in <code>Program.cs</code>. Hierin combineren we drie acties:</p>
+        <ol>
+            <li><strong>Input:</strong> Gebruik <code>Console.ReadLine()</code>.</li>
+            <li><strong>Process:</strong> Gebruik <code>.Add()</code> om een nieuw object in de lijst te stoppen.</li>
+            <li><strong>Output:</strong> Gebruik <code>foreach</code> om de lijst te tonen.</li>
+        </ol>
+
+        <pre><code class="language-csharp">Console.WriteLine("Voer namen in. Druk op ENTER om te stoppen.");
+
+while (true)
+{
+    Console.Write("\nNaam: ");
+    string? input = Console.ReadLine();
+
+    // Stop conditie
+    if (string.IsNullOrWhiteSpace(input)) break;
+
+    // 1. Toevoegen aan lijst
+    pets.Add(new DigitalPet(input));
+
+    // 2. Lijst weergeven
+    Console.WriteLine($"\n--- Aantal dieren: {pets.Count} ---");
+
+    foreach (DigitalPet pet in pets)
+    {
+        Console.WriteLine(pet.EnergyDisplay());
+    }
+}</code></pre>
+
+        <hr>
+
+        <h2>Samenvatting Code</h2>
+        <p>Dit is hoe je <code>Program.cs</code> er nu uit moet zien:</p>
+
+        <pre><code class="language-csharp">using Figgle.Fonts;
+using Tamagotchi.Models;
+
+Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter"));
+
+List&lt;DigitalPet&gt; pets = new List&lt;DigitalPet&gt;();
+
+while (true)
+{
+    Console.Write("Naam nieuw dier (of ENTER om te stoppen): ");
+    string? input = Console.ReadLine();
+
+    if (string.IsNullOrWhiteSpace(input)) break;
+
+    pets.Add(new DigitalPet(input));
+
+    foreach (DigitalPet pet in pets)
+    {
+        Console.WriteLine($"- {pet.Name} (Energy: {pet.Energy})");
+    }
+}</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-3: Zoeken met LINQ - C# Console</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-3: Zoeken met LINQ</h1>
+
+        <p class="lead">Om specifieke items in een lijst te vinden, gebruiken we geen <code>foreach</code> loop met een <code>if</code>. We gebruiken <strong>LINQ</strong> (Language Integrated Query). Dit is korter en leesbaarder.</p>
+
+        <h2>1. Namespace toevoegen</h2>
+        <p>LINQ functies werken alleen als je deze regel helemaal bovenaan je bestand zet:</p>
+
+        <pre><code class="language-csharp">using System.Linq;</code></pre>
+
+        <hr>
+
+        <h2>2. FirstOrDefault</h2>
+        <p>
+            De meest gebruikte zoekfunctie is <code>FirstOrDefault</code>.
+            Hij zoekt het <strong>eerste</strong> item dat aan de voorwaarde voldoet. Vindt hij niets? Dan geeft hij <code>null</code> terug.
+        </p>
+
+        <pre><code class="language-csharp">Console.Write("Wie zoek je? ");
+string search = Console.ReadLine() ?? "";
+
+// Lambda Expressie: p => p.Name == search
+// Lees als: "Zoek het dier 'p' waarvan de naam gelijk is aan 'search'"
+DigitalPet? foundPet = pets.FirstOrDefault(p => p.Name == search);</code></pre>
+
+        <hr>
+
+        <h2>3. Case Insensitive Zoeken</h2>
+        <p>Strings zijn hoofdlettergevoelig ("rex" is niet "Rex"). Om dit op te lossen, zetten we alles om naar kleine letters (`ToLower`).</p>
+
+        <pre><code class="language-csharp">DigitalPet? foundPet = pets.FirstOrDefault(p => p.Name.ToLower() == search.ToLower());</code></pre>
+
+        <hr>
+
+        <h2>4. Null Check (Veiligheid)</h2>
+        <p>Als het dier niet bestaat, is de variabele <code>null</code>. Je moet dit controleren voordat je het gebruikt, anders crasht de app.</p>
+
+        <pre><code class="language-csharp">if (foundPet != null)
+{
+    // Gevonden!
+    Console.WriteLine($"Gevonden: {foundPet.Name} heeft {foundPet.Energy} energie.");
+}
+else
+{
+    // Niet gevonden (foundPet is null)
+    Console.WriteLine("Dier niet gevonden.");
+}</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-5: State Management - C# Console</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-5: State Management</h1>
+
+        <p class="lead">We splitsen de applicatie in twee statussen: <strong>Hoofdmenu</strong> (geen dier geselecteerd) en <strong>Actie Menu</strong> (ingelogd op een dier).</p>
+
+        <h2>Stap 1: Menu Uitbreiden (Menu.cs)</h2>
+        <p>Voeg een methode toe om veilige getallen te vragen, en een methode voor het submenu.</p>
+
+        <pre><code class="language-csharp">// In Menu.cs
+
+public int AskInt(string question)
+{
+    Console.Write(question + " ");
+    if (int.TryParse(Console.ReadLine(), out int result)) return result;
+    return 50; // Fallback waarde
+}
+
+public void ShowPetMenu(string name, int energy, int hunger)
+{
+    Console.WriteLine($"\n--- MENU: {name} ---");
+    Console.WriteLine($"Energie: {energy} | Honger: {hunger}");
+    Console.WriteLine("0. Terug (Uitloggen)");
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: State Variabele (Game.cs)</h2>
+        <p>We hebben een variabele nodig die onthoudt welk dier actief is.</p>
+
+        <pre><code class="language-csharp">// In Game.cs (bij de fields)
+private DigitalPet? _currentPet = null;</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: De Loop Splitsen (Game.cs)</h2>
+        <p>Pas de <code>Start()</code> methode aan. De `if (_currentPet == null)` bepaalt welk menu getoond wordt.</p>
+
+        <pre><code class="language-csharp">public void Start()
+{
+    _menu.ShowTitle();
+    bool appRunning = true;
+
+    while (appRunning)
+    {
+        // SITUATIE A: HOOFDMENU
+        if (_currentPet == null)
+        {
+            _menu.ShowMainMenu(_pets.Count);
+            string choice = _menu.AskString("Keuze:");
+
+            switch (choice.ToUpper())
+            {
+                case "1": // Nieuw
+                    string name = _menu.AskString("Naam:");
+                    int energy = _menu.AskInt("Energie (0-100):");
+                    int hunger = _menu.AskInt("Honger (0-100):");
+                    _pets.Add(new DigitalPet(name, energy, hunger));
+                    break;
+
+                case "2": // Lijst
+                    foreach (var pet in _pets) Console.WriteLine(pet.EnergyDisplay());
+                    _menu.WaitForEnter();
+                    break;
+
+                case "3": // Login
+                    string search = _menu.AskString("Wie zoek je?");
+                    // LINQ search
+                    _currentPet = _pets.FirstOrDefault(p => p.Name.ToLower() == search.ToLower());
+                    if (_currentPet == null)
+                    {
+                         Console.WriteLine("Niet gevonden.");
+                         _menu.WaitForEnter();
+                    }
+                    break;
+
+                case "Q": // Stop
+                    appRunning = false;
+                    break;
+            }
+        }
+        // SITUATIE B: ACTIE MENU (Ingelogd)
+        else
+        {
+            _menu.ShowPetMenu(_currentPet.Name, _currentPet.Energy, _currentPet.Hunger);
+            string action = _menu.AskString("Actie:");
+
+            switch (action)
+            {
+                case "0": // Uitloggen
+                    _currentPet = null;
+                    break;
+            }
+        }
+    }
+}</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

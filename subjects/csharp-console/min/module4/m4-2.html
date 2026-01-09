@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-2: Input & Parsing - C# Console</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-2: Input & Parsing</h1>
+
+        <p class="lead">Alle invoer via <code>Console.ReadLine()</code> is standaard tekst (string). Om met getallen te werken (zoals Energie), moeten we de tekst omzetten. Dit heet <strong>Parsing</strong>.</p>
+
+        <h2>1. Tekst Inlezen</h2>
+        <p>Gebruik <code>Console.ReadLine()</code> om te wachten tot de gebruiker iets typt en op Enter drukt.</p>
+
+        <pre><code class="language-csharp">Console.Write("Naam: ");
+string? input = Console.ReadLine();
+
+// Check op lege invoer
+if (string.IsNullOrWhiteSpace(input))
+{
+    // ... stop of probeer opnieuw ...
+}</code></pre>
+
+        <hr>
+
+        <h2>2. Parsing (String naar Int)</h2>
+        <p>
+            Je kunt tekst niet zomaar in een <code>int</code> variabele stoppen.
+            Gebruik <code>int.TryParse</code>. Dit is veiliger dan `int.Parse` omdat het niet crasht als de gebruiker "hallo" typt in plaats van een cijfer.
+        </p>
+
+        <pre><code class="language-csharp">Console.Write("Voer energie in (0-100): ");
+string numberInput = Console.ReadLine() ?? "0";
+
+// TryParse probeert de tekst om te zetten.
+// Het resultaat komt in de variabele 'energy' via de 'out' parameter.
+int energy;
+if (int.TryParse(numberInput, out energy))
+{
+    Console.WriteLine($"Gekozen energie: {energy}");
+}
+else
+{
+    Console.WriteLine("Dat was geen geldig getal. We gebruiken 0.");
+    energy = 0;
+}</code></pre>
+
+        <hr>
+
+        <h2>3. Alles Samenvoegen</h2>
+        <p>We breiden de loop uit Module 4-1 uit. We vragen nu om de Naam én de Energie.</p>
+
+        <pre><code class="language-csharp">while (true)
+{
+    // 1. Vraag Naam
+    Console.Write("\nNaam (of ENTER om te stoppen): ");
+    string? name = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(name)) break;
+
+    // 2. Vraag Energie
+    Console.Write("Energie level (getal): ");
+    string energyInput = Console.ReadLine() ?? "0";
+
+    // 3. Parse Energie
+    // We gebruiken hier een inline declaratie (out int energy)
+    if (!int.TryParse(energyInput, out int energy))
+    {
+        energy = 50; // Standaardwaarde bij fout
+    }
+
+    // 4. Maak Object en voeg toe
+    // We gebruiken de constructor die we eerder hebben gemaakt
+    pets.Add(new DigitalPet(name, energy));
+
+    Console.WriteLine($"{name} is toegevoegd met {energy} energie.");
+}</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

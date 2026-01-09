@@ -577,6 +577,19 @@
                 { "label": "Type Safety & Nullable", "url": "module3/m3-4.html" },
                 { "label": "Documentatie", "url": "module3/m3-5.html" }
               ]
+            },
+            {
+              "label": "Module 4: Collecties & Architectuur",
+              "url": "#",
+              "items": [
+                { "label": "Lists & Generics", "url": "module4/m4-1.html" },
+                { "label": "User Input & Loops", "url": "module4/m4-2.html" },
+                { "label": "LINQ Basics", "url": "module4/m4-3.html" },
+                { "label": "Architectuur (Classes)", "url": "module4/m4-4.html" },
+                { "label": "State Management", "url": "module4/m4-5.html" },
+                { "label": "Dictionaries", "url": "module4/m4-6.html" },
+                { "label": "JSON Opslaan & Laden", "url": "module4/m4-7.html" }
+              ]
             }
           ]
         }
@@ -630,6 +643,19 @@
                 { "label": "Constructors & Readonly", "url": "module3/m3-3-ext.html" },
                 { "label": "Type Safety & Nullable", "url": "module3/m3-4-ext.html" },
                 { "label": "Documentatie", "url": "module3/m3-5-ext.html" }
+              ]
+            },
+            {
+              "label": "Module 4: Collecties & Architectuur (Ext)",
+              "url": "#",
+              "items": [
+                { "label": "De Lijst & Loop", "url": "module4/m4-1-ext.html" },
+                { "label": "Input & Parsing", "url": "module4/m4-2-ext.html" },
+                { "label": "Zoeken met LINQ", "url": "module4/m4-3-ext.html" },
+                { "label": "De Grote Verhuizing", "url": "module4/m4-4-ext.html" },
+                { "label": "State Management", "url": "module4/m4-5-ext.html" },
+                { "label": "Dictionaries & Eten", "url": "module4/m4-6-ext.html" },
+                { "label": "JSON Opslaan & Laden", "url": "module4/m4-7-ext.html" }
               ]
             }
           ]

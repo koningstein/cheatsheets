@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light" data-color="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4-6: Dictionaries - C# Console</title>
+    <script src="../../../../assets/js/theme-init.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="../../../../assets/css/style.css">
+</head>
+<body>
+<div data-include="../../../../components/header.html"></div>
+<div class="layout-wrapper">
+    <div data-include="../../../../components/sidebar.html"></div>
+    <main class="main-content">
+        <h1>Module 4-6: Dictionaries</h1>
+
+        <p class="lead">We gebruiken een <code>Dictionary&lt;Key, Value&gt;</code> voor de voorraadkast. Dit maakt het opzoeken van items (op basis van naam) heel snel.</p>
+
+        <h2>Stap 1: Menu Update (Menu.cs)</h2>
+        <p>Voeg optie 1 toe aan <code>ShowPetMenu</code>.</p>
+        <pre><code class="language-csharp">public void ShowPetMenu(string name, int energy, int hunger)
+{
+    Console.WriteLine($"\n--- MENU: {name} ---");
+    Console.WriteLine($"Energie: {energy} | Honger: {hunger}");
+    Console.WriteLine("1. Voeren"); // <--- Nieuw
+    Console.WriteLine("0. Terug (Uitloggen)");
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Voorraadkast & Constructor (Game.cs)</h2>
+        <p>Maak de Dictionary aan en vul deze in de constructor.</p>
+
+        <pre><code class="language-csharp">// Field
+private Dictionary&lt;string, Food&gt; _pantry = new Dictionary&lt;string, Food&gt;();
+
+// Constructor (Voeg toe boven Start)
+public Game()
+{
+    _pantry.Add("Appel", new Food("Appel", 10));
+    _pantry.Add("Brood", new Food("Brood", 20));
+    _pantry.Add("Biefstuk", new Food("Biefstuk", 50));
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Feed Methode (DigitalPet.cs)</h2>
+        <p>Het dier verwerkt zelf het eten.</p>
+
+        <pre><code class="language-csharp">public string Feed(Food food)
+{
+    this.Energy += food.EnergyGain;
+    this.Hunger -= 10;
+    if (this.Hunger < 0) this.Hunger = 0;
+
+    return $"{this.Name} at een {food.Name}. (+{food.EnergyGain} Energie)";
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Implementatie (Game.cs)</h2>
+        <p>Voeg de logica toe in het <code>else</code> blok (Actie Menu) bij <code>case "1"</code>.</p>
+
+        <pre><code class="language-csharp">case "1": // VOEREN
+    Console.WriteLine(string.Join(", ", _pantry.Keys)); // Toon opties
+    string choice = _menu.AskString("Wat geef je?");
+
+    if (_pantry.ContainsKey(choice))
+    {
+        Food item = _pantry[choice];        // Ophalen
+        string result = _currentPet.Feed(item); // Uitvoeren
+        Console.WriteLine(result);
+    }
+    else
+    {
+        Console.WriteLine("Hebben we niet.");
+    }
+    _menu.WaitForEnter();
+    break;</code></pre>
+
+    </main>
+    <aside class="sidebar-right">
+        <div class="toc-container">
+            <h4>Inhoud</h4>
+            <ul id="toc-list" class="toc-list"></ul>
+        </div>
+    </aside>
+</div>
+<div data-include="../../../../components/footer.html"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="../../../../assets/js/script.js"></script>
+</body>
+</html>

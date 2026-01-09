@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Module 4-4: Architectuur - C# Module 4</title>
+    <title>Module 4-4: Architectuur - C# Console</title>
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -14,56 +14,31 @@
 <div class="layout-wrapper">
     <div data-include="../../../../components/sidebar.html"></div>
     <main class="main-content">
-        <h1>Module 4-4: De Grote Verhuizing</h1>
+        <h1>Module 4-4: Architectuur (Classes)</h1>
 
-        <p class="lead">Je <code>Program.cs</code> staat bomvol. Dat is niet handig. We gaan de taken verdelen over twee specialisten: de <strong>Manager</strong> (Game) en de <strong>Ober</strong> (Menu).</p>
+        <p class="lead"><code>Program.cs</code> wordt onoverzichtelijk. We splitsen de code op in drie delen: <strong>Data</strong> (Models), <strong>Weergave</strong> (Menu) en <strong>Logica</strong> (Game).</p>
 
         <div class="alert alert-secondary">
-            <strong>📂 Locatie:</strong> Maak <code>Menu.cs</code> en <code>Game.cs</code> aan in de hoofdmap (naast Program.cs), niet in Models.
+            <strong>Locatie:</strong> Maak <code>Menu.cs</code> en <code>Game.cs</code> aan in de hoofdmap (naast Program.cs).
         </div>
 
-        <h2>Stap 1: De Ober (Menu.cs)</h2>
+        <h2>Stap 1: UI Class (Menu.cs)</h2>
         <p>
-            De <code>Menu</code> class regelt alles wat de gebruiker ziet. We beginnen met de basisfunctionaliteit: titels tonen en vragen stellen.
+            Deze class regelt alle `Console` input en output.
         </p>
 
-        <h3>1.1 De Basis</h3>
-        <p>Zet deze code in <code>Menu.cs</code>. Dit zijn de hulpmiddelen die we steeds nodig hebben.</p>
         <pre><code class="language-csharp">using Figgle.Fonts;
 
 namespace Tamagotchi;
 
 public class Menu
 {
-    // Laat een mooie titel zien (met of zonder Figgle)
     public void ShowTitle()
     {
         Console.Clear();
         try { Console.WriteLine(FiggleFonts.Standard.Render("Dino Shelter")); }
         catch { Console.WriteLine("=== DINO SHELTER ==="); }
     }
-
-    // Stel een vraag en krijg tekst terug
-    public string AskString(string question)
-    {
-        Console.Write(question + " ");
-        return Console.ReadLine() ?? "";
-    }
-
-    // Pauzeer het programma
-    public void WaitForEnter()
-    {
-        Console.WriteLine("\nDruk op ENTER om verder te gaan...");
-        Console.ReadLine();
-    }
-}</code></pre>
-
-        <h3>1.2 Het Hoofdmenu</h3>
-        <p>
-            De Ober moet ook weten wat er op de menukaart staat. Voeg deze methode toe aan de class.
-            We zetten hier meteen alle opties in die we nodig hebben (Nieuw, Lijst, Login, Stop).
-        </p>
-        <pre><code class="language-csharp">    // Voeg toe in Menu.cs
 
     public void ShowMainMenu(int petCount)
     {
@@ -72,62 +47,64 @@ public class Menu
         Console.WriteLine("2. Bekijk alle dieren");
         Console.WriteLine("3. Login (Selecteer dier)");
         Console.WriteLine("Q. Stoppen");
-    }</code></pre>
+    }
+
+    public string AskString(string question)
+    {
+        Console.Write(question + " ");
+        return Console.ReadLine() ?? "";
+    }
+
+    public void WaitForEnter()
+    {
+        Console.WriteLine("\nDruk op ENTER om verder te gaan...");
+        Console.ReadLine();
+    }
+}</code></pre>
 
         <hr>
 
-        <h2>Stap 2: De Manager (Game.cs)</h2>
+        <h2>Stap 2: Logic Class (Game.cs)</h2>
         <p>
-            De <code>Game</code> class is de baas. Hij beheert de lijst met dieren en stuurt de Ober aan.
+            Deze class beheert de lijst en de loop. Hij gebruikt de `Menu` class om dingen te tonen.
         </p>
 
-        <h3>2.1 De Voorbereiding</h3>
-        <p>
-            De Manager heeft twee dingen nodig: een lijst met dieren en een Ober (`_menu`) om mee te communiceren.
-        </p>
         <pre><code class="language-csharp">using Tamagotchi.Models;
 
 namespace Tamagotchi;
 
 public class Game
 {
-    // Onze hulpmiddelen
     private Menu _menu = new Menu();
     private List&lt;DigitalPet&gt; _pets = new List&lt;DigitalPet&gt;();
 
-    // ... hieronder komt de Start() methode
-}</code></pre>
-
-        <h3>2.2 De Game Loop</h3>
-        <p>
-            Nu maken we de <code>Start()</code> methode. Hierin draait het spel.
-            Let op: we roepen hier <code>_menu.ShowMainMenu</code> aan, in plaats van zelf met Console.WriteLine te rommelen.
-        </p>
-        <pre><code class="language-csharp">    public void Start()
+    public void Start()
     {
         _menu.ShowTitle();
         bool appRunning = true;
 
         while (appRunning)
         {
-            // OPROEP: Ober, toon de kaart!
+            // Roep de UI aan
             _menu.ShowMainMenu(_pets.Count);
-
             string choice = _menu.AskString("Keuze:");
 
+            // Simpele logica voor nu (wordt uitgebreid in 4-5)
             if (choice.ToUpper() == "Q")
             {
                 appRunning = false;
             }
         }
-    }</code></pre>
+    }
+}</code></pre>
 
         <hr>
 
-        <h2>Stap 3: De Startknop (Program.cs)</h2>
+        <h2>Stap 3: Entry Point (Program.cs)</h2>
         <p>
-            Je oude code mag weg. <code>Program.cs</code> start alleen nog maar de manager op.
+            Je `Program.cs` start nu alleen de Game op.
         </p>
+
         <pre><code class="language-csharp">using Tamagotchi;
 
 Game myGame = new Game();

@@ -16,95 +16,117 @@
     <main class="main-content">
         <h1>Module 4-7: Opslaan & Laden (JSON)</h1>
 
-        <p class="lead">Onze game is leuk, maar als we afsluiten zijn de dieren dood. Dat kan niet! We gaan de dieren opslaan in een tekstbestand met <strong>JSON</strong>.</p>
+        <p class="lead">Onze game werkt, maar als we afsluiten zijn alle dieren weg. Dat gaan we oplossen door de lijst op te slaan in een tekstbestand (JSON).</p>
 
         <h2>Stap 1: Namespaces (Game.cs)</h2>
         <p>
-            Om bestanden te lezen en JSON te gebruiken, hebben we tools nodig.
-            Zet dit helemaal bovenin <code>Game.cs</code>:
+            C# heeft standaard geen verstand van JSON of bestanden schrijven. We moeten bibliotheken importeren.
+            Zet deze twee regels <strong>helemaal bovenin</strong> <code>Game.cs</code> (boven `namespace Tamagotchi;`).
         </p>
 
-        <pre><code class="language-csharp">using System.IO;         // Voor bestanden
-using System.Text.Json;  // Voor JSON</code></pre>
+        <pre><code class="language-csharp">using System.IO;         // Nodig voor File.WriteAllText en File.ReadAllText
+using System.Text.Json;  // Nodig voor JsonSerializer</code></pre>
 
         <hr>
 
         <h2>Stap 2: Opslaan (Serialize)</h2>
         <p>
-            We maken een methode <code>SaveGame()</code> in <code>Game.cs</code>.
-            Deze pakt de lijst <code>_pets</code> en maakt er tekst van.
+            We maken een methode die de lijst met dieren omzet naar tekst.
+            Zet deze methode <strong>helemaal onderaan</strong> in de `Game` class (onder de Start-methode, maar wel binnen de accolades van de class).
         </p>
 
-        <pre><code class="language-csharp">private void SaveGame()
-{
-    // Opties voor mooie leesbare tekst
-    var options = new JsonSerializerOptions { WriteIndented = true };
+        <pre><code class="language-csharp">    private void SaveGame()
+    {
+        // We stellen in dat de JSON netjes ingesprongen moet zijn (leesbaar voor mensen)
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
 
-    // 1. Van Lijst naar Tekst (JSON)
-    string json = JsonSerializer.Serialize(_pets, options);
+        // 1. Serialize: Maak van de lijst (_pets) een lange string (json)
+        string json = JsonSerializer.Serialize(_pets, options);
 
-    // 2. Schrijf naar bestand
-    File.WriteAllText("dieren.json", json);
+        // 2. Schrijf die string naar een bestand genaamd "dieren.json"
+        File.WriteAllText("dieren.json", json);
 
-    Console.WriteLine("Opgeslagen!");
-}</code></pre>
+        Console.WriteLine("Spel succesvol opgeslagen!");
+    }</code></pre>
 
         <hr>
 
         <h2>Stap 3: Laden (Deserialize)</h2>
         <p>
-            We maken een methode <code>LoadGame()</code>. Deze doet het omgekeerde: van Tekst naar Lijst.
-            We moeten wel checken of het bestand bestaat, anders crasht de app.
+            We hebben ook een methode nodig die het bestand leest en er weer een lijst van maakt.
+            Zet deze methode ook onderaan in <code>Game.cs</code>.
         </p>
 
-        <pre><code class="language-csharp">private void LoadGame()
-{
-    if (File.Exists("dieren.json"))
+        <pre><code class="language-csharp">    private void LoadGame()
     {
-        // 1. Lees tekst
-        string json = File.ReadAllText("dieren.json");
+        // Check altijd eerst of het bestand wel bestaat, anders crasht de game!
+        if (File.Exists("dieren.json"))
+        {
+            // 1. Lees de tekst uit het bestand
+            string json = File.ReadAllText("dieren.json");
 
-        // 2. Van Tekst naar Lijst
-        _pets = JsonSerializer.Deserialize&lt;List&lt;DigitalPet&gt;&gt;(json);
+            // 2. Deserialize: Maak van de tekst weer een List<DigitalPet>
+            // De '?? new List...' betekent: als het bestand leeg of fout is, maak dan een lege lijst aan.
+            _pets = JsonSerializer.Deserialize&lt;List&lt;DigitalPet&gt;&gt;(json) ?? new List&lt;DigitalPet&gt;();
 
-        Console.WriteLine("Dieren ingeladen!");
-    }
-}</code></pre>
+            Console.WriteLine($"Savegame geladen: {_pets.Count} dieren gevonden.");
+        }
+        else
+        {
+            Console.WriteLine("Geen opgeslagen spel gevonden. We beginnen opnieuw.");
+        }
+    }</code></pre>
 
         <hr>
 
-        <h2>Stap 4: Integreren</h2>
+        <h2>Stap 4: Integreren in de Start</h2>
         <p>
-            Nu moeten we deze methodes nog aanroepen in de <code>Start()</code> methode.
+            De methodes doen niets als we ze niet aanroepen.
+            We moeten <code>LoadGame</code> aanroepen bij het opstarten, en <code>SaveGame</code> bij het afsluiten.
+        </p>
+        <p>
+            Ga naar je <code>Start()</code> methode en pas hem op deze twee plekken aan:
         </p>
 
-        <pre><code class="language-csharp">public void Start()
-{
-    // LADEN bij opstarten
-    LoadGame();
-
-    while (appRunning)
+        <h3>4.1 Laden aan het begin</h3>
+        <p>Zet dit helemaal bovenaan in de <code>Start</code> methode:</p>
+        <pre><code class="language-csharp">    public void Start()
     {
-        // ... (De loop) ...
+        // 1. Eerst proberen we te laden
+        LoadGame();
 
-        if (choice == "Q")
-        {
-            // OPSLAAN bij afsluiten
-            SaveGame();
-            appRunning = false;
-        }
-    }
-}</code></pre>
+        // Even wachten zodat de gebruiker het resultaat ziet
+        _menu.WaitForEnter();
 
-        <h2>Samenvatting</h2>
-        <p>
-            Gefeliciteerd! Je hebt Module 4 afgerond.
-        </p>
-        <ul>
-            <li>Je hebt een professionele <strong>Architectuur</strong> (Game/Menu).</li>
-            <li>Je gebruikt <strong>State Management</strong> voor menu's.</li>
-            <li>Je werkt met <strong>Dictionaries</strong> en <strong>JSON</strong>.</li>
-        </ul>
+        _menu.ShowTitle();
+        bool appRunning = true;
+
+        // ... hieronder begint de while loop ...</code></pre>
+
+        <h3>4.2 Opslaan aan het einde</h3>
+        <p>Ga in de while-loop naar de <code>switch</code> van het Hoofdmenu. Zoek <code>case "Q"</code> op en pas deze aan:</p>
+        <pre><code class="language-csharp">                case "Q": // Stoppen
+                    // 2. Voordat we stoppen, slaan we op
+                    SaveGame();
+
+                    appRunning = false;
+                    break;</code></pre>
+
+        <h2>Samenvatting Module 4</h2>
+        <div class="alert alert-success">
+            <strong>Gefeliciteerd!</strong> Je hebt Fase 1 afgerond.
+
+            Je hebt nu een game die:
+            <ul>
+                <li>Netjes gestructureerd is (Game/Menu/Model).</li>
+                <li>Onthoudt waar je bent (State Management).</li>
+                <li>Eten kan geven uit een voorraad (Dictionaries).</li>
+                <li>Alles onthoudt na afsluiten (JSON).</li>
+            </ul>
+        </div>
 
     </main>
     <aside class="sidebar-right">

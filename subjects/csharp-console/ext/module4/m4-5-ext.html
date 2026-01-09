@@ -16,111 +16,141 @@
     <main class="main-content">
         <h1>Module 4-5: State Management</h1>
 
-        <p class="lead">We hebben een lege <code>Game</code> class. Nu gaan we zorgen dat we dieren kunnen toevoegen én selecteren. We gebruiken een variabele om te onthouden op welk dier we "ingelogd" zijn.</p>
+        <p class="lead">We gaan zorgen dat de knoppen werken. We introduceren het concept "Inloggen" op een dier.</p>
 
-        <h2>Stap 1: De State Variabele</h2>
+        <h2>Stap 1: Menu Uitbreiden (Menu.cs)</h2>
+        <p>We moeten eerst onze Ober (Menu) wat nieuwe trucjes leren.</p>
+
+        <h3>1.1 Getallen vragen</h3>
+        <p>Voor Energie en Honger hebben we getallen nodig. Voeg deze hulp-methode toe:</p>
+        <pre><code class="language-csharp">    // In Menu.cs
+    public int AskInt(string question)
+    {
+        Console.Write(question + " ");
+        // Probeer tekst om te zetten naar getal, anders 50
+        if (int.TryParse(Console.ReadLine(), out int result))
+            return result;
+        return 50;
+    }</code></pre>
+
+        <h3>1.2 Het Actie Menu</h3>
+        <p>Als we ingelogd zijn op een dier, zien we een ander menu. Hier gebruiken we <strong>0</strong> om terug te gaan.</p>
+        <pre><code class="language-csharp">    // In Menu.cs
+    public void ShowPetMenu(string name, int energy, int hunger)
+    {
+        Console.WriteLine($"\n--- MENU: {name} ---");
+        Console.WriteLine($"Energie: {energy} | Honger: {hunger}");
+        Console.WriteLine("0. Terug (Uitloggen)");
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: De State (Game.cs)</h2>
         <p>
-            In <code>Game.cs</code> voegen we een variabele toe: <code>_currentPet</code>.
-        <ul>
-            <li>Is deze <code>null</code>? Dan tonen we het <strong>Hoofdmenu</strong>.</li>
-            <li>Is deze gevuld? Dan tonen we het <strong>Actie Menu</strong>.</li>
-        </ul>
+            De Manager moet onthouden of we in het hoofdmenu zijn, of met een dier bezig zijn.
+            Daarvoor gebruiken we een variabele `_currentPet`.
         </p>
-
-        <pre><code class="language-csharp">// In Game.cs (bovenin bij de lijst)
-
-private List&lt;DigitalPet&gt; _pets = new List&lt;DigitalPet&gt;();
-
-// De State Variabele (nullable, want hij begint leeg)
+        <pre><code class="language-csharp">// In Game.cs (bovenin bij de fields)
 private DigitalPet? _currentPet = null;</code></pre>
 
         <hr>
 
-        <h2>Stap 2: De Loop Splitsen</h2>
+        <h2>Stap 3: De Logica Splitsen</h2>
         <p>
-            We passen de <code>Start()</code> methode aan. We kijken steeds: is er een dier geselecteerd?
-            Zo niet (if), toon menu A. Zo wel (else), toon menu B.
+            We gaan de <code>Start()</code> methode verbouwen. We kijken steeds: is `_currentPet` leeg (null)?
         </p>
+        <p>Zorg dat je `Start()` er zo uit komt te zien (de inhoud van de switches doen we hierna):</p>
 
-        <pre><code class="language-csharp">// In Game.cs -> Start()
-
-while (appRunning)
-{
-    // SITUATIE A: Geen dier (Hoofdmenu)
-    if (_currentPet == null)
+        <pre><code class="language-csharp">    public void Start()
     {
-        Console.WriteLine("\n--- HOOFDMENU ---");
-        Console.WriteLine("1. Nieuw dier");
-        Console.WriteLine("2. Login (Selecteer dier)");
-        Console.WriteLine("Q. Stoppen");
+        _menu.ShowTitle();
+        bool appRunning = true;
 
-        string choice = Menu.AskString("Keuze:");
+        while (appRunning)
+        {
+            // SITUATIE A: Geen dier (Hoofdmenu)
+            if (_currentPet == null)
+            {
+                _menu.ShowMainMenu(_pets.Count);
+                string choice = _menu.AskString("Keuze:");
 
-        // ... (Switch voor Hoofdmenu, zie Stap 3) ...
-    }
-    // SITUATIE B: Wel dier (Actie Menu)
-    else
-    {
-        Console.WriteLine($"\n--- MENU: {_currentPet.Name} ---");
-        Console.WriteLine("1. Uitloggen (Terug)");
+                // ... Hier komt Switch A (zie Stap 4)
+            }
+            // SITUATIE B: Wel dier (Actie Menu)
+            else
+            {
+                _menu.ShowPetMenu(_currentPet.Name, _currentPet.Energy, _currentPet.Hunger);
+                string action = _menu.AskString("Actie:");
 
-        string action = Menu.AskString("Actie:");
-
-        // ... (Switch voor Actie Menu, zie Stap 4) ...
-    }
-}</code></pre>
+                // ... Hier komt Switch B (zie Stap 5)
+            }
+        }
+    }</code></pre>
 
         <hr>
 
-        <h2>Stap 3: Het Hoofdmenu (Toevoegen & Zoeken)</h2>
-        <p>
-            Nu vullen we de logica in voor Situatie A.
-            We gebruiken LINQ om een dier te zoeken en slaan het resultaat op in <code>_currentPet</code>.
-        </p>
+        <h2>Stap 4: Het Hoofdmenu Invullen</h2>
+        <p>Nu vullen we de eerste switch in. Hier regelen we toevoegen, de lijst tonen en inloggen.</p>
 
-        <pre><code class="language-csharp">        // In het if (_currentPet == null) blok:
-        switch (choice.ToUpper())
-        {
-            case "1":
-                string name = Menu.AskString("Naam:");
-                _pets.Add(new DigitalPet(name));
-                Console.WriteLine("Toegevoegd!");
-                break;
+        <pre><code class="language-csharp">            // Switch A (In het if-blok)
+            switch (choice.ToUpper())
+            {
+                case "1": // Toevoegen
+                    string name = _menu.AskString("Naam:");
+                    int energy = _menu.AskInt("Energie (0-100):");
+                    int hunger = _menu.AskInt("Honger (0-100):");
+                    _pets.Add(new DigitalPet(name, energy, hunger));
+                    Console.WriteLine("Toegevoegd!");
+                    _menu.WaitForEnter();
+                    break;
 
-            case "2":
-                string search = Menu.AskString("Wie zoek je?");
-                // LINQ: Zoek het dier en zet het in de variabele
-                _currentPet = _pets.FirstOrDefault(p => p.Name == search);
+                case "2": // Lijst Tonen
+                    Console.WriteLine("\n--- ALLE DIEREN ---");
+                    foreach (var pet in _pets)
+                    {
+                        Console.WriteLine(pet.EnergyDisplay());
+                    }
+                    _menu.WaitForEnter();
+                    break;
 
-                if (_currentPet == null)
-                    Console.WriteLine("Niet gevonden.");
-                break;
+                case "3": // Zoeken & Inloggen
+                    string search = _menu.AskString("Wie zoek je?");
+                    _currentPet = _pets.FirstOrDefault(p => p.Name.ToLower() == search.ToLower());
 
-            case "Q":
-                appRunning = false;
-                break;
-        }</code></pre>
+                    if (_currentPet == null)
+                    {
+                        Console.WriteLine("Niet gevonden.");
+                        _menu.WaitForEnter();
+                    }
+                    break;
+
+                case "Q": // Stoppen
+                    appRunning = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Ongeldige keuze.");
+                    _menu.WaitForEnter();
+                    break;
+            }</code></pre>
 
         <hr>
 
-        <h2>Stap 4: Het Actie Menu (Uitloggen)</h2>
-        <p>
-            Als <code>_currentPet</code> gevuld is, komen we in de `else`.
-            Als we willen "uitloggen", zetten we de variabele simpelweg weer op `null`. De loop springt dan vanzelf terug naar Situatie A.
-        </p>
+        <h2>Stap 5: Het Actie Menu Invullen</h2>
+        <p>Als we ingelogd zijn, willen we ook weer terug kunnen. Dat doen we door `_currentPet` weer op `null` te zetten.</p>
 
-        <pre><code class="language-csharp">        // In het else blok:
-        switch (action)
-        {
-            case "1":
-                _currentPet = null; // Terug naar Hoofdmenu
-                break;
-        }</code></pre>
+        <pre><code class="language-csharp">            // Switch B (In het else-blok)
+            switch (action)
+            {
+                case "0": // TERUG
+                    _currentPet = null; // Door dit op null te zetten, gaan we terug naar het hoofdmenu
+                    break;
 
-        <h2>Samenvatting</h2>
-        <p>
-            Je hebt nu <strong>State Management</strong> toegepast! Je navigeert door de applicatie door simpelweg een variabele te vullen of leeg te maken.
-        </p>
+                default:
+                    Console.WriteLine("Ongeldige keuze.");
+                    _menu.WaitForEnter();
+                    break;
+            }</code></pre>
 
     </main>
     <aside class="sidebar-right">

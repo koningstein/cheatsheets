@@ -16,86 +16,143 @@
     <main class="main-content">
         <h1>Module 4-6: Dictionaries & Eten Geven</h1>
 
-        <p class="lead">We kunnen inloggen op een dier! Nu willen we het voeren. We maken een voorraadkast (Dictionary) in de Game en leren het dier eten.</p>
+        <p class="lead">We kunnen inloggen op een dier. Nu gaan we zorgen dat we het dier kunnen voeren. Hiervoor hebben we drie stappen nodig: het menu aanpassen, een voorraadkast maken, en de eet-logica schrijven.</p>
 
-        <h2>Stap 1: De Voorraadkast (Game.cs)</h2>
+        <h2>Stap 1: Het Menu Aanpassen (Menu.cs)</h2>
         <p>
-            In <code>Game.cs</code> maken we een Dictionary aan. Dit is onze pantry.
-            We zetten dit bovenaan bij de andere private fields.
-
+            De gebruiker moet weten dat hij kan voeren. We passen de methode <code>ShowPetMenu</code> aan in <code>Menu.cs</code>.
+        </p>
+        <p>
+            We voegen optie <strong>1</strong> toe voor "Voeren". De optie <strong>0</strong> blijft "Terug".
         </p>
 
-        <pre><code class="language-csharp">// In Game.cs
+        <pre><code class="language-csharp">// Vervang de methode ShowPetMenu in Menu.cs met deze volledige versie:
 
-private Dictionary&lt;string, Food&gt; _pantry = new Dictionary&lt;string, Food&gt;();
-
-// Tip: In de Constructor (public Game()) kun je hem vullen:
-public Game()
+public void ShowPetMenu(string name, int energy, int hunger)
 {
-    _pantry.Add("Appel", new Food("Appel", 10));
-    _pantry.Add("Brood", new Food("Brood", 20));
+    Console.WriteLine($"\n--- MENU: {name} ---");
+    Console.WriteLine($"Energie: {energy} | Honger: {hunger}");
+    Console.WriteLine("1. Voeren");
+    Console.WriteLine("0. Terug (Uitloggen)");
 }</code></pre>
 
         <hr>
 
-        <h2>Stap 2: Logica in de Class (DigitalPet.cs)</h2>
+        <h2>Stap 2: De Logica in het Dier (DigitalPet.cs)</h2>
         <p>
-            De Game-class mag niet zelf aan de <code>Energy</code> variabele van het dier zitten (dat is private!).
-            We moeten het dier netjes vragen om te eten.
+            Volgens de regels van OOP (Object Oriented Programming) mag de <code>Game</code> class niet zomaar de <code>Energy</code> van het dier veranderen. Het dier is de baas over zijn eigen buik.
         </p>
-        <p>Open <code>Models/DigitalPet.cs</code> en voeg toe:</p>
+        <p>
+            Daarom maken we een methode <code>Feed</code> in <code>DigitalPet.cs</code>. Deze methode:
+        </p>
+        <ol>
+            <li>Accepteert een stukje eten (`Food`).</li>
+            <li>Verhoogt de energie met de waarde van het eten.</li>
+            <li>Verlaagt de honger met een vast getal (bijvoorbeeld 10).</li>
+            <li>Zorgt dat de honger niet onder de 0 komt (geen negatieve honger).</li>
+            <li>Geeft een zinnetje terug als feedback.</li>
+        </ol>
 
-        <pre><code class="language-csharp">// In DigitalPet.cs
+        <pre><code class="language-csharp">// Voeg deze volledige methode toe in DigitalPet.cs:
 
 public string Feed(Food food)
 {
     this.Energy += food.EnergyGain;
     this.Hunger -= 10;
 
-    if (this.Hunger < 0) this.Hunger = 0;
+    // Veiligheidscheck: Honger mag niet negatief zijn
+    if (this.Hunger < 0)
+    {
+        this.Hunger = 0;
+    }
 
     return $"{this.Name} at een {food.Name}. (+{food.EnergyGain} Energie)";
 }</code></pre>
 
         <hr>
 
-        <h2>Stap 3: Het Menu Uitbreiden (Game.cs)</h2>
+        <h2>Stap 3: De Voorraadkast (Game.cs)</h2>
         <p>
-            Nu voegen we de optie "Voeren" toe aan het Actie Menu (de `else` in je loop).
-            We tonen de keys (namen) en laten de gebruiker kiezen.
+            Nu gaan we naar <code>Game.cs</code>. We hebben een plek nodig om ons eten te bewaren. Hiervoor gebruiken we een <strong>Dictionary</strong>.
+            Een Dictionary werkt met een <em>Sleutel</em> (de naam, string) en een <em>Waarde</em> (het object, Food).
         </p>
 
-        <pre><code class="language-csharp">        // In het else blok van Game.cs, case "2":
+        <h3>3.1 Het Field aanmaken</h3>
+        <p>Zet dit bovenaan in <code>Game.cs</code>, bij de lijst met pets en het menu.</p>
+        <pre><code class="language-csharp">    // De voorraadkast (Pantry)
+    private Dictionary&lt;string, Food&gt; _pantry = new Dictionary&lt;string, Food&gt;();</code></pre>
 
-        case "2": // Stel dat 2 = Voeren
-            Console.WriteLine("Kast: " + string.Join(", ", _pantry.Keys));
-
-            string foodChoice = Menu.AskString("Wat geef je?");
-
-            // Check of het in de Dictionary zit
-            if (_pantry.ContainsKey(foodChoice))
-            {
-                // Haal het object op
-                Food item = _pantry[foodChoice];
-
-                // Geef het aan het huidige dier
-                string result = _currentPet.Feed(item);
-                Console.WriteLine(result);
-            }
-            else
-            {
-                Console.WriteLine("Hebben we niet.");
-            }
-            break;</code></pre>
-
-        <h2>Samenvatting</h2>
+        <h3>3.2 De Constructor</h3>
         <p>
-            Je hebt nu een perfecte scheiding van taken:
+            We willen dat de voorraadkast gevuld is zodra het spel begint. Daarvoor gebruiken we de <strong>Constructor</strong>.
+            Dit is een methode die precies dezelfde naam heeft als de class (`Game`). Hij wordt automatisch uitgevoerd bij `new Game()`.
         </p>
-        <ul>
-            <li><strong>Game:</strong> Beheert de voorraad (Dictionary).</li>
-            <li><strong>DigitalPet:</strong> Beheert zijn eigen buik (Energy/Hunger).</li>
-        </ul>
+        <p>Zet dit blok code in <code>Game.cs</code>, net boven de `Start()` methode.</p>
+
+        <pre><code class="language-csharp">    // De Constructor van Game
+    public Game()
+    {
+        // We vullen de kast met 3 items
+        _pantry.Add("Appel", new Food("Appel", 10));
+        _pantry.Add("Brood", new Food("Brood", 20));
+        _pantry.Add("Biefstuk", new Food("Biefstuk", 50));
+    }</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: De Actie Uitvoeren (Game.cs)</h2>
+        <p>
+            Nu koppelen we alles aan elkaar in de <code>Start</code> methode.
+            We gaan naar het <code>else</code> blok (waar we ingelogd zijn). Daar moeten we zorgen dat als de gebruiker "1" kiest, hij eten kan selecteren.
+        </p>
+        <p>
+            Vervang het `switch(action)` blok in je code met deze uitgebreide versie:
+        </p>
+
+        <pre><code class="language-csharp">            // Dit is de switch in het 'else' blok (Situatie B: Wel dier)
+            switch (action)
+            {
+                case "1": // VOEREN
+                    Console.WriteLine("\n--- VOORRAADKAST ---");
+
+                    // We tonen alle 'Keys' (de namen van het eten: Appel, Brood, Biefstuk)
+                    Console.WriteLine(string.Join(", ", _pantry.Keys));
+
+                    // Vraag de gebruiker wat hij wil geven
+                    string foodChoice = _menu.AskString("Wat wil je geven?");
+
+                    // Check: Hebben we dit wel in de kast?
+                    if (_pantry.ContainsKey(foodChoice))
+                    {
+                        // 1. Haal het Food object uit de Dictionary
+                        Food item = _pantry[foodChoice];
+
+                        // 2. Geef het object aan het dier via de Feed methode
+                        string result = _currentPet.Feed(item);
+
+                        // 3. Toon het resultaat op het scherm
+                        Console.WriteLine(result);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Dat hebben we helaas niet in huis.");
+                    }
+
+                    // Even wachten zodat de gebruiker het kan lezen
+                    _menu.WaitForEnter();
+                    break;
+
+                case "0": // TERUG
+                    // Door _currentPet op null te zetten, 'vergeten' we op wie we ingelogd zijn.
+                    // De loop begint opnieuw en ziet dat _currentPet null is -> Hoofdmenu.
+                    _currentPet = null;
+                    break;
+
+                default:
+                    Console.WriteLine("Ongeldige keuze.");
+                    _menu.WaitForEnter();
+                    break;
+            }</code></pre>
 
     </main>
     <aside class="sidebar-right">
