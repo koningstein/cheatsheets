@@ -64,6 +64,8 @@ public function delete(Category $category)
         @csrf
         @method('DELETE')
 
+        &lt;input type="text" name="name" value="{{ $category->name }}" disabled&gt;
+
         &lt;button type="submit" class="bg-red-500 text-white p-2"&gt;
             Ja, weg ermee
         &lt;/button&gt;

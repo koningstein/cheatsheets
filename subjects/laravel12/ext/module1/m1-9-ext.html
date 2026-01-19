@@ -24,9 +24,9 @@
             <h2>Leeruitkomsten</h2>
             <ul style="margin-bottom: 0;">
                 <li>Ik begrijp waarom we voor verwijderen een POST/DELETE request gebruiken en geen GET.</li>
-                <li>Ik kan een HTML-formulier maken om een item te verwijderen.</li>
+                <li>Ik kan een aparte bevestigingspagina maken voor het verwijderen van items.</li>
+                <li>Ik kan disabled input fields gebruiken om data weer te geven.</li>
                 <li>Ik kan Method Spoofing toepassen voor DELETE acties.</li>
-                <li>Ik kan een JavaScript bevestiging (confirm) toevoegen voor de zekerheid.</li>
                 <li>Ik kan de destroy methode in de controller implementeren.</li>
             </ul>
         </div>
@@ -38,41 +38,101 @@
 
         <p>Daarom gebruiken we voor acties die iets veranderen (zoals verwijderen) altijd een <strong>formulier</strong> met een POST-methode (en Method Spoofing naar DELETE). Bovendien vereist een formulier een <strong>CSRF-token</strong>, wat voorkomt dat andere sites namens jou iets kunnen verwijderen.</p>
 
-        <h2>De View (De Knop)</h2>
-        <p>We voegen de verwijderknop toe aan het overzicht in <code>resources/views/admin/categories/index.blade.php</code>. Omdat het een formulier is, ziet de code er iets anders uit dan een simpele knop.</p>
+        <h2>Two-Step Verification Pattern</h2>
+        <p>We gaan een professioneel patroon implementeren: de <strong>Two-Step Verification Pattern</strong>. Dit betekent dat verwijderen uit twee stappen bestaat:</p>
+        <ol>
+            <li><strong>Stap 1 (Delete):</strong> De gebruiker klikt op "Verwijder" en ziet een bevestigingspagina met details van wat verwijderd wordt.</li>
+            <li><strong>Stap 2 (Destroy):</strong> De gebruiker bevestigt en het item wordt daadwerkelijk uit de database verwijderd.</li>
+        </ol>
+        <p>Dit is veiliger en gebruikersvriendelijker dan een snelle pop-up bevestiging.</p>
 
-        <pre><code class="language-html">
-&lt;!-- In de loop van je tabel --&gt;
-&lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium"&gt;
-    &lt;a href="{{ route('admin.categories.edit', $category) }}" class="text-indigo-600 hover:text-indigo-900 mr-3"&gt;
-        Wijzig
-    &lt;/a&gt;
+        <h2>De Routes</h2>
+        <p>We hebben twee routes nodig. Plaats deze <strong>boven</strong> je resource route in <code>routes/web.php</code>:</p>
 
-    &lt;!-- Verwijder Formulier --&gt;
-    &lt;form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline-block"&gt;
-        @csrf
-        @method('DELETE')
+        <pre><code class="language-php">
+// Routes voor het verwijderen van categorieën
+// DELETE = bevestigingspagina tonen
+// DESTROY = daadwerkelijk verwijderen
+Route::get('/admin/categories/{category}/delete', [CategoryController::class, 'delete'])
+    ->name('categories.delete');
 
-        &lt;button type="submit"
-                class="text-red-600 hover:text-red-900"
-                onclick="return confirm('Weet je zeker dat je deze categorie wilt verwijderen?')"&gt;
-            Verwijder
-        &lt;/button&gt;
-    &lt;/form&gt;
-&lt;/td&gt;
+Route::resource('/admin/categories', CategoryController::class);
         </code></pre>
 
-        <h3>Javascript Bevestiging</h3>
-        <p>Je ziet in de code hierboven het attribuut <code>onclick</code>. Dit is een klein stukje JavaScript dat een pop-up toont. Als de gebruiker op "Annuleren" klikt, geeft de functie <code>false</code> terug en wordt het formulier niet verstuurd. Klikt de gebruiker op "OK", dan gaat het formulier wel door.</p>
+        <p>De reden dat we deze <strong>boven</strong> de resource route zetten: Laravel leest routes van boven naar beneden. Als we ze eronder zetten, zou Laravel denken dat <code>{category}/delete</code> een ID is.</p>
 
-        <h2>De Destroy Methode</h2>
-        <p>Het formulier stuurt de gebruiker naar de <code>destroy</code> methode in de <code>CategoryController</code>. Dankzij de Resource Route die we in module 1-4 hebben gemaakt, is deze route al gekoppeld.</p>
+        <h2>De Delete Methode (Bevestigingspagina)</h2>
+        <p>In <code>app/Http/Controllers/CategoryController.php</code> voegen we een nieuwe methode toe:</p>
 
-        <p>We gebruiken ook hier weer <strong>Implicit Model Binding</strong>. Laravel zoekt automatisch de categorie die bij het ID in de URL hoort.</p>
+        <pre><code class="language-php">
+/**
+ * Show the delete confirmation page.
+ * Dit is NIET het echte verwijderen, alleen het bevestigingsscherm.
+ */
+public function delete(Category $category)
+{
+    return view('admin.categories.delete', [
+        'category' => $category
+    ]);
+}
+        </code></pre>
+
+        <p>Deze methode doet niks met de database. Het toont alleen een pagina met de vraag "Weet je het zeker?".</p>
+
+        <h2>De Delete View (Bevestigingspagina)</h2>
+        <p>Maak een nieuw bestand: <code>resources/views/admin/categories/delete.blade.php</code></p>
+
+        <pre><code class="language-html">
+@extends('layouts.layoutadmin')
+
+@section('content')
+    &lt;div class="max-w-2xl mx-auto"&gt;
+        &lt;h1 class="text-red-600 text-3xl font-bold mb-6"&gt;Verwijderen?&lt;/h1&gt;
+
+        &lt;p class="text-gray-700 mb-6"&gt;
+            Je staat op het punt om de volgende categorie te verwijderen. Dit kan <strong>niet ongedaan</strong> gemaakt worden.
+        &lt;/p&gt;
+
+        &lt;form action="{{ route('categories.destroy', $category) }}" method="POST" class="bg-gray-100 border-l-4 border-red-600 p-6 mb-6"&gt;
+            @csrf
+            @method('DELETE')
+
+            &lt;h2 class="text-lg font-bold mb-4"&gt;Dit wordt verwijderd:&lt;/h2&gt;
+
+            &lt;div class="mb-4"&gt;
+                &lt;label class="block text-sm font-medium text-gray-700 mb-2"&gt;Naam&lt;/label&gt;
+                &lt;input type="text" value="{{ $category->name }}" disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700"&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-6"&gt;
+                &lt;label class="block text-sm font-medium text-gray-700 mb-2"&gt;Beschrijving&lt;/label&gt;
+                &lt;textarea disabled class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700" rows="4"&gt;{{ $category->description ?? 'Geen beschrijving' }}&lt;/textarea&gt;
+            &lt;/div&gt;
+
+            &lt;button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"&gt;
+                Ja, ik ben zeker. Verwijder deze categorie.
+            &lt;/button&gt;
+        &lt;/form&gt;
+
+        &lt;a href="{{ route('categories.index') }}" class="text-blue-600 hover:text-blue-900"&gt;
+            ← Terug naar overzicht (niet verwijderen)
+        &lt;/a&gt;
+    &lt;/div&gt;
+@endsection
+        </code></pre>
+
+        <p>Merk op dat we hier <strong>disabled input fields</strong> gebruiken. Deze zijn leesbaar, maar kunnen niet gewijzigd worden. Dit laat duidelijk zien wat er verwijderd wordt.</p>
+
+        <h3>Waarom disabled fields?</h3>
+        <p>Disabled input fields zijn handig om informatie weer te geven die niet bewerkt mag worden. Ze worden ook niet meestuurd in het formulier, dus ze houden geen ruis in je POST data.</p>
+
+        <h2>De Destroy Methode (Echte Verwijdering)</h2>
+        <p>In de <code>CategoryController</code> voegen we ook de destroy methode toe (of passen deze aan als die al bestaat):</p>
 
         <pre><code class="language-php">
 /**
  * Remove the specified resource from storage.
+ * Dit is het echte verwijderen uit de database.
  */
 public function destroy(Category $category): RedirectResponse
 {
@@ -80,10 +140,43 @@ public function destroy(Category $category): RedirectResponse
     $category->delete();
 
     // 2. Stuur de gebruiker terug met een melding
-    return to_route('admin.categories.index')
+    return to_route('categories.index')
         ->with('status', 'Categorie succesvol verwijderd!');
 }
         </code></pre>
+
+        <h2>De Index View (Verwijder Knop)</h2>
+        <p>In je overzichtspagina <code>resources/views/admin/categories/index.blade.php</code>, voeg je een "Verwijder" knop toe die naar de delete bevestigingspagina verwijst:</p>
+
+        <pre><code class="language-html">
+&lt;!-- In de loop van je tabel --&gt;
+&lt;td class="px-6 py-4 whitespace-nowrap text-sm font-medium"&gt;
+    &lt;a href="{{ route('categories.edit', $category) }}" class="text-indigo-600 hover:text-indigo-900 mr-3"&gt;
+        Wijzig
+    &lt;/a&gt;
+
+    &lt;!-- Verwijder Knop (gaat naar delete bevestigingspagina) --&gt;
+    &lt;a href="{{ route('categories.delete', $category) }}" class="text-red-600 hover:text-red-900"&gt;
+        Verwijder
+    &lt;/a&gt;
+&lt;/td&gt;
+        </code></pre>
+
+        <p>Deze knop is een gewone link, want hij gaat maar naar een bevestigingspagina. Het echte verwijderen gebeurt pas daarna met het DELETE formulier.</p>
+
+        <h2>Method Spoofing: @method('DELETE')</h2>
+        <p>HTML formulieren kennen standaard alleen GET en POST. Voor REST-API's willen we echter DELETE, PUT, PATCH gebruiken. Laravel biedt hiervoor "Method Spoofing" aan:</p>
+
+        <pre><code class="language-html">
+&lt;form action="{{ route('categories.destroy', $category) }}" method="POST"&gt;
+    @csrf
+    @method('DELETE')  &lt;!-- Dit vertelt Laravel: behandel dit als DELETE --&gt;
+
+    &lt;button type="submit"&gt;Verwijder&lt;/button&gt;
+&lt;/form&gt;
+        </code></pre>
+
+        <p>De <code>@method('DELETE')</code> voegt een verborgen input veld toe die Laravel vertelt hoe dit formulier behandeld moet worden.</p>
 
         <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
             <strong>Let op: Constraints</strong><br>
@@ -99,6 +192,17 @@ public function destroy(Category $category): RedirectResponse
             <li>De kolom <code>deleted_at</code> toevoegen aan je migration (<code>$table->softDeletes();</code>).</li>
         </ol>
         <p>Voor deze module gebruiken we <strong>Hard Deletes</strong> (definitief verwijderen), maar het is goed om te weten dat dit bestaat.</p>
+
+        <h2>Samenvatting: De Flow</h2>
+        <ol>
+            <li>Gebruiker ziet een "Verwijder" knop op de categorielijst.</li>
+            <li>Gebruiker klikt erop → gaat naar <code>/admin/categories/{id}/delete</code> → <code>delete()</code> methode.</li>
+            <li>Bevestigingspagina toont de details van wat verwijderd wordt.</li>
+            <li>Gebruiker klikt "Ja, verwijderen" → stuurt DELETE formulier.</li>
+            <li>Formulier gaat naar <code>/admin/categories/{id}</code> → <code>destroy()</code> methode.</li>
+            <li>Categorie wordt verwijderd uit de database.</li>
+            <li>Gebruiker wordt terugstuurd naar het overzicht met succes-melding.</li>
+        </ol>
 
     </main>
 
