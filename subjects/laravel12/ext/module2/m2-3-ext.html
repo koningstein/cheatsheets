@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roles & Permissions - Laravel 12 Module 2</title>
+    <title>Module 2-3: Roles & Permissions (Spatie) - Laravel 12 Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,141 +18,188 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Roles & Permissions</h1>
-        <p>Tot nu toe kan iedereen die een account aanmaakt inloggen en (als ze de URL weten) naar het admin-gedeelte gaan. Dat is natuurlijk niet de bedoeling. Een klant mag alleen producten kopen, terwijl een beheerder producten mag toevoegen en verwijderen.</p>
-        <p>In deze module leggen we de basis voor <strong>Role-Based Access Control (RBAC)</strong>. We gaan onderscheid maken tussen gewone gebruikers ('User') en beheerders ('Admin').</p>
+        <h1>Module 2-3: Roles & Permissions (Spatie)</h1>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <p class="lead">Tot nu toe is elke gebruiker in je applicatie gelijk. Maar in een echte webshop mag een klant alleen kopen, een magazijnmedewerker mag voorraden aanpassen, en een admin mag alles. We gaan dit regelen met <strong>Roles & Permissions</strong>.</p>
+
+        <p>We bouwen dit niet zelf, want beveiliging is complex. We gebruiken de industriestandaard package: <strong>spatie/laravel-permission</strong>.</p>
+
+        <section class="learning-outcomes">
             <h2>Leeruitkomsten</h2>
-            <ul style="margin-bottom: 0;">
-                <li>Ik begrijp het verschil tussen Authenticatie en Autorisatie.</li>
-                <li>Ik kan een bestaande tabel (users) uitbreiden met een nieuwe kolom via een migration.</li>
-                <li>Ik kan Attribute Casting gebruiken in een Model.</li>
-                <li>Ik kan beheerders aanmaken via Database Seeders.</li>
-                <li>Ik kan in Blade controleren of een gebruiker admin-rechten heeft.</li>
+            <p>Na het afronden van deze les kun je:</p>
+            <ul>
+                <li>Een externe package installeren via Composer.</li>
+                <li>De configuratie van een Laravel package publiceren en aanpassen.</li>
+                <li>Een <strong>Trait</strong> toepassen in een Model om functionaliteit toe te voegen.</li>
+                <li>Database Seeders gebruiken om een rechtenstructuur (Rollen & Permissies) op te zetten.</li>
             </ul>
-        </div>
+        </section>
 
-        <h2>Authenticatie vs. Autorisatie</h2>
-        <p>Deze twee termen worden vaak door elkaar gehaald, maar betekenen iets heel anders:</p>
-        <ul>
-            <li><strong>Authenticatie (Who are you?):</strong> Controleren <em>wie</em> de gebruiker is. Dit gebeurt bij het inloggen (gebruikersnaam + wachtwoord). Laravel regelt dit grotendeels voor ons met de starterkit.</li>
-            <li><strong>Autorisatie (What may you do?):</strong> Controleren wat de gebruiker <em>mag doen</em>. Mag deze persoon de admin-pagina bekijken? Mag hij dit product verwijderen?</li>
-        </ul>
-        <p>In deze module focussen we op <strong>Autorisatie</strong>.</p>
+        <hr>
 
-        <h2>Database Aanpassing</h2>
-        <p>Om te weten of iemand admin is, moeten we dit opslaan in de database. De simpelste manier voor nu is om een kolom <code>is_admin</code> toe te voegen aan de <code>users</code> tabel. Dit is een 'boolean' (waar/niet waar).</p>
+        <h2>Stap 1: De Package Installeren</h2>
+        <p>
+            We halen de code van de package binnen via <strong>Composer</strong>. Composer is de pakketmanager voor PHP; hij downloadt de bestanden naar je `vendor` map en zorgt dat je project weet dat deze nieuwe code bestaat.
+        </p>
+        <pre><code class="language-bash">composer require spatie/laravel-permission</code></pre>
 
-        <h3>Migration Maken</h3>
-        <p>Omdat de <code>users</code> tabel al bestaat (deze komt standaard met Laravel mee), maken we een nieuwe migration om de tabel te <em>wijzigen</em>.</p>
+        <hr>
 
-        <pre><code class="language-bash">php artisan make:migration add_is_admin_to_users_table --table=users</code></pre>
+        <h2>Stap 2: Configuratie & Database</h2>
+        <p>
+            Laravel moet weten dat we deze package willen gebruiken. Soms gaat dit automatisch, maar voor volledige controle voegen we de "Service Provider" handmatig toe. De Service Provider is het opstart-script van de package.
+        </p>
 
-        <p>Open het bestand in <code>database/migrations</code> en voeg de kolom toe:</p>
+        <h3>2.1 Provider registreren</h3>
+        <p>
+            Open <strong>bootstrap/providers.php</strong>. Dit bestand regelt welke onderdelen van Laravel worden opgestart. Voeg de regel van Spatie toe aan de lijst:
+        </p>
 
-        <pre><code class="language-php">
-public function up(): void
-{
-    Schema::table('users', function (Blueprint $table) {
-        // We voegen een boolean kolom toe.
-        // default(false) is belangrijk: nieuwe gebruikers zijn standaard GEEN admin.
-        $table->boolean('is_admin')->default(false)->after('email');
-    });
-}
+        <pre><code class="language-php">return [
+    App\Providers\AppServiceProvider::class,
+    // Voeg deze regel toe:
+    Spatie\Permission\PermissionServiceProvider::class,
+];</code></pre>
 
-public function down(): void
-{
-    Schema::table('users', function (Blueprint $table) {
-        // Als we de migratie terugdraaien, moet de kolom weer weg.
-        $table->dropColumn('is_admin');
-    });
-}
-        </code></pre>
+        <h3>2.2 Bestanden Publiceren</h3>
+        <p>
+            De package heeft instellingen en database-migraties nodig. Deze zitten nu nog verstopt in de `vendor` map (die we nooit handmatig aanpassen). We moeten ze "publiceren" (kopiëren) naar jouw eigen projectmappen.
+        </p>
 
-        <p>Voer daarna de migratie uit:</p>
+        <pre><code class="language-bash">php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"</code></pre>
+
+        <p>Dit commando zorgt voor twee dingen:</p>
+        <ol>
+            <li>Er komt een nieuw bestand: <code>config/permission.php</code> (hierin staan de instellingen).</li>
+            <li>Er komt een nieuw migration-bestand in <code>database/migrations/</code>.</li>
+        </ol>
+
+        <h3>2.3 Migreren</h3>
+        <p>De package heeft tabellen nodig om te onthouden wie welke rol heeft. Voer de migratie uit:</p>
         <pre><code class="language-bash">php artisan migrate</code></pre>
 
-        <h2>Model Aanpassing (Casting)</h2>
-        <p>In de database wordt een boolean vaak opgeslagen als een <code>0</code> of een <code>1</code> (TINYINT). In PHP willen we liever werken met <code>true</code> of <code>false</code>.</p>
-        <p>Laravel heeft hiervoor <strong>Attribute Casting</strong>. Hiermee vertel je het Model hoe hij de data uit de database moet vertalen naar PHP.</p>
-        <p>Open <code>app/Models/User.php</code> en voeg <code>is_admin</code> toe aan de <code>$casts</code> array:</p>
+        <div class="info-box warning">
+            <p><strong>Krijg je een MySQL error?</strong><br>
+                Zie je een foutmelding zoals: <em>"Specified key was too long; max key length is 1000 bytes"</em>?<br>
+                Dit gebeurt vaak bij oudere versies van MySQL. <br><br>
+                <strong>Oplossing:</strong> Open <code>app/Providers/AppServiceProvider.php</code> en voeg dit toe in de <code>boot()</code> methode:
+            <pre><code class="language-php">use Illuminate\Support\Facades\Schema; // Bovenaan toevoegen
+
+public function boot(): void
+{
+    Schema::defaultStringLength(191);
+}</code></pre>
+            </p>
+        </div>
+
+        <hr>
+
+        <h2>Stap 3: Het User Model Aanpassen</h2>
+        <p>
+            De tabellen zijn er, maar jouw <code>User</code> class snapt nog niet hoe hij met rollen moet praten. We moeten functionaliteit "injecteren" in het model. Dit doen we met een <strong>Trait</strong>.
+        </p>
+        <div class="info-box">
+            <p><strong>Wat is een Trait?</strong><br>
+                Een Trait is een setje kant-en-klare functies die je in een class kunt "plakken". Hierdoor krijgt jouw User opeens functies als <code>$user->assignRole('admin')</code> zonder dat je die zelf hoeft te schrijven.</p>
+        </div>
+
+        <p>Open <code>app/Models/User.php</code> en voeg de <code>HasRoles</code> trait toe:</p>
+
+        <pre><code class="language-php">namespace App\Models;
+
+// 1. Importeer de Trait
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable;
+
+    // 2. Activeer de Trait in de class
+    use HasRoles;
+
+    // ... de rest van je code ...
+}</code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Rollen & Rechten (Seeding)</h2>
+        <p>
+            Nu de techniek werkt, moeten we bepalen <em>wie</em> wat mag. Het is slim om dit in een <strong>Seeder</strong> vast te leggen. Waarom? Zodat je op elke computer (of als je de database reset) met één druk op de knop alle rechten weer goed hebt staan.
+        </p>
+
+        <h3>4.1 Seeder Maken</h3>
+        <pre><code class="language-bash">php artisan make:seeder RoleAndPermissionSeeder</code></pre>
+
+        <h3>4.2 Het verschil tussen Rol en Permissie</h3>
+        <p>Voordat we de seeder vullen, is het belangrijk het verschil te snappen:</p>
+        <ul>
+            <li><strong>Permission (Permissie):</strong> Een hele specifieke actie. Bijvoorbeeld: <em>"artikel verwijderen"</em> of <em>"categorie bewerken"</em>.</li>
+            <li><strong>Role (Rol):</strong> Een verzameling van permissies. Bijvoorbeeld: de rol <em>"Redacteur"</em> heeft de permissies om artikelen te schrijven én te bewerken.</li>
+        </ul>
+
+        <h3>4.3 Seeder Vullen</h3>
+        <p>Open <code>database/seeders/RoleAndPermissionSeeder.php</code> en neem onderstaande code over. Lees de commentaren goed om te begrijpen wat er gebeurt.</p>
 
         <pre><code class="language-php">
-protected function casts(): array
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
+class RoleAndPermissionSeeder extends Seeder
 {
-    return [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'is_admin' => 'boolean', // Zorgt dat 0/1 automatisch false/true wordt
-    ];
+    public function run(): void
+    {
+        // 1. Reset de cache
+        // Dit is heel belangrijk! Laravel onthoudt rechten om de site snel te houden.
+        // Als je rechten aanpast, moet je die cache wissen, anders zie je de wijzigingen niet.
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // 2. Maak de losse permissies aan (Wat kan er gedaan worden?)
+        Permission::create(['name' => 'index category']);  // Lijst zien
+        Permission::create(['name' => 'show category']);   // Details zien
+        Permission::create(['name' => 'create category']); // Nieuwe maken
+        Permission::create(['name' => 'edit category']);   // Aanpassen
+        Permission::create(['name' => 'delete category']); // Verwijderen
+
+        // 3. Maak ROLLEN aan en geef ze de juiste sleutels (permissies)
+
+        // Rol: Sales (mag wel maken/wijzigen, maar NIET verwijderen)
+        $roleSales = Role::create(['name' => 'sales']);
+        $roleSales->givePermissionTo(['index category', 'show category', 'create category', 'edit category']);
+
+        // Rol: Admin (mag ALLES)
+        $roleAdmin = Role::create(['name' => 'admin']);
+        $roleAdmin->givePermissionTo(Permission::all()); // Admin krijgt ALLE rechten in één keer
+    }
 }
         </code></pre>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>Mass Assignment:</strong><br>
-            Vergeet niet om <code>is_admin</code> ook toe te voegen aan de <code>$fillable</code> array in je User model, anders kun je deze waarde niet opslaan via seeds of controllers!
-            <br><br>
-            <code>protected $fillable = ['name', 'email', 'password', 'is_admin'];</code>
-        </div>
-
-        <h2>Admins maken (Seeding)</h2>
-        <p>We hebben nu de structuur, maar nog geen admins. We gaan de <code>DatabaseSeeder</code> aanpassen zodat we altijd één vaste admin-account hebben om mee te testen.</p>
+        <h3>4.4 Seeder Koppelen</h3>
+        <p>Laravel voert standaard alleen <code>DatabaseSeeder.php</code> uit. We moeten vertellen dat onze nieuwe seeder ook gedraaid moet worden.</p>
         <p>Open <code>database/seeders/DatabaseSeeder.php</code>:</p>
+        <pre><code class="language-php">$this->call([
+    RoleAndPermissionSeeder::class,
+    // eventuele andere seeders...
+]);</code></pre>
 
-        <pre><code class="language-php">
-use App\Models\User;
-
-public function run(): void
-{
-    // Maak 1 specifieke Admin aan
-    User::factory()->create([
-        'name' => 'Admin User',
-        'email' => 'admin@test.com',
-        'password' => bcrypt('password'), // of Hash::make('password')
-        'is_admin' => true,
-    ]);
-
-    // Maak 10 gewone klanten aan
-    User::factory(10)->create([
-        'is_admin' => false,
-    ]);
-
-    // ... je andere seeders (CategorySeeder etc.)
-}
-        </code></pre>
-
-        <p>Reset je database en vul hem opnieuw:</p>
+        <p>Voer tot slot de seed uit om alles in de database te zetten:</p>
         <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
-        <p>Je kunt nu inloggen met <code>admin@test.com</code> en wachtwoord <code>password</code>.</p>
 
-        <h2>Blade Checks</h2>
-        <p>Nu kunnen we in onze HTML (Blade) controleren wie er is ingelogd. We passen de <code>navbarpublic.blade.php</code> aan zodat de "Admin" knop alleen zichtbaar is voor beheerders.</p>
+        <hr>
 
-        <pre><code class="language-html">
-@auth
-    &lt;span class="text-gray-600"&gt;Hallo, {{ Auth::user()-&gt;name }}&lt;/span&gt;
-
-    {{-- Check of de ingelogde user admin is --}}
-    @if(Auth::user()-&gt;is_admin)
-        &lt;a href="{{ route('admin.categories.index') }}"
-           class="text-blue-600 hover:text-blue-800 font-bold"&gt;
-           Admin Paneel
-        &lt;/a&gt;
-    @endif
-
-    &lt;form method="POST" action="{{ route('logout') }}" class="inline"&gt;
-        @csrf
-        &lt;button type="submit" class="text-gray-600 ml-4"&gt;Uitloggen&lt;/button&gt;
-    &lt;/form&gt;
-@endauth
-        </code></pre>
-
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>Waarschuwing: Beveiliging is nog niet compleet!</strong><br>
-            We hebben nu de knop verborgen voor gewone gebruikers. Maar... als een gewone gebruiker de URL <code>/admin/categories</code> handmatig intypt in de browser, <strong>komt hij er nog steeds in!</strong><br><br>
-            Het verbergen van een knop is <em>geen</em> beveiliging. In de volgende module (2-5) gaan we <strong>Middleware</strong> gebruiken om de routes daadwerkelijk af te schermen.
-        </div>
+        <h2>Samenvatting</h2>
+        <p>
+            Je hebt nu een professioneel rechtensysteem opgezet!
+        </p>
+        <ul>
+            <li>Je hebt <code>spatie/laravel-permission</code> geïnstalleerd en geconfigureerd in <code>bootstrap/providers.php</code>.</li>
+            <li>Je hebt je User model "slimmer" gemaakt met de <code>HasRoles</code> trait.</li>
+            <li>Je hebt een structuur bedacht waarbij 'Sales' beperkte rechten heeft en 'Admin' alles mag.</li>
+        </ul>
+        <p>In de volgende les gaan we deze rollen gebruiken om knoppen in je Blade-bestanden te verbergen en routes te beveiligen.</p>
 
     </main>
 

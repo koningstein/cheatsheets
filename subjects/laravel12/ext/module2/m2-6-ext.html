@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rolgebaseerde Toegang - Laravel 12 Module 2</title>
+    <title>Module 2-6: Controller Permissions (Uitgebreid) - Laravel 12 Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,143 +18,149 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Rolgebaseerde Toegang</h1>
-        <p>We zijn aangekomen bij het sluitstuk van de beveiliging. We hebben een kolom <code>is_admin</code> in de database, en we hebben routes beveiligd met <code>auth</code>. Echter, de <code>auth</code> middleware controleert alleen of je bent ingelogd, niet of je beheerder bent. Op dit moment kan elke ingelogde klant handmatig naar <code>/admin/categories</code> navigeren.</p>
-        <p>Om dit gat te dichten, gaan we onze eigen <strong>Middleware</strong> schrijven die specifiek controleert op de admin-rol.</p>
+        <h1>Module 2-6: Controller Permissions</h1>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <p class="lead">We hebben de "voordeur" beveiligd, maar Sales-medewerkers mogen nog steeds naar binnen. Helaas kunnen ze nu ook producten verwijderen, en dat is niet de bedoeling. We gaan de beveiliging fijner afstellen in de Controller.</p>
+
+        <section class="learning-outcomes">
             <h2>Leeruitkomsten</h2>
-            <ul style="margin-bottom: 0;">
-                <li>Ik kan een Custom Middleware aanmaken via Artisan.</li>
-                <li>Ik kan logica schrijven om de rol van een gebruiker te controleren.</li>
-                <li>Ik begrijp het verschil tussen een <code>403 Forbidden</code> en een <code>404 Not Found</code>.</li>
-                <li>Ik kan Middleware registreren (alias) in de applicatie configuratie.</li>
-                <li>Ik kan meerdere middlewares stapelen op een route groep.</li>
+            <p>Na het afronden van deze les kun je:</p>
+            <ul>
+                <li>Uitleggen wat <code>implements</code> en Interfaces doen in PHP.</li>
+                <li>De <code>HasMiddleware</code> interface toepassen in een Laravel Controller.</li>
+                <li>Permissies koppelen aan meerdere methodes (zoals <code>delete</code> én <code>destroy</code>).</li>
+                <li>De frontend aanpassen met <code>@can</code> directives.</li>
             </ul>
+        </section>
+
+        <hr>
+
+        <h2>Stap 1: Interface Implementeren</h2>
+        <p>
+            Om in Laravel 12 middleware toe te voegen aan een controller, moeten we de controller vertellen dat hij middleware mag verwachten. Dit doen we met een <strong>Interface</strong>.
+        </p>
+
+        <div class="info-box">
+            <p><strong>Wat is 'implements'?</strong><br>
+                Een Interface is een contract. Door te zeggen <code>implements HasMiddleware</code>, belooft jouw class: <em>"Ik heb een functie die <code>middleware()</code> heet."</em><br>
+                Laravel checkt dit contract. Als de functie bestaat, wordt de beveiliging automatisch geactiveerd.</p>
         </div>
 
-        <h2>Custom Middleware Maken</h2>
-        <p>Laravel biedt standaard geen "IsAdmin" middleware, omdat elke applicatie andere rollen heeft. We moeten deze dus zelf maken. We noemen hem <code>EnsureUserIsAdmin</code>.</p>
-
-        <pre><code class="language-bash">php artisan make:middleware EnsureUserIsAdmin</code></pre>
-
-        <p>Dit commando maakt een bestand aan in <code>app/Http/Middleware/EnsureUserIsAdmin.php</code>.</p>
-
-        <h2>De Logica (Handle Methode)</h2>
-        <p>Open het bestand. Je ziet een <code>handle</code> methode. Dit is de functie waar elk verzoek doorheen moet. Hier schrijven we onze check.</p>
-        <p>De logica is als volgt:</p>
-        <ol>
-            <li>Is de gebruiker überhaupt ingelogd? (Dit wordt vaak al door <code>auth</code> gedaan, maar dubbelchecken is veilig).</li>
-            <li>Is de waarde van <code>is_admin</code> waar (true)?</li>
-            <li><strong>Nee?</strong> Stop het verzoek en geef een foutmelding.</li>
-            <li><strong>Ja?</strong> Laat het verzoek doorgaan naar de volgende stap (<code>$next($request)</code>).</li>
-        </ol>
+        <p>Open <code>app/Http/Controllers/Admin/CategoryController.php</code> en voeg de imports en de implementatie toe:</p>
 
         <pre><code class="language-php">
-namespace App\Http\Middleware;
+namespace App\Http\Controllers\Admin;
 
-use Closure;
+use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth; // Vergeet deze niet!
 
-class EnsureUserIsAdmin
+// BELANGRIJK: Deze 3 regels toevoegen
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+
+// BELANGRIJK: Voeg 'implements HasMiddleware' toe
+class CategoryController extends Controller implements HasMiddleware
 {
-    public function handle(Request $request, Closure $next): Response
-    {
-        // Check 1: Is de gebruiker ingelogd?
-        // Check 2: Is de gebruiker GEEN admin?
-        if (!Auth::check() || !Auth::user()->is_admin) {
-
-            // Optie A: Abort met een 403 Forbidden error (netjes)
-            abort(403, 'U heeft geen toegang tot deze pagina.');
-
-            // Optie B: Redirect terug naar home (gebruiksvriendelijk)
-            // return redirect('/');
-        }
-
-        // Als we hier komen, is de gebruiker admin. Laat hem door.
-        return $next($request);
-    }
+    // ...
 }
         </code></pre>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>HTTP Status Codes:</strong><br>
-            <ul>
-                <li><strong>401 Unauthorized:</strong> Ik weet niet wie je bent (je bent niet ingelogd).</li>
-                <li><strong>403 Forbidden:</strong> Ik weet wie je bent, maar je mag hier niet in (geen rechten).</li>
-            </ul>
-            Het is belangrijk om de juiste code te gebruiken voor de juiste situatie.
+        <hr>
+
+        <h2>Stap 2: Permissies Koppelen</h2>
+        <p>
+            Nu maken we de beloofde functie <code>middleware()</code> aan. Hier koppelen we permissies aan de methodes.
+            <br>
+            <strong>Let op:</strong> We hebben een aparte methode <code>delete</code> (die de "Weet je het zeker?" pagina toont) en een methode <code>destroy</code> (die echt verwijdert). Beiden moeten beveiligd worden!
+        </p>
+
+        <pre><code class="language-php">
+    /**
+     * Hier bepalen we wie welke functie mag gebruiken.
+     */
+    public static function middleware(): array
+    {
+        return [
+            // 1. Zien van de lijst (index)
+            new Middleware(PermissionMiddleware::using('index category'), only:['index']),
+
+            // 2. Bekijken van 1 item (show)
+            new Middleware(PermissionMiddleware::using('show category'), only:['show']),
+
+            // 3. Aanmaken (create toont formulier, store slaat op)
+            new Middleware(PermissionMiddleware::using('create category'), only:['create', 'store']),
+
+            // 4. Wijzigen (edit toont formulier, update slaat op)
+            new Middleware(PermissionMiddleware::using('edit category'), only:['edit', 'update']),
+
+            // 5. Verwijderen
+            // We beveiligen de 'delete' (bevestigingspagina) EN de 'destroy' (actie)
+            new Middleware(PermissionMiddleware::using('delete category'), only:['delete', 'destroy']),
+        ];
+    }
+        </code></pre>
+
+        <hr>
+
+        <h2>Stap 3: De Frontend (Blade)</h2>
+        <p>
+            Als Sales nu probeert te verwijderen, krijgen ze een 403 error. Netter is om de knop helemaal niet te tonen.
+            We gebruiken hiervoor <code>@can('permissie naam')</code>.
+        </p>
+
+        <p>Open <code>resources/views/admin/categories/index.blade.php</code>:</p>
+
+        <pre><code class="language-html">
+<thead>
+    <tr>
+        <th>Naam</th>
+        <th>Acties</th>
+    </tr>
+</thead>
+
+<tbody>
+    @foreach($categories as $category)
+        <tr>
+            <td>{{ $category->name }}</td>
+            <td class="flex gap-2">
+
+                @can('show category')
+                    <a href="{{ route('categories.show', $category) }}">Bekijk</a>
+                @endcan
+
+                @can('edit category')
+                    <a href="{{ route('categories.edit', $category) }}">Wijzig</a>
+                @endcan
+
+                @can('delete category')
+                    <a href="{{ route('categories.delete', $category) }}" class="text-red-500">
+                        Verwijder
+                    </a>
+                @endcan
+
+            </td>
+        </tr>
+    @endforeach
+</tbody>
+        </code></pre>
+
+        <div class="info-box tip">
+            <p><strong>Waarom Permissions en geen Roles?</strong><br>
+                Je zou kunnen zeggen: <code>@role('admin')</code>. Maar wat als je later een "SuperManager" krijgt die het ook mag? Dan moet je je Blade-bestanden aanpassen.<br>
+                Door permissies te checken (<code>@can('delete category')</code>), hoef je later alleen de rol in de database aan te passen. Je code blijft hetzelfde.</p>
         </div>
 
-        <h2>Middleware Registreren (Alias)</h2>
-        <p>Voordat we de middleware makkelijk kunnen gebruiken in onze routes, moeten we hem bekendmaken aan Laravel en er een korte naam (alias) aan geven, bijvoorbeeld <code>admin</code>.</p>
+        <hr>
 
-        <p>In moderne Laravel versies (11+) doe je dit in <code>bootstrap/app.php</code>.</p>
-
-        <pre><code class="language-php">
-// bootstrap/app.php
-
-use App\Http\Middleware\EnsureUserIsAdmin; // Importeer je class
-
-return Application::configure(basePath: dirname(__DIR__))
-    ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
-        health: '/up',
-    )
-    ->withMiddleware(function (Middleware $middleware) {
-
-        // Hier registreren we de alias
-        $middleware->alias([
-            'admin' => EnsureUserIsAdmin::class,
-        ]);
-
-    })
-    ->withExceptions(function (Exceptions $exceptions) {
-        //
-    })->create();
-        </code></pre>
-
-        <h2>Routes Beveiligen</h2>
-        <p>Nu kunnen we de alias <code>admin</code> gebruiken in onze route groep in <code>routes/web.php</code>. We stapelen hem bovenop de <code>auth</code> middleware.</p>
-
-        <pre><code class="language-php">
-// routes/web.php
-
-// De gebruiker moet ingelogd zijn (auth) EN admin zijn (admin)
-Route::middleware(['auth', 'admin'])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-
-        Route::resource('categories', CategoryController::class);
-        Route::resource('products', ProductController::class);
-        Route::resource('users', UserController::class);
-
-        // ... overige admin routes
-});
-        </code></pre>
-
-        <h2>Testen en Verifiëren</h2>
-        <p>Het testen van beveiliging is cruciaal. Je moet verifiëren dat het werkt zoals verwacht.</p>
-
-        <h3>Scenario 1: De Blije Pad (Happy Path)</h3>
+        <h2>Samenvatting</h2>
+        <p>Je hebt nu een volledig gelaagde beveiliging:</p>
         <ol>
-            <li>Log in met je admin-account (die we in de Seeder hebben gemaakt).</li>
-            <li>Ga naar <code>/admin/categories</code>.</li>
-            <li><strong>Resultaat:</strong> Je ziet de pagina.</li>
+            <li><strong>Middleware op Route:</strong> Zorgt dat onbevoegden (Customers) niet bij `/admin` kunnen.</li>
+            <li><strong>Middleware in Controller:</strong> Zorgt dat bevoegden (Sales) niet de bevestigingspagina (`delete`) of de actie (`destroy`) kunnen aanroepen.</li>
+            <li><strong>Blade @can:</strong> Zorgt dat de interface zich aanpast aan de rechten van de gebruiker.</li>
         </ol>
-
-        <h3>Scenario 2: De Indringer</h3>
-        <ol>
-            <li>Log uit of log in met een gewone gebruiker (is_admin = 0).</li>
-            <li>Probeer handmatig naar <code>/admin/categories</code> te gaan.</li>
-            <li><strong>Resultaat:</strong> Je krijgt een <strong>403 | FORBIDDEN</strong> scherm te zien (standaard Laravel foutpagina).</li>
-        </ol>
-
-        <p>Gefeliciteerd! Je admin-paneel is nu volledig afgeschermd. Alleen gebruikers die in de database expliciet als admin zijn gemarkeerd, kunnen wijzigingen aanbrengen.</p>
 
     </main>
 

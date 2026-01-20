@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Middleware bij routes - Laravel 12 Module 2</title>
+    <title>Module 2-5: Middleware & Redirects - Laravel 12 Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,63 +18,87 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Middleware bij routes</h1>
-        <p>Niet iedereen mag zomaar overal bij. We gebruiken middleware om routes te beveiligen, zodat alleen ingelogde gebruikers of gebruikers met specifieke rechten toegang krijgen tot bepaalde pagina's.</p>
+        <h1>Module 2-5: Middleware & Redirects (Livewire)</h1>
+        <p class="lead">We gaan de routes beveiligen zodat alleen bevoegde gebruikers (Admin/Sales) toegang krijgen. Daarnaast zorgen we dat admins via het menu naar het beheerdersgedeelte kunnen.</p>
 
-        <h2>Leeruitkomsten</h2>
-        <ul style="margin-bottom: 2rem;">
-            <li>Ik kan middleware aliases registreren in bootstrap/app.php.</li>
-            <li>Ik kan een custom 403 error page maken.</li>
-            <li>Ik kan redirect after login aanpassen.</li>
-            <li>Ik kan auth middleware op routes toepassen.</li>
-            <li>Ik kan conditionele content tonen (@auth/@guest).</li>
-        </ul>
+        <section class="learning-outcomes">
+            <h2>Leeruitkomsten</h2>
+            <p>Na het afronden van deze les kun je:</p>
+            <ul>
+                <li>Middleware aliassen registreren in <code>bootstrap/app.php</code>.</li>
+                <li>Routes beveiligen op basis van rollen in <code>web.php</code>.</li>
+                <li>De redirect logica in <strong>Livewire Auth Components</strong> beheren.</li>
+                <li>Frontend assets compileren met NPM.</li>
+            </ul>
+        </section>
 
-        <h3 id="aliases">Stap 1: Middleware Aliases Registreren</h3>
-        <p>Om de middleware van Spatie te kunnen gebruiken, moeten we deze registreren in <code>bootstrap/app.php</code>. We voegen hier alle aliases toe.</p>
+        <hr>
 
+        <h2>Stap 1: Middleware Registreren</h2>
+        <p>
+            Laravel moet weten welke namen (aliassen) we gebruiken voor de Spatie middleware. Open <strong>bootstrap/app.php</strong> en voeg de aliassen toe.
+        </p>
+
+        <pre><code class="language-php">->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+    ]);
+})</code></pre>
+
+        <hr>
+
+        <h2>Stap 2: Routes Beveiligen</h2>
+        <p>
+            Open <strong>routes/web.php</strong>. We zorgen ervoor dat de categorie-routes alleen toegankelijk zijn voor 'admin' of 'sales'.
+        </p>
+
+        <pre><code class="language-php">use App\Http\Controllers\Admin\CategoryController;
+
+Route::middleware(['auth', 'role:admin|sales'])->group(function () {
+
+    // Alleen Admins en Sales mogen hier komen
+    Route::resource('admin/categories', CategoryController::class);
+
+});</code></pre>
+
+        <hr>
+
+        <h2>Stap 3: Livewire Redirects Instellen</h2>
+        <p>
+            Standaard staat Laravel Breeze ingesteld op <code>dashboard</code>. Wij veranderen dit naar <code>home</code>.
+            <br>
+            <em>Let op: We verwijderen <code>navigate: true</code> omdat we na het inloggen naar een gewone Blade layout gaan.</em>
+        </p>
+
+        <h3>3.1 Login Component</h3>
+        <p>Open <code>app/Livewire/Auth/Login.php</code>. Zoek de methode <code>login()</code>:</p>
         <pre><code class="language-php">
-// bootstrap/app.php
+$this->redirectIntended(default: route('home', absolute: false), navigate: true);</code></pre>
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-        ]);
-    })
-    // ...
-        </code></pre>
-
-        <h3 id="routes">Stap 2: Routes Beveiligen</h3>
-        <p>In <code>routes/web.php</code> kunnen we nu een groep maken die beveiligd is. We willen dat alleen gebruikers met de rol <strong>admin</strong> of <strong>sales</strong> bij de admin-routes kunnen.</p>
-
+        <h3>3.2 Register Component</h3>
+        <p>Open <code>app/Livewire/Auth/Register.php</code>. Zoek de methode <code>register()</code>:</p>
         <pre><code class="language-php">
-// routes/web.php
+$this->redirect(route('home', absolute: false), navigate: true);</code></pre>
 
-Route::group(['middleware' => ['role:sales|admin']], function () {
+        <hr>
 
-    // Deze routes zijn nu beveiligd
-    Route::resource('/admin/categories', Admin\CategoryController::class);
+        <h2>Stap 4: Styling & Navigatie</h2>
 
-});
-        </code></pre>
+        <h3>4.1 Styling fixen (NPM)</h3>
+        <p>Als je login-scherm geen opmaak heeft, draai dan dit commando:</p>
+        <pre><code class="language-bash">npm install && npm run build</code></pre>
 
-        <h3 id="error">Stap 3: Custom 403 Error Pagina</h3>
-        <p>Als iemand geen toegang heeft, zien ze een standaard "403 | Forbidden" scherm. We willen dit in onze eigen stijl.</p>
-        <p>Maak een bestand aan: <code>resources/views/errors/403.blade.php</code>.</p>
+        <h3>4.2 Navigatie aanpassen</h3>
+        <p>Open <code>resources/views/layouts/base/navbar.blade.php</code>. Zorg dat admins een knop zien om naar het beveiligde gedeelte te gaan:</p>
 
-        <pre><code class="language-html">
-@extends('layouts.layoutpublic')
+        <pre><code class="language-html">@auth
+    @hasanyrole('admin|sales')
+        <a href="{{ route('categories.index') }}">Admin Paneel</a>
+    @endhasanyrole
+@endauth</code></pre>
 
-@section('content')
-    &lt;div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"&gt;
-        &lt;strong class="font-bold"&gt;Error!&lt;/strong&gt;
-        &lt;span class="block sm:inline"&gt;{{ $exception->getMessage() }}&lt;/span&gt;
-    &lt;/div&gt;
-@endsection
-        </code></pre>
     </main>
 
     <aside class="sidebar-right">

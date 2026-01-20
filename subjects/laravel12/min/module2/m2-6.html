@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rolgebaseerde Toegang - Laravel 12 Module 2</title>
+    <title>Module 2-6: Controller Permissions - Laravel 12 Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,53 +18,93 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Rolgebaseerde Toegang</h1>
-        <p>We hebben de routes beveiligd, maar soms wil je in de view knoppen verbergen of in de controller specifieke methodes beveiligen.</p>
+        <h1>Module 2-6: Controller Permissions</h1>
+        <p class="lead">We hebben de "voordeur" beveiligd. Nu regelen we de regels binnenin: Sales mag kijken en wijzigen, maar <strong>niet verwijderen</strong>. Dit regelen we in de Controller.</p>
 
-        <h2>Leeruitkomsten</h2>
-        <ul style="margin-bottom: 2rem;">
-            <li>Ik kan elementen in Blade verbergen op basis van permissies.</li>
-            <li>Ik kan controller actions beveiligen met middleware.</li>
-            <li>Ik begrijp het verschil tussen <code>@role</code> en <code>@can</code>.</li>
-        </ul>
+        <section class="learning-outcomes">
+            <h2>Leeruitkomsten</h2>
+            <p>Na het afronden van deze les kun je:</p>
+            <ul>
+                <li>De <code>HasMiddleware</code> interface implementeren in een Controller.</li>
+                <li>Specifieke permissies koppelen aan meerdere acties (zowel de confirm-page als de delete-actie).</li>
+                <li>Knoppen in Blade verbergen met <code>@can</code>.</li>
+            </ul>
+        </section>
 
-        <h3 id="blade">Stap 1: Blade Directives (@role & @can)</h3>
-        <p>In <code>resources/views/admin/categories/index.blade.php</code> willen we de "Delete" knop verbergen voor gebruikers die dit niet mogen.</p>
-        <p>Je kunt <code>@role('admin')</code> gebruiken, maar beter is <code>@can('delete category')</code>. Dit kijkt naar de permissie, wat flexibeler is.</p>
+        <hr>
 
-        <pre><code class="language-html">
-&lt;td&gt;
-    &lt;a href="..."&gt;Edit&lt;/a&gt;
-
-    @can('delete category')
-        | &lt;a href="..."&gt;Delete&lt;/a&gt;
-    @endcan
-&lt;/td&gt;
-        </code></pre>
-
-        <h3 id="controller">Stap 2: Controller Beveiliging (Middleware)</h3>
-        <p>In de <code>CategoryController</code> moeten we ook checks inbouwen. We gebruiken hiervoor de <code>HasMiddleware</code> interface (nieuw in Laravel 11/12).</p>
+        <h2>Stap 1: De Controller Aanpassen</h2>
+        <p>
+            Open <code>app/Http/Controllers/Admin/CategoryController.php</code>.
+            We koppelen de permissies aan de methodes.
+        </p>
 
         <pre><code class="language-php">
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+// 1. Voeg deze imports toe:
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
+// 2. Voeg 'implements HasMiddleware' toe aan de class definitie
 class CategoryController extends Controller implements HasMiddleware
 {
+    // 3. Voeg de static middleware functie toe
     public static function middleware(): array
     {
         return [
+            // Koppel permissies aan methodes
             new Middleware(PermissionMiddleware::using('index category'), only:['index']),
+            new Middleware(PermissionMiddleware::using('show category'), only:['show']),
             new Middleware(PermissionMiddleware::using('create category'), only:['create', 'store']),
             new Middleware(PermissionMiddleware::using('edit category'), only:['edit', 'update']),
             new Middleware(PermissionMiddleware::using('delete category'), only:['delete', 'destroy']),
         ];
     }
 
-    // ... rest van de controller ...
+    // ... hieronder staan je gewone functies ...
 }
         </code></pre>
+
+        <hr>
+
+        <h2>Stap 2: De Delete Knop Verbergen</h2>
+        <p>
+            Nu kan een Sales-medewerker de delete-pagina niet meer zien. We verbergen de knop in het overzicht.
+        </p>
+        <p>Open <code>resources/views/admin/categories/index.blade.php</code>.</p>
+
+        <pre><code class="language-html">
+@foreach($categories as $category)
+    <tr>
+        <td>{{ $category->name }}</td>
+        <td>
+            @can('edit category')
+                <a href="{{ route('categories.edit', $category) }}">Aanpassen</a>
+            @endcan
+
+            @can('delete category')
+                 <a href="{{ route('categories.delete', $category) }}">Verwijderen</a>
+            @endcan
+        </td>
+    </tr>
+@endforeach
+        </code></pre>
+
+        <hr>
+
+        <h2>Samenvatting</h2>
+        <p>Je hebt nu permissies tot op het bot geregeld:</p>
+        <ul>
+            <li><strong>Route Middleware:</strong> Houdt klanten buiten de deur.</li>
+            <li><strong>Controller Middleware:</strong> Zorgt dat Sales niet bij de delete-pagina (`delete`) en de verwijder-actie (`destroy`) kan.</li>
+            <li><strong>Blade @can:</strong> Zorgt dat Sales de link niet ziet.</li>
+        </ul>
+
     </main>
 
     <aside class="sidebar-right">

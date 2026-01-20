@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Middleware bij Routes - Laravel 12 Module 2</title>
+    <title>Module 2-5: Middleware & Redirects (Uitgebreid) - Laravel 12 Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,114 +18,121 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Middleware bij Routes</h1>
-        <p>In de vorige modules hebben we gebruikers aangemaakt en de knop naar het admin-paneel verborgen. Maar, zoals we al waarschuwden: het verbergen van een knop is geen beveiliging. Iemand die de URL raadt, kan er nog steeds bij.</p>
-        <p>Om routes écht te beveiligen, gebruiken we <strong>Middleware</strong>. Middleware is een stuk code dat tussen het verzoek van de gebruiker en jouw controller in zit. Het fungeert als een poortwachter: voldoet de gebruiker aan de eisen? Zo ja, mag hij door. Zo nee, wordt hij tegengehouden.</p>
+        <h1>Module 2-5: Middleware & Livewire Redirects</h1>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <p class="lead">Tot nu toe was de beveiliging alleen visueel. Nu gaan we de routes echt beveiligen met <strong>Middleware</strong>. Daarnaast zorgen we ervoor dat gebruikers na het inloggen netjes op de homepage terechtkomen, waarna admins door kunnen klikken naar het beheergedeelte.</p>
+
+        <section class="learning-outcomes">
             <h2>Leeruitkomsten</h2>
-            <ul style="margin-bottom: 0;">
-                <li>Ik begrijp wat Middleware is en wat het doel ervan is (Gatekeeper pattern).</li>
-                <li>Ik kan routes groeperen (Route Groups) om code te organiseren.</li>
-                <li>Ik kan de standaard <code>auth</code> middleware toepassen op routes.</li>
-                <li>Ik kan testen of niet-ingelogde gebruikers worden omgeleid naar de login pagina.</li>
+            <p>Na het afronden van deze les kun je:</p>
+            <ul>
+                <li>Uitleggen wat Middleware is en hoe je dit registreert.</li>
+                <li>Routes beveiligen op basis van rollen (Admin/Sales).</li>
+                <li><strong>Livewire Components</strong> aanpassen om redirects te wijzigen.</li>
+                <li>Frontend styling bouwen met NPM.</li>
             </ul>
-        </div>
+        </section>
 
-        <h2>Het Concept: The Gatekeeper</h2>
-        <p>Stel je een nachtclub voor. Je hebt de dansvloer (jouw Controller) en de rij buiten (het Request). De uitsmijter bij de deur is de <strong>Middleware</strong>. Hij checkt of je op de gastenlijst staat (Authentication) en of je oud genoeg bent (Authorization).</p>
-        <p>In Laravel werkt het precies zo:</p>
-        <ol>
-            <li>Request komt binnen.</li>
-            <li>Middleware checkt: "Is deze gebruiker ingelogd?"</li>
-            <li>Nee? -> Redirect naar Login pagina.</li>
-            <li>Ja? -> Laat het verzoek door naar de Controller.</li>
-        </ol>
+        <hr>
 
-        <h2>Route Groups</h2>
-        <p>Je kunt middleware per route instellen, maar dat wordt al snel onoverzichtelijk als je 20 admin-routes hebt. Daarom gebruiken we <strong>Route Groups</strong>. Hiermee bundel je routes die dezelfde eigenschappen (zoals beveiliging of URL-prefix) delen.</p>
+        <h2>Stap 1: Styling Fixen (NPM)</h2>
+        <p>
+            Ziet je login-scherm eruit als platte tekst zonder opmaak? Dat komt omdat Livewire en Laravel Breeze <strong>Vite</strong> gebruiken voor de CSS. Je moet de bestanden eenmalig compileren.
+        </p>
+        <pre><code class="language-bash">npm install && npm run build</code></pre>
 
-        <p>Open <code>routes/web.php</code>. Waarschijnlijk heb je nu zoiets:</p>
+        <hr>
 
-        <pre><code class="language-php">
-// Dit is herhaling en foutgevoelig:
-Route::resource('admin/categories', CategoryController::class)->middleware('auth');
-Route::resource('admin/products', ProductController::class)->middleware('auth');
-Route::resource('admin/users', UserController::class)->middleware('auth');
-        </code></pre>
+        <h2>Stap 2: Middleware Registreren</h2>
+        <p>
+            We gebruiken de Spatie package. We moeten Laravel eerst vertellen welke afkortingen (aliassen) we willen gebruiken voor de beveiliging.
+            Open <strong>bootstrap/app.php</strong>.
+        </p>
 
-        <p>Dit gaan we opschonen met een groep:</p>
+        <pre><code class="language-php">->withMiddleware(function (Middleware $middleware) {
+    // Voeg dit blok toe:
+    $middleware->alias([
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+    ]);
+})</code></pre>
 
-        <pre><code class="language-php">
-use Illuminate\Support\Facades\Route;
+        <hr>
 
-// Alles binnen deze groep is beveiligd met 'auth'
-Route::middleware(['auth'])->group(function () {
+        <h2>Stap 3: Routes Beveiligen</h2>
+        <p>
+            Nu de aliassen werken, beveiligen we de admin-routes in <strong>routes/web.php</strong>.
+            We gebruiken de middleware <code>role:admin|sales</code>.
+        </p>
 
-    // Al deze routes vallen nu onder de beveiliging
+        <pre><code class="language-php">use App\Http\Controllers\Admin\CategoryController;
+
+Route::middleware(['auth', 'role:admin|sales'])->group(function () {
+
+    // Iedereen in deze groep moet ingelogd zijn EN de juiste rol hebben
     Route::resource('admin/categories', CategoryController::class);
-    Route::resource('admin/products', ProductController::class);
-    Route::resource('admin/users', UserController::class);
 
-    // Je kunt hier ook de dashboard route toevoegen
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+});</code></pre>
 
-});
-        </code></pre>
-
-        <h2>Prefix & Name Prefixes</h2>
-        <p>Je ziet dat we bij elke route <code>admin/</code> in de URL typen. Ook dit kunnen we groeperen. Hetzelfde geldt voor de namen van de routes (die beginnen vaak met <code>admin.</code>).</p>
-        <p>We maken de groep nog krachtiger:</p>
-
-        <pre><code class="language-php">
-Route::middleware(['auth'])
-    ->prefix('admin')        // Alle URL's beginnen met /admin/...
-    ->name('admin.')         // Alle route-namen beginnen met admin...
-    ->group(function () {
-
-        // Oude URL: admin/categories
-        // Oude Naam: admin.categories.index
-        // Nieuwe definitie:
-        Route::resource('categories', CategoryController::class);
-
-        Route::resource('users', UserController::class);
-
-        // Dashboard wordt nu bereikbaar via /admin/dashboard
-        Route::get('/dashboard', function () {
-            return view('dashboard');
-        })->name('dashboard');
-});
-        </code></pre>
-
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>Let op je route namen!</strong><br>
-            Als je in je code (bijv. in views of controllers) verwees naar <code>route('admin.categories.index')</code>, dan blijft dat werken omdat we <code>->name('admin.')</code> hebben toegevoegd.
-            <br>
-            Maar... als je handmatig URL's had getypt in je HTML (wat je niet zou moeten doen!), dan moet je controleren of de prefix klopt.
+        <div class="info-box tip">
+            <p><strong>Testen:</strong> Probeer als 'Customer' naar <code>/admin/categories</code> te gaan. Je krijgt nu een <strong>403 Forbidden</strong> foutmelding. Dat is goed!</p>
         </div>
 
-        <h2>Testen</h2>
-        <p>Het is cruciaal om te testen of je beveiliging werkt.</p>
-        <ol>
-            <li>Zorg dat je bent <strong>uitgelogd</strong>.</li>
-            <li>Probeer handmatig naar <code>http://jouw-site.test/admin/categories</code> te gaan.</li>
-            <li>Als het goed is, word je nu automatisch doorgestuurd naar de login pagina.</li>
-            <li>Log in.</li>
-            <li>Probeer de pagina nog eens te openen. Nu zou je er wel in moeten kunnen.</li>
-        </ol>
+        <hr>
 
-        <h2>Wat is 'auth'?</h2>
-        <p>Je vraagt je misschien af waar die string <code>'auth'</code> vandaan komt. Dit is een alias voor de class <code>Illuminate\Auth\Middleware\Authenticate</code>.</p>
-        <p>In oudere Laravel versies (voor versie 11) stonden deze aliassen in <code>app/Http/Kernel.php</code>. In Laravel 11 wordt dit veelal automatisch geregeld of geconfigureerd in <code>bootstrap/app.php</code>.</p>
-        <p>De <code>auth</code> middleware controleert simpelweg: "Is er een sessie met een User ID?". Zo niet, dan gooit hij een <code>AuthenticationException</code>, die door Laravel wordt opgevangen en omgezet in een redirect naar de login route.</p>
+        <h2>Stap 4: Livewire Redirects Aanpassen</h2>
+        <p>
+            Je gebruikt de <strong>Livewire</strong> stack voor authenticatie. De inlog-logica zit dus in PHP-componenten in de map <code>app/Livewire/Auth</code>.
+        </p>
+        <p>
+            We willen dat gebruikers na het inloggen op de <strong>Homepagina</strong> komen.
+        </p>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>Volgende stap:</strong><br>
-            We hebben nu geregeld dat je ingelogd moet zijn om bij de admin te komen. Maar... een gewone klant kan nu ook inloggen en bij de admin komen!
-            <br><br>
-            In de volgende module gaan we onze eigen middleware schrijven om te checken of iemand ook echt <strong>Admin</strong> is.
+        <h3>4.1 Login Component</h3>
+        <p>
+            Open <code>app/Livewire/Auth/Login.php</code> en zoek de <code>login()</code> methode.
+        </p>
+        <pre><code class="language-php">
+// Oude situatie:
+// $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+
+// NIEUWE situatie:
+$this->redirectIntended(default: route('home', absolute: false), navigate: true);
+        </code></pre>
+
+        <h3>4.2 Register Component</h3>
+        <p>
+            Open <code>app/Livewire/Auth/Register.php</code> en zoek de <code>register()</code> methode.
+        </p>
+        <pre><code class="language-php">
+// NIEUWE situatie:
+$this->redirect(route('home', absolute: false), navigate: true);
+        </code></pre>
+
+        <hr>
+
+        <h2>Stap 5: Navigatie (Blade)</h2>
+        <p>
+            Nu iedereen op de homepagina landt, moeten de Admins en Sales-medewerkers natuurlijk wel een knop hebben om naar het beheergedeelte te gaan.
+            Open <code>resources/views/layouts/base/navbar.blade.php</code>.
+        </p>
+        <p>Gebruik een gewone <code>href</code> link (geen wire:navigate).</p>
+
+        <pre><code class="language-html">
+@auth
+    @hasanyrole('admin|sales')
+        <a href="{{ route('categories.index') }}">Admin Paneel</a>
+    @endhasanyrole
+@endauth
+        </code></pre>
+
+        <div class="info-box warning">
+            <p><strong>Samenvatting</strong><br>
+                Je hebt nu een veilige en logische flow:<br>
+                1. <strong>Inloggen:</strong> Je landt op de Homepagina.<br>
+                2. <strong>Beveiliging:</strong> Middleware bewaakt de admin-routes.<br>
+                3. <strong>Navigatie:</strong> Alleen bevoegden zien de knop "Admin Paneel".</p>
         </div>
 
     </main>

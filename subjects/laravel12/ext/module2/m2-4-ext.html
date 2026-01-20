@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aanmaken van Users - Laravel 12 Module 2</title>
+    <title>Module 2-4: Users Seeden & Koppelen - Laravel 12 Module 2</title>
 
     <script src="../../../../assets/js/theme-init.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -18,157 +18,144 @@
     <div data-include="../../../../components/sidebar.html"></div>
 
     <main class="main-content">
-        <h1>Aanmaken van Users</h1>
-        <p>In de vorige modules hebben we gewerkt met registratie (waarbij de gebruiker zichzelf aanmaakt) en seeds (automatisch aanmaken). Maar in een beheerdersomgeving wil je vaak handmatig accounts kunnen aanmaken voor collega's of klanten. In deze module bouwen we een admin-pagina om gebruikers toe te voegen.</p>
+        <h1>Module 2-4: Users Seeden & Koppelen</h1>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
+        <p class="lead">We hebben nu rollen (Admin, Sales, Customer), maar nog geen gebruikers die deze rollen hebben. Om goed te kunnen testen, willen we niet steeds handmatig via een registratieformulier accounts hoeven aanmaken. We gaan dit automatiseren met een <strong>UserSeeder</strong>.</p>
+
+        <section class="learning-outcomes">
             <h2>Leeruitkomsten</h2>
-            <ul style="margin-bottom: 0;">
-                <li>Ik kan een Resource Controller maken voor Users.</li>
-                <li>Ik begrijp hoe <strong>Hashing</strong> werkt en waarom we wachtwoorden nooit als platte tekst opslaan.</li>
-                <li>Ik kan een formulier maken met een checkbox voor boolean waardes (is_admin).</li>
-                <li>Ik kan validatie toepassen op wachtwoorden (lengte, bevestiging).</li>
+            <p>Na het afronden van deze les kun je:</p>
+            <ul>
+                <li>Een specifieke Seeder aanmaken voor gebruikers.</li>
+                <li>Laravel <strong>Factories</strong> gebruiken om snel testdata te genereren.</li>
+                <li>Wachtwoorden veilig opslaan met <strong>Hashing</strong>.</li>
+                <li>Gebruikers direct bij het aanmaken koppelen aan een Rol (Spatie).</li>
+                <li>De volgorde van Seeders beheren in de <code>DatabaseSeeder</code>.</li>
             </ul>
-        </div>
+        </section>
 
-        <h2>De User Controller</h2>
-        <p>We beginnen met het aanmaken van een controller speciaal voor het beheren van gebruikers. Omdat dit een admin-taak is, plaatsen we deze weer in de <code>Admin</code> namespace.</p>
+        <hr>
 
-        <pre><code class="language-bash">php artisan make:controller Admin/UserController --resource</code></pre>
+        <h2>Stap 1: De UserSeeder Aanmaken</h2>
+        <p>
+            We hebben al een `RoleAndPermissionSeeder`, nu maken we er eentje speciaal voor gebruikers.
+        </p>
+        <pre><code class="language-bash">php artisan make:seeder UserSeeder</code></pre>
 
-        <p>Vergeet niet de route toe te voegen in <code>routes/web.php</code>:</p>
-        <pre><code class="language-php">
-use App\Http\Controllers\Admin\UserController;
+        <hr>
 
-// ... binnen je admin routes ...
-Route::resource('admin/users', UserController::class);
-        </code></pre>
+        <h2>Stap 2: Users met Vaste Gegevens</h2>
+        <p>
+            Standaard maakt een Factory ("fabriek") willekeurige data (random namen, random emails). Dat is leuk voor bulk-data, maar onhandig als je wilt inloggen. Je weet immers het willekeurig gegenereerde e-mailadres niet.
+        </p>
+        <p>
+            Daarom gaan we de factory <strong>overschrijven</strong>. We dwingen specifieke namen en e-mailadressen af, zodat we zeker weten dat we kunnen inloggen als Admin of Sales.
+        </p>
 
-        <h2>Wachtwoorden & Hashing</h2>
-        <p>Voordat we gebruikers gaan opslaan, moeten we het hebben over veiligheid. Een van de belangrijkste regels in software development is:</p>
-
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>WAARSCHUWING:</strong> Sla <strong>NOOIT</strong> wachtwoorden op als "platte tekst" (plain text) in de database.
-        </div>
-
-        <p>Als je database ooit uitlekt (en dat gebeurt bij de grootste bedrijven), liggen alle wachtwoorden op straat. Daarom gebruiken we <strong>Hashing</strong>. Een hash is een wiskundige reeks tekens die onomkeerbaar is. Je kunt van "geheim123" wel een hash maken, maar van de hash nooit meer terug naar "geheim123".</p>
-
-        <h3>Hash Facade</h3>
-        <p>Laravel maakt dit heel makkelijk met de <code>Hash</code> facade. De standaard techniek die Laravel gebruikt is <strong>Bcrypt</strong> (of Argon2), wat op dit moment de industriestandaard is.</p>
+        <h3>De Code</h3>
+        <p>Open <code>database/seeders/UserSeeder.php</code>. Zorg dat je bovenin de juiste `use` statements hebt staan, vooral voor `Hash` en `User`.</p>
 
         <pre><code class="language-php">
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-// Zo maak je een veilige hash:
-$hashedPassword = Hash::make('geheim123');
-        </code></pre>
-
-        <h2>De Create View</h2>
-        <p>Maak het bestand <code>resources/views/admin/users/create.blade.php</code> aan. Dit formulier lijkt op dat van Categorieën, maar met extra velden voor e-mail, wachtwoord en de admin-checkbox.</p>
-
-        <pre><code class="language-html">
-@extends('layouts.layoutadmin')
-
-@section('content')
-    &lt;h1 class="text-2xl font-bold mb-4"&gt;Nieuwe Gebruiker&lt;/h1&gt;
-
-    &lt;form action="{{ route('admin.users.store') }}" method="POST" class="max-w-lg"&gt;
-        @csrf
-
-        &lt;!-- Naam --&gt;
-        &lt;div class="mb-4"&gt;
-            &lt;label class="block mb-2 font-bold"&gt;Naam&lt;/label&gt;
-            &lt;input type="text" name="name" class="border w-full p-2 rounded" value="{{ old('name') }}"&gt;
-            @error('name') &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt; @enderror
-        &lt;/div&gt;
-
-        &lt;!-- Email --&gt;
-        &lt;div class="mb-4"&gt;
-            &lt;label class="block mb-2 font-bold"&gt;Email&lt;/label&gt;
-            &lt;input type="email" name="email" class="border w-full p-2 rounded" value="{{ old('email') }}"&gt;
-            @error('email') &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt; @enderror
-        &lt;/div&gt;
-
-        &lt;!-- Wachtwoord --&gt;
-        &lt;div class="mb-4"&gt;
-            &lt;label class="block mb-2 font-bold"&gt;Wachtwoord&lt;/label&gt;
-            &lt;input type="password" name="password" class="border w-full p-2 rounded"&gt;
-            @error('password') &lt;p class="text-red-500 text-sm"&gt;{{ $message }}&lt;/p&gt; @enderror
-        &lt;/div&gt;
-
-        &lt;!-- Is Admin Checkbox --&gt;
-        &lt;div class="mb-4"&gt;
-            &lt;label class="inline-flex items-center"&gt;
-                &lt;input type="checkbox" name="is_admin" class="form-checkbox h-5 w-5 text-red-600" value="1"&gt;
-                &lt;span class="ml-2 text-gray-700"&gt;Maak deze gebruiker Admin&lt;/span&gt;
-            &lt;/label&gt;
-        &lt;/div&gt;
-
-        &lt;button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded"&gt;Opslaan&lt;/button&gt;
-    &lt;/form&gt;
-@endsection
-        </code></pre>
-
-        <h2>Opslaan (Store Logic)</h2>
-        <p>In de <code>UserController</code> gaan we de data verwerken. Let goed op hoe we het wachtwoord en de checkbox behandelen.</p>
-
-        <h3>1. Validatie</h3>
-        <p>E-mailadressen moeten uniek zijn. Wachtwoorden moeten sterk genoeg zijn.</p>
-
-        <h3>2. Checkboxen in HTML</h3>
-        <p>Een eigenaardigheid van HTML-checkboxen is: als ze <strong>niet</strong> aangevinkt zijn, worden ze <strong>niet</strong> meegestuurd in het request. Als ze <strong>wel</strong> aangevinkt zijn, sturen ze de waarde "1" (of "on").</p>
-        <p>In Laravel controleren we dit met <code>$request->has('is_admin')</code> of door een default waarde te gebruiken.</p>
-
-        <pre><code class="language-php">
-namespace App\Http\Controllers\Admin;
-
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash; // Importeer Hash!
-
-class UserController extends Controller
+class UserSeeder extends Seeder
 {
-    public function create()
+    public function run(): void
     {
-        return view('admin.users.create');
-    }
-
-    public function store(Request $request)
-    {
-        // 1. Valideer de invoer
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8', // Minimaal 8 tekens
+        // 1. Maak de ADMIN aan
+        // We gebruiken factory()->create([...]) om de standaard random waardes te overschrijven.
+        $admin = User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@webshop.nl',
+            'password' => Hash::make('test1234') // Veilig hashen!
         ]);
 
-        // 2. Maak een nieuwe user aan (OOP manier)
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
+        // Koppel direct de rol. Dankzij de 'HasRoles' trait uit de vorige les kan dit:
+        $admin->assignRole('admin');
 
-        // 3. Hash het wachtwoord!
-        $user->password = Hash::make($request->password);
 
-        // 4. Verwerk de checkbox
-        // $request->has() geeft true als het vinkje aan staat, anders false
-        $user->is_admin = $request->has('is_admin');
+        // 2. Maak de SALES medewerker aan
+        $sales = User::factory()->create([
+            'name' => 'Sales',
+            'email' => 'sales@webshop.nl',
+            'password' => Hash::make('test1234')
+        ]);
+        $sales->assignRole('sales');
 
-        $user->save();
 
-        return redirect()->route('admin.users.index')
-            ->with('status', 'Gebruiker succesvol aangemaakt!');
+        // 3. Maak de CUSTOMER (Klant) aan
+        $customer = User::factory()->create([
+            'name' => 'Customer',
+            'email' => 'customer@webshop.nl',
+            'password' => Hash::make('test1234')
+        ]);
+        $customer->assignRole('customer');
     }
 }
         </code></pre>
 
-        <div class="info-box" style="background: var(--bg-content); border: 1px solid var(--border-color); padding: 1rem; border-radius: 0.5rem;">
-            <strong>Pro Tip: Wachtwoord Bevestigen</strong><br>
-            Wil je zeker weten dat de gebruiker geen typefout maakt in het wachtwoord? Voeg een extra veld toe in je HTML: <code>name="password_confirmation"</code>.<br>
-            Pas vervolgens je validatie aan naar: <code>'password' => 'required|confirmed|min:8'</code>.<br>
-            Laravel checkt dan automatisch of <code>password</code> en <code>password_confirmation</code> identiek zijn.
+        <div class="info-box tip">
+            <p><strong>Waarom Hash::make?</strong><br>
+                Wachtwoorden slaan we <strong>nooit</strong> als platte tekst op. Als je database gehackt wordt, liggen alle wachtwoorden op straat. <code>Hash::make()</code> verandert 'test1234' in een onleesbare reeks tekens (bijv. <code>$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi</code>). Laravel checkt bij het inloggen of het ingevoerde wachtwoord matcht met deze hash.</p>
         </div>
+
+        <hr>
+
+        <h2>Stap 3: Volgorde in DatabaseSeeder</h2>
+        <p>
+            Nu moeten we Laravel vertellen dat deze nieuwe seeder uitgevoerd moet worden. Dit doen we in de master-seeder: <code>DatabaseSeeder.php</code>.
+        </p>
+        <p>
+            <strong>De volgorde is cruciaal!</strong> Je kunt geen rol aan een gebruiker geven als die rol nog niet bestaat in de database.
+        </p>
+
+        <pre><code class="language-php">
+public function run(): void
+{
+    $this->call([
+        // 1. EERST de rollen en permissies aanmaken
+        RoleAndPermissionSeeder::class,
+
+        // 2. DAN PAS de gebruikers maken (want die hebben de rollen nodig)
+        UserSeeder::class,
+
+        // 3. Daarna eventuele andere data (zoals Categorieën)
+        // CategorySeeder::class,
+    ]);
+}
+        </code></pre>
+
+        <hr>
+
+        <h2>Stap 4: Uitvoeren en Testen</h2>
+        <p>
+            Om alles vers in de database te zetten, wissen we de oude data en draaien we de seeders opnieuw.
+        </p>
+        <pre><code class="language-bash">php artisan migrate:fresh --seed</code></pre>
+
+        <p>Als alles goed is gegaan, zie je groene vinkjes bij alle seeders.</p>
+
+        <h3>Controleren in de Database (PhpMyAdmin)</h3>
+        <p>Als je nu in je database kijkt, zie je:</p>
+        <ul>
+            <li>In de tabel <code>users</code> staan 3 gebruikers.</li>
+            <li>In de tabel <code>roles</code> staan 3 rollen.</li>
+            <li>In de tabel <code>model_has_roles</code> (de koppeltabel) zie je dat user ID 1 gekoppeld is aan rol ID 3 (Admin), enzovoorts.</li>
+        </ul>
+
+        <h2>Samenvatting</h2>
+        <p>
+            Je testomgeving is nu klaar voor gebruik!
+        </p>
+        <ul>
+            <li>Je hoeft niet meer handmatig te registreren.</li>
+            <li>Je hebt vaste inloggegevens (bijv. <code>admin@webshop.nl</code>) om je applicatie mee te testen.</li>
+            <li>De koppeling tussen Users en Roles wordt automatisch gelegd.</li>
+        </ul>
 
     </main>
 
